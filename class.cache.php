@@ -24,7 +24,7 @@ if ( ! defined( 'ABSPATH' ) && function_exists( 'wp_die' ) ) {
 	wp_die("Cannot access file directly" );
 }
 
-if ( ! class_exists( 'E20R\\Utilities\\Cache' ) ) {
+if ( ! class_exists( 'E20R\Utilities\Cache' ) ) {
 	
 	class Cache {
 		
