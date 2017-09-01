@@ -21,7 +21,7 @@ namespace E20R\Utilities;
 
 // Deny direct access to the file
 if ( ! defined( 'ABSPATH' ) && function_exists( 'wp_die' ) ) {
-	wp_die("Cannot access file directly" );
+	wp_die( "Cannot access file directly" );
 }
 
 if ( ! class_exists( 'E20R\Utilities\Cache' ) ) {
@@ -37,7 +37,7 @@ if ( ! class_exists( 'E20R\Utilities\Cache' ) ) {
 		/**
 		 * Fetch entry from cache
 		 *
-		 * @param        $key
+		 * @param  mixed $key
 		 * @param string $group
 		 *
 		 * @return bool|mixed|null
@@ -61,7 +61,7 @@ if ( ! class_exists( 'E20R\Utilities\Cache' ) ) {
 		 * Store entry in cache
 		 *
 		 * @param string $key
-		 * @param string $value
+		 * @param mixed  $value
 		 * @param int    $expires
 		 * @param string $group
 		 *

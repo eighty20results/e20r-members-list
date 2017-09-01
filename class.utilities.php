@@ -253,10 +253,8 @@ if ( ! class_exists( 'E20R\Utilities\Utilities' ) ) {
 			}
 			
 			if ( ! empty( $this->msg ) && ! empty( $this->msgt ) ) {
-				
-				if ( WP_DEBUG ) {
-					error_log( "Have " . count( $this->msg ) . " admin message(s) to display" );
-				}
+                
+                $this->log( "Have " . count( $this->msg ) . " admin message(s) to display" );
 				
 				foreach ( $this->msg as $key => $notice ) { ?>
                     <div class="notice notice-<?php esc_html_e( $this->msgt[ $key ] ); ?> is-dismissible <?php esc_html_e( $this->msg_source[ $key ] ); ?>">
