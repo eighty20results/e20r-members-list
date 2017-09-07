@@ -212,21 +212,43 @@ if ( ! class_exists( 'E20R\Utilities\Utilities' ) ) {
 			
 			// Grab from the cache (if it exists)
 			if ( null !== ( $tmp = Cache::get( 'err_info', self::$cache_key ) ) ) {
-				
+				$this->log("Loading cached messages (" . count( $tmp['msg'] ) . ")");
 				$this->msg        = $tmp['msg'];
 				$this->msgt       = $tmp['msgt'];
 				$this->msg_source = $tmp['msg_source'];
 			}
 			
-			if ( is_array( $this->msg ) && ! in_array( $message, $this->msg ) ) {
-				
-                $this->log( "Adding a message to the admin errors: {$message}" );
-				
-				// Save the new message
-				$this->msg[]        = $message;
-				$this->msgt[]       = $type;
-				$this->msg_source[] = $msg_source;
-				
+			$msg_found = array();
+			
+			// Look for duplicate messages
+			foreach( $this->msg as $key => $msg ) {
+			    
+			    if ( false !== strpos( $message, $msg ) ) {
+			        $msg_found[] = $key;
+                }
+            }
+            
+            // No duplicates found, so add the new one
+            if ( empty( $msg_found ) ) {
+			    // Save new message
+	            $this->log( "Adding a message to the admin errors: {$message}" );
+	            
+			    $this->msg[] = $message;
+			    $this->msgt[] = $type;
+			    $this->msg_source[] = $msg_source;
+            } else {
+			    
+			    // Potentially clean up duplicate messages
+	            $total = count($msg_found);
+	            
+                // Remove extra instances of the message
+	            for( $i = 1 ; ( $total - 1 ) >= $i ; $i++ ) {
+	                $this->log("Removing duplicate message");
+		            unset( $this->msg[ $i ] );
+                }
+            }
+			
+            if ( !empty ($this->msg) ) {
 				$values = array(
 					'msg'        => $this->msg,
 					'msgt'       => $this->msgt,
