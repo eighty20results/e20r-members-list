@@ -25,7 +25,7 @@ namespace E20R\Utilities\Licensing;
 use E20R\Utilities\Utilities;
 use E20R\Utilities\Cache;
 
-if ( ! class_exists( 'E20R\Licensing\Licensing' ) ) {
+if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 	
 	class Licensing {
 		
