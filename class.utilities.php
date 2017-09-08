@@ -638,7 +638,7 @@ if ( ! class_exists( 'E20R\Utilities\Utilities' ) ) {
 		 *
 		 * @param array|int|null|string|\stdClass $field The value to sanitize
 		 *
-		 * @return array|int|string     Sanitized value
+		 * @return mixed     Sanitized value
 		 */
 		public function _sanitize( $field ) {
 			
