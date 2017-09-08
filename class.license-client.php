@@ -18,7 +18,7 @@
  */
 
 namespace E20R\Utilities\Licensing;
-
+use E20R\Utilities\Utilities;
 
 abstract class License_Client {
 	
