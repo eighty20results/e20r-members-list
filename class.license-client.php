@@ -76,7 +76,7 @@ abstract class License_Client {
 		
 		$utils->log( "Have " . count( $license_settings['new_licenses'] ) . " new licenses to process already. Adding {$plugin_settings['key_prefix']}/{$plugin_settings['stub']}... " );
 		
-		$license_settings['new_licenses'][ $plugin_settings['prefix'] ] = array(
+		$license_settings['new_licenses'][ $plugin_settings['key_prefix'] ] = array(
 			'label_for'     => $plugin_settings['key_prefix'],
 			'fulltext_name' => $plugin_settings['label'],
 			'new_product'   => $plugin_settings['stub'],
