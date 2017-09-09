@@ -877,7 +877,7 @@ if ( ! class_exists( 'E20R\Utilities\Utilities' ) ) {
 		 * Credit:
 		 * @url http://stackoverflow.com/questions/4356289/php-random-string-generator/31107425#31107425
 		 */
-		public function randomStr( $length, $keyspace = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ' ) {
+		public function random_string( $length, $keyspace = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ' ) {
 			
 		    $string = '';
 			$max_len = mb_strlen( $keyspace, '8bit' ) - 1;
