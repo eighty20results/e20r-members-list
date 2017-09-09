@@ -865,7 +865,40 @@ if ( ! class_exists( 'E20R\Utilities\Utilities' ) ) {
 			
 			return $text;
 		}
-  
+		
+		/**
+		 * Generates a true random alphanumeric string of $length characters
+		 *
+		 * @param int    $length   Size of the string to generate
+		 * @param string $keyspace The characters to use to generate the string.
+		 *
+		 * @return string   True random string of $keyspace characters
+		 *
+		 * Credit:
+		 * @url http://stackoverflow.com/questions/4356289/php-random-string-generator/31107425#31107425
+		 */
+		public function random_string( $length, $keyspace = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ' ) {
+			
+		    $string = '';
+			$max_len = mb_strlen( $keyspace, '8bit' ) - 1;
+			for ( $i = 0; $i < $length; ++ $i ) {
+				$string .= $keyspace[ random_int( 0, $max_len ) ];
+			}
+			
+			return $string;
+		}
+		
+		/**
+		 * Connect to the license server using TLS 1.2
+		 *
+		 * @param $handle - File handle for the pipe to the CURL process
+		 */
+		public function force_tls_12( $handle ) {
+			
+			// set the CURL option to use.
+			curl_setopt( $handle, CURLOPT_SSLVERSION, 6 );
+		}
+		
 		/**
 		 * The current instance of the Utilities class
 		 *
