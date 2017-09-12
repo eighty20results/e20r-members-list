@@ -55,6 +55,8 @@ abstract class License_Client {
 		return self::$instance;
 	}
 	
+	abstract public function check_licenses();
+	
 	/**
 	 * Filter Handler: Add the a new License settings entry
 	 *
