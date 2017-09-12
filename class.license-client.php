@@ -88,7 +88,7 @@ abstract class License_Client {
 			'value'         => null,
 			'email_field'   => "license_email",
 			'email_value'   => null,
-			'placeholder'   => sprintf( __( "Paste the purchased E20R Roles %s key here", "e20r-licensing" ), $plugin_settings['label'] ),
+			'placeholder'   => sprintf( __( "Paste the purchased %s key here", "e20r-licensing" ), $plugin_settings['label'] ),
 		);
 		
 		return $license_settings;
