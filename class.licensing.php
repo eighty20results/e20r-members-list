@@ -394,6 +394,13 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 			update_option( 'e20r_license_settings', $license_settings, true );
 		}
 		
+		/**
+		 * Deactivate the specified license (product/license key)
+		 *
+		 * @param string $product
+		 *
+		 * @return bool
+		 */
 		public static function deactivate_license( $product ) {
 			
 			$utils    = Utilities::get_instance();
@@ -628,17 +635,17 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 			register_setting(
 				"e20r_license_settings", // group, used for settings_fields()
 				"e20r_license_settings",  // option name, used as key in database
-				'E20R\Licensing\Licensing::validate_settings'     // validation callback
+				'E20R\Utilities\Licensing::validate_settings'     // validation callback
 			);
 			
 			add_settings_section(
 				'e20r_licensing_section',
 				__( "Configure Licenses", self::$text_domain ),
-				'E20R\Licensing\Licensing::show_licensing_section',
+				'E20R\Utilities\Licensing::show_licensing_section',
 				'e20r-licensing'
 			);
-			
-			$settings = apply_filters( 'e20r-license-add-new-licenses', self::get_license_settings() );
+   
+			$settings = apply_filters( 'e20r-license-add-new-licenses', self::get_license_settings(), array() );
 			
 			// $global_addon_settings = apply_filters( 'e20r-license-global-addon-settings', array() );
 			
@@ -727,6 +734,9 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 			}
 		}
 		
+		/**
+		 * Show the licensing section on the options page
+		 */
 		public static function show_licensing_section() {
 			
 		    $utils = Utilities::get_instance();
@@ -816,7 +826,7 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 		public static function licensing_page() {
 			
 			$utils = Utilities::get_instance();
-			$utils->log("Testing access for Licensing page in Payment Warning plugin");
+			$utils->log("Testing access for Licensing page");
 			
 			if ( ! function_exists( "current_user_can" ) || ( ! current_user_can( "manage_options" ) && ! current_user_can( "e20r_license_admin" ) ) ) {
 				wp_die( __( "You are not permitted to perform this action.", self::$text_domain ) );
@@ -836,7 +846,7 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
             </form>
 			<?php
 			
-			$settings            = $settings = apply_filters( 'e20r-license-add-new-licenses', self::get_license_settings() );
+			$settings            = apply_filters( 'e20r-license-add-new-licenses', self::get_license_settings(), array() );
 			$support_account_url = apply_filters( 'e20r-license-support-account-url', sprintf( 'https://eighty20results.com/login/?redirect_to=%s', home_url( '/account/' ) ) );
 			foreach ( $settings as $prod => $license ) {
 				
