@@ -599,7 +599,7 @@ if ( ! class_exists( 'E20R\Utilities\Utilities' ) ) {
 			$time = date_i18n('H:m:s', strtotime( get_option( 'timezone_string' ) ) );
 			$from = $this->_who_called_me();
 			
-			if ( defined( "WP_DEBUG" ) && true == WP_DEBUG ) {
+			if ( defined( "WP_DEBUG" ) && true === WP_DEBUG ) {
 				error_log( "[{$tid}]({$time}) {$from} - {$msg}" );
 			}
 		}
