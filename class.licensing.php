@@ -394,6 +394,13 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 			update_option( 'e20r_license_settings', $license_settings, true );
 		}
 		
+		/**
+		 * Deactivate the specified license (product/license key)
+		 *
+		 * @param string $product
+		 *
+		 * @return bool
+		 */
 		public static function deactivate_license( $product ) {
 			
 			$utils    = Utilities::get_instance();
@@ -727,6 +734,9 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 			}
 		}
 		
+		/**
+		 * Show the licensing section on the options page
+		 */
 		public static function show_licensing_section() {
 			
 		    $utils = Utilities::get_instance();
