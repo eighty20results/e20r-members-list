@@ -596,11 +596,11 @@ if ( ! class_exists( 'E20R\Utilities\Utilities' ) ) {
 		public function log( $msg ) {
 			
 			$tid = sprintf( "%08x", abs( crc32( $_SERVER['REMOTE_ADDR'] . $_SERVER['REQUEST_TIME'] ) ) );
-			
+			$time = date_i18n('H:m:s', strtotime( get_option( 'timezone_string' ) ) );
 			$from = $this->_who_called_me();
 			
 			if ( defined( "WP_DEBUG" ) && true == WP_DEBUG ) {
-				error_log( "[{$tid}] {$from} - {$msg}" );
+				error_log( "[{$tid}]({$time}) {$from} - {$msg}" );
 			}
 		}
 		

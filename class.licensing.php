@@ -848,6 +848,7 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 			
 			$settings            = apply_filters( 'e20r-license-add-new-licenses', self::get_license_settings(), array() );
 			$support_account_url = apply_filters( 'e20r-license-support-account-url', sprintf( 'https://eighty20results.com/login/?redirect_to=%s', home_url( '/account/' ) ) );
+			
 			foreach ( $settings as $prod => $license ) {
 				
 				if ( in_array( $prod, array( 'e20r_default_license', 'new_licenses', 'example_addon' ) ) ) {
