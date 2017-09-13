@@ -789,7 +789,7 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 			
 			printf( '<input type="hidden" name="%1$s" value="%2$s" />', $var_name, $product );
 			printf(
-				'<input name="%1$s[%2$s][]" type="%3$s" id="%4$s" value="%5$s" placeholder="%6$s" class="regular_text">',
+				'<input name="%1$s[%2$s][]" type="%3$s" id="%4$s" value="%5$s" placeholder="%6$s" class="regular_text" style="min-width: 350px;">',
 				$args['option_name'],
 				$args['name'],
 				$args['input_type'],
