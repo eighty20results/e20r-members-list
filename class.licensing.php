@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @version 1.4
+ * @version 1.5
  *
  */
 
@@ -626,6 +626,7 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 		
 		/**
 		 * Register all Licensing settings
+         * @since 1.5 - BUG FIX: Incorrect namespace used in register_setting(), add_sttings_section() and add_settings_field() functions
 		 */
 		static public function register_settings() {
 			
@@ -635,13 +636,13 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 			register_setting(
 				"e20r_license_settings", // group, used for settings_fields()
 				"e20r_license_settings",  // option name, used as key in database
-				'E20R\Utilities\Licensing::validate_settings'     // validation callback
+				'E20R\Utilities\Licensing\Licensing::validate_settings'     // validation callback
 			);
 			
 			add_settings_section(
 				'e20r_licensing_section',
 				__( "Configure Licenses", self::$text_domain ),
-				'E20R\Utilities\Licensing::show_licensing_section',
+				'E20R\Utilities\Licensing\Licensing::show_licensing_section',
 				'e20r-licensing'
 			);
    
@@ -672,7 +673,7 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 					add_settings_field(
 						"{$license['key']}",
 						"{$license['fulltext_name']} (" . ucfirst( $license['status'] ) . ")",
-						'E20R\Licensing\Licensing::show_input',
+						'E20R\Utilities\Licensing\Licensing::show_input',
 						'e20r-licensing',
 						'e20r_licensing_section',
 						array(
@@ -710,7 +711,7 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 							add_settings_field(
 								"e20r_license_new_{$nk}",
 								sprintf( __( "Add %s license", self::$text_domain ), $new['fulltext_name'] ),
-								'E20R\Licensing\Licensing::show_input',
+								'E20R\Utilities\Licensing\Licensing::show_input',
 								'e20r-licensing',
 								'e20r_licensing_section',
 								array(
