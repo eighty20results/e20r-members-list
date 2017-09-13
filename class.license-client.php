@@ -81,7 +81,7 @@ abstract class License_Client {
 		$license_settings['new_licenses'][ $plugin_settings['key_prefix'] ] = array(
 			'label_for'     => $plugin_settings['key_prefix'],
 			'fulltext_name' => $plugin_settings['label'],
-			'new_product'   => $plugin_settings['stub'],
+			'new_product'   => $plugin_settings['key_prefix'],
 			'option_name'   => "e20r_license_settings",
 			'name'          => 'license_key',
 			'input_type'    => 'password',
