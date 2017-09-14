@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @version 1.6
+ * @version 1.6.1
  *
  */
 
@@ -143,8 +143,6 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 				'last_name'         => $settings['last_name'],
 				'email'             => $settings['email'],
 			);
-			
-			$utils->log( "Transmitting...: " . print_r( $api_params, true ) );
 			
 			// Send query to the license manager server
 			$decoded = self::send_to_license_server( $api_params );
@@ -846,6 +844,8 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 		
 		/**
 		 * The page content for the E20R Licensing section
+         *
+         * @since 1.6.1 - BUG FIX: Would sometimes show the wrong license status on the licensing page
 		 */
 		public static function licensing_page() {
 			
@@ -879,7 +879,10 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 					continue;
 				}
 				
-				$license_valid = self::is_licensed( $prod ) && ( isset( $license['status'] ) && 'active' === $license['status'] );
+				/**
+				 * @since 1.6.1 - BUG FIX: Would sometimes show the wrong license status on the licensing page
+				 */
+				$license_valid = self::is_licensed( $prod, true ) && ( isset( $license['status'] ) && 'active' === $license['status'] );
 				
 				?>
 
