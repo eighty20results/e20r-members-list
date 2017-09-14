@@ -144,8 +144,6 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 				'email'             => $settings['email'],
 			);
 			
-			$utils->log( "Transmitting...: " . print_r( $api_params, true ) );
-			
 			// Send query to the license manager server
 			$decoded = self::send_to_license_server( $api_params );
 			
@@ -879,7 +877,7 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 					continue;
 				}
 				
-				$license_valid = self::is_licensed( $prod ) && ( isset( $license['status'] ) && 'active' === $license['status'] );
+				$license_valid = self::is_licensed( $prod, true ) && ( isset( $license['status'] ) && 'active' === $license['status'] );
 				
 				?>
 
