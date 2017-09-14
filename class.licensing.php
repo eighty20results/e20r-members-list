@@ -792,12 +792,12 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 			if ( isset( $args['product'] ) ) {
 				
 				$product  = $args['product'];
-				$var_name = "{$args['option_name']}[product][]";
+				$var_name = "{$args['option_name']}[product][{$args['index']}]";
 				
 			} else if ( isset( $args['new_product'] ) ) {
 				
 				$product             = $args['new_product'];
-				$var_name            = "{$args['option_name']}[new_product][]";
+				$var_name            = "{$args['option_name']}[new_product][{$args['index']}]";
 				$args['email_value'] = $current_user->user_email;
 			}
 			
