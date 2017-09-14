@@ -789,8 +789,6 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 			
 			$utils->log( "Loading input HTML for: " . print_r( $args, true ) );
 			
-			printf( '<input type="hidden" name="%1$s" value="%2$s" />', "{$args['option_name']}[fieldname][]", $args['value'] );
-			printf( '<input type="hidden" name="%1$s" value="%2$s" />', "{$args['option_name']}[fulltext_name][]", $args['fulltext_name'] );
 			if ( isset( $args['product'] ) ) {
 				
 				$product  = $args['product'];
