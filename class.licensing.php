@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @version 1.6
+ * @version 1.6.1
  *
  */
 
@@ -844,6 +844,8 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 		
 		/**
 		 * The page content for the E20R Licensing section
+         *
+         * @since 1.6.1 - BUG FIX: Would sometimes show the wrong license status on the licensing page
 		 */
 		public static function licensing_page() {
 			
@@ -877,6 +879,9 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 					continue;
 				}
 				
+				/**
+				 * @since 1.6.1 - BUG FIX: Would sometimes show the wrong license status on the licensing page
+				 */
 				$license_valid = self::is_licensed( $prod, true ) && ( isset( $license['status'] ) && 'active' === $license['status'] );
 				
 				?>
