@@ -936,9 +936,9 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 				
 				foreach ( $input['new_product'] as $nk => $product ) {
 					
-					$license_key   = $input['new_license'][ $nk ];
-					$license_email = $input['new_email'][ $nk ];
-					$product       = $input['new_product'][ $nk ];
+					$license_key   = isset( $input['new_license'][ $nk ] ) ? $input['new_license'][ $nk ] : null;
+					$license_email = isset( $input['new_email'][ $nk ] ) ? $input['new_email'][ $nk ] : null;
+					$product       = isset( $input['new_product'][ $nk ] ) ? $input['new_product'][ $nk ] : null;
 					
 					$licenses[ $product ]['first_name']    = $current_user->first_name;
 					$licenses[ $product ]['last_name']     = $current_user->last_name;
