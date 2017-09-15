@@ -928,7 +928,7 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 			$licenses = self::get_license_settings();
    
 			// Save new license keys & activate the license
-			if ( isset( $input['new_product'] ) && ! empty( $input['new_product'][0] ) ) {
+			if ( isset( $input['new_product'] ) && true === $utils->array_isnt_empty( $input['new_product'] ) ) {
 				
 				$utils->log( "Processing a new license activation" );
 				
@@ -956,7 +956,7 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 			}
 			
 			// Process licenses to deactivate/delete
-			if ( isset( $input['delete'] ) && ! empty( $input['delete'][0] ) ) {
+			if ( isset( $input['delete'] ) && true === $utils->array_isnt_empty( $input['delete'] ) ) {
 				
 				foreach ( $input['delete'] as $dk => $l ) {
 					
