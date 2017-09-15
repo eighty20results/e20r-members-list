@@ -889,6 +889,20 @@ if ( ! class_exists( 'E20R\Utilities\Utilities' ) ) {
 		}
 		
 		/**
+         * Search through array values to check whether there's anything there
+         *
+		 * @param array $array
+		 *
+		 * @return bool
+		 */
+		public function array_isnt_empty( $array ) {
+		    
+		    $values = array_values( $array );
+		    
+		    return ( empty( $values ) ? false : true );
+        }
+        
+		/**
 		 * Connect to the license server using TLS 1.2
 		 *
 		 * @param $handle - File handle for the pipe to the CURL process
