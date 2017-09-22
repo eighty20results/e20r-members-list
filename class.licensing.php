@@ -356,7 +356,7 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 				return $license_status;
 			}
 			
-			$utils->log( "From the server for {$product}: " . print_r( $decoded, true ) );
+			// $utils->log( "From the server for {$product}: " . print_r( $decoded, true ) );
 			
 			if ( is_array( $decoded->registered_domains ) ) {
 				
@@ -536,8 +536,8 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 			$utils            = Utilities::get_instance();
 			$license_settings = self::get_settings();
 			
-			$utils->log( "Settings before update: " . print_r( $license_settings, true ) );
-			$utils->log( "NEW settings for {$product}: " . print_r( $new_settings, true ) );
+			// $utils->log( "Settings before update: " . print_r( $license_settings, true ) );
+			// $utils->log( "NEW settings for {$product}: " . print_r( $new_settings, true ) );
 			
 			// Make sure the new settings make sense
 			if ( is_array( $license_settings ) && in_array( 'fieldname', array_keys( $license_settings ) ) ) {
@@ -569,7 +569,7 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 				$utils->log( "Requested save of everything" );
 			}
 			
-			$utils->log( "Saving: " . print_r( $license_settings, true ) );
+			// $utils->log( "Saving: " . print_r( $license_settings, true ) );
 			update_option( 'e20r_license_settings', $license_settings, 'yes' );
 			
 			return $license_settings;
