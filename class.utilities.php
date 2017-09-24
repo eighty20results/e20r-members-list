@@ -901,7 +901,41 @@ if ( ! class_exists( 'E20R\Utilities\Utilities' ) ) {
 		    
 		    return ( empty( $values ) ? false : true );
         }
-        
+		
+		/**
+		 * Substitute [IN] for proper SQL 'IN' statement containing array of like values
+		 *
+		 * @param  string      $sql
+		 * @param  array      $values
+		 * @param string $type
+		 *
+		 * @return string
+		 */
+		public function prepare_in( $sql, $values, $type = '%d' ) {
+			
+			global $wpdb;
+			
+			$not_in_count = substr_count( $sql, '[IN]' );
+			
+			if ( $not_in_count > 0 ) {
+				
+				$args = array( str_replace( '[IN]',
+					implode( ', ', array_fill( 0, count( $values ), ( $type == '%d' ? '%d' : '%s' ) ) ),
+					str_replace( '%', '%%', $sql ) ) );
+				
+				for ( $i = 0; $i < substr_count( $sql, '[IN]' ); $i++ ) {
+					$args = array_merge( $args, $values );
+				}
+				
+				$sql = call_user_func_array(
+					array( $wpdb, 'prepare' ),
+					array_merge( $args ) );
+				
+			}
+			
+			return $sql;
+		}
+		
 		/**
 		 * Connect to the license server using TLS 1.2
 		 *
