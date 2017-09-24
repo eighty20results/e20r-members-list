@@ -927,6 +927,7 @@ if ( ! class_exists( 'E20R\Utilities\Utilities' ) ) {
 					$args = array_merge( $args, $values );
 				}
 				
+				// Sanitize the SQL variables
 				$sql = call_user_func_array(
 					array( $wpdb, 'prepare' ),
 					array_merge( $args ) );
