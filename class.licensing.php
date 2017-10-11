@@ -100,9 +100,9 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 					$license_settings[ $product_stub ] = array();
 				}
 				
-				$license_settings[$product_stub] = isset( $license_settings[ $product_stub ] ) ? $license_settings[ $product_stub ] : self::default_settings( $product_stub );
+				$license_settings[ $product_stub ] = isset( $license_settings[ $product_stub ] ) ? $license_settings[ $product_stub ] : self::default_settings( $product_stub );
 				
-				$utils->log("Using license settings for {$product_stub}: " . print_r( $license_settings[ $product_stub ], true ) );
+				$utils->log( "Using license settings for {$product_stub}: " . print_r( $license_settings[ $product_stub ], true ) );
 				
 				// Update the local cache for the license
 				Cache::set( self::CACHE_KEY, $license_settings, DAY_IN_SECONDS, self::CACHE_GROUP );
@@ -297,7 +297,7 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 		/**
 		 * Connect to license server and check status for the current product/server
 		 *
-		 * @param string $product
+		 * @param string     $product
 		 * @param null|array $settings
 		 *
 		 * @return bool
@@ -392,7 +392,7 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 						$license_status = ( 'active' === $settings['status'] ? true : false );
 						$utils->log( "Current status for {$product} license: " . ( $license_status ? 'active' : 'inactive/deactivated/blocked' ) );
 					} else {
-						$utils->log("Wrong domain, or domain info not found");
+						$utils->log( "Wrong domain, or domain info not found" );
 					}
 				}
 			} else {
@@ -431,7 +431,7 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 			
 			// Send query to the license manager server
 			$response = wp_remote_get(
-				add_query_arg( $api_params, self::E20R_LICENSE_SERVER_URL ),
+				esc_url( add_query_arg( $api_params, self::E20R_LICENSE_SERVER_URL ) ),
 				array(
 					'timeout'     => apply_filters( 'e20r-license-remote-server-timeout', 30 ),
 					'sslverify'   => true,
@@ -977,7 +977,8 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 			$utils = Utilities::get_instance();
 			
 			if ( empty( $input['new_product'] ) && empty( $input['product'] ) && empty( $input['delete'] ) ) {
-				$utils->log( "Not being called by the E20R License settings page, so returning: " . print_r( $input, true ));
+				$utils->log( "Not being called by the E20R License settings page, so returning: " . print_r( $input, true ) );
+				
 				return $input;
 			}
 			
@@ -1029,7 +1030,7 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 							}
 							
 							$utils->log( "Loading updated settings from server" );
-							if ( true === self::get_license_status_from_server( $product, $license_settings[$product] ) ) {
+							if ( true === self::get_license_status_from_server( $product, $license_settings[ $product ] ) ) {
 								$result['settings'] = self::get_settings( $product );
 							}
 							
@@ -1087,11 +1088,11 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 			
 			$utils->log( "Returning validated settings" . print_r( $license_settings, true ) );
 			
-			foreach( $input as $license => $settings ) {
+			foreach ( $input as $license => $settings ) {
 				
-				if ( isset( $license_settings[$license] ) && in_array( 'domain', array_keys( $settings )) ) {
-					$utils->log("Grabbing data from input and assigning it to license");
-					$license_settings[$license ] = $input[$license];
+				if ( isset( $license_settings[ $license ] ) && in_array( 'domain', array_keys( $settings ) ) ) {
+					$utils->log( "Grabbing data from input and assigning it to license" );
+					$license_settings[ $license ] = $input[ $license ];
 				}
 			}
 			
@@ -1107,13 +1108,13 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 		 */
 		public static function get_license_page_url( $stub ) {
 			
-			$license_page_url = add_query_arg(
+			$license_page_url = esc_url( add_query_arg(
 				array(
 					'page'         => 'e20r-licensing',
 					'license_stub' => $stub,
 				),
 				admin_url( 'options-general.php' )
-			);
+			) );
 			
 			return $license_page_url;
 		}
