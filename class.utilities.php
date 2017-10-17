@@ -192,7 +192,7 @@ if ( ! class_exists( 'E20R\Utilities\Utilities' ) ) {
 			$return = array();
 			foreach ( $this->msgt as $key => $mt ) {
 				if ( $mt === $type ) {
-					$return = $this->msg[ $key ];
+					$return[] = $this->msg[ $key ];
 				}
 			}
 			
