@@ -938,6 +938,17 @@ if ( ! class_exists( 'E20R\Utilities\Utilities' ) ) {
 		}
 		
 		/**
+		 * Get rid of PHP notice/warning messages from buffer
+		 */
+		public function safeAjax() {
+		    
+		    ini_set('display_errors', 0);
+		    ob_start();
+		    $messages = ob_get_clean();
+		    $this->log($messages);
+        }
+        
+		/**
 		 * Connect to the license server using TLS 1.2
 		 *
 		 * @param $handle - File handle for the pipe to the CURL process
