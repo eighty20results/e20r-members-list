@@ -25,6 +25,9 @@ namespace E20R\Utilities\Licensing;
 use E20R\Utilities\Utilities;
 use E20R\Utilities\Cache;
 
+if ( !defined('E20R_LICENSING_DEBUG' ) ) {
+    define( 'E20R_LICENSING_DEBUG', false );
+}
 if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 	
 	class Licensing {
