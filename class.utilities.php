@@ -192,7 +192,7 @@ if ( ! class_exists( 'E20R\Utilities\Utilities' ) ) {
 			$return = array();
 			foreach ( $this->msgt as $key => $mt ) {
 				if ( $mt === $type ) {
-					$return = $this->msg[ $key ];
+					$return[] = $this->msg[ $key ];
 				}
 			}
 			
@@ -266,22 +266,24 @@ if ( ! class_exists( 'E20R\Utilities\Utilities' ) ) {
 		 */
 		public function display_messages( $source = 'default' ) {
 			
-			// Load any cached error message(s)
-			if ( null !== ( $msgs = Cache::get( 'err_info', self::$cache_key ) ) ) {
+		    // Load from cache if there are no messages found
+			if ( empty( $this->msg )) {
 				
-				$this->msg        = array_merge( $this->msg, $msgs['msg'] );
-				$this->msgt       = array_merge( $this->msgt, $msgs['msgt'] );
-				$this->msg_source = array_merge( $this->msg_source, $msgs['msg_source'] );
+			    $msgs = Cache::get( 'err_info', self::$cache_key );
+				
+				$this->msg        = $msgs['msg'];
+				$this->msgt       = $msgs['msgt'];
+				$this->msg_source = $msgs['msg_source'];
 			}
 			
 			if ( ! empty( $this->msg ) && ! empty( $this->msgt ) ) {
                 
-                $this->log( "Have " . count( $this->msg ) . " admin message(s) to display" );
+                		$this->log( "Have " . count( $this->msg ) . " admin message(s) to display" );
 				
 				foreach ( $this->msg as $key => $notice ) { ?>
-                    <div class="notice notice-<?php esc_html_e( $this->msgt[ $key ] ); ?> is-dismissible <?php esc_html_e( $this->msg_source[ $key ] ); ?>">
-                        <p><?php echo $notice; ?></p>
-                    </div>
+                    			<div class="notice notice-<?php esc_html_e( $this->msgt[ $key ] ); ?> is-dismissible <?php esc_html_e( $this->msg_source[ $key ] ); ?>">
+			                        <p><?php echo $notice; ?></p>
+			                    </div>
 					<?php
 				}
 			}
@@ -291,7 +293,7 @@ if ( ! class_exists( 'E20R\Utilities\Utilities' ) ) {
 			$this->msgt       = array();
 			$this->msg_source = array();
 			
-			Cache::delete( 'err_info', self::$cache_key );
+			Cache::delete( 'err_info', self::$cache_key );		
 		}
 		
 		/**

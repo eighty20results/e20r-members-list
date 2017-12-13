@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @version 1.6.1
+ * @version 1.7
  *
  */
 
@@ -480,13 +480,14 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
                 $utils->log( "Attempting remote connection to " . self::E20R_LICENSE_SERVER_URL );
             }
 			// Send query to the license manager server
-			$response = wp_remote_get(
-				esc_url( add_query_arg( $api_params, self::E20R_LICENSE_SERVER_URL ) ),
+			$response = wp_remote_post(
+				self::E20R_LICENSE_SERVER_URL,
 				array(
 					'timeout'     => apply_filters( 'e20r-license-remote-server-timeout', 30 ),
 					'sslverify'   => true,
 					'httpversion' => '1.1',
 					'decompress'  => true,
+					'body' 	      => $api_params,
 				)
 			);
 			
