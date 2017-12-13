@@ -449,7 +449,7 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 				$license_status = false;
 			}
 			
-			if ( $settings['expires'] < current_time( 'timestamp' ) || 'active' !== $settings['status'] ) {
+			if ( isset( $settings['expires'] ) && $settings['expires'] < current_time( 'timestamp' ) || 'active' !== $settings['status'] ) {
 				
 				$msg = sprintf(
 					__( "Your update license has expired for the %s add-on!", self::$text_domain ),
@@ -821,6 +821,10 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
                         $utils->log( "Settings: " . print_r( $license, true ) );
                     }
 					
+                    if ( ! isset( $license['status']) ) {
+                        $license['status'] = 'inactive';
+                    }
+                    
 					add_settings_field(
 						"{$license['key']}",
 						"{$license['fulltext_name']} (" . ucfirst( $license['status'] ) . ")",
