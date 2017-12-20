@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @version 1.9
+ * @version 1.10
  */
 
 namespace E20R\Utilities;
@@ -301,9 +301,9 @@ if ( ! class_exists( 'E20R\Utilities\Utilities' ) ) {
 		 *
 		 * @return array|string
 		 *
-		 * @access private
+		 * @access public
 		 */
-		private function _who_called_me() {
+		public function _who_called_me() {
 			
 			$trace  = debug_backtrace();
 			$caller = $trace[2];
