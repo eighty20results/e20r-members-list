@@ -95,6 +95,8 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 				'new_licenses',
 			) );
 			
+			$is_licensed = self::get_license_status_from_server( $product_stub );
+			
 			if ( ! in_array( $product_stub, $excluded ) && ( null === ( $license_settings = Cache::get( self::CACHE_KEY, self::CACHE_GROUP ) ) || true === $force ) ) {
                 if ( E20R_LICENSING_DEBUG ) {
                     $utils->log( "License status IS NOT cached for {$product_stub}" );
@@ -114,8 +116,6 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 				// Update the local cache for the license
 				Cache::set( self::CACHE_KEY, $license_settings, DAY_IN_SECONDS, self::CACHE_GROUP );
 			}
-			
-			$is_licensed = self::get_license_status_from_server( $product_stub, $license_settings );
 			
 			$is_active = ( ! empty( $license_settings[ $product_stub ]['key'] ) && ! empty( $license_settings[ $product_stub ]['status'] ) && 'active' == $license_settings[ $product_stub ]['status'] && $license_settings[ $product_stub ]['domain'] == $_SERVER['SERVER_NAME'] && true === $is_licensed );
             if ( E20R_LICENSING_DEBUG ) {
