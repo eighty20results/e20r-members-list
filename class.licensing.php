@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @version 1.7.1
+ * @version 1.8
  *
  */
 
@@ -99,7 +99,6 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
                 if ( E20R_LICENSING_DEBUG ) {
                     $utils->log( "License status IS NOT cached for {$product_stub}" );
                 }
-				$is_licensed = self::get_license_status_from_server( $product_stub );
 				
 				// Get new/existing settings
 				$license_settings = self::get_settings();
@@ -115,6 +114,8 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 				// Update the local cache for the license
 				Cache::set( self::CACHE_KEY, $license_settings, DAY_IN_SECONDS, self::CACHE_GROUP );
 			}
+			
+			$is_licensed = self::get_license_status_from_server( $product_stub, $license_settings );
 			
 			$is_active = ( ! empty( $license_settings[ $product_stub ]['key'] ) && ! empty( $license_settings[ $product_stub ]['status'] ) && 'active' == $license_settings[ $product_stub ]['status'] && $license_settings[ $product_stub ]['domain'] == $_SERVER['SERVER_NAME'] && true === $is_licensed );
             if ( E20R_LICENSING_DEBUG ) {
@@ -337,9 +338,7 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 		private static function get_license_status_from_server( $product, $settings = null ) {
 			
 			$utils = Utilities::get_instance();
-            if ( E20R_LICENSING_DEBUG ) {
-                $utils->log( "Connecting to license server to validate license for {$product}" );
-            }
+			
 			// Default value for the license (it's not active)
 			$license_status = false;
 			global $current_user;
@@ -349,118 +348,127 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 			}
 			
 			if ( empty( $settings['key'] ) ) {
-                if ( E20R_LICENSING_DEBUG ) {
-                    $utils->log( "{$product} has no key stored. Returning false" );
-                }
+				if ( E20R_LICENSING_DEBUG ) {
+					$utils->log( "{$product} has no key stored. Returning false" );
+				}
 				return $license_status;
 			}
-            
-            if ( E20R_LICENSING_DEBUG ) {
-                $utils->log( "Local license settings for {$product}: " . print_r( $settings, true ) );
-            }
-            
-			$product_name = $settings['fulltext_name'];
 			
-			// Configure request for license check
-			$api_params = array(
-				'slm_action'  => 'slm_check',
-				'secret_key'  => self::E20R_LICENSE_SECRET_KEY,
-				'license_key' => $settings['key'],
-				// 'registered_domain' => $_SERVER['SERVER_NAME']
-			);
-   
 			if ( E20R_LICENSING_DEBUG ) {
-                $utils->log( "Transmitting request to License server for {$product}" );
-            }
-            
-			$decoded = self::send_to_license_server( $api_params );
-			
-			// License not validated
-			if ( ! isset( $decoded->result ) || 'success' != $decoded->result ) {
-				
-				
-				if ( isset( $settings['fulltext_name'] ) ) {
-					$name = $settings['fulltext_name'];
-				} else {
-					$name = $product_name;
-				}
-				
-				$msg = sprintf( __( "Sorry, no valid license found for: %s", self::$text_domain ), $name );
-                if ( E20R_LICENSING_DEBUG ) {
-                    $utils->log( $msg );
-                }
-				$utils->add_message( $msg, 'error', 'backend' );
-				
-				return $license_status;
-			}
-            if ( E20R_LICENSING_DEBUG ) {
-                // $utils->log( "From the server for {$product}: " . print_r( $decoded, true ) );
-            }
-            
-			if ( is_array( $decoded->registered_domains ) ) {
-                if ( E20R_LICENSING_DEBUG ) {
-                    $utils->log( "Processing license data for (count: " . count( $decoded->registered_domains ) . " domains )" );
-                }
-                
-				foreach ( $decoded->registered_domains as $domain ) {
-					
-					if ( isset( $domain->registered_domain ) && $domain->registered_domain == $_SERVER['SERVER_NAME'] ) {
-						
-						if ( '0000-00-00' != $decoded->date_renewed ) {
-							$settings['renewed'] = strtotime( $decoded->date_renewed, current_time( 'timestamp' ) );
-						} else {
-							$settings['renewed'] = current_time( 'timestamp' );
-						}
-						$settings['domain']        = $domain->registered_domain;
-						$settings['fulltext_name'] = $product_name;
-						$settings['expires']       = isset( $decoded->date_expiry ) ? strtotime( $decoded->date_expiry, current_time( 'timestamp' ) ) : null;
-						$settings['status']        = $decoded->status;
-						$settings['first_name']    = $current_user->user_firstname;
-						$settings['last_name']     = $current_user->user_lastname;
-						$settings['email']         = $decoded->email;
-						$settings['timestamp']     = current_time( 'timestamp' );
-      
-						if ( E20R_LICENSING_DEBUG ) {
-                            $utils->log( "Saving license data for {$domain->registered_domain}: " . print_r( $settings, true ) );
-                        }
-						if ( false === self::update_settings( $product, $settings ) ) {
-							
-							$msg = sprintf( __( "Unable to save license settings for %s", self::$text_domain ), $product );
-                            if ( E20R_LICENSING_DEBUG ) {
-                                $utils->log( $msg );
-                            }
-							$utils->add_message( $msg, 'error', 'backend' );
-						}
-						
-						$license_status = ( 'active' === $settings['status'] ? true : false );
-                        if ( E20R_LICENSING_DEBUG ) {
-                            $utils->log( "Current status for {$product} license: " . ( $license_status ? 'active' : 'inactive/deactivated/blocked' ) );
-                        }
-					} else {
-                        if ( E20R_LICENSING_DEBUG ) {
-                            $utils->log( "Wrong domain, or domain info not found" );
-                        }
-					}
-				}
-			} else {
-                if ( E20R_LICENSING_DEBUG ) {
-                    $utils->log( "The {$product} license is on the server, but not active for this domain" );
-                }
-				$license_status = false;
+				$utils->log( "Local license settings for {$product}: " . print_r( $settings, true ) );
 			}
 			
-			if ( isset( $settings['expires'] ) && $settings['expires'] < current_time( 'timestamp' ) || ( isset( $settings['active'] ) && 'active' !== $settings['status'] ) ) {
+			if ( false === ( $license_status = (bool) Cache::get( "{$product}_status", 'e20r_licensing' ) ) ) {
 				
-				$msg = sprintf(
-					__( "Your update license has expired for the %s add-on!", self::$text_domain ),
-					$settings['fulltext_name']
+				if ( E20R_LICENSING_DEBUG ) {
+					$utils->log( "Connecting to license server to validate license for {$product}" );
+				}
+				
+				$product_name = $settings['fulltext_name'];
+				
+				// Configure request for license check
+				$api_params = array(
+					'slm_action'  => 'slm_check',
+					'secret_key'  => self::E20R_LICENSE_SECRET_KEY,
+					'license_key' => $settings['key'],
+					// 'registered_domain' => $_SERVER['SERVER_NAME']
 				);
 				
-                if ( E20R_LICENSING_DEBUG ) {
-                    $utils->log( $msg );
-                }
-				$utils->add_message( $msg, 'error' );
-				$license_status = false;
+				if ( E20R_LICENSING_DEBUG ) {
+					$utils->log( "Transmitting request to License server for {$product}" );
+				}
+				
+				$decoded = self::send_to_license_server( $api_params );
+				
+				// License not validated
+				if ( ! isset( $decoded->result ) || 'success' != $decoded->result ) {
+					
+					
+					if ( isset( $settings['fulltext_name'] ) ) {
+						$name = $settings['fulltext_name'];
+					} else {
+						$name = $product_name;
+					}
+					
+					$msg = sprintf( __( "Sorry, no valid license found for: %s", self::$text_domain ), $name );
+					if ( E20R_LICENSING_DEBUG ) {
+						$utils->log( $msg );
+					}
+					$utils->add_message( $msg, 'error', 'backend' );
+					
+					return $license_status;
+				}
+				if ( E20R_LICENSING_DEBUG ) {
+					// $utils->log( "From the server for {$product}: " . print_r( $decoded, true ) );
+				}
+				
+				if ( is_array( $decoded->registered_domains ) ) {
+					if ( E20R_LICENSING_DEBUG ) {
+						$utils->log( "Processing license data for (count: " . count( $decoded->registered_domains ) . " domains )" );
+					}
+					
+					foreach ( $decoded->registered_domains as $domain ) {
+						
+						if ( isset( $domain->registered_domain ) && $domain->registered_domain == $_SERVER['SERVER_NAME'] ) {
+							
+							if ( '0000-00-00' != $decoded->date_renewed ) {
+								$settings['renewed'] = strtotime( $decoded->date_renewed, current_time( 'timestamp' ) );
+							} else {
+								$settings['renewed'] = current_time( 'timestamp' );
+							}
+							$settings['domain']        = $domain->registered_domain;
+							$settings['fulltext_name'] = $product_name;
+							$settings['expires']       = isset( $decoded->date_expiry ) ? strtotime( $decoded->date_expiry, current_time( 'timestamp' ) ) : null;
+							$settings['status']        = $decoded->status;
+							$settings['first_name']    = $current_user->first_name;
+							$settings['last_name']     = $current_user->last_name;
+							$settings['email']         = $decoded->email;
+							$settings['timestamp']     = current_time( 'timestamp' );
+							
+							if ( E20R_LICENSING_DEBUG ) {
+								$utils->log( "Saving license data for {$domain->registered_domain}: " . print_r( $settings, true ) );
+							}
+							if ( false === self::update_settings( $product, $settings ) ) {
+								
+								$msg = sprintf( __( "Unable to save license settings for %s", self::$text_domain ), $product );
+								if ( E20R_LICENSING_DEBUG ) {
+									$utils->log( $msg );
+								}
+								$utils->add_message( $msg, 'error', 'backend' );
+							}
+							
+							$license_status = ( 'active' === $settings['status'] ? true : false );
+							if ( E20R_LICENSING_DEBUG ) {
+								$utils->log( "Current status for {$product} license: " . ( $license_status ? 'active' : 'inactive/deactivated/blocked' ) );
+							}
+						} else {
+							if ( E20R_LICENSING_DEBUG ) {
+								$utils->log( "Wrong domain, or domain info not found" );
+							}
+						}
+					}
+				} else {
+					if ( E20R_LICENSING_DEBUG ) {
+						$utils->log( "The {$product} license is on the server, but not active for this domain" );
+					}
+					$license_status = false;
+				}
+				
+				if ( isset( $settings['expires'] ) && $settings['expires'] < current_time( 'timestamp' ) || ( isset( $settings['active'] ) && 'active' !== $settings['status'] ) ) {
+					
+					$msg = sprintf(
+						__( "Your update license has expired for the %s add-on!", self::$text_domain ),
+						$settings['fulltext_name']
+					);
+					
+					if ( E20R_LICENSING_DEBUG ) {
+						$utils->log( $msg );
+					}
+					$utils->add_message( $msg, 'error' );
+					$license_status = false;
+				}
+				
+				Cache::set( "{$product}_status", $license_status, DAY_IN_SECONDS, 'e20r_licensing' );
 			}
 			
 			return $license_status;
