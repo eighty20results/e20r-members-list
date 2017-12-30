@@ -170,6 +170,8 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 		 * @param array  $settings
 		 *
 		 * @return array
+		 *
+		 * @since 1.8.4 - BUG FIX: Didn't save the license settings
 		 */
 		public static function activate_license( $product, $settings ) {
 			
@@ -266,6 +268,13 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 				}
 				
 				$settings['timestamp'] = current_time( 'timestamp' );
+				
+				/**
+				 * @since 1.8.4 - BUG FIX: Didn't save the license settings
+				 */
+				if ( 'active' === $settings['status']  ) {
+					self::update_settings( $product, $settings );
+				}
 			}
 			
 			return array( 'status' => $state, 'settings' => $settings );
@@ -571,6 +580,8 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 		}
 		
 		/**
+		 * Load local settings for the specified product
+		 *
 		 * @param string $product
 		 *
 		 * @return array
@@ -796,6 +807,7 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 		
 		/**
 		 * Register all Licensing settings
+		 *
 		 * @since 1.5 - BUG FIX: Incorrect namespace used in register_setting(), add_sttings_section() and add_settings_field() functions
 		 * @since 1.6 - BUG FIX: Used wrong label for new licenses
 		 */
@@ -1143,7 +1155,6 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 							$license_settings[ $product ]['email'] = $license_email;
 							$license_settings[ $product ]['key']   = $license_key;
 							if ( E20R_LICENSING_DEBUG ) {
-								$utils->log( "Checking remote license: " . print_r( $license_settings[ $product ], true ) );
 								$utils->log( "Attempting remote activation for {$product} " );
 							}
 							
