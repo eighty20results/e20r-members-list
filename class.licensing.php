@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @version 1.8.1
+ * @version 1.8.2
  *
  */
 
@@ -178,9 +178,9 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 			$state = null;
 			$utils = Utilities::get_instance();
 			
-            if ( E20R_LICENSING_DEBUG ) {
-                $utils->log( "Attempting to activate {$product} on remote server: " . print_r( $settings, true ) );
-            }
+            		if ( E20R_LICENSING_DEBUG ) {
+		                $utils->log( "Attempting to activate {$product} on remote server: " . print_r( $settings, true ) );
+            		}
             
 			if ( empty( $settings ) ) {
 				
@@ -205,18 +205,18 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 			if ( false === $decoded ) {
 				$msg = __( "Error transmitting to the remote licensing server", self::$text_domain );
 				// $utils->add_message( $msg, 'error', 'backend' );
-                if ( E20R_LICENSING_DEBUG ) {
-                    $utils->log( $msg );
-                }
+		                if ( E20R_LICENSING_DEBUG ) {
+                		    $utils->log( $msg );
+		                }
                 
 				return array( 'status' => 'blocked', 'settings' => null );
 			}
 			
 			if ( isset( $decoded->result ) ) {
        
-			    if ( E20R_LICENSING_DEBUG ) {
-                    $utils->log( "Decoded JSON and received a status... ({$decoded->result})" );
-                }
+				if ( E20R_LICENSING_DEBUG ) {
+                    			$utils->log( "Decoded JSON and received a status... ({$decoded->result})" );
+                		}
                 
 				switch ( $decoded->result ) {
 					
@@ -224,9 +224,9 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 						$settings['status'] = 'active';
       
 						if ( E20R_LICENSING_DEBUG ) {
-                            $utils->log( "Added {$product} to license list" );
-                            $utils->log( "Activated {$product} on the remote server." );
-                        }
+                            				$utils->log( "Added {$product} to license list" );
+                            				$utils->log( "Activated {$product} on the remote server." );
+                        			}
                         
 						$state = true;
 						break;
@@ -310,17 +310,34 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 				return $decoded;
 			}
 			
-			if ( 'success' !== $decoded->result ) {
-				return false;
+			/**
+			 * Check if the result is the 'Already inactive' ( status: 80 )
+			 */
+			if ( 'error' === $decoded->result && ( 
+				isset( $decoded->error_code ) && 
+				80 == $decoded->error_code && 
+				1 === preg_match( '/domain is already inactive/i', $decoded->message ) 
+			) ) {
+				
+				// Then override the status.
+				$decoded->result = 'success';
 			}
 			
-            if ( E20R_LICENSING_DEBUG ) {
-                $utils->log( "Removing license {$product}..." );
-            }
+			if ( 'success' !== $decoded->result ) {
+				if ( E20R_LICENSING_DEBUG ) {
+					$utils->log("Error deactivating the license!");
+				}
+					return false;
+			}
+			
+            		if ( E20R_LICENSING_DEBUG ) {
+                		$utils->log( "Removing license {$product}..." );
+            		}
+			
 			if ( false === self::update_settings( $product, null ) ) {
-                if ( E20R_LICENSING_DEBUG ) {
-                    $utils->log( "Unable to save settings (after removal) for {$product}" );
-                }
+		                if ( E20R_LICENSING_DEBUG ) {
+                		    $utils->log( "Unable to save settings (after removal) for {$product}" );
+                		}
 			}
 			
 			return true;
