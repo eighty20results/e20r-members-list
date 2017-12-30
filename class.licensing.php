@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @version 1.8.4
+ * @version 1.9
  *
  */
 
@@ -268,13 +268,6 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 				}
 				
 				$settings['timestamp'] = current_time( 'timestamp' );
-				
-				/**
-				 * @since 1.8.4 - BUG FIX: Didn't save the license settings
-				 */
-				if ( 'active' === $settings['status']  ) {
-					self::update_settings( $product, $settings );
-				}
 			}
 			
 			return array( 'status' => $state, 'settings' => $settings );
@@ -284,6 +277,7 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 		 * Deactivate the specified license (product/license key)
 		 *
 		 * @param string $product
+		 * @param array|null $settings
 		 *
 		 * @return bool
 		 */
@@ -359,10 +353,11 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 		 *
 		 * @param string     $product
 		 * @param null|array $settings
+		 * @param bool $force
 		 *
 		 * @return bool
 		 */
-		private static function get_license_status_from_server( $product, $settings = null ) {
+		private static function get_license_status_from_server( $product, $settings = null, $force = false ) {
 			
 			$utils = Utilities::get_instance();
 			
@@ -385,7 +380,7 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 				$utils->log( "Local license settings for {$product}: " . print_r( $settings, true ) );
 			}
 			
-			if ( false === ( $license_status = (bool) Cache::get( "{$product}_status", 'e20r_licensing' ) ) ) {
+			if ( true === $force || false === ( $license_status = (bool) Cache::get( "{$product}_status", 'e20r_licensing' ) ) ) {
 				
 				if ( E20R_LICENSING_DEBUG ) {
 					$utils->log( "Connecting to license server to validate license for {$product}" );
@@ -424,9 +419,6 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 					$utils->add_message( $msg, 'error', 'backend' );
 					
 					return $license_status;
-				}
-				if ( E20R_LICENSING_DEBUG ) {
-					// $utils->log( "From the server for {$product}: " . print_r( $decoded, true ) );
 				}
 				
 				if ( is_array( $decoded->registered_domains ) ) {
@@ -1184,7 +1176,7 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 								$utils->log( "Loading updated settings from server" );
 							}
 							
-							if ( true === self::get_license_status_from_server( $product, $license_settings[ $product ] ) ) {
+							if ( true === self::get_license_status_from_server( $product, $license_settings[ $product ], true ) ) {
 								$result['settings'] = self::get_settings( $product );
 							}
 							
