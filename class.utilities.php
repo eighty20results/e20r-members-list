@@ -145,7 +145,7 @@ if ( ! class_exists( 'E20R\Utilities\Utilities' ) ) {
 		 */
 		public function plugin_is_active( $plugin_file = null, $function_name = null ) {
 			
-			$this->log( "Testing whether plugin file ({$plugin_file}) or function ({$function_name}) exists/indicates an active plugin" );
+			// $this->log( "Testing whether plugin file ({$plugin_file}) or function ({$function_name}) exists/indicates an active plugin" );
 			if ( ! is_admin() ) {
 				
 				if ( ! empty( $function_name ) ) {
@@ -293,7 +293,7 @@ if ( ! class_exists( 'E20R\Utilities\Utilities' ) ) {
 			$this->msgt       = array();
 			$this->msg_source = array();
 			
-			Cache::delete( 'err_info', self::$cache_key );		
+			Cache::delete( 'err_info', self::$cache_key );
 		}
 		
 		/**
