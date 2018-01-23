@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @version 1.9
+ * @version 2.0
  *
  */
 
@@ -91,7 +91,7 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 			
 			$excluded = apply_filters( 'e20r_licensing_excluded', array(
 				'e20r_default_license',
-				'example_addon',
+				'example_gateway_addon',
 				'new_licenses',
 			) );
 			
@@ -639,7 +639,7 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 			// Need to update the settings for a (possibly) pre-existing product
 			if ( ! is_null( $product ) && ! empty( $new_settings ) && ! in_array( $product, array(
 					'e20r_default_license',
-					'example_addon',
+					'example_gateway_addon',
 				) ) && ! empty( $product )
 			) {
 				
@@ -650,7 +650,7 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 				
 			} else if ( ! is_null( $product ) && empty( $new_settings ) && ( ! in_array( $product, array(
 						'e20r_default_license',
-						'example_addon',
+						'example_gateway_addon',
 					) ) && ! empty( $product ) )
 			) {
 				if ( E20R_LICENSING_DEBUG ) {
@@ -844,7 +844,7 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 					$utils->log( "Generate settings fields for {$k}?" );
 				}
 				
-				if ( $k !== 'example_addon' && $k !== 'new_licenses' && isset( $license['key'] ) && $license['key'] != 'e20r_default_license' && ! empty( $license['key'] ) ) {
+				if ( $k !== 'example_gateway_addon' && $k !== 'new_licenses' && isset( $license['key'] ) && $license['key'] != 'e20r_default_license' && ! empty( $license['key'] ) ) {
 					
 					if ( E20R_LICENSING_DEBUG ) {
 						$utils->log( "Previously activated license: {$k}: adding {$license['fulltext_name']} fields" );
@@ -893,7 +893,7 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 						
 						// Skip if we've got this one in the list of licenses already.
 						
-						if ( ! in_array( $new['new_product'], $license_list ) && $nk !== 'example_addon' ) {
+						if ( ! in_array( $new['new_product'], $license_list ) && $nk !== 'example_gateway_addon' ) {
 							if ( E20R_LICENSING_DEBUG ) {
 								$utils->log( "Adding new license fields for {$new['new_product']} (one of " . count( $new_licenses ) . " unlicensed add-ons)" );
 							}
@@ -1057,7 +1057,7 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 			
 			foreach ( $settings as $prod => $license ) {
 				
-				if ( in_array( $prod, array( 'e20r_default_license', 'new_licenses', 'example_addon' ) ) ) {
+				if ( in_array( $prod, array( 'e20r_default_license', 'new_licenses', 'example_gateway_addon' ) ) ) {
 					continue;
 				}
 				
