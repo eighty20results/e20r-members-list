@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @version 1.9
+ * @version 2.0
  *
  */
 
@@ -91,7 +91,7 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 			
 			$excluded = apply_filters( 'e20r_licensing_excluded', array(
 				'e20r_default_license',
-				'example_addon',
+				'example_gateway_addon',
 				'new_licenses',
 			) );
 			
@@ -639,7 +639,7 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 			// Need to update the settings for a (possibly) pre-existing product
 			if ( ! is_null( $product ) && ! empty( $new_settings ) && ! in_array( $product, array(
 					'e20r_default_license',
-					'example_addon',
+					'example_gateway_addon',
 				) ) && ! empty( $product )
 			) {
 				
@@ -650,7 +650,7 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 				
 			} else if ( ! is_null( $product ) && empty( $new_settings ) && ( ! in_array( $product, array(
 						'e20r_default_license',
-						'example_addon',
+						'example_gateway_addon',
 					) ) && ! empty( $product ) )
 			) {
 				if ( E20R_LICENSING_DEBUG ) {
@@ -823,6 +823,7 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 			
 			$settings        = apply_filters( 'e20r-license-add-new-licenses', self::get_settings(), array() );
 			$license_counter = 0;
+			
 			if ( E20R_LICENSING_DEBUG ) {
 				$utils->log( "Found " . count( $settings ) . " potential licenses" );
 			}
@@ -844,7 +845,7 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 					$utils->log( "Generate settings fields for {$k}?" );
 				}
 				
-				if ( $k !== 'example_addon' && $k !== 'new_licenses' && isset( $license['key'] ) && $license['key'] != 'e20r_default_license' && ! empty( $license['key'] ) ) {
+				if ( ! in_array( $k, array( 'example_gateway_addon', 'new_licenses' )) && isset( $license['key'] ) && $license['key'] != 'e20r_default_license' && ! empty( $license['key'] ) ) {
 					
 					if ( E20R_LICENSING_DEBUG ) {
 						$utils->log( "Previously activated license: {$k}: adding {$license['fulltext_name']} fields" );
@@ -879,54 +880,52 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 					$license_list[] = $k;
 					$license_counter ++;
 				}
+			}
+			
+			
+			$new_licenses = $settings['new_licenses'];
+			
+			foreach ( $new_licenses as $nk => $new ) {
 				
-				if ( 'new_licenses' === $k ) {
+				if ( E20R_LICENSING_DEBUG ) {
+					$utils->log( "Processing new license field for {$new['new_product']}" );
+				}
+				
+				// Skip if we've got this one in the list of licenses already.
+				
+				if ( ! in_array( $new['new_product'], $license_list ) && $nk !== 'example_gateway_addon' ) {
+					if ( E20R_LICENSING_DEBUG ) {
+						$utils->log( "Adding new license fields for {$new['new_product']} (one of " . count( $new_licenses ) . " unlicensed add-ons)" );
+					}
 					
-					$new_licenses = $license;
+					add_settings_field(
+						"e20r_license_new_{$nk}",
+						sprintf( __( "Add %s license", self::$text_domain ), $new['fulltext_name'] ),
+						'E20R\Utilities\Licensing\Licensing::show_input',
+						'e20r-licensing',
+						'e20r_licensing_section',
+						array(
+							'index'         => $license_counter,
+							'label_for'     => $new['new_product'],
+							'fulltext_name' => $new['fulltext_name'],
+							'option_name'   => "e20r_license_settings",
+							'new_product'   => $new['new_product'],
+							'name'          => "new_license",
+							'input_type'    => 'text',
+							'value'         => null,
+							'email_field'   => "new_email",
+							'email_value'   => null,
+							'placeholder'   => $new['placeholder'],
+						)
+					);
 					
-					foreach ( $new_licenses as $nk => $new ) {
-						
-						if ( E20R_LICENSING_DEBUG ) {
-							$utils->log( "Processing: {$nk}" );
-							$utils->log( "Processing new license field for {$new['new_product']}" );
-						}
-						
-						// Skip if we've got this one in the list of licenses already.
-						
-						if ( ! in_array( $new['new_product'], $license_list ) && $nk !== 'example_addon' ) {
-							if ( E20R_LICENSING_DEBUG ) {
-								$utils->log( "Adding new license fields for {$new['new_product']} (one of " . count( $new_licenses ) . " unlicensed add-ons)" );
-							}
-							
-							add_settings_field(
-								"e20r_license_new_{$nk}",
-								sprintf( __( "Add %s license", self::$text_domain ), $new['fulltext_name'] ),
-								'E20R\Utilities\Licensing\Licensing::show_input',
-								'e20r-licensing',
-								'e20r_licensing_section',
-								array(
-									'index'         => $license_counter,
-									'label_for'     => $new['new_product'],
-									'fulltext_name' => $new['fulltext_name'],
-									'option_name'   => "e20r_license_settings",
-									'new_product'   => $new['new_product'],
-									'name'          => "new_license",
-									'input_type'    => 'text',
-									'value'         => null,
-									'email_field'   => "new_email",
-									'email_value'   => null,
-									'placeholder'   => $new['placeholder'],
-								)
-							);
-							
-							$license_counter ++;
-							if ( E20R_LICENSING_DEBUG ) {
-								$utils->log( "New license field(s) added for {$nk}" );
-							}
-						}
+					$license_counter ++;
+					if ( E20R_LICENSING_DEBUG ) {
+						$utils->log( "New license field(s) added for {$nk}" );
 					}
 				}
 			}
+			
 		}
 		
 		/**
@@ -941,19 +940,19 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 			
 			$pricing_page = apply_filters( 'e20r-license-pricing-page-url', 'https://eighty20results.com/shop/' );
 			?>
-            <p class="e20r-licensing-section"><?php _e( "This add-on is distributed under version 2 of the GNU Public License (GPLv2). One of the things the GPLv2 license grants is the right to use this software on your site, free of charge.", self::$text_domain ); ?></p>
-            <p class="e20r-licensing-section">
-                <a href="<?php echo esc_url_raw( $pricing_page ); ?>"
-                   target="_blank"><?php _e( "Purchase Licenses/Add-ons &raquo;", self::$text_domain ); ?></a>
-            </p>
-            <table class="form-table">
-                <tr>
-                    <th style="width: 200px; min-width: 200px;"><?php _e( "Name", self::$text_domain ); ?></th>
-                    <th style="min-width: 350px;"><?php _e( "Key", self::$text_domain ); ?></th>
-                    <th style="min-width: 200px;"><?php _e( "Email", self::$text_domain ); ?></th>
-                    <th><?php _e( "Deactivate", self::$text_domain ); ?></th>
-                </tr>
-            </table>
+			<p class="e20r-licensing-section"><?php _e( "This add-on is distributed under version 2 of the GNU Public License (GPLv2). One of the things the GPLv2 license grants is the right to use this software on your site, free of charge.", self::$text_domain ); ?></p>
+			<p class="e20r-licensing-section">
+				<a href="<?php echo esc_url_raw( $pricing_page ); ?>"
+				   target="_blank"><?php _e( "Purchase Licenses/Add-ons &raquo;", self::$text_domain ); ?></a>
+			</p>
+			<table class="form-table">
+				<tr>
+					<th style="width: 200px; min-width: 200px;"><?php _e( "Name", self::$text_domain ); ?></th>
+					<th style="min-width: 350px;"><?php _e( "Key", self::$text_domain ); ?></th>
+					<th style="min-width: 200px;"><?php _e( "Email", self::$text_domain ); ?></th>
+					<th><?php _e( "Deactivate", self::$text_domain ); ?></th>
+				</tr>
+			</table>
 			<?php
 		}
 		
@@ -996,8 +995,8 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 				$args['placeholder'],
 				$args['index']
 			); ?>
-            </td>
-            <td>
+			</td>
+			<td>
 				<?php
 				printf(
 					'<input name="%1$s[%2$s][%6$d]" type="email" id=%3$s_email value="%4$s" placeholder="%5$s" class="email_address" style="width: 200px;">',
@@ -1008,8 +1007,8 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 					__( "Email used to buy license", "e20rlicense" ),
 					$args['index']
 				); ?>
-            </td>
-            <td>
+			</td>
+			<td>
 			<?php if ( $args['name'] != 'new_key' ) { ?>
 				<?php
 				printf(
@@ -1019,7 +1018,7 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 					$args['index']
 				);
 			} ?>
-            </td><?php
+			</td><?php
 		}
 		
 		/**
@@ -1041,15 +1040,15 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 			$utils = Utilities::get_instance();
 			?>
 			<?php $utils->display_messages(); ?>
-            <br/>
-            <h2><?php echo $GLOBALS['title']; ?></h2>
-            <form action="options.php" method="POST">
+			<br/>
+			<h2><?php echo $GLOBALS['title']; ?></h2>
+			<form action="options.php" method="POST">
 				<?php
 				settings_fields( "e20r_license_settings" );
 				do_settings_sections( 'e20r-licensing' );
 				submit_button();
 				?>
-            </form>
+			</form>
 			<?php
 			
 			$settings            = apply_filters( 'e20r-license-add-new-licenses', self::get_settings(), array() );
@@ -1057,7 +1056,7 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 			
 			foreach ( $settings as $prod => $license ) {
 				
-				if ( in_array( $prod, array( 'e20r_default_license', 'new_licenses', 'example_addon' ) ) ) {
+				if ( in_array( $prod, array( 'e20r_default_license', 'new_licenses', 'example_gateway_addon' ) ) ) {
 					continue;
 				}
 				
@@ -1067,29 +1066,29 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 				$license_valid = self::is_licensed( $prod, true ) && ( isset( $license['status'] ) && 'active' === $license['status'] );
 				
 				?>
-
-                <div class="wrap"><?php
+				
+				<div class="wrap"><?php
 					if ( false === $license_valid && ( isset( $license['expires'] ) && $license['expires'] <= current_time( 'timestamp' ) || empty( $license['expires'] ) ) ) {
 						?>
-                        <div class="notice notice-error inline">
-                        <p>
-                            <strong><?php printf( __( 'Your <em>%s</em> license is either not configured, invalid or has expired.', self::$text_domain ), $license['fulltext_name'] ); ?></strong>
+						<div class="notice notice-error inline">
+						<p>
+							<strong><?php printf( __( 'Your <em>%s</em> license is either not configured, invalid or has expired.', self::$text_domain ), $license['fulltext_name'] ); ?></strong>
 							<?php printf( __( 'Visit your Eighty / 20 Results <a href="%s" target="_blank">Support Account</a> page to confirm that your account is active and to locate your license key.', self::$text_domain ), $support_account_url ); ?>
-                        </p>
-                        </div><?php
+						</p>
+						</div><?php
 					}
 					
 					if ( $license_valid ) {
 						?>
-                        <div class="notice notice-info inline">
-                        <p>
-                            <strong><?php _e( 'Thank you!', self::$text_domain ); ?></strong>
+						<div class="notice notice-info inline">
+						<p>
+							<strong><?php _e( 'Thank you!', self::$text_domain ); ?></strong>
 							<?php printf( __( "A valid %s license key is being used on this site.", self::$text_domain ), $license['fulltext_name'] ); ?>
-                        </p>
-                        </div><?php
+						</p>
+						</div><?php
 						
 					} ?>
-                </div> <!-- end wrap -->
+				</div> <!-- end wrap -->
 				<?php
 			}
 			
