@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (c) 2017 - Eighty / 20 Results by Wicked Strong Chicks.
+ * Copyright (c) 2017-2018 - Eighty / 20 Results by Wicked Strong Chicks.
  * ALL RIGHTS RESERVED
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @version 2.0
+ * @version 2.1
  *
  */
 
@@ -139,6 +139,8 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 			$settings = self::get_settings( $product );
 			
 			if ( empty( $settings['expires'] ) ) {
+				
+				$utils->log("NOTICE: No expiration date set for the {$product} product license!");
 				return false;
 			}
 			
@@ -148,15 +150,15 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 			
 			$expiration_interval     = apply_filters( 'e20r_licensing_expiration_warning_intervals', 30 );
 			$calculated_warning_time = strtotime( "+ {$expiration_interval} day", current_time( 'timestamp' ) );
-			$diff                    = $settings['expires'] - $calculated_warning_time;
+			$diff                    = $settings['expires'] - current_time('timestamp' );
 			
 			if ( E20R_LICENSING_DEBUG ) {
 				$utils->log( "{$product} scheduled to expire on {$settings['expires']} vs {$calculated_warning_time}" );
 			}
 			
-			if ( $settings['expires'] <= $calculated_warning_time && $diff > 0 ) {
+			if ( $settings['expires'] <= $calculated_warning_time && $settings['expires'] >= current_time('timestamp' ) && $diff > 0 ) {
 				return true;
-			} else if ( $diff <= 0 ) {
+			} else if ( $settings['expires'] <= current_time('timestamp' ) && $diff <= 0 ) {
 				return - 1;
 			}
 			
@@ -852,7 +854,7 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 						$utils->log( "Settings: " . print_r( $license, true ) );
 					}
 					
-					if ( ! isset( $license['status']) ) {
+					if ( empty( $license['status']) ) {
 						$license['status'] = 'inactive';
 					}
 					
