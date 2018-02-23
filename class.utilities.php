@@ -90,14 +90,35 @@ if ( ! class_exists( 'E20R\Utilities\Utilities' ) ) {
 				$this->msg_source = is_array( $tmp['msg_source'] ) ? $tmp['msg_source'] : array( $tmp['msg_source'] );
 			}
 			
-			if ( ! has_action( 'admin_notices', array( $this, 'display_messages' ) ) ) {
-				add_action( 'admin_notices', array( $this, 'display_messages' ), 10 );
+			if ( true === self::is_admin() ) {
+				if ( ! has_action( 'admin_notices', array( $this, 'display_messages' ) ) ) {
+					add_action( 'admin_notices', array( $this, 'display_messages' ), 10 );
+				}
+				
+				// Clear cache when updating discount codes or membership level definitions
+				add_action( 'pmpro_save_discount_code', array( $this, 'clear_delay_cache' ), 9999, 1 );
+				add_action( 'pmpro_save_membership_level', array( $this, 'clear_delay_cache' ), 9999, 1 );
+				
 			}
 			
-			// Clear cache when updating discount codes or membership level definitions
-			add_action( 'pmpro_save_discount_code', array( $this, 'clear_delay_cache' ), 9999, 1 );
-			add_action( 'pmpro_save_membership_level', array( $this, 'clear_delay_cache' ), 9999, 1 );
+		}
+		
+		/**
+		 * Are we viewing the admin screen (WP Backend)
+		 *
+		 * @return bool
+		 */
+		private static function is_admin() {
 			
+			$is_admin = false;
+			
+			if ( isset( $GLOBALS['current_screen'] ) ) {
+				$is_admin =  $GLOBALS['current_screen']->in_admin();
+			} else if ( defined( 'WP_ADMIN' ) ) {
+				$is_admin = WP_ADMIN;
+			}
+			
+			return $is_admin;
 		}
 		
 		/**
