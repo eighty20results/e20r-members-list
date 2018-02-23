@@ -108,7 +108,7 @@ if ( ! class_exists( 'E20R\Utilities\Utilities' ) ) {
 		 *
 		 * @return bool
 		 */
-		private static function is_admin() {
+		public static function is_admin() {
 			
 			$is_admin = false;
 			
