@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @version 1.10
+ * @version 1.2
  */
 
 namespace E20R\Utilities;
@@ -302,7 +302,7 @@ if ( ! class_exists( 'E20R\Utilities\Utilities' ) ) {
                 		$this->log( "Have " . count( $this->msg ) . " admin message(s) to display" );
 				
 				foreach ( $this->msg as $key => $notice ) { 
-					if ( !empty( $notice ) { ?>
+					if ( !empty( $notice ) ) { ?>
                     			<div class="notice notice-<?php esc_html_e( $this->msgt[ $key ] ); ?> is-dismissible <?php esc_html_e( $this->msg_source[ $key ] ); ?>">
 			                        <p><?php echo $notice; ?></p>
 			                    </div>
