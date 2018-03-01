@@ -244,32 +244,32 @@ if ( ! class_exists( 'E20R\Utilities\Utilities' ) ) {
 			// Look for duplicate messages
 			foreach( $this->msg as $key => $msg ) {
 			    
-			    if ( false !== strpos( $message, $msg ) ) {
+			    if ( !empty($message) && !empty($msg) && false !== strpos( $message, $msg ) ) {
 			        $msg_found[] = $key;
-                }
-            }
-            
-            // No duplicates found, so add the new one
-            if ( empty( $msg_found ) ) {
-			    // Save new message
-	            $this->log( "Adding a message to the admin errors: {$message}" );
-	            
-			    $this->msg[] = $message;
-			    $this->msgt[] = $type;
-			    $this->msg_source[] = $msg_source;
-            } else {
-			    
-			    // Potentially clean up duplicate messages
-	            $total = count($msg_found);
-	            
-                // Remove extra instances of the message
-	            for( $i = 1 ; ( $total - 1 ) >= $i ; $i++ ) {
-	                $this->log("Removing duplicate message");
-		            unset( $this->msg[ $i ] );
-                }
-            }
+			    }
+			}
 			
-            if ( !empty ($this->msg) ) {
+			// No duplicates found, so add the new one
+			if ( empty( $msg_found ) ) {
+				// Save new message
+				$this->log( "Adding a message to the admin errors: {$message}" );
+				
+				$this->msg[] = $message;
+				$this->msgt[] = $type;
+				$this->msg_source[] = $msg_source;
+			} else {
+				
+				// Potentially clean up duplicate messages
+				$total = count($msg_found);
+				
+				// Remove extra instances of the message
+				for( $i = 1 ; ( $total - 1 ) >= $i ; $i++ ) {
+					$this->log("Removing duplicate message");
+					unset( $this->msg[ $i ] );
+				}
+			}
+			
+			if ( !empty ($this->msg) ) {
 				$values = array(
 					'msg'        => $this->msg,
 					'msgt'       => $this->msgt,
