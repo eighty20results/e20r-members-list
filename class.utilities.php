@@ -301,11 +301,13 @@ if ( ! class_exists( 'E20R\Utilities\Utilities' ) ) {
                 
                 		$this->log( "Have " . count( $this->msg ) . " admin message(s) to display" );
 				
-				foreach ( $this->msg as $key => $notice ) { ?>
+				foreach ( $this->msg as $key => $notice ) { 
+					if ( !empty( $notice ) { ?>
                     			<div class="notice notice-<?php esc_html_e( $this->msgt[ $key ] ); ?> is-dismissible <?php esc_html_e( $this->msg_source[ $key ] ); ?>">
 			                        <p><?php echo $notice; ?></p>
 			                    </div>
 					<?php
+				       }
 				}
 			}
 			
