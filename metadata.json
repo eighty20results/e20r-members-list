@@ -1,0 +1,17 @@
+{
+  "name" : "E20R Enhanced Members List for Paid Memberships Pro",
+  "slug" : "e20r-members-list",
+  "download_url" : "https://eighty20results.com/protected-content/e20r-members-list/e20r-members-list-2.0.zip",
+  "version" : "2.0",
+  "tested": "4.9.4",
+  "requires": "4.8",
+  "author" : "Thomas Sjolshagen <thomas@eighty20results.com>",
+  "author_homepage": "https://eighty20results.com/thomas-sjolshagen",
+  "last_updated": "2018-03-14 10:00:00 MDT",
+  "homepage": "https://eighty20results.com/wordpress-plugins/paid-memberships-pro/e20r-members-list/",
+  "sections" : {
+    "description" : "Extensible, sortable & bulk action capable members listing tool for Paid Memberships Pro",
+    "changelog": "",
+    "faq": "<h3>I found a bug in the plugin.</h3>Please report your issue to us by using the <a href='https://eighty20results.com/support-forums/forum/support-forums/e20r-members-list/' target='_blank'>Enhanced Members List</a> Support Forum on The Eighty / 20 Website, and we'll normally respond within 1 business day."
+    }
+}

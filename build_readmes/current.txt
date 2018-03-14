@@ -1,0 +1,50 @@
+ENHANCEMENT: Better variable name for reset/cancel button in Members List
+ENHANCEMENT: Reset the input field value to the original value when cancelling
+ENHANCEMENT: Change text and drop-down for Bulk action when editing a field in the Member List
+ENHANCEMENT: Support for bulk-update operations (Membership level, membership status, start date, and expiration date)
+ENHANCEMENT: Add datepicker support for start/expiration date bulk editor updates
+ENHANCEMENT: Inform admin of change to expiration date when changing membership level
+ENHANCEMENT: Add "status" as hidden column
+ENHANCEMENT: Include record ID (from pmpro_memberships_users) to simplify updates
+ENHANCEMENT: Add status as a sortable column to members list page
+ENHANCEMENT: Provide user ID and membership level ID in list of users to process for bulk update
+ENHANCEMENT: Moved cancel_member() to own class (Bulk_Cancel)
+ENHANCEMENT: Add "All Members" status (display all members who ever had a membership level, active or not)
+ENHANCEMENT: Didn't include all relevant statuses for 'cancelled' members
+ENHANCEMENT: Add placeholder and fix date settings for start/end date input fields
+ENHANCEMENT: Load JQuery UI & DatePicker functionality for Members List page
+ENHANCEMENT: Add translatable JS strings
+ENHANCEMENT: Add "All Members" and "Active Members" as options to list
+ENHANCEMENT: Better error reporting if there are problems with trying to send export file to browser
+ENHANCEMENT: Move member cancellation handling from Bulk Editor to own class
+ENHANCEMENT: Allow user to sort based on added columns for WASR (buggy)
+ENHANCEMENT: Loading hidden column list from usermeta for currently logged in user (if applicable)
+ENHANCEMENT: Improved label text for Status column
+ENHANCEMENT: Add support for sorting array of arrays by a user metadata key
+ENHANCEMENT: Use Sort_By_Meta class to sort on member # and birth date
+ENHANCEMENT: Add start period as query arg to pagination links, etc for Member List
+ENHANCEMENT: Removed unused method - addMemberData()
+ENHANCEMENT: Set header for username field to "Login" (translatable)
+ENHANCEMENT: More specific error message when Nonce fails during bulk action
+ENHANCEMENT: Standardize filter/action hook names (start with 'e20r_memberslist_')
+ENHANCEMENT: Add support for filtered sort (to support added columns, etc)
+ENHANCEMENT: Make member list ORDER BY clause filterable (to support custom usermeta sorts)
+ENHANCEMENT: Add parameters to limit/include records to any members list page URI
+ENHANCEMENT: Renamed upload_headers() method to set_upload_headers()
+ENHANCEMENT: Updated CSS & JS file names
+ENHANCEMENT: Remove unused constants
+BUG FIX: Return to using username as field name.
+BUG FIX: Member list bulk action filter (list of available bulk actions) used incorrect prefix
+BUG FIX: Fix the ORDER BY clause when asked to sort on one of our custom fields
+BUG FIX: Used incorrect sort by key (um.meta_key) instead of um.meta_value
+BUG FIX: Make sure we only check for WooCommerce pages if WooCommerce is installed/active
+BUG FIX: Report if the headers have been sent when trying to export data
+BUG FIX: Use pmpro_getAllLevels() instead of SQL to load membership level info
+BUG FIX: Didn't update checkbox and modify bulk action and bulk action button when editing a level/status/start date/expiration date
+BUG FIX: Update singular/plural word for members list
+BUG FIX: username is a reserved column in WP_Table_List. Renamed to user_name for our list
+BUG FIX: Didn't always load the correct records to the members list
+BUG FIX: Members list didn't always account for the selected membership level
+BUG FIX: Didn't use the saved hidden column list when displaying data
+BUG FIX: Didn't always select the correct records for export
+BUG FIX: Typo in variable name
