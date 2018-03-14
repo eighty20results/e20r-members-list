@@ -33,6 +33,7 @@
             this.changed_input = $('input[class^="e20r-members-list-input-"]');
             this.changed_select = $( 'select[class^="e20r-members-list-select-"]');
             this.bulkUpdate = $('#doaction, #doaction2');
+            this.updateListBtn = $('#e20r-update-list');
 
             this.dateFields = $('.e20r-members-list-input-enddate, .e20r-members-list-input-startdate');
 
@@ -54,6 +55,9 @@
                 self.set_update( this );
             });
 
+            self.updateListBtn.unbind('click').on('click', function(ev) {
+                $('#post-search-input').val(null);
+            });
             /*
             self.changed_select.unbind('blur').on('blur', function() {
                 self.set_update( this );

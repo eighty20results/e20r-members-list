@@ -301,7 +301,7 @@ class Members_List_Page {
             <form method="post" id="posts-filter">
                 <div class="e20r-search-arguments">
                     <p class="search-box float-left">
-                        <input class="button" type="submit" value="<?php _e( 'Update List', 'pmpro' ); ?>"/>
+                        <input id="e20r-update-list" class="button" type="submit" value="<?php _e( 'Update List', 'pmpro' ); ?>"/>
                     </p>
                     <ul class="subsubsub">
                         <li>
