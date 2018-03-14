@@ -1,0 +1,1479 @@
+<?php
+/*
+ * License:
+
+	Copyright 2016-2018 - Eighty / 20 Results by Wicked Strong Chicks, LLC (thomas@eighty20results.com)
+
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License, version 2, as
+	published by the Free Software Foundation.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+*/
+
+namespace E20R\Members_List\Admin;
+
+/** Load WP_List_Table if it's not already loaded */
+if ( ! class_exists( '\\WP_List_Table' ) ) {
+	require_once( ABSPATH . "wp-admin/includes/class-wp-list-table.php" );
+}
+
+use E20R\Utilities\Utilities;
+
+class Members_List extends \WP_List_Table {
+	
+	/**
+	 * @var     Members_List $instance Class instance variable (singleton support).
+	 */
+	private static $instance;
+	
+	/**
+	 * @var     string $sql_from The table & condition section of the SQL.
+	 */
+	private static $sql_from;
+	
+	/**
+	 * @var array $sql_col_list List of columns to fetch by default from DB
+	 */
+	private $sql_col_list = array();
+	
+	/**
+	 * @var array $default_columns The default Members_List table columns
+	 */
+	private $default_columns = array();
+	
+	/**
+	 * @var array $hidden_columns The columns that should be hidden in the table
+	 */
+	private $hidden_columns = array();
+	
+	/**
+	 * @var string $sqlQuery The completed SQL query used to generate the membership list
+	 */
+	private $sqlQuery = '';
+	
+	/**
+	 * @var     Utilities $utils Instance of the Utilities class
+	 */
+	private $utils;
+	/**
+	 * Various elements of the SQL query as it's being built.
+	 */
+	private $table_list = array();
+	private $search = null;
+	private $order_by = null;
+	private $offset = null;
+	private $limit = null;
+	private $levels = null;
+	private $find = null;
+	private $where = null;
+	private $joins = null;
+	private $from = null;
+	private $group_by = null;
+	
+	private $action = null;
+	
+	/**
+	 * Members_List constructor.
+	 */
+	public function __construct() {
+		
+		parent::__construct( array(
+				'singular' => __( "member", "e20r-members-list" ),
+				'plural'   => __( "members", "e20r-members-list" ),
+				'ajax'     => false,
+			)
+		);
+		
+		if ( method_exists( 'E20R\Utilities\Utilities', 'get_instance' ) ) {
+			$this->utils = Utilities::get_instance();
+			$this->utils->log( "Loaded Utilities class for the Members List" );
+		}
+		
+		$this->sql_col_list = $this->set_sql_columns();
+		
+		$level        = $this->utils->get_variable( 'level', '' );
+		$this->action = $this->utils->get_variable( 'action', '' );
+		
+		$this->default_columns = array(
+			'cb'         => '<input type="checkbox" />',
+			// 'user_id'    => _x( "ID", "e20r-members-list" ),
+			'username'   => _x( "Login", "e20r-members-list" ),
+			'first_name' => _x( "First Name", "e20r-members-list" ),
+			'last_name'  => _x( "Last Name", "e20r-members-list" ),
+			'user_email' => _x( "Email", "e20r-members-list" ),
+			'baddress'   => _x( "Billing Info", "e20r-members-list" ),
+			'membership' => _x( "Level", "e20r-members-list" ),
+			'fee'        => _x( "Fee", "e20r-members-list" ),
+			'status'     => _x( "Status", 'e20r-members-list' ),
+			'joindate'   => _x( "Joined", "e20r-members-list" ),
+			'startdate'  => _x( "Start", "e20r-members-list" ),
+		);
+		
+		if ( 'oldmembers' == $level ) {
+			$this->default_columns['last'] = _x( "Expired", "e20r-members-list" );
+		} else {
+			$this->default_columns['last'] = _x( "Expires", "e20r-members-list" );
+		}
+		
+		if ( 'e20rml_export_records' === $this->utils->get_variable( 'action', null ) ) {
+			$this->utils->log( "Adding export handler" );
+			add_action( 'e20r_memberslist_process_action', array( $this, 'export_members' ), 10, 3 );
+		}
+	}
+	
+	/**
+	 * Default list of columns to fetch.
+	 *
+	 * @return array - Array of SQL table columns/aliases to use when selecting data for membership list.
+	 */
+	private function set_sql_columns() {
+		
+		// Format: 'name' => 'alias'
+		$sql_cols = array(
+			'mu.id'              => 'record_id',
+			'u.ID'               => 'user_id',
+			'u.user_login'       => 'username',
+			'u.user_email'       => 'user_email',
+			'u.user_registered'  => 'joindate',
+			'mu.membership_id'   => 'membership_id',
+			'mu.initial_payment' => 'initial_payment',
+			'mu.billing_amount'  => 'recurring_payment',
+			'mu.cycle_period'    => 'billing_period_name',
+			'mu.cycle_number'    => 'billing_period_duration',
+			'mu.billing_limit'   => 'billing_limit',
+			'mu.code_id'         => 'discount_code_id',
+			'mu.status'          => 'status',
+			'mu.trial_amount'    => 'trial_amount',
+			'mu.trial_limit'     => 'trial_limit',
+			'mu.startdate'       => 'startdate',
+			'mu.enddate'         => 'enddate',
+			'ml.name'            => 'membership',
+		);
+		
+		return apply_filters( 'e20r_memberslist_sql_columns', $sql_cols );
+	}
+	
+	/**
+	 * Creates or returns an instance of the PMPro_Approvals class.
+	 *
+	 * @return  Members_List A single instance of this class.
+	 */
+	public static function get_instance() {
+		
+		if ( null === self::$instance ) {
+			self::$instance = new self;
+		}
+		
+		return self::$instance;
+		
+	}
+	
+	/**
+	 * Handle data query & filter, sorting, and pagination.
+	 */
+	public function prepare_items() {
+		
+		$this->utils->log( "Loading column headers" );
+		
+		// Configure the column headers
+		$this->_column_headers = array(
+			$this->all_columns(),
+			$this->get_hidden_columns(),
+			$this->get_sortable_columns(),
+		);
+		
+		$should_export = $this->utils->get_variable( 'action', '' );
+		
+		if ( false !== $this->current_action() || 'e20rml_export_records' === $should_export ) {
+			
+			$this->utils->log( "Trigger bulk action(s)/export" );
+			
+			// Handle bulk & save actions
+			$this->process_bulk_action();
+		}
+		
+		// How many rows per page
+		$per_page = $this->get_items_per_page( 'per_page', 15 );
+		
+		// Do we need to limit?
+		$level = $this->utils->get_variable( 'level', '' );
+		
+		if ( empty( $level ) ) {
+			$level = 'active';
+		}
+		
+		// Get the current page number
+		$current_page = $this->get_pagenum();
+		
+		$this->utils->log( "Fetch records from DB" );
+		// Load  & count records
+		$this->items = $this->get_members( $per_page, $current_page, $level );
+		$total_items = $this->record_count();
+		
+		$this->utils->log( "Configure pagination" );
+		// Configure pagination
+		$this->set_pagination_args(
+			array(
+				'total_items' => $total_items,
+				'per_page'    => $per_page,
+				'total_pages' => ceil( $total_items / $per_page ),
+			)
+		);
+		
+	}
+	
+	/**
+	 * Default columns to use for Member Listing (filterable)
+	 *
+	 * @return array
+	 */
+	private function all_columns() {
+		
+		$columns = $this->default_columns;
+		
+		/**
+		 * Add/remove columns from the members list.
+		 *
+		 * @filter 'e20r_memberslist_columnlist'
+		 *
+		 * @param   array $columns - List of columns
+		 */
+		
+		$new_columns = apply_filters( 'e20r_memberslist_columnlist', array() );
+		
+		if ( apply_filters( 'e20r_memberslist_page_prepend_cols', false ) && ! empty( $new_columns ) ) {
+			$columns = $new_columns + $this->default_columns;
+		} else if ( ! empty( $new_columns ) ) {
+			$columns = $this->default_columns + $new_columns;
+		}
+		
+		return $columns;
+	}
+	
+	/**
+	 * Return list of columns that should be hidden by default
+	 *
+	 * @return array
+	 */
+	public function get_hidden_columns() {
+		
+		global $current_user;
+		
+		$columns_to_hide = get_user_meta( $current_user->ID, 'managememberships_page_e20r-memberslistcolumnshidden', true );
+		
+		if ( empty( $columns_to_hide ) ) {
+			$this->hidden_columns = array( 'baddress', 'status' );
+		} else {
+			$this->hidden_columns = $columns_to_hide;
+		}
+		
+		return apply_filters( 'e20r_memberslist_hidden_columns', $this->hidden_columns );
+	}
+	
+	/**
+	 * Columns to make sortable.
+	 *
+	 * @return array
+	 */
+	public function get_sortable_columns() {
+		
+		$columns          = $this->all_columns();
+		$sortable_columns = array();
+		
+		foreach ( array_keys( $columns ) as $col ) {
+			
+			// Some of the default columns are sortable
+			switch ( $col ) {
+				case 'username':
+				case 'user_email':
+				case 'membership':
+				case 'startdate':
+				case 'status':
+				case 'last':
+					$sortable_columns[ $col ] = array( $col, false );
+					break;
+			}
+		}
+		
+		// Filter the return value so other plugins can change this behavior.
+		return apply_filters( 'e20r_memberslist_sortable_columns', $sortable_columns );
+	}
+	
+	/**
+	 * Process actions from member list form
+	 */
+	public function process_bulk_action() {
+		
+		$a    = $this->utils->get_variable( 'action', '' );
+		$a2   = $this->utils->get_variable( 'action2', '' );
+		$page = $this->utils->get_variable( 'page', '' );
+		
+		if ( $a == - 1 && $a2 == - 1 ) {
+			$this->utils->log( "No bulk action to execute" );
+			
+			return;
+		}
+		
+		if ( 'e20r-memberslist' !== $page ) {
+			$this->utils->log( "Not on the Members List page, so nothing to do" );
+			
+			return;
+		}
+		
+		// Are we processing a bulk action?
+		if ( 1 === preg_match( '/bulk-/', $a ) || 1 === preg_match( '/bulk-/', $a2 ) ) {
+			
+			$this->utils->log( "Processing a bulk action" );
+			
+			// Process any plugin/add-on bulk actions first.
+			// In our file that handles the request, verify the nonce.
+			$nonce = esc_attr( $this->utils->get_variable( '_wpnonce', null ) );
+			
+			$this->utils->log( "Nonce is: {$nonce} for action: " . $this->current_action() );
+			
+			if ( ! wp_verify_nonce( $nonce, 'bulk-' . $this->_args['plural'] ) ) {
+				$this->utils->add_message( __( 'Error: Insecure bulk action denied.', 'e20r-members-list' ), 'warning', 'backend' );
+				
+				return;
+			}
+			
+			$level_id = $this->utils->get_variable( 'membership_id', array() );
+			$action   = $this->current_action();
+			$data     = array();
+			
+			$selected_members = $this->utils->get_variable( 'member_id', array() );
+			
+			foreach ( $selected_members as $key => $user_id ) {
+				$user_level = $this->utils->get_variable( "e20r-members-list-membership_id_{$user_id}", 0 );
+				$data[]     = array( 'user_id' => $user_id, 'level_id' => $user_level );
+			}
+			
+			$bulk_actions = array( $a, $a2 );
+			
+			// Prepare plugin specific data for member list bulk action processing
+			$data = apply_filters( 'e20r_memberslist_bulk_action_data_array', $data, $action, $level_id );
+			
+			// Process member list bulk action in add-ons/plugins
+			do_action( 'e20r_memberslist_process_bulk_actions', $nonce, $action, $bulk_actions, $data, $this->_args['plural'] );
+			
+			$this->utils->log( "About to try and trigger one of the default actions" );
+			
+			if ( in_array( 'bulk-cancel', $bulk_actions ) ) {
+				
+				$cancel = Bulk_Cancel::get_instance();
+				$cancel->set_members( $data );
+				$cancel->cancel();
+				
+				return;
+				
+			} else if ( in_array( 'bulk-export', $bulk_actions ) ) {
+				
+				$this->utils->log( "Requested Export of members!" );
+				$this->export_members();
+				
+				// To push the export file to the browser, we have to terminate execution of this process.
+				$this->utils->log( "Returned from export_members(). That's unexpected!" );
+				
+				// We should never get here.
+				return;
+				
+			} else if ( in_array( 'bulk-update', $bulk_actions ) ) {
+				
+				$this->utils->log( "Requested member updates for " . count( $data ) . " records" );
+				
+				$update = Bulk_Update::get_instance();
+				$update->set_members( $data );
+				$update->update();
+				
+				return;
+				
+			}
+		} else {
+			
+			$this->utils->log( "Single action for the Members List..." );
+			
+			$user_id  = $this->utils->get_variable( 'member_id', array() );
+			$level_id = $this->utils->get_variable( 'membership_id', array() );
+			$action   = $this->current_action();
+			
+			switch ( $action ) {
+				
+				case 'cancel':
+					
+					$user_ids = array(
+						array( 'user_id' => $user_id, 'level_id' => $level_id ),
+					);
+					
+					$cancel = Bulk_Cancel::get_instance();
+					$cancel->set_members( $user_ids );
+					
+					if ( false === $cancel->cancel() ) {
+						if ( function_exists( 'pmpro_setMessage' ) ) {
+							pmpro_setMessage( __( "Error cancelling membership", "e20r-members-list" ), 'error' );
+						} else {
+							global $msg;
+							global $msgt;
+							
+							$msg  = __( "Error cancelling membership", "e20r-members-list" );
+							$msgt = 'error';
+						}
+					}
+					
+					break;
+				
+				default:
+					$this->utils->log( "Trigger external process_action for memberslist" );
+					// Process add-on Members list actions
+					do_action( 'e20r_memberslist_process_action', $action, $user_id, $level_id );
+			}
+			
+			// Reload & whatnot
+			// wp_redirect( esc_url( add_query_arg() ) );
+			// exit;
+		}
+	}
+	
+	/**
+	 * Export function bulk export action or for the "Export to CSV" button
+	 *
+	 * @param null|string $action
+	 * @param null|int    $user_id
+	 * @param null|int    $level_id
+	 */
+	public function export_members( $action = null, $user_id = null, $level_id = null ) {
+		
+		$this->utils->log( "Called by: " . $this->utils->_who_called_me() );
+		$search_level = $this->utils->get_variable( 'level', '' );
+		
+		if ( empty( $search_level ) ) {
+			$search_level = 'active';
+		}
+		
+		add_filter( 'e20r_memberslist_sql_where_statement', array( $this, 'export_member_where' ), 20, 4 );
+		add_filter( 'e20r_memberslist_sort_order', array( $this, 'export_sort_order' ), 10, 1 );
+		add_filter( 'e20r_memberslist_order_by', array( $this, 'export_order_by' ), 10, 1 );
+		
+		$members_to_export = $this->get_members( - 1, 1, $search_level );
+		
+		$export = new Export_Members( $members_to_export );
+		$export->get_data_list();
+		$export->save_data_for_export();
+		$export->return_content();
+	}
+	
+	/**
+	 * Load member data for listing
+	 *
+	 * @param int    $per_page
+	 * @param int    $page_number
+	 * @param string $status
+	 *
+	 * @return array|null|object
+	 */
+	public function get_members( $per_page = 15, $page_number = 1, $status = 'all' ) {
+		
+		global $wpdb;
+		
+		$this->generate_member_sql( $per_page, $page_number, $status );
+		
+		// Fetch the data
+		$result = $wpdb->get_results( $this->sqlQuery, ARRAY_A );
+		
+		// Return the result set unless an error occurred.
+		if ( ! empty( $result ) ) {
+			
+			$order    = esc_sql( apply_filters( 'e20r_memberslist_sort_order', $this->utils->get_variable( 'order', 'DESC' ) ) );
+			$order_by = esc_sql( apply_filters( 'e20r_memberslist_order_by', $this->utils->get_variable( 'orderby', 'ml.id' ) ) );
+			
+			if ( !in_array( $order_by, array_keys( $this->sql_col_list ) ) ){
+				$this->utils->log("3rd Party sort of the returned records by {$order_by}/{$order}?");
+				$result = apply_filters('e20r_memberslist_sort_filter', $result, $order_by, $order );
+			}
+			
+			$this->utils->log( " Returning " . count( $result ) . " records" );
+			
+			return $result;
+			
+		} else {
+			
+			$error_msg = $wpdb->print_error();
+			if ( ! empty( $error_msg ) ) {
+				$this->utils->add_message( sprintf( __( "Error processing Members List database query: %s", "e20r-members-list" ), $error_msg ), 'error', 'backend' );
+			}
+			
+			return null;
+		}
+	}
+	
+	/**
+	 * Generate the SQL for the page query
+	 *
+	 * @param  int    $per_page
+	 * @param  int    $page_number
+	 * @param  string $status
+	 */
+	private function generate_member_sql( $per_page, $page_number, $status = 'active' ) {
+		
+		$this->utils->log( "Called by: " . $this->utils->_who_called_me() );
+		
+		// Default sort order and field (membership ID)
+		$order    = esc_sql( apply_filters( 'e20r_memberslist_sort_order', $this->utils->get_variable( 'order', 'DESC' ) ) );
+		$order_by = esc_sql( apply_filters( 'e20r_memberslist_order_by', $this->utils->get_variable( 'orderby', 'ml.id' ) ) );
+		
+		// handle the 'last' column (which is really the enddate field when sorting/ordering)
+		if ( 'last' == $order_by ) {
+			$order_by = 'enddate';
+		}
+		
+		// Start the SELECT statement
+		$sql = "SELECT SQL_CALC_FOUND_ROWS
+		";
+		
+		// The columns to fetch data for
+		$columns = $this->set_sql_columns();
+		
+		// Add to the SQL statement
+		foreach ( $columns as $name => $alias ) {
+			$sql .= "{$name} AS {$alias}, ";
+		}
+		
+		// Clean up trailing comma from column list
+		$sql = rtrim( $sql, ', ' );
+		
+		// Add the tables to search (and configure JOIN operations)
+		$this->set_tables_and_joins();
+		
+		// Error out if something is wrong here.
+		if ( false === $this->table_list ) {
+			wp_die( __( "Error: Invalid list of tables & joins for member list!", "e20r-members-list" ) );
+		}
+		
+		if ( ! empty( $this->table_list['from'] ) ) {
+			
+			$this->from = " FROM {$this->table_list['from']['name']}";
+			$this->from .= ( empty( $this->table_list['from']['alias'] ) ? null : " AS {$this->table_list['from']['alias']}" );
+		} else {
+			
+			wp_die( __( "Error: No FROM table specified for member list!", "e20r-members-list" ) );
+		}
+		
+		foreach ( $this->table_list as $type => $config ) {
+			if ( 'joins' === $type ) {
+				
+				// Avoid duplicate joins
+				if ( ! empty( $this->joins ) ) {
+					$this->joins = '';
+				}
+				
+				foreach ( $config as $k => $join ) {
+					$this->joins .= "\t{$join['join_type']} {$join['name']} AS {$join['alias']} {$join['condition']} \n";
+				}
+			}
+		}
+		
+		$user_search = $this->utils->get_variable( 'find', '' );
+		
+		// Only need users who have (had) memberships
+		if ( ( empty( $status ) || 'active' === $status ) && empty( $user_search ) ) {
+			$this->where = " WHERE (mu.membership_id IS NOT NULL OR mu.membership_id > 0) ";
+			$status      = 'active';
+		} else {
+			$this->where = " WHERE ";
+		}
+		
+		
+		// Is the user searching for something (meta value, username, email, start or end date
+		if ( ! empty ( $user_search ) ) {
+			
+			$is_time = false;
+			
+			$this->utils->log( "Searching for: {$user_search}" );
+			
+			// Check if this is a date value
+			if ( false !== strtotime( $user_search ) ) {
+				
+				$user_search = date( 'Y-m-d', strtotime( $user_search ) );
+				$is_time     = true;
+			}
+			
+			$s          = esc_sql( sanitize_text_field( $user_search ) );
+			$this->find = " ( u.user_login LIKE '%{$s}%' OR u.user_email LIKE '%{$s}%' OR um.meta_value LIKE '%{$s}%' ";
+			
+			// Search for records that have a startdate or enddate
+			if ( true === $is_time && 'desc' === strtolower( $order ) ) {
+				$this->find .= "OR mu.startdate >= '{$s} 00:00:00' OR mu.enddate >= '{$s} 00:00:00' ";
+			}
+			
+			if ( true === $is_time && 'asc' === strtolower( $order ) ) {
+				$this->find .= "OR mu.startdate <= '{$s} 00:00:00' OR mu.enddate <= '{$s} 23:59:59' ";
+			}
+			
+			$this->find .= ") ";
+		}
+		
+		// Are they only looking for a specific membership level.
+		if ( ! empty( $status ) ) {
+			
+			$this->levels = '';
+			
+			if ( ( ' WHERE ' !== $this->where || ! empty( $this->find ) ) && ( ( ! empty( $status ) || 'all' === $status ) || ! empty( $user_search ) ) ) {
+				$this->levels = "AND ";
+			}
+			
+			$cancelled_statuses = apply_filters( 'e20r_memberslist_cancelled_statuses', array(
+				'cancelled',
+				'admin_cancelled',
+				'admin_change',
+				'admin_changed',
+				'changed',
+				'inactive',
+			) );
+			$active_statuses    = apply_filters( 'e20r_memberslist_active_statuses', array( 'active' ) );
+			$expired_statuses   = apply_filters( 'e20r_memberslist_expired_statuses', array( 'expired' ) );
+			
+			$this->utils->log( "Only returning records for membership level {$status}" );
+			
+			switch ( $status ) {
+				
+				case 'oldmembers':
+					$statuses     = implode( "','", array_map( 'sanitize_text_field', $active_statuses ) );
+					$this->levels .= " mu.status NOT IN ('{$statuses}') AND mu2.status IS NULL ";
+					break;
+				
+				case 'expired':
+					$statuses     = implode( "','", array_map( 'sanitize_text_field', $expired_statuses ) );
+					$this->levels .= " mu.status IN ('{$statuses}') AND mu2.status IS NULL ";
+					break;
+				
+				case 'cancelled':
+					$statuses     = implode( "','", array_map( 'sanitize_text_field', $cancelled_statuses ) );
+					$this->levels .= " mu.status IN ('{$statuses}') AND mu2.status IS NULL ";
+					break;
+				
+				case 'all':
+					$any_status = array_merge( $cancelled_statuses, $active_statuses, $expired_statuses );
+					
+					$statuses     = implode( "','", array_map( 'sanitize_text_field', $any_status ) );
+					$this->levels .= " mu.status IN ('{$statuses}') ";
+					break;
+				case 'active':
+					
+					$statuses     = implode( "','", array_map( 'sanitize_text_field', $active_statuses ) );
+					$this->levels .= " mu.status IN ('{$statuses}') ";
+					break;
+				
+				default:
+					$statuses     = implode( "','", array_map( 'sanitize_text_field', $active_statuses ) );
+					$this->levels .= " mu.status IN ('{$statuses}') ";
+					
+					if ( ! empty( $status ) && ! in_array( $status, array( 'active', 'all' ) ) ) {
+						$this->levels .= " AND mu.membership_id = " . esc_sql( $status ) . " ";
+					}
+			}
+		}
+		
+		// Append any search & level info to the WHERE statement
+		if ( ! empty( $this->find ) || ! empty( $this->levels ) ) {
+			
+			if ( ! empty( $this->find ) ) {
+				$this->where .= $this->find;
+			}
+			
+			if ( ! empty( $this->levels ) ) {
+				$this->where .= $this->levels;
+			}
+		}
+		
+		$this->where    = apply_filters( 'e20r_memberslist_sql_where_statement', $this->where, $this->find, $this->levels, $this->joins );
+		$this->group_by = " GROUP BY u.ID ";
+		$this->order_by = apply_filters( 'e20r_memberslist_order_by_statement', " ORDER BY {$order_by} {$order}", $order_by, $order );
+		
+		// $cols     = apply_filters( 'e20r_memberslist_columnlist', $this->all_columns() );
+		$per_page     = apply_filters( 'e20r_memberslist_per_page', $per_page );
+		$this->offset = ( $page_number - 1 ) * $per_page;
+		
+		if ( - 1 != $per_page ) {
+			$this->limit = " LIMIT {$per_page} OFFSET {$this->offset} ";
+		}
+		
+		// Construct the tail end of the SQL statement.
+		self::$sql_from = "
+			{$this->from}
+			{$this->joins}
+			{$this->where}
+			{$this->group_by}
+			{$this->order_by}
+			{$this->limit}
+		";
+		
+		// Define the SQL statement
+		$this->sqlQuery = $sql . self::$sql_from;
+		
+		$this->utils->log( "SQL for fetching membership records:\n {$this->sqlQuery}" );
+	}
+	
+	/**
+	 * Define the list of tables & joins we need to process for the member list query
+	 *
+	 * @return array|mixed
+	 */
+	private function set_tables_and_joins() {
+		
+		global $wpdb;
+		
+		$this->table_list = array(
+			'from'  => array( 'name' => $wpdb->users, 'alias' => 'u' ),
+			'joins' => array(
+				0 => array(
+					'name'      => $wpdb->pmpro_memberships_users,
+					'join_type' => 'LEFT JOIN',
+					'alias'     => 'mu',
+					'condition' => "ON u.ID = mu.user_id AND mu.id = (SELECT mu3.id FROM {$wpdb->pmpro_memberships_users} AS mu3 WHERE mu3.user_id = u.id ORDER BY mu3.id DESC LIMIT 1)",
+				),
+				1 => array(
+					'name'      => $wpdb->pmpro_membership_levels,
+					'join_type' => 'LEFT JOIN',
+					'alias'     => 'ml',
+					'condition' => 'ON mu.membership_id = ml.id',
+				),
+			),
+		);
+		
+		// We're searching so need to add the usermeta table.
+		// if ( null !== $this->utils->get_variable( 'find', null ) ) {
+		$this->table_list['joins'][2] = array(
+			'name'      => $wpdb->usermeta,
+			'join_type' => 'LEFT JOIN ',
+			'alias'     => 'um',
+			'condition' => 'ON u.ID = um.user_id',
+		);
+		//}
+		
+		$search_level = $this->utils->get_variable( 'level', null );
+		
+		// We're looking for a specific membership level
+		if ( in_array( $search_level, array(
+				'oldmembers',
+				'expired',
+				'cancelled',
+				'all',
+			) ) || is_numeric( $search_level ) ) {
+			$this->table_list['joins'][3] = array(
+				'name'      => $wpdb->pmpro_memberships_users,
+				'join_type' => 'LEFT JOIN ',
+				'alias'     => 'mu2',
+				'condition' => "ON u.ID = mu2.user_id AND mu2.status = 'active'",
+			);
+		}
+		
+		$this->table_list = apply_filters( 'e20r_memberslist_tables_and_joins', $this->table_list );
+		
+		// TODO: Need to validate the table/join array (only one 'from' allowed, etc.)
+		if ( true === $this->is_valid_tnj_list( $this->table_list ) ) {
+			return $this->table_list;
+		} else {
+			pmpro_setMessage( __( "Error: Invalid configuration!!!", "e20r-members-list" ), "error" );
+		}
+	}
+	
+	/**
+	 * Test validity of the table & join list.
+	 *
+	 * TODO: Actually test the validity of the tables and jointed tables list
+	 *
+	 * @param array $list The list of tables to search
+	 *
+	 * @return bool     Successfully validated list of tables & joined tables.
+	 */
+	public function is_valid_tnj_list( $list ) {
+		
+		return true;
+	}
+	
+	/**
+	 * Calculate pagination data (number of records found (total) based on the SQL used)
+	 *
+	 * @return int
+	 */
+	public function record_count() {
+		
+		global $wpdb;
+		
+		return $wpdb->get_var( "SELECT FOUND_ROWS() AS found_rows" );
+	}
+	
+	/**
+	 * When exporting the members list, order by user's membership ID and email address (alphabetically)
+	 *
+	 * @param string $order_by
+	 *
+	 * @return string
+	 */
+	public function export_order_by( $order_by ) {
+		return 'mu.membership_id, u.user_email';
+	}
+	
+	/**
+	 * Use A-Z sort order
+	 *
+	 * @param string $sort_order
+	 *
+	 * @return string
+	 */
+	public function export_sort_order( $sort_order ) {
+		
+		return 'ASC';
+	}
+	
+	/**
+	 * Export specific SQL WHERE statement (for sorting)
+	 *
+	 * @param string $where
+	 * @param string $find
+	 * @param string $levels
+	 * @param string $joins
+	 *
+	 * @return string
+	 */
+	public function export_member_where( $where, $find, $levels, $joins ) {
+		
+		$this->utils->log( "Requesting (active/old/etc) member export" );
+		
+		$member_ids  = $this->utils->get_variable( 'member_id', array() );
+		$added_where = null;
+		
+		if ( ! empty( $where ) && ! empty( $member_ids ) ) {
+			$added_where = " AND ( ";
+		} else if ( empty( $where ) & ! empty( $member_ids ) ) {
+			$added_where = " ( ";
+		}
+		
+		$this->utils->log( "Starting appended WHERE statement: {$added_where}" );
+		// Is this a bulk export operation?
+		if ( ! empty( $member_ids ) && is_array( $member_ids ) ) {
+			
+			sort( $member_ids );
+			$this->utils->log( "Processing list of " . count( $member_ids ) . " member IDs." );
+			$in_list     = implode( ', ', $member_ids );
+			$added_where .= " mu.user_id IN ( {$in_list} )";
+			
+		} else if ( ! empty( $member_ids ) ) {
+			$this->utils->log( "Processing single member ID: " . count( $member_ids ) );
+			$added_where .= sprintf( " mu.user_id = %d", esc_sql( $member_ids ) );
+		}
+		
+		if ( ! empty( $where ) && ! empty( $member_ids ) ) {
+			$added_where .= " ) ";
+		}
+		
+		if ( ! empty( $added_where ) ) {
+			$where .= $added_where;
+		}
+		
+		return $where;
+	}
+	
+	/**
+	 * Default list of bulk actions supported
+	 *
+	 * @return array
+	 */
+	public function get_bulk_actions() {
+		
+		$actions = array(
+			'bulk-cancel' => __( 'Cancel', 'e20r-members-list' ),
+			'bulk-update' => __( 'Update', 'e20r-members-list' ),
+			'bulk-export' => __( 'Export', 'e20r-members-list' ),
+		);
+		
+		return apply_filters( 'e20r_memberlist_bulk_actions', $actions );
+	}
+	
+	/**
+	 * Configures the bulk item checkbox.
+	 *
+	 * @param object $item
+	 *
+	 * @return string
+	 */
+	public function column_cb( $item ) {
+		
+		return apply_filters(
+			'e20r_memberslist_bulk_checkbox',
+			sprintf(
+				'<input type="checkbox" name="%1$s[]" value="%2$s" />',
+				"{$this->_args['singular']}_id",
+				$item['user_id']
+			)
+		);
+	}
+	
+	/**
+	 * Configure the username field in table
+	 *
+	 * @param   array $item Database record for the row being processed
+	 *
+	 * @return  string          Content for the cell
+	 */
+	public function column_username( $item ) {
+		
+		$user = new \WP_User( $item['user_id'] );
+		
+		$edit_url = add_query_arg(
+			array(
+				'user_id'         => $item['user_id'],
+				'wp_http_referer' => urlencode( wp_get_referer() ),
+			),
+			get_admin_url( get_current_blog_id(), 'user-edit.php' )
+		);
+		
+		$row_nonce = wp_create_nonce( 'e20r_ml_nonce' );
+		
+		$actions = array(
+			'cancel' => sprintf( '<a href="%1$s" title="%2$s">%3$s</a>',
+				add_query_arg(
+					array(
+						'page_no'       => $this->utils->get_variable( 'page_no', 1 ),
+						'action'        => 'cancel',
+						'user_id'       => $item['user_id'],
+						'membership_id' => $item['membership_id'],
+						'_row_nonce'    => $row_nonce,
+					),
+					get_admin_url( get_current_blog_id(), 'admin.php' )
+				),
+				__( 'Cancel membership', 'e20r-members-list' ),
+				__( 'Cancel', 'e20r-members-list' )
+			),
+			'update' => sprintf( '<a href="%1$s" title="%2$s" class="e20r-update-member">%3$s</a>',
+				add_query_arg(
+					array(
+						'page_no'       => $this->utils->get_variable( 'page_no', 1 ),
+						'action'        => 'update',
+						'user_id'       => $item['user_id'],
+						'membership_id' => $item['membership_id'],
+						'_row_nonce'    => $row_nonce,
+					),
+					get_admin_url( get_current_blog_id(), 'admin.php' )
+				),
+				__( 'Update member info', 'e20r-members-list' ),
+				__( 'Update', 'e20r-members-list' )
+			),
+		);
+		
+		$avatar  = get_avatar( $item['user_id'], 32 );
+		$actions = apply_filters( 'e20r_memberslist_user_row_actions', $actions, $user );
+		
+		$col_content = sprintf(
+			'%1$s
+			<strong>
+			%2$s
+			</strong>
+			<br>
+			%3$s',
+			$avatar,
+			"<a href=\"{$edit_url}\">{$item['username']}</a>",
+			$this->row_actions( $actions )
+		);
+		
+		return $col_content;
+	}
+	
+	/**
+	 * Configure the user's first name field in table
+	 *
+	 * @param   array $item Database record for the row being processed
+	 *
+	 * @return  string          Content for the cell
+	 */
+	public function column_first_name( $item ) {
+		
+		$user = get_userdata( $item['user_id'] );
+		
+		if ( ! empty( $user->first_name ) ) {
+			return $user->first_name;
+		}
+		
+		if ( ! empty( $user->user_firstname ) ) {
+			return $user->user_firstname;
+		}
+		
+		$bfirstname = get_user_meta( $item['user_id'], 'pmpro_bfirstname', true );
+		
+		if ( ! empty( $bfirstname ) ) {
+			return $bfirstname;
+		}
+		
+		return null;
+	}
+	
+	/**
+	 * Configure the user's last name field in table
+	 *
+	 * @param   array $item Database record for the row being processed
+	 *
+	 * @return  string          Content for the cell
+	 */
+	public function column_last_name( $item ) {
+		
+		$user = get_userdata( $item['user_id'] );
+		
+		if ( ! empty( $user->last_name ) ) {
+			return $user->last_name;
+		}
+		
+		if ( ! empty( $user->user_lastname ) ) {
+			return $user->user_lastname;
+		}
+		
+		$blastname = get_user_meta( $user->ID, 'pmpro_blastname', true );
+		
+		if ( ! empty( $blastname ) ) {
+			return $blastname;
+		}
+		
+		return null;
+	}
+	
+	/**
+	 * Configure the user's email/mailto field in table
+	 *
+	 * @param   array $item Database record for the row being processed
+	 *
+	 * @return  string          Content for the cell
+	 */
+	public function column_user_email( $item ) {
+		
+		return sprintf(
+			'<a href="mailto:%s">%s</a>',
+			$item['user_email'],
+			$item['user_email']
+		);
+	}
+	
+	/**
+	 * Configure the billing address info field in table
+	 *
+	 * @param   array $item Database record for the row being processed
+	 *
+	 * @return  string          Content for the cell
+	 */
+	public function column_baddress( $item ) {
+		
+		if ( ! function_exists( 'pmpro_formatAddress' ) ) {
+			return __( "Not found", 'e20r-members-list' );
+		}
+		$user = get_user_by( 'id', $item['user_id'] );
+		
+		$address = pmpro_formatAddress(
+			trim( "{$user->pmpro_bfirstname} {$user->pmpro_blastname}" ),
+			$user->pmpro_baddress1,
+			$user->pmpro_baddress2,
+			$user->pmpro_bcity,
+			$user->pmpro_bstate,
+			$user->pmpro_bzipcode,
+			$user->pmpro_bcountry,
+			$user->pmpro_bphone
+		);
+		
+		if ( empty( $address ) ) {
+			
+			$address = __( "Not found", 'e20r-members-list' );
+			
+			if ( 0 >= intval( $item['initial_payment'] ) && 0 >= intval( $item['recurring_payment'] ) ) {
+				return $address = __( "N/A", 'e20r-members-list' );
+			}
+			
+		}
+		
+		return $address;
+	}
+	
+	/**
+	 * Configure the user's membership level field in table
+	 *
+	 * @param   array $item Database record for the row being processed
+	 *
+	 * @return  string          Content for the cell
+	 */
+	public function column_membership( $item ) {
+		
+		$membership_id = $item['membership_id'];
+		
+		// These are used to configure the membership level with JavaScript
+		$membership_input = sprintf(
+			'
+			<input type="hidden" value="%1$d" class="e20r-members-list-membership-id" name="e20r-members-list-membership_id_%2$s" />
+			<input type="hidden" value="%2$d" class="e20r-members-list-user-id" name="e20r-members-list-membership_id_user_id_%2$s" />
+			<input type="hidden" value="%3$s" class="e20r-members-list-membership_id-label" name="e20r-members-list-membership_label_%2$s" />
+			<input type="hidden" value="%1$d" class="e20r-members-list-db-membership_id" name="e20r-members-list-db_membership_id_%2$s" />
+			<input type="hidden" value="%5$d" class="e20r-members-list-db_record_id" name="e20r-members-list-db_record_id_%2$s" />
+			<input type="hidden" value="%4$s" class="e20r-members-list-field-name" name="e20r-members-list-field_name_%2$s" />',
+			$item['membership_id'],
+			$item['user_id'],
+			$item['membership'],
+			'membership_id',
+			$item['record_id']
+		);
+		
+		$options = '';
+		if ( function_exists( 'pmpro_getAllLevels' ) ) {
+			$levels = pmpro_getAllLevels( true, true );
+		} else {
+			
+			// Default info if PMPro is disabled
+			$null_level           = new \stdClass();
+			$null_level->level_id = 0;
+			$null_level->name     = __( 'No levels found. Paid Memberships Pro is inactive!', 'e20r-members-list' );
+			$levels               = array( $null_level );
+		}
+		
+		foreach ( $levels as $level ) {
+			$options .= sprintf(
+				            '<option value="%1$s" %2$s>%3$s</option>',
+				            $level->id,
+				            selected( $level->id, $item['membership_id'], false ),
+				            $level->name
+			            ) . "\n";
+		}
+		$new_membershiplevel_input = sprintf(
+			'<div class="ml-row-settings clearfix">
+					%1$s
+					<select name="e20r-members-list-new_membership_id_%2$s" class="e20r-members-list-select-membership_id">
+					%3$s
+					</select>
+					<br>
+					<a href="#" class="e20r-members-list-cancel e20r-members-list-link">%4$s</a>
+				</div>',
+			$membership_input,
+			$item['user_id'],
+			$options,
+			__( "Reset", "e20r-members-list" )
+		);
+		
+		$value = sprintf(
+			'<a href="#" class="e20r-members-list_membership_id e20r-members-list-editable" title="%1$s">%2$s<span class="dashicons dashicons-edit"></a>%3$s',
+			__( "Click to editmembership level", "e20rapp" ),
+			$item['membership'],
+			$new_membershiplevel_input
+		);
+		
+		return $value;
+	}
+	
+	/**
+	 * Calculate the user's initial/recurring fee
+	 *
+	 * @param   array $item Database record for the row being processed
+	 *
+	 * @return  string          Content for the cell
+	 */
+	public function column_fee( $item ) {
+		
+		
+		$initial = 0.00;
+		
+		$fee_string = '';
+		
+		if ( $item['initial_payment'] > 0 ) {
+			
+			$fee_string .= sprintf( "%s", pmpro_formatPrice( (float) $item['initial_payment'] ) );
+		}
+		
+		if ( $item['initial_payment'] > 0 && $item['recurring_payment'] > 0 ) {
+			$fee_string .= " + <br />";
+		}
+		
+		if ( $item['recurring_payment'] > 0 ) {
+			if ( $item['billing_period_duration'] > 1 ) {
+				$freq = sprintf( '%1$s %2$ss', $item['billing_period_duration'], $item['billing_period_name'] );
+			} else {
+				$freq = sprintf( '%s', $item['billing_period_name'] );
+			}
+			
+			$fee_string .= sprintf( '%1$s / %2$s', pmpro_formatPrice( $item['recurring_payment'] ), $freq );
+		}
+		
+		if ( empty( $fee_string ) ) {
+			$fee_string = '--';
+		}
+		
+		return $fee_string;
+	}
+	
+	/**
+	 * Display the date for when the user first joined
+	 *
+	 * @param   array $item Database record for the row being processed
+	 *
+	 * @return  string          Content for the cell
+	 */
+	public function column_joindate( $item ) {
+		
+		return sprintf( '%s', date( 'M j, \'y', strtotime( $item['joindate'], current_time( 'timestamp' ) ) ) );
+	}
+	
+	/**
+	 * Display the date when the user started at the current membership level(s).
+	 *
+	 * @param   array $item Database record for the row being processed
+	 *
+	 * @return  string          Content for the cell
+	 */
+	public function column_startdate( $item ) {
+		
+		$start_label = date( 'M j, \'y', strtotime( $item['startdate'], current_time( 'timestamp' ) ) );
+		$date_value  = ! empty( $item['startdate'] ) ? date( 'Y-m-d', strtotime( $item['startdate'], current_time( 'timestamp' ) ) ) : null;
+		
+		$min_val = empty( $item['startdate'] ) ? sprintf( 'min="%s"', date( 'Y-m-d', current_time( 'timestamp' ) ) ) : null;
+		
+		$startdate_input = sprintf(
+			'
+			<input type="hidden" value="%1$s" class="e20r-members-list-membership-id" name="e20r-members-list-startdate_mid_%2$s" />
+			<input type="hidden" value="%3$s" class="e20r-members-list-user-id" name="e20r-members-list-user_id_%2$s" />
+			<input type="hidden" value="%4$s" class="e20r-members-list-startdate-label" name="e20r-members-list-startdatelabel_%2$s" />
+			<input type="hidden" value="%3$s" class="e20r-members-list-db-startdate" name="e20r-members-list-db_startdate_%2$s" />
+			<input type="hidden" value="%5$d" class="e20r-members-list-db_record_id" name="e20r-members-list-db_record_id_%2$s" />
+			<input type="hidden" value="%6$s" class="e20r-members-list-field-name" name="e20r-members-list-field_name_%2$s" />',
+			$item['membership_id'],
+			$item['user_id'],
+			$date_value,
+			$start_label,
+			$item['record_id'],
+			'startdate'
+		);
+		
+		$new_date_input = sprintf(
+			'<div class="ml-row-settings clearfix">
+					%1$s
+					<input type="date" placeholder="YYYY-MM-DD" pattern="(?:19|20)[0-9]{2}-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1[0-9]|2[0-9])|(?:(?!02)(?:0[1-9]|1[0-2])-(?:30))|(?:(?:0[13578]|1[02])-31))" title="Enter a date in this format YYYY-MM-DD" name="e20r-members-list-new_startdate_%2$s" class="e20r-members-list-input-startdate" value="%3$s" %4$s />
+					<br>
+					<a href="#" class="e20r-members-list-cancel e20r-members-list-list-link">%5$s</a>
+				</div>',
+			$startdate_input,
+			$item['user_id'],
+			$date_value,
+			$min_val,
+			__( "Cancel", "e20r-members-list" )
+		);
+		
+		$value = sprintf(
+			'<a href="#" class="e20r-members-list_startdate e20r-members-list-editable" title="%1$s">%2$s<span class="dashicons dashicons-edit"></a>%3$s',
+			__( "Edit to bulk update membership start date", "e20rapp" ),
+			$start_label,
+			$new_date_input
+		);
+		
+		return $value;
+	}
+	
+	/**
+	 * Create the last column for the default Members_List table (Expiration date)
+	 *
+	 * @param $item
+	 *
+	 * @return string
+	 */
+	public function column_last( $item ) {
+		
+		if ( empty( $item['enddate'] ) || '0000-00-00 00:00:00' === $item['enddate'] ) {
+			$enddate = __( "Never", "e20r-members-list" );
+		} else {
+			$enddate = date( 'M j, \'y', strtotime( $item['enddate'], current_time( 'timestamp' ) ) );
+		}
+		
+		$date_value = ! ( empty( $item['enddate'] ) || '0000-00-00 00:00:00' === $item['enddate'] ) ? date( 'Y-m-d', strtotime( $item['enddate'], current_time( 'timestamp' ) ) ) : null;
+		// $min_val    = ( empty( $item['enddate'] ) || '0000-00-00 00:00:00' === $item['enddate'] ) ? sprintf( 'min="%s"', date( 'Y-m-d', current_time( 'timestamp' ) ) ) : null;
+		
+		// These are used to configure the enddate with JavaScript
+		$enddate_input = sprintf(
+			'
+			<input type="hidden" value="%1$s" class="e20r-members-list-membership-id" name="e20r-members-list-enddate_mid_%2$s" />
+			<input type="hidden" value="%2$s" class="e20r-members-list-user-id" name="e20r-members-list-user_id_%2$s" />
+			<input type="hidden" value="%3$s" class="e20r-members-list-enddate-label" name="e20r-members-list-enddatelabel_%2$s" />
+			<input type="hidden" value="%4$s" class="e20r-members-list-db-enddate" name="e20r-members-list-db_enddate_%2$s" />
+			<input type="hidden" value="%5$d" class="e20r-members-list-db_record_id" name="e20r-members-list-db_record_id_%2$s" />
+			<input type="hidden" value="%6$s" class="e20r-members-list-field-name" name="e20r-members-list-field_name_%2$s" />',
+			$item['membership_id'],
+			$item['user_id'],
+			$enddate,
+			$date_value,
+			$item['record_id'],
+			'enddate'
+		);
+		
+		$new_date_input = sprintf(
+			'<div class="ml-row-settings clearfix">
+					%1$s
+					<input type="date" placeholder="YYYY-MM-DD" pattern="(?:19|20)[0-9]{2}-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1[0-9]|2[0-9])|(?:(?!02)(?:0[1-9]|1[0-2])-(?:30))|(?:(?:0[13578]|1[02])-31))" title="Enter a date in this format YYYY-MM-DD" name="e20r-members-list-new_enddate_%2$s" class="e20r-members-list-input-enddate" value="%3$s"/>
+					<br>
+					<a href="#" class="e20r-members-list-cancel e20r-members-list-list-link">%4$s</a>
+				</div>',
+			$enddate_input,
+			$item['user_id'],
+			$date_value,
+			__( "Cancel", "e20r-members-list" )
+		);
+		
+		$value = sprintf(
+			'<a href="#" class="e20r-members-list_enddate e20r-members-list-editable" title="%1$s">%2$s<span class="dashicons dashicons-edit"></a></span>%3$s',
+			__( "Bulk update membership end/expiration date", "e20r-members-list" ),
+			$enddate,
+			$new_date_input
+		
+		);
+		
+		return $value;
+	}
+	
+	/**
+	 * Configure the membership level status field
+	 *
+	 * @param array $item
+	 *
+	 * @return null|string
+	 */
+	public function column_status( $item ) {
+		
+		$value   = null;
+		$options = '';
+		
+		$status_list = apply_filters( ' e20r_memberslist_member_status', $this->get_pmpro_statuses() );
+		
+		$status_text = explode( '_', $item['status'] );
+		if ( is_array( $status_text ) ) {
+			$label_text = implode( ' ', array_map( 'ucfirst', $status_text ) );
+		} else {
+			$label_text = ucfirst( $status_text );
+		}
+		
+		$status_input = sprintf(
+			'
+			<input type="hidden" value="%1$s" class="e20r-members-list-status" name="e20r-members-list_status_mid_%2$s" />
+			<input type="hidden" value="%2$s" class="e20r-members-list-user-id" name="e20r-members-list-user_id_%2$s" />
+			<input type="hidden" value="%6$s" class="e20r-members-list-status-label" name="e20r-members-list-status_label_%2$s" />
+			<input type="hidden" value="%3$s" class="e20r-members-list-db-status" name="e20r-members-list-db_status_%2$s" />
+			<input type="hidden" value="%5$d" class="e20r-members-list-db_record_id" name="e20r-members-list-db_record_id_%2$s" />
+			<input type="hidden" value="%4$s" class="e20r-members-list-field-name" name="e20r-members-list-field_name_%2$s" />',
+			$item['membership_id'],
+			$item['user_id'],
+			$item['status'],
+			'status',
+			$item['record_id'],
+			$label_text
+		);
+		
+		foreach ( $status_list as $status ) {
+			
+			$status_text = explode( '_', $status );
+			
+			if ( is_array( $status_text ) ) {
+				$text = implode( ' ', array_map( 'ucfirst', $status_text ) );
+			} else {
+				$text = ucfirst( $status_text );
+			}
+			
+			$options .= sprintf(
+				'\t<option value="%1$s" %2$s>%3$s</option>\n',
+				$status,
+				selected( $status, $item['status'], false ),
+				$text
+			);
+		}
+		$new_status_input = sprintf(
+			'<div class="ml-row-settings clearfix">
+					%1$s
+					<select name="e20r-members-list-new_status_%2$s" class="e20r-members-list-select-status">
+					%3$s
+					</select>
+					<br>
+					<a href="#" class="e20r-members-list-cancel e20r-members-list-link">%4$s</a>
+				</div>',
+			$status_input,
+			$item['user_id'],
+			$options,
+			__( "Reset", "e20r-members-list" )
+		);
+		
+		$value = sprintf(
+			'<a href="#" class="e20r-members-list_status e20r-members-list-editable" title="%1$s">%2$s<span class="dashicons dashicons-edit"></a></span>%3$s',
+			__( "Update the member's membership status", "e20r-members-list" ),
+			$label_text,
+			$new_status_input
+		
+		);
+		
+		return $value;
+	}
+	
+	/**
+	 * Fetch and return all recorded status types from the DB
+	 *
+	 * @return array
+	 */
+	private function get_pmpro_statuses() {
+		global $wpdb;
+		global $e20r_pmpro_statuses;
+		
+		if ( empty( $e20r_pmpro_statuses ) ) {
+			$e20r_pmpro_statuses = $wpdb->get_col( "SELECT DISTINCT mu.status FROM {$wpdb->pmpro_memberships_users} AS mu" );
+		}
+		
+		if ( empty( $e20r_pmpro_statuses ) ) {
+			$e20r_pmpro_statuses = array();
+		}
+		
+		return $e20r_pmpro_statuses;
+	}
+	
+	/**
+	 * Handle any columns that don't have explicit handlers in this class
+	 *
+	 * @param object $item -   Database record for the row
+	 * @param string $name -   Field/column name
+	 *
+	 * @return mixed
+	 */
+	public function column_default( $item, $name ) {
+		
+		// To avoid warnings/notices
+		$value = isset( $item[ $name ] ) ? $item[ $name ] : null;
+		
+		/**
+		 * If it's not one of the Members_List default columns, apply a filter so other
+		 * plugins can load their own column info.
+		 */
+		if ( ! in_array( $name, $this->default_columns ) ) {
+			
+			// Apply a filter for this column in the memberslist.
+			$value = apply_filters( 'e20r_memberslist_custom_column', $value, $item, $name );
+		}
+		
+		// Default
+		return $value;
+	}
+	
+	/**
+	 * Configure columns to use for Member Listing
+	 *
+	 * @return array
+	 */
+	public function get_columns() {
+		
+		return $this->all_columns();
+	}
+	
+	/**
+	 * Default text when no records are found/returned
+	 */
+	public function no_items() {
+		_e( "No members found", 'e20r-members-list' );
+	}
+}
