@@ -59,23 +59,6 @@ class E20R_Members_List {
 	}
 	
 	/**
-	 * Initialize the Enhanced Members List functionality
-	 */
-	public function load_hooks( ) {
-		add_action( 'init', array( Members_List_Page::get_instance(), 'load_hooks' ), - 1 );
-	}
-	
-	/**
-	 * Connect to the license server using TLS 1.2
-	 *
-	 * @param $handle - File handle for the pipe to the CURL process
-	 */
-	public function forceTLS12( $handle ) {
-		// set the CURL option to use.
-		curl_setopt( $handle, CURLOPT_SSLVERSION, 6 );
-	}
-	
-	/**
 	 * Class auto-loader for the Enhanced Members List plugin
 	 *
 	 * @param string $class_name Name of the class to auto-load
@@ -130,8 +113,39 @@ class E20R_Members_List {
 			}
 		}
 	}
+	
+	/**
+	 * Initialize the Enhanced Members List functionality
+	 */
+	public function load_hooks() {
+		add_action( 'http_api_curl', array( $this, 'forceTLS12' ) );
+		add_action( 'init', array( Members_List_Page::get_instance(), 'load_hooks' ), - 1 );
+	}
+	
+	/**
+	 * Connect to the license server using TLS 1.2
+	 *
+	 * @param $handle - File handle for the pipe to the CURL process
+	 */
+	public function forceTLS12( $handle ) {
+		// set the CURL option to use.
+		curl_setopt( $handle, CURLOPT_SSLVERSION, 6 );
+	}
 }
 
 spl_autoload_register( 'E20R\Members_List\Controller\E20R_Members_List::autoLoader' );
 
 add_action( 'plugins_loaded', array( E20R_Members_List::get_instance(), 'load_hooks' ) );
+
+/**
+ * One-click update handler & checker
+ */
+if ( ! class_exists( '\Puc_v4_Factory' ) ) {
+	require_once( plugin_dir_path( __FILE__ ) . 'plugin-updates/plugin-update-checker.php' );
+}
+
+$eml_updates = \Puc_v4_Factory::buildUpdateChecker(
+	'https://eighty20results.com/protected-content/e20r-members-list/metadata.json',
+	__FILE__,
+	'e20r-members-list'
+);
