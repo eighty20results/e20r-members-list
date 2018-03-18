@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @version 2.1
+ * @version 2.2
  *
  */
 
@@ -371,7 +371,7 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 				$settings = self::get_settings( $product );
 			}
 			
-			if ( empty( $settings['key'] ) ) {
+			if ( empty( $settings['key'] )  ) {
 				if ( E20R_LICENSING_DEBUG ) {
 					$utils->log( "{$product} has no key stored. Returning false" );
 				}
@@ -441,8 +441,8 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 							$settings['fulltext_name'] = $product_name;
 							$settings['expires']       = isset( $decoded->date_expiry ) ? strtotime( $decoded->date_expiry, current_time( 'timestamp' ) ) : null;
 							$settings['status']        = $decoded->status;
-							$settings['first_name']    = $current_user->first_name;
-							$settings['last_name']     = $current_user->last_name;
+							$settings['first_name']    = isset( $current_user->first_name ) ? $current_user->first_name : null;
+							$settings['last_name']     = isset( $current_user->last_name ) ? $current_user->last_name : null;
 							$settings['email']         = $decoded->email;
 							$settings['timestamp']     = current_time( 'timestamp' );
 							
