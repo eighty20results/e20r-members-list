@@ -1229,8 +1229,15 @@ class Members_List extends \WP_List_Table {
 	 */
 	public function column_startdate( $item ) {
 		
-		$start_label = date( 'M j, \'y', strtotime( $item['startdate'], current_time( 'timestamp' ) ) );
-		$date_value  = ! empty( $item['startdate'] ) ? date( 'Y-m-d', strtotime( $item['startdate'], current_time( 'timestamp' ) ) ) : null;
+		if ( '0000-00-00 00:00:00' == $item['startdate'] || empty( $item['startdate'] ) ) {
+			$date_value = null;
+			$start_label =  __( 'Invalid', 'e20r-members-list' );
+		} else {
+			$date_value  = ! empty( $item['startdate'] ) ? date( 'Y-m-d', strtotime( $item['startdate'], current_time( 'timestamp' ) ) ) : null;
+			$start_label = date( 'M j, \'y', strtotime( $item['startdate'], current_time( 'timestamp' ) ) );
+		}
+		
+		
 		
 		$min_val = empty( $item['startdate'] ) ? sprintf( 'min="%s"', date( 'Y-m-d', current_time( 'timestamp' ) ) ) : null;
 		
