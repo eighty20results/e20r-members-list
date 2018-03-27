@@ -27,6 +27,7 @@
             this.edit_lnk = $('a.e20r-members-list-editable');
             // this.enddate_lnk = $('a.e20r-members-list_enddate');
             this.resetBtn = $('a.e20r-members-list-cancel');
+            this.cancelMemberLnk = $('a.e20r-cancel-member');
             this.updateBtn = $('a.e20r-members-list-save');
             this.updateMemberLnk = $('a.e20r-update-member');
             this.exportBtn = $('a.e20r-memberslist-export');
@@ -63,6 +64,13 @@
                 self.set_update( this );
             });
             */
+
+            self.updateMemberLnk.unbind('click').on('click', function(ev){
+
+                ev.preventDefault();
+
+            });
+
             self.changed_select.unbind('change').on('change', function() {
 
                 var current_select = $(this);
@@ -247,13 +255,18 @@
                 self.submit_export(this, export_args);
             });
 
+            /*
             self.updateBtn.unbind('click').on('click', function (ev) {
 
                 ev.preventDefault();
+                var $link = $(this).attr('href');
+                var url = document.createElement('a');
 
+                url.href = $link;
 
+                window.console.log("requesting cancellation for");
             });
-
+            */
         },
         set_update: function( $element ) {
             var self = this;
