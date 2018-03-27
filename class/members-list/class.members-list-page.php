@@ -162,7 +162,7 @@ class Members_List_Page {
 		if ( false == ( $page = remove_submenu_page( 'pmpro-membershiplevels', 'pmpro-memberslist' ) ) ) {
 			
 			$this->utils->log( "Unable to remove the default membership levels page!" );
-			pmpro_setMessage( __( 'Error: Attempting to reassign member list menu', 'pmpro' ), 'error' );
+			pmpro_setMessage( __( 'Error while attempting to reassign member list menu', 'pmpro' ), 'error' );
 		}
 		
 		// Load the (new) WP_Table_List based Members List
