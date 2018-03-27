@@ -938,7 +938,8 @@ class Members_List extends \WP_List_Table {
 		$row_nonce = wp_create_nonce( 'e20r_ml_nonce' );
 		
 		$actions = array(
-			'cancel' => sprintf( '<a href="%1$s" title="%2$s">%3$s</a>',
+			/*
+			'cancel' => sprintf( '<a href="%1$s" title="%2$s" class="e20r-cancel-member">%3$s</a>',
 				add_query_arg(
 					array(
 						'page_no'       => $this->utils->get_variable( 'page_no', 1 ),
@@ -951,7 +952,7 @@ class Members_List extends \WP_List_Table {
 				),
 				__( 'Cancel membership', 'e20r-members-list' ),
 				__( 'Cancel', 'e20r-members-list' )
-			),
+			), */
 			'update' => sprintf( '<a href="%1$s" title="%2$s" class="e20r-update-member">%3$s</a>',
 				add_query_arg(
 					array(
