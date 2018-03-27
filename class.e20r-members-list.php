@@ -3,7 +3,7 @@
 Plugin Name: Enhanced Members List for Paid Memberships Pro
 Plugin URI: https://eighty20results.com/paid-memberships-pro/do-it-for-me/
 Description: Extensible, sortable & bulk action capable members listing tool for Paid Memberships Pro
-Version: 2.0
+Version: 2.2
 Author: Eighty / 20 Results by Wicked Strong Chicks, LLC <thomas@eighty20results.com>
 Author URI: https://eighty20results.com/thomas-sjolshagen/
 Text Domain: e20r-members-list
