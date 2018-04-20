@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (c) 2016-2017 - Eighty / 20 Results by Wicked Strong Chicks.
+ * Copyright (c) 2016-2018 - Eighty / 20 Results by Wicked Strong Chicks.
  * ALL RIGHTS RESERVED
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @version 1.2
+ * @version 2.0
  */
 
 namespace E20R\Utilities;
@@ -39,7 +39,7 @@ if ( ! class_exists( 'E20R\Utilities\Utilities' ) ) {
 		/**
 		 * @var null|string
 		 */
-		private static $plugin_slug = null;
+		public static $plugin_slug = null;
 		
 		/**
 		 * @var null|Utilities
