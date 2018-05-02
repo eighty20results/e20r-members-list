@@ -57,6 +57,12 @@
             });
 
             self.updateListBtn.unbind('click').on('click', function(ev) {
+
+                if ( 'Clear Search' === self.updateListBtn.val() ) {
+                    window.console.log(e20rml.url);
+                    location.href = e20rml.url;
+                }
+
                 $('#post-search-input').val(null);
             });
             /*
@@ -64,6 +70,7 @@
                 self.set_update( this );
             });
             */
+
 
             self.updateMemberLnk.unbind('click').on('click', function(ev){
 
