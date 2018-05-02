@@ -19,7 +19,7 @@
 
 namespace E20R\Members_List\Admin;
 
-define( 'E20R_MEMBERSLIST_VER', '2.7' );
+define( 'E20R_MEMBERSLIST_VER', '2.4' );
 
 use E20R\Utilities\Utilities;
 
