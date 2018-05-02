@@ -46,22 +46,29 @@ if ( ! class_exists( 'E20R\Members_List\Support\Sort_By_Meta' ) ) {
 		 *
 		 * @throws \Exception
 		 */
-		public function sort( $a, $b ) {
+		public function sort_records( $a, $b ) {
 			
 			// $utils = Utilities::get_instance();
-			//$utils->log( "A: " . print_r( $a, true));
+			// $utils->log( "A: " . print_r( $a, true));
 			// $utils->log("B: " . print_r( $b, true));
+			
+			$a_user_id = is_array( $a ) ? $a['user_id'] : ( is_a( $a, '\WP_User' ) ? $a->ID : null );
+			$b_user_id = is_array( $b ) ? $b['user_id'] : ( is_a( $b, '\WP_User' ) ? $b->ID : null );
+			
+			if ( is_null($a_user_id ) || is_null( $b_user_id ) ) {
+				return false;
+			}
 			
 			// Check if the field specified exists in the data
 			if ( ! isset( $a[ $this->meta_key ] ) ) {
-				$a_value = get_user_meta( $a['user_id'], $this->meta_key, true );
+				$a_value = get_user_meta( $a_user_id, $this->meta_key, true );
 				
 			} else {
 				$a_value = $b[ $this->meta_key ];
 			}
 			
 			if ( ! isset( $b[ $this->meta_key ] ) ) {
-				$b_value = get_user_meta( $b['user_id'], $this->meta_key, true );
+				$b_value = get_user_meta( $b_user_id, $this->meta_key, true );
 			} else {
 				$b_value = $b[ $this->meta_key ];
 			}
