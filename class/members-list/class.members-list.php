@@ -55,6 +55,11 @@ class Members_List extends \WP_List_Table {
 	private $hidden_columns = array();
 	
 	/**
+	 * @var null|int The total number of records found after SQL
+	 */
+	private $total_members_found = null;
+	
+	/**
 	 * @var string $sqlQuery The completed SQL query used to generate the membership list
 	 */
 	private $sqlQuery = '';
@@ -218,7 +223,8 @@ class Members_List extends \WP_List_Table {
 		$this->items = $this->get_members( $per_page, $current_page, $level );
 		$total_items = $this->record_count();
 		
-		$this->utils->log( "Configure pagination" );
+		$this->utils->log( "Configure pagination for {$total_items} records and " . count($this->items ) . " counted records"  );
+		
 		// Configure pagination
 		$this->set_pagination_args(
 			array(
@@ -487,6 +493,7 @@ class Members_List extends \WP_List_Table {
 		// Fetch the data
 		$result = $wpdb->get_results( $this->sqlQuery, ARRAY_A );
 		
+		$this->total_members_found = $wpdb->get_var("SELECT FOUND_ROWS() AS found_rows" );
 		// Return the result set unless an error occurred.
 		if ( ! empty( $result ) ) {
 			
@@ -494,8 +501,8 @@ class Members_List extends \WP_List_Table {
 			$order_by = esc_sql( apply_filters( 'e20r_memberslist_order_by', $this->utils->get_variable( 'orderby', 'ml.id' ) ) );
 			
 			if ( !in_array( $order_by, array_keys( $this->sql_col_list ) ) ){
-				$this->utils->log("3rd Party sort of the returned records by {$order_by}/{$order}?");
-				$result = apply_filters('e20r_memberslist_sort_filter', $result, $order_by, $order );
+				$this->utils->log("3rd Party sort of the returned records by {$order_by}/{$order} and " . count( $result ) . " records");
+				$result = apply_filters('e20r_memberslist_sort_filter', $result, $order_by, $order, $page_number, $per_page );
 			}
 			
 			$this->utils->log( " Returning " . count( $result ) . " records" );
@@ -598,7 +605,7 @@ class Members_List extends \WP_List_Table {
 			$this->utils->log( "Searching for: {$user_search}" );
 			
 			// Check if this is a date value
-			if ( false !== strtotime( $user_search ) ) {
+			if ( !is_numeric($user_search) && false !== strtotime( $user_search ) ) {
 				
 				$user_search = date( 'Y-m-d', strtotime( $user_search ) );
 				$is_time     = true;
@@ -805,8 +812,11 @@ class Members_List extends \WP_List_Table {
 	 */
 	public function record_count() {
 		
-		global $wpdb;
+		if ( !is_null( $this->total_members_found ) ) {
+			return $this->total_members_found;
+		}
 		
+		global $wpdb;
 		return $wpdb->get_var( "SELECT FOUND_ROWS() AS found_rows" );
 	}
 	
@@ -876,6 +886,30 @@ class Members_List extends \WP_List_Table {
 		
 		if ( ! empty( $added_where ) ) {
 			$where .= $added_where;
+		}
+		
+		return $where;
+	}
+	
+	public function metadata_where( $where, $find, $levels, $joins ) {
+		
+		$this->utils->log("Adding search based on search form");
+		
+		$search = $this->utils->get_variable('find', '');
+		$added_where = null;
+		
+		if ( ! empty( $where ) && ! empty( $search ) ) {
+			$added_where = " AND ( ";
+		} else if ( empty( $where ) & ! empty( $search ) ) {
+			$added_where = " ( ";
+		}
+		
+		if ( !empty( $search ) ) {
+			$added_where .= "";
+		}
+		
+		if ( ! empty( $where ) && ! empty( $search ) ) {
+			$added_where .= " ) ";
 		}
 		
 		return $where;
