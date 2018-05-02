@@ -19,7 +19,7 @@
 
 namespace E20R\Members_List\Admin;
 
-define( 'E20R_MEMBERSLIST_VER', '2.0' );
+define( 'E20R_MEMBERSLIST_VER', '2.7' );
 
 use E20R\Utilities\Utilities;
 
@@ -301,7 +301,17 @@ class Members_List_Page {
             <form method="post" id="posts-filter">
                 <div class="e20r-search-arguments">
                     <p class="search-box float-left">
-                        <input id="e20r-update-list" class="button" type="submit" value="<?php _e( 'Update List', 'pmpro' ); ?>"/>
+                        <?php
+                        $label = __('Update List', "e20r-members-list" );
+                        $button_def = 'button';
+                        
+                        if ( isset( $_REQUEST['find'] ) && !empty( $_REQUEST['find'] ) ) {
+                            
+                            $label = __('Clear Search', "e20r-members-list" );
+                            $button_def .= " button-primary";
+                        }?>
+                        
+                        <input id="e20r-update-list" class="<?php esc_attr_e( $button_def ); ?>" type="submit" value="<?php echo $label; ?>"/>
                     </p>
                     <ul class="subsubsub">
                         <li>
