@@ -123,9 +123,9 @@ class Members_List extends \WP_List_Table {
 		);
 		
 		if ( 'oldmembers' == $level ) {
-			$this->default_columns['last'] = _x( "Expired", "e20r-members-list" );
+			$this->default_columns['last'] = apply_filters( 'e20r-members-list-enddate-col-name', _x( "Expired", "e20r-members-list" ), $level );
 		} else {
-			$this->default_columns['last'] = _x( "Expires", "e20r-members-list" );
+			$this->default_columns['last'] = apply_filters( 'e20r-members-list-enddate-col-name', _x( "Expires", "e20r-members-list"  ), $level );
 		}
 		
 		if ( 'e20rml_export_records' === $this->utils->get_variable( 'action', null ) ) {
@@ -1331,8 +1331,11 @@ class Members_List extends \WP_List_Table {
 			$enddate = date( 'M j, \'y', strtotime( $item['enddate'], current_time( 'timestamp' ) ) );
 		}
 		
+		$enddate = apply_filters( 'e20r-members-list-enddate-col-result', $enddate, $item );
+		
 		$date_value = ! ( empty( $item['enddate'] ) || '0000-00-00 00:00:00' === $item['enddate'] ) ? date( 'Y-m-d', strtotime( $item['enddate'], current_time( 'timestamp' ) ) ) : null;
 		// $min_val    = ( empty( $item['enddate'] ) || '0000-00-00 00:00:00' === $item['enddate'] ) ? sprintf( 'min="%s"', date( 'Y-m-d', current_time( 'timestamp' ) ) ) : null;
+		
 		
 		// These are used to configure the enddate with JavaScript
 		$enddate_input = sprintf(
