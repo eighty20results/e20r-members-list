@@ -140,7 +140,7 @@ if ( ! class_exists( 'E20R\Utilities\Licensing\Licensing' ) ) {
 			
 			if ( empty( $settings['expires'] ) ) {
 				
-				$utils->log("NOTICE: No expiration date set for the {$product} product license!");
+				$utils->log("NOTICE: The {$product} license does not expire");
 				return false;
 			}
 			
