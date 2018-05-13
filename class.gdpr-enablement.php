@@ -56,7 +56,7 @@ class GDPR_Enablement {
 	 */
 	public function e20r_data_privacy_policy() {
 		
-		if ( false === function_exists( 'wp_add_privacy_policy_content' ) ) {
+		if ( false === $this->wp_has_gdpr_support() ) {
 			return false;
 		}
 		
@@ -200,13 +200,10 @@ class GDPR_Enablement {
 	 */
 	public function load_hooks() {
 		
-		if ( true === $this->wp_has_gdpr_support() ) {
-			
-			add_action( 'admin_init', array( $this, 'e20r_data_privacy_policy' ), 10 );
-			
-			add_filter( 'wp_privacy_personal_data_exporters', array( $this, 'personal_data_exporters' ), 10, 1 );
-			add_filter( 'wp_privacy_personal_data_erasers', array( 'personal_data_erasers' ), 10, 1 );
-		}
+		add_action( 'admin_init', array( $this, 'e20r_data_privacy_policy' ), 10 );
+		
+		add_filter( 'wp_privacy_personal_data_exporters', array( $this, 'personal_data_exporters' ), 10, 1 );
+		add_filter( 'wp_privacy_personal_data_erasers', array( $this, 'personal_data_erasers' ), 10, 1 );
 	}
 	
 	/**
@@ -216,8 +213,11 @@ class GDPR_Enablement {
 	 */
 	private function wp_has_gdpr_support() {
 		
-		return function_exists( 'wp_add_privacy_policy_content' ) &&
-		       has_filter( 'wp_privacy_personal_data_exporters' ) &&
-		       has_filter( 'wp_privacy_personal_data_erasers' );
+		$utils = Utilities::get_instance();
+		
+		$has_gdpr = function_exists( 'wp_add_privacy_policy_content' );
+		
+		$utils->log("Site has Data Privacy functionality: " . ( $has_gdpr ? 'Yes' : 'No'));
+		return $has_gdpr;
 	}
 }
