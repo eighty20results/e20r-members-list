@@ -23,7 +23,7 @@ namespace E20R\Utilities;
 
 // Disallow direct access to the class definition
 
-if ( ! defined( 'ABSPATH' ) && function_exists( 'wp_die' )) {
+if ( ! defined( 'ABSPATH' ) && function_exists( 'wp_die' ) ) {
 	wp_die( "Cannot access file directly" );
 }
 
@@ -104,6 +104,54 @@ if ( ! class_exists( 'E20R\Utilities\Utilities' ) ) {
 		}
 		
 		/**
+		 * (Attempte to) Fetch and sanitize the IP address of the connecting client
+		 *
+		 * @return string|null
+		 */
+		public function get_client_ip() {
+			
+			$ip = null;
+			
+			if ( isset( $_SERVER['REMOTE_ADDR'] ) ) {
+				return $_SERVER['REMOTE_ADDR'];
+			}
+			
+			$ip_keys = array(
+				'HTTP_CLIENT_IP',
+				'HTTP_X_FORWARDED_FOR',
+				'HTTP_X_FORWARDED',
+				'HTTP_X_CLUSTER_CLIENT_IP',
+				'HTTP_FORWARDED_FOR',
+				'HTTP_FORWARDED',
+				'REMOTE_ADDR',
+			);
+			
+			foreach ( $ip_keys as $key ) {
+				
+				if ( array_key_exists( $key, $_SERVER ) === true ) {
+					
+					foreach ( explode( ',', $_SERVER[ $key ] ) as $ip ) {
+						
+						// trim for safety measures
+						$ip = trim( $ip );
+						
+						// attempt to validate IP
+						if ( filter_var( $ip,
+                                FILTER_VALIDATE_IP,
+                                FILTER_FLAG_IPV4 | FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE
+                             ) !== false ) {
+							
+							return $ip;
+						}
+					}
+				}
+			}
+			
+			
+			return $ip;
+		}
+		
+		/**
 		 * Are we viewing the admin screen (WP Backend)
 		 *
 		 * @return bool
@@ -113,7 +161,7 @@ if ( ! class_exists( 'E20R\Utilities\Utilities' ) ) {
 			$is_admin = false;
 			
 			if ( isset( $GLOBALS['current_screen'] ) ) {
-				$is_admin =  $GLOBALS['current_screen']->in_admin();
+				$is_admin = $GLOBALS['current_screen']->in_admin();
 			} else if ( defined( 'WP_ADMIN' ) ) {
 				$is_admin = WP_ADMIN;
 			}
@@ -233,7 +281,7 @@ if ( ! class_exists( 'E20R\Utilities\Utilities' ) ) {
 			
 			// Grab from the cache (if it exists)
 			if ( null !== ( $tmp = Cache::get( 'err_info', self::$cache_key ) ) ) {
-				$this->log("Loading cached messages (" . count( $tmp['msg'] ) . ")");
+				$this->log( "Loading cached messages (" . count( $tmp['msg'] ) . ")" );
 				$this->msg        = $tmp['msg'];
 				$this->msgt       = $tmp['msgt'];
 				$this->msg_source = $tmp['msg_source'];
@@ -242,11 +290,11 @@ if ( ! class_exists( 'E20R\Utilities\Utilities' ) ) {
 			$msg_found = array();
 			
 			// Look for duplicate messages
-			foreach( $this->msg as $key => $msg ) {
-			    
-			    if ( !empty($message) && !empty($msg) && false !== strpos( $message, $msg ) ) {
-			        $msg_found[] = $key;
-			    }
+			foreach ( $this->msg as $key => $msg ) {
+				
+				if ( ! empty( $message ) && ! empty( $msg ) && false !== strpos( $message, $msg ) ) {
+					$msg_found[] = $key;
+				}
 			}
 			
 			// No duplicates found, so add the new one
@@ -254,22 +302,22 @@ if ( ! class_exists( 'E20R\Utilities\Utilities' ) ) {
 				// Save new message
 				$this->log( "Adding a message to the admin errors: {$message}" );
 				
-				$this->msg[] = $message;
-				$this->msgt[] = $type;
+				$this->msg[]        = $message;
+				$this->msgt[]       = $type;
 				$this->msg_source[] = $msg_source;
 			} else {
 				
 				// Potentially clean up duplicate messages
-				$total = count($msg_found);
+				$total = count( $msg_found );
 				
 				// Remove extra instances of the message
-				for( $i = 1 ; ( $total - 1 ) >= $i ; $i++ ) {
-					$this->log("Removing duplicate message");
+				for ( $i = 1; ( $total - 1 ) >= $i; $i ++ ) {
+					$this->log( "Removing duplicate message" );
 					unset( $this->msg[ $i ] );
 				}
 			}
 			
-			if ( !empty ($this->msg) ) {
+			if ( ! empty ( $this->msg ) ) {
 				$values = array(
 					'msg'        => $this->msg,
 					'msgt'       => $this->msgt,
@@ -287,10 +335,10 @@ if ( ! class_exists( 'E20R\Utilities\Utilities' ) ) {
 		 */
 		public function display_messages( $source = 'default' ) {
 			
-		    // Load from cache if there are no messages found
-			if ( empty( $this->msg )) {
+			// Load from cache if there are no messages found
+			if ( empty( $this->msg ) ) {
 				
-			    $msgs = Cache::get( 'err_info', self::$cache_key );
+				$msgs = Cache::get( 'err_info', self::$cache_key );
 				
 				$this->msg        = $msgs['msg'];
 				$this->msgt       = $msgs['msgt'];
@@ -298,16 +346,16 @@ if ( ! class_exists( 'E20R\Utilities\Utilities' ) ) {
 			}
 			
 			if ( ! empty( $this->msg ) && ! empty( $this->msgt ) ) {
-                
-                		$this->log( "Have " . count( $this->msg ) . " admin message(s) to display" );
 				
-				foreach ( $this->msg as $key => $notice ) { 
-					if ( !empty( $notice ) ) { ?>
-                    			<div class="notice notice-<?php esc_html_e( $this->msgt[ $key ] ); ?> is-dismissible <?php esc_html_e( $this->msg_source[ $key ] ); ?>">
-			                        <p><?php echo $notice; ?></p>
-			                    </div>
-					<?php
-				       }
+				$this->log( "Have " . count( $this->msg ) . " admin message(s) to display" );
+				
+				foreach ( $this->msg as $key => $notice ) {
+					if ( ! empty( $notice ) ) { ?>
+                        <div class="notice notice-<?php esc_html_e( $this->msgt[ $key ] ); ?> is-dismissible <?php esc_html_e( $this->msg_source[ $key ] ); ?>">
+                            <p><?php echo $notice; ?></p>
+                        </div>
+						<?php
+					}
 				}
 			}
 			
@@ -512,7 +560,7 @@ if ( ! class_exists( 'E20R\Utilities\Utilities' ) ) {
 		public function is_in_trial( $user_id, $level_id ) {
 			
 			global $wpdb;
-			$this->log("Processing trial test for {$user_id} and {$level_id}");
+			$this->log( "Processing trial test for {$user_id} and {$level_id}" );
 			
 			// Get the most recent (active) membership level record for the specified user/membership level ID
 			$sql = $wpdb->prepare(
@@ -528,11 +576,12 @@ if ( ! class_exists( 'E20R\Utilities\Utilities' ) ) {
 			
 			$start_ts = intval( $wpdb->get_var( $sql ) );
 			
-			$this->log("Found start Timestamp: {$start_ts}");
+			$this->log( "Found start Timestamp: {$start_ts}" );
 			
 			// No record found for specified user, so can't be in a trial...
 			if ( empty( $start_ts ) ) {
-				$this->log("No start time found for {$user_id}, {$level_id}: {$wpdb->last_error}");
+				$this->log( "No start time found for {$user_id}, {$level_id}: {$wpdb->last_error}" );
+				
 				return false;
 			}
 			
@@ -567,7 +616,7 @@ if ( ! class_exists( 'E20R\Utilities\Utilities' ) ) {
 						
 						return $trial_ends_ts;
 					} else {
-						$this->log("There was a problem converting the trial period info into a timestamp!" );
+						$this->log( "There was a problem converting the trial period info into a timestamp!" );
 					}
 				} else {
 					$this->log( "No Trial period defined for user..." );
@@ -584,13 +633,13 @@ if ( ! class_exists( 'E20R\Utilities\Utilities' ) ) {
 		 * Return the correct Stripe amount formatting (based on currency setting)
 		 *
 		 * @param float|int $amount
-		 * @param string $currency
+		 * @param string    $currency
 		 *
 		 * @return float|string
 		 */
 		public function amount_by_currency( $amount, $currency ) {
 			
-			$def_currency = apply_filters('e20r_utilities_default_currency', 'USD' );
+			$def_currency = apply_filters( 'e20r_utilities_default_currency', 'USD' );
 			
 			if ( $def_currency !== $currency ) {
 				$def_currency = strtoupper( $currency );
@@ -604,11 +653,11 @@ if ( ! class_exists( 'E20R\Utilities\Utilities' ) ) {
 			}
 			
 			
-			$divisor = intval( str_pad( '1', ( 1 + $decimals ),'0', STR_PAD_RIGHT ) );
-			$this->log("Divisor for calculation: {$divisor}");
+			$divisor = intval( str_pad( '1', ( 1 + $decimals ), '0', STR_PAD_RIGHT ) );
+			$this->log( "Divisor for calculation: {$divisor}" );
 			
 			$amount = number_format_i18n( ( $amount / $divisor ), $decimals );
-			$this->log("Using amount: {$amount} for {$currency} vs {$amount}");
+			$this->log( "Using amount: {$amount} for {$currency} vs {$amount}" );
 			
 			return $amount;
 		}
@@ -620,8 +669,8 @@ if ( ! class_exists( 'E20R\Utilities\Utilities' ) ) {
 		 */
 		public function log( $msg ) {
 			
-			$tid = sprintf( "%08x", abs( crc32( $_SERVER['REMOTE_ADDR'] . $_SERVER['REQUEST_TIME'] ) ) );
-			$time = date_i18n('H:m:s', strtotime( get_option( 'timezone_string' ) ) );
+			$tid  = sprintf( "%08x", abs( crc32( $_SERVER['REMOTE_ADDR'] . $_SERVER['REQUEST_TIME'] ) ) );
+			$time = date_i18n( 'H:m:s', strtotime( get_option( 'timezone_string' ) ) );
 			$from = $this->_who_called_me();
 			
 			if ( defined( "WP_DEBUG" ) && true === WP_DEBUG ) {
@@ -827,18 +876,18 @@ if ( ! class_exists( 'E20R\Utilities\Utilities' ) ) {
 		public function checked( $needle, $haystack, $echo = false ) {
 			
 			$text = null;
-   
+			
 			if ( is_array( $haystack ) ) {
 				if ( in_array( $needle, $haystack ) ) {
 					$text = ' checked="checked" ';
 				}
 			}
 			
-			if ( is_object( $haystack) && in_array( $needle, (array) $haystack )) {
+			if ( is_object( $haystack ) && in_array( $needle, (array) $haystack ) ) {
 				$text = ' checked="checked" ';
 			}
 			
-			if ( !is_array( $haystack ) && !is_object( $haystack )) {
+			if ( ! is_array( $haystack ) && ! is_object( $haystack ) ) {
 				if ( $needle === $haystack ) {
 					$text = ' checked="checked" ';
 				}
@@ -872,16 +921,16 @@ if ( ! class_exists( 'E20R\Utilities\Utilities' ) ) {
 				}
 			}
 			
-			if ( is_object( $haystack) && in_array( $needle, (array) $haystack )) {
+			if ( is_object( $haystack ) && in_array( $needle, (array) $haystack ) ) {
 				$text = ' selected="selected" ';
-            }
-            
-            if ( !is_array( $haystack ) && !is_object( $haystack )) {
-			    if ( $needle === $haystack ) {
-			        $text = ' selected="selected" ';
-                }
-            }
-            
+			}
+			
+			if ( ! is_array( $haystack ) && ! is_object( $haystack ) ) {
+				if ( $needle === $haystack ) {
+					$text = ' selected="selected" ';
+				}
+			}
+			
 			if ( true === $echo ) {
 				esc_attr_e( $text );
 				
@@ -904,7 +953,7 @@ if ( ! class_exists( 'E20R\Utilities\Utilities' ) ) {
 		 */
 		public function random_string( $length, $keyspace = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ' ) {
 			
-		    $string = '';
+			$string  = '';
 			$max_len = mb_strlen( $keyspace, '8bit' ) - 1;
 			for ( $i = 0; $i < $length; ++ $i ) {
 				$string .= $keyspace[ random_int( 0, $max_len ) ];
@@ -914,25 +963,25 @@ if ( ! class_exists( 'E20R\Utilities\Utilities' ) ) {
 		}
 		
 		/**
-         * Search through array values to check whether there's anything there
-         *
+		 * Search through array values to check whether there's anything there
+		 *
 		 * @param array $array
 		 *
 		 * @return bool
 		 */
 		public function array_isnt_empty( $array ) {
-		    
-		    $values = array_values( $array );
-		    
-		    return ( empty( $values ) ? false : true );
-        }
+			
+			$values = array_values( $array );
+			
+			return ( empty( $values ) ? false : true );
+		}
 		
 		/**
 		 * Substitute [IN] for proper SQL 'IN' statement containing array of like values
 		 *
-		 * @param  string      $sql
-		 * @param  array      $values
-		 * @param string $type
+		 * @param  string $sql
+		 * @param  array  $values
+		 * @param string  $type
 		 *
 		 * @return string
 		 */
@@ -944,11 +993,13 @@ if ( ! class_exists( 'E20R\Utilities\Utilities' ) ) {
 			
 			if ( $not_in_count > 0 ) {
 				
-				$args = array( str_replace( '[IN]',
-					implode( ', ', array_fill( 0, count( $values ), ( $type == '%d' ? '%d' : '%s' ) ) ),
-					str_replace( '%', '%%', $sql ) ) );
+				$args = array(
+					str_replace( '[IN]',
+						implode( ', ', array_fill( 0, count( $values ), ( $type == '%d' ? '%d' : '%s' ) ) ),
+						str_replace( '%', '%%', $sql ) ),
+				);
 				
-				for ( $i = 0; $i < substr_count( $sql, '[IN]' ); $i++ ) {
+				for ( $i = 0; $i < substr_count( $sql, '[IN]' ); $i ++ ) {
 					$args = array_merge( $args, $values );
 				}
 				
@@ -966,13 +1017,13 @@ if ( ! class_exists( 'E20R\Utilities\Utilities' ) ) {
 		 * Get rid of PHP notice/warning messages from buffer
 		 */
 		public function safeAjax() {
-		    
-		    ini_set('display_errors', 0);
-		    ob_start();
-		    $messages = ob_get_clean();
-		    $this->log($messages);
-        }
-        
+			
+			ini_set( 'display_errors', 0 );
+			ob_start();
+			$messages = ob_get_clean();
+			$this->log( $messages );
+		}
+		
 		/**
 		 * Connect to the license server using TLS 1.2
 		 *
