@@ -63,6 +63,7 @@ class GDPR_Enablement {
 		$privacy_policy = file_get_contents( plugin_dir_path( __FILE__ ) . 'policies/e20r-privacy-policy.html' );
 		$data_list      = '';
 		$plugin_list    = '';
+		$why_text       = '';
 		
 		/**
 		 * @filter e20r-utilities-collected-data-labels Identifying data collected by a plugin/add-on
@@ -75,26 +76,39 @@ class GDPR_Enablement {
 		$plugins = apply_filters( 'e20r-utilities-collected-data-plugins', array() );
 		
 		/**
+		 * @filter e20r-utilities-why-plugins-collected-data - Plain language explanation of what the collected data will be used for.
+		 */
+		$why_paragraphs = apply_filters( 'e20r-utilities-why-plugins-collected-data', array() );
+		
+		/**
 		 * @filter e20r-utilities-collected-data-3rdparty-platform-text 3rd party site name(s) wrapped in a href/link to the 3rd party site where data is being transmitted
 		 */
 		$caveats = apply_filters( 'e20r-utilities-collected-data-3rdparty-platform-text', array() );
 		
 		if ( empty( $collected_data ) ) {
-			$collected_data = array( __( 'No extra data collected', Utilities::$plugin_slug ) );
+			$collected_data = array( 'default' => array( __( 'No extra data collected', Utilities::$plugin_slug ) ) );
 		}
 		
 		// Process the list of data collected
-		foreach ( $collected_data as $info_label ) {
-			$data_list .= sprintf( '<li>%s</li>', esc_attr( $info_label ) );
+		foreach ( $collected_data as $plugin_slug => $data_labels ) {
+			
+			foreach ($data_labels as $info_label ) {
+				$data_list .= sprintf( '<li>%s</li>', esc_attr( $info_label ) );
+			}
 		}
 		
 		if ( empty( $plugins ) ) {
-			$plugins = array( __( 'No E20R developed plugins installed', Utilities::$plugin_slug ) );
+			error_log("No plugins found!");
+			$plugins = array( 'default' => array( __( 'No plugin developed by Eighty/20 Results by Wicked Strong Chicks was found', Utilities::$plugin_slug ) ) );
 		}
 		
 		// Process the list of plugins installed/active
-		foreach ( $plugins as $plugin_name ) {
-			$plugin_list .= sprintf( '<li>%s</li>', esc_attr( $plugin_name ) );
+		foreach ( $plugins as $plugin_slug => $plugin_names ) {
+			
+			foreach( $plugin_names as $plugin_name ) {
+				
+				$plugin_list .= sprintf( '<li>%s</li>', esc_attr( $plugin_name ) );
+			}
 		}
 		
 		// Add links/names of 3rd party sites where data may be transmitted
@@ -108,17 +122,32 @@ class GDPR_Enablement {
 			);
 			
 			$caveat_text .= '<ul>';
-			foreach ( $caveats as $thirdparty_site ) {
-				$caveat_text .= sprintf( '<li>%s</li>', $thirdparty_site );
+			foreach ( $caveats as $plugin_slug => $thirdparty_sites ) {
+				
+				foreach( $thirdparty_sites as $thirdparty_site ) {
+					$caveat_text .= sprintf( '<li>%s</li>', $thirdparty_site );
+				}
 			}
 			
 			$caveat_text .= '</ul>';
+		}
+		
+		if ( empty( $why_paragraphs ) ) {
+			$why_text = null;
+		} else {
+			
+			foreach ( $why_paragraphs as $plugin_slug => $paragraphs ) {
+				foreach( $paragraphs as $paragraph ) {
+					$why_text .= sprintf( '<p>%s</p>', $paragraph );
+				}
+			}
 		}
 		
 		// Add the list of data collected to the policy content
 		$privacy_policy = str_replace( '!!collected_data_list!!', $data_list, $privacy_policy );
 		$privacy_policy = str_replace( '!!plugin_list!!', $plugin_list, $privacy_policy );
 		$privacy_policy = str_replace( '!!caveat_text!!', $caveat_text, $privacy_policy );
+		$privacy_policy = str_replace( '!!why_collected!!', $why_text, $privacy_policy );
 		
 		wp_add_privacy_policy_content( __( 'Eighty / 20 Results by Wicked Strong Chicks, LLC', Utilities::$plugin_slug ), $privacy_policy );
 	}
