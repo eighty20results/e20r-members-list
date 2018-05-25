@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @version 2.0
+ * @version 3.0 - GDPR opt-in, erasure and data access framework
  */
 
 namespace E20R\Utilities;
