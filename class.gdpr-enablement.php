@@ -89,16 +89,12 @@ class GDPR_Enablement {
 			$collected_data = array( 'default' => array( __( 'No extra data collected', Utilities::$plugin_slug ) ) );
 		}
 		
-		// Process the list of data collected
-		foreach ( $collected_data as $plugin_slug => $data_labels ) {
-			
-			foreach ($data_labels as $info_label ) {
-				$data_list .= sprintf( '<li>%s</li>', esc_attr( $info_label ) );
-			}
+		// Process the list of data being collected for the user/member
+		foreach ( $collected_data as $plugin_slug => $data_label ) {
+			$data_list .= sprintf( '<li>%s</li>', esc_attr( $data_label ) );
 		}
 		
 		if ( empty( $plugins ) ) {
-			error_log("No plugins found!");
 			$plugins = array( 'default' => array( __( 'No plugin developed by Eighty/20 Results by Wicked Strong Chicks was found', Utilities::$plugin_slug ) ) );
 		}
 		
