@@ -258,7 +258,12 @@ class Export_Members {
 			
 			foreach ( $extra_cols as $col_header => $callback ) {
 				$header_list             .= ",{$col_header}";
-				// $this->default_columns[] = array( $col_header => $callback );
+				$this->header_map[ $col_header ] = array(
+					'db_key' => null,
+					'type' => 'callback',
+					'header_key' => $col_header,
+					'callback_value' => $callback
+				);
 			}
 		}
 		
