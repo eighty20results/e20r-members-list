@@ -17,6 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * @version 3.0 - GDPR opt-in, erasure and data access framework
+ * @version 4.0 - Settings form/page framework (Used in the WP Settings API)
  */
 
 namespace E20R\Utilities;
@@ -30,6 +31,25 @@ if ( ! defined( 'ABSPATH' ) && function_exists( 'wp_die' ) ) {
 if ( ! class_exists( 'E20R\Utilities\Utilities' ) ) {
 	
 	class Utilities {
+		
+		/**
+		 * Version number for the Utilities class
+		 */
+		const Version = '4.0';
+		
+		/**
+		 * URI to the library path (Utilities)
+		 *
+		 * @var string
+		 */
+		public static $LIBRARY_URL = '';
+		
+		/**
+		 * Path to the Utilities library
+		 *
+		 * @var string
+		 */
+		public static $LIBRARY_PATH = '';
 		
 		/**
 		 * @var string Cache key
@@ -72,6 +92,9 @@ if ( ! class_exists( 'E20R\Utilities\Utilities' ) ) {
 		 * Utilities constructor.
 		 */
 		private function __construct() {
+			
+			self::$LIBRARY_URL  = plugins_url( null, __FILE__ );
+			self::$LIBRARY_PATH = plugin_dir_path( __FILE__ );
 			
 			if ( empty( self::$plugin_slug ) ) {
 				self::$plugin_slug = apply_filters( 'e20r-licensing-text-domain', null );
@@ -137,9 +160,9 @@ if ( ! class_exists( 'E20R\Utilities\Utilities' ) ) {
 						
 						// attempt to validate IP
 						if ( filter_var( $ip,
-                                FILTER_VALIDATE_IP,
-                                FILTER_FLAG_IPV4 | FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE
-                             ) !== false ) {
+								FILTER_VALIDATE_IP,
+								FILTER_FLAG_IPV4 | FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE
+						     ) !== false ) {
 							
 							return $ip;
 						}
