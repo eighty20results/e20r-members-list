@@ -17,7 +17,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * @version 3.0 - GDPR opt-in, erasure and data access framework
- * @version 4.0 - Settings form/page framework (Used in the WP Settings API)
  */
 
 namespace E20R\Utilities;
@@ -35,7 +34,7 @@ if ( ! class_exists( 'E20R\Utilities\Utilities' ) ) {
 		/**
 		 * Version number for the Utilities class
 		 */
-		const Version = '4.0';
+		const Version = '3.0';
 		
 		/**
 		 * URI to the library path (Utilities)
@@ -126,8 +125,29 @@ if ( ! class_exists( 'E20R\Utilities\Utilities' ) ) {
 			
 		}
 		
+		
 		/**
-		 * (Attempte to) Fetch and sanitize the IP address of the connecting client
+		 * Pattern recognize whether the data is a valid date format for this plugin
+		 * Expected format: YYYY-MM-DD
+		 *
+		 * @param $data -- Data to test
+		 *
+		 * @return bool -- true | false
+		 *
+		 * @access private
+		 */
+		public function is_valid_date( $data ) {
+			// Fixed: is_valid_date() needs to support all expected date formats...
+			if ( false === strtotime( $data ) ) {
+				
+				return false;
+			}
+			
+			return true;
+		}
+		
+		/**
+		 * (Attempt to) Fetch and sanitize the IP address of the connecting client
 		 *
 		 * @return string|null
 		 */
