@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @version 2.0
+ * @version 3.0 - GDPR opt-in, erasure and data access framework
  */
 
 namespace E20R\Utilities;
@@ -30,6 +30,25 @@ if ( ! defined( 'ABSPATH' ) && function_exists( 'wp_die' ) ) {
 if ( ! class_exists( 'E20R\Utilities\Utilities' ) ) {
 	
 	class Utilities {
+		
+		/**
+		 * Version number for the Utilities class
+		 */
+		const Version = '3.0';
+		
+		/**
+		 * URI to the library path (Utilities)
+		 *
+		 * @var string
+		 */
+		public static $LIBRARY_URL = '';
+		
+		/**
+		 * Path to the Utilities library
+		 *
+		 * @var string
+		 */
+		public static $LIBRARY_PATH = '';
 		
 		/**
 		 * @var string Cache key
@@ -73,6 +92,9 @@ if ( ! class_exists( 'E20R\Utilities\Utilities' ) ) {
 		 */
 		private function __construct() {
 			
+			self::$LIBRARY_URL  = plugins_url( null, __FILE__ );
+			self::$LIBRARY_PATH = plugin_dir_path( __FILE__ );
+			
 			if ( empty( self::$plugin_slug ) ) {
 				self::$plugin_slug = apply_filters( 'e20r-licensing-text-domain', null );
 			}
@@ -103,8 +125,29 @@ if ( ! class_exists( 'E20R\Utilities\Utilities' ) ) {
 			
 		}
 		
+		
 		/**
-		 * (Attempte to) Fetch and sanitize the IP address of the connecting client
+		 * Pattern recognize whether the data is a valid date format for this plugin
+		 * Expected format: YYYY-MM-DD
+		 *
+		 * @param $data -- Data to test
+		 *
+		 * @return bool -- true | false
+		 *
+		 * @access private
+		 */
+		public function is_valid_date( $data ) {
+			// Fixed: is_valid_date() needs to support all expected date formats...
+			if ( false === strtotime( $data ) ) {
+				
+				return false;
+			}
+			
+			return true;
+		}
+		
+		/**
+		 * (Attempt to) Fetch and sanitize the IP address of the connecting client
 		 *
 		 * @return string|null
 		 */
@@ -137,9 +180,9 @@ if ( ! class_exists( 'E20R\Utilities\Utilities' ) ) {
 						
 						// attempt to validate IP
 						if ( filter_var( $ip,
-                                FILTER_VALIDATE_IP,
-                                FILTER_FLAG_IPV4 | FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE
-                             ) !== false ) {
+								FILTER_VALIDATE_IP,
+								FILTER_FLAG_IPV4 | FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE
+						     ) !== false ) {
 							
 							return $ip;
 						}
