@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2017 Eighty / 20 Results by Wicked Strong Chicks, LLC (thomas@eighty20results.com)
+ * Copyright 2017-2018 Eighty / 20 Results by Wicked Strong Chicks, LLC (thomas@eighty20results.com)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License, version 2, as
@@ -28,6 +28,7 @@ namespace E20R\Utilities;
  * @credit  A5hleyRich at https://github.com/A5hleyRich/wp-background-processing
  * @since   v1.9.6 - ENHANCEMENT: Added fixes and updates from EWWW Image Optimizer code
  * @since   1.9.13 - BUG FIX: Would sometimes double up on the entry count in the queue
+ * @since   1.9.14 - BUG FIX: Minor nits to make code more readable
  */
 
 /**
@@ -269,24 +270,21 @@ abstract class E20R_Background_Process extends E20R_Async_Request {
 		global $wpdb;
 		$utils = Utilities::get_instance();
 		
-		$table        = $wpdb->options;
-		$column       = 'option_name';
-		$value_column = 'option_value';
 		/*
 					if ( is_multisite() ) {
 						$table  = $wpdb->sitemeta;
 						$column = 'meta_key';
 					}
 		*/
-		$key = "{$this->identifier}_batch_%";
+		$key = $wpdb->esc_like( "{$this->identifier}_batch_" ) . '%';
 		
-		$utils->log( "Checking for content in {$key} variable from {$table} in {$column} while looking for {$value_column}" );
+		$utils->log( "Checking for content in {$key} variable from {$wpdb->options} in option_value while looking for option_name" );
 		
 		$sql = $wpdb->prepare( "
 					SELECT COUNT(*)
-					FROM {$table}
-						WHERE {$column} LIKE %s
-						AND {$value_column} != ''",
+					FROM {$wpdb->options}
+						WHERE option_name LIKE %s
+						AND option_value != ''",
 			$key
 		);
 		
@@ -333,17 +331,8 @@ abstract class E20R_Background_Process extends E20R_Async_Request {
 		$utils = Utilities::get_instance();
 		
 		$lock_transient = "_transient_{$this->identifier}_process_lock";
-		$table          = $wpdb->options;
-		$column         = 'option_name';
-		$value_column   = 'option_value';
 		
-		$sql = $wpdb->prepare(
-			"SELECT {$column} FROM {$table}
-					WHERE {$column} LIKE %s",
-			$lock_transient
-		);
-		
-		if ( $wpdb->get_var( $sql ) == $queue_id ) {
+		if ( $queue_id == $wpdb->get_var( $wpdb->prepare( "SELECT option_value FROM {$wpdb->options} WHERE option_name LIKE %s", $lock_transient ) )  ) {
 			
 			$utils->log( "Queue ({$queue_id}) is running" );
 			
@@ -426,33 +415,22 @@ abstract class E20R_Background_Process extends E20R_Async_Request {
 		
 		$utils = Utilities::get_instance();
 		
-		$table        = $wpdb->options;
-		$column       = 'option_name';
-		$key_column   = 'option_id';
-		$value_column = 'option_value';
-		/*
-					if ( is_multisite() ) {
-						$table        = $wpdb->sitemeta;
-						$column       = 'meta_key';
-						$key_column   = 'meta_id';
-						$value_column = 'meta_value';
-					}
-		*/
-		$key   = "{$this->identifier}_batch_%";
-		$query = $wpdb->get_row( $wpdb->prepare( "
-			SELECT *
-				FROM {$table}
-				WHERE {$column} LIKE %s AND {$value_column} != ''
-				ORDER BY {$key_column} ASC
-				LIMIT 1",
+		$key   = $wpdb->esc_like( "{$this->identifier}_batch_") . '%';
+		$query = $wpdb->get_row(
+			$wpdb->prepare( "
+				SELECT *
+					FROM {$wpdb->options}
+					WHERE option_name LIKE %s AND option_value != ''
+					ORDER BY option_id ASC
+					LIMIT 1",
 			$key )
 		);
 		
-		$utils->log( "Will fetch batch: {$query->{$column}}" );
+		$utils->log( "Will fetch batch: {$query->option_name}" );
 		
 		$batch       = new \stdClass();
-		$batch->key  = $query->{$column};
-		$batch->data = maybe_unserialize( $query->{$value_column} );
+		$batch->key  = $query->option_name;
+		$batch->data = maybe_unserialize( $query->option_name );
 		
 		$this->active_queue = substr( $batch->key, - 1 );
 		$utils->log( "Using queue name: {$this->active_queue} and processing " . count( $batch->data ) . " batch entries" );
