@@ -29,6 +29,8 @@ namespace E20R\Utilities;
  * @since   v1.9.6 - ENHANCEMENT: Added fixes and updates from EWWW Image Optimizer code
  * @since   1.9.13 - BUG FIX: Would sometimes double up on the entry count in the queue
  * @since   1.9.14 - BUG FIX: Minor nits to make code more readable
+ * @since   1.9.15 - ENHANCEMENT: Added is_queue_good() method to verify content of queue
+ * @since   1.9.15 - ENHANCEMENT: Exit maybe_handle() if queue is invalid (clear the queue too)
  */
 
 /**
@@ -230,6 +232,8 @@ abstract class E20R_Background_Process extends E20R_Async_Request {
 	 *
 	 * Checks whether data exists within the queue and that
 	 * the process is not already running.
+	 
+	 * @since   1.9.15 - ENHANCEMENT: Exit maybe_handle() if queue is invalid (clear the queue too)
 	 */
 	public function maybe_handle() {
 		
@@ -241,6 +245,12 @@ abstract class E20R_Background_Process extends E20R_Async_Request {
 		// Background process already running.
 		if ( $this->is_process_running() ) {
 			$utils->log( "Terminating: Have an active queue already!" );
+			wp_die();
+		}
+		
+		if ( $this->is_queue_good() ) {
+			$utils->log("Terminating: Invalid queue content");
+			$this->clear_queue();
 			wp_die();
 		}
 		
@@ -258,6 +268,35 @@ abstract class E20R_Background_Process extends E20R_Async_Request {
 		
 		$utils->log( "Terminating: After the 'handle()' function" );
 		wp_die();
+	}
+	
+	/**
+	 * The queue should be an array of entries/data to process
+	 *
+	 * @return bool
+	 *
+	 * @since   1.9.15 - ENHANCEMENT: Added is_queue_good() method to verify content of queue
+	 */
+	public function is_queue_good() {
+		
+		global $wpdb;
+		$utils = Utilities::get_instance();
+		
+		$key = $wpdb->esc_like( "{$this->identifier}_batch_" ) . '%';
+		
+		$utils->log( "Checking for content in {$key} variable from {$wpdb->options} in option_value while looking for option_name" );
+		
+		$sql = $wpdb->prepare( "
+					SELECT option_value
+					FROM {$wpdb->options}
+						WHERE option_name LIKE %s
+						AND option_value != ''",
+			$key
+		);
+		
+		$result = $wpdb->get_var( $sql );
+		
+		return ( empty( $result ) || is_array($result ) );
 	}
 	
 	/**
@@ -295,6 +334,11 @@ abstract class E20R_Background_Process extends E20R_Async_Request {
 		return ( intval( $count ) > 0 ) ? false : true;
 	}
 	
+	/**
+	 * Return the key for the currently active queue
+	 *
+	 * @return string
+	 */
 	public function get_active_queue() {
 		return $this->active_queue;
 	}
@@ -325,6 +369,13 @@ abstract class E20R_Background_Process extends E20R_Async_Request {
 		return false;
 	}
 	
+	/**
+	 * Verify whether the specified Queue is active
+	 *
+	 * @param string $queue_id
+	 *
+	 * @return bool
+	 */
 	protected function is_queue_active( $queue_id ) {
 		
 		global $wpdb;
@@ -430,9 +481,10 @@ abstract class E20R_Background_Process extends E20R_Async_Request {
 		
 		$batch       = new \stdClass();
 		$batch->key  = $query->option_name;
-		$batch->data = maybe_unserialize( $query->option_name );
+		$batch->data = maybe_unserialize( $query->option_value );
 		
 		$this->active_queue = substr( $batch->key, - 1 );
+		$utils->log("Batch contains: " . print_r( $batch->data, true  ) );
 		$utils->log( "Using queue name: {$this->active_queue} and processing " . count( $batch->data ) . " batch entries" );
 		$this->update_lock();
 		
