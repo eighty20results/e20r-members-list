@@ -484,7 +484,7 @@ abstract class E20R_Background_Process extends E20R_Async_Request {
 		$batch->data = maybe_unserialize( $query->option_value );
 		
 		$this->active_queue = substr( $batch->key, - 1 );
-		$utils->log("Batch contains: " . print_r( $batch->data, true  ) );
+
 		$utils->log( "Using queue name: {$this->active_queue} and processing " . count( $batch->data ) . " batch entries" );
 		$this->update_lock();
 		
