@@ -91,7 +91,13 @@ class GDPR_Enablement {
 		
 		// Process the list of data being collected for the user/member
 		foreach ( $collected_data as $plugin_slug => $data_label ) {
-			$data_list .= sprintf( '<li>%s</li>', esc_attr( $data_label ) );
+			if ( is_array( $data_label ) ) {				
+				foreach( $data_label as $label ) {
+					$data_list .= sprintf( '<li>%s</li>', esc_attr( $label ) );
+				}
+			} else {
+				$data_list .= sprintf( '<li>%s</li>', esc_attr( $data_label ) );
+			}
 		}
 		
 		if ( empty( $plugins ) ) {
