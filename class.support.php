@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (c) 2017 - Eighty / 20 Results by Wicked Strong Chicks.
+ * Copyright (c) 2017-2018 - Eighty / 20 Results by Wicked Strong Chicks.
  * ALL RIGHTS RESERVED
  *
  * This program is free software: you can redistribute it and/or modify
@@ -20,6 +20,13 @@
 namespace E20R\Utilities;
 
 
-class Support {
+if ( ! class_exists( '\E20R\Utilities\Support' ) ) {
 	
+	/**
+	 * Class Support
+	 * @package E20R\Utilities
+	 */
+	class Support {
+	
+	}
 }

@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (c) 2017 - Eighty / 20 Results by Wicked Strong Chicks.
+ * Copyright (c) 2017-2018 - Eighty / 20 Results by Wicked Strong Chicks.
  * ALL RIGHTS RESERVED
  *
  * This program is free software: you can redistribute it and/or modify
@@ -20,77 +20,84 @@
 namespace E20R\Utilities\Licensing;
 use E20R\Utilities\Utilities;
 
-abstract class License_Client {
+if ( ! class_exists( '\E20R\Utilities\Licensing\License_Client' ) ) {
 	
 	/**
-	 * @var null|License_Client
+	 * Class License_Client
+	 * @package E20R\Utilities\Licensing
 	 */
-	private static $instance = null;
-	
-	/**
-	 * License_Client constructor.
-	 */
-	private function __construct() {
+	abstract class License_Client {
 		
-		if ( is_null( self::$instance ) ) {
-			self::$instance = $this;
-		}
-	}
-	
-	// Load hooks to add new license info to license page
-	abstract public function load_hooks();
-	
-	/**
-	 * The current instance of the License_Client class
-	 *
-	 * @return License_Client|null
-	 */
-	public static function get_instance() {
+		/**
+		 * @var null|License_Client
+		 */
+		private static $instance = null;
 		
-		if ( !is_null( self::$instance ) ) {
-
-			self::$instance->load_hooks();
+		/**
+		 * License_Client constructor.
+		 */
+		private function __construct() {
+			
+			if ( is_null( self::$instance ) ) {
+				self::$instance = $this;
+			}
 		}
 		
-		return self::$instance;
-	}
-	
-	abstract public function check_licenses();
-	
-	/**
-	 * Filter Handler: Add the a new License settings entry
-	 *
-	 * @filter e20r-license-add-new-licenses
-	 *
-	 * @param array $license_settings
-	 * @param array $plugin_settings
-	 *
-	 * @return array
-	 */
-	protected function add_new_license_info( $license_settings, $plugin_settings ) {
+		// Load hooks to add new license info to license page
+		abstract public function load_hooks();
 		
-		$utils = Utilities::get_instance();
-		
-		if ( ! isset( $license_settings['new_licenses'] ) ) {
-			$license_settings['new_licenses'] = array();
-			$utils->log( "Init array of licenses entry" );
+		/**
+		 * The current instance of the License_Client class
+		 *
+		 * @return License_Client|null
+		 */
+		public static function get_instance() {
+			
+			if ( ! is_null( self::$instance ) ) {
+				
+				self::$instance->load_hooks();
+			}
+			
+			return self::$instance;
 		}
 		
-		$utils->log( "Have " . count( $license_settings['new_licenses'] ) . " new licenses to process already. Adding {$plugin_settings['key_prefix']}/{$plugin_settings['stub']}... " );
+		abstract public function check_licenses();
 		
-		$license_settings['new_licenses'][ $plugin_settings['key_prefix'] ] = array(
-			'label_for'     => $plugin_settings['key_prefix'],
-			'fulltext_name' => $plugin_settings['label'],
-			'new_product'   => $plugin_settings['key_prefix'],
-			'option_name'   => "e20r_license_settings",
-			'name'          => 'license_key',
-			'input_type'    => 'password',
-			'value'         => null,
-			'email_field'   => "license_email",
-			'email_value'   => null,
-			'placeholder'   => sprintf( __( "Paste the purchased %s key here", "e20r-licensing" ), $plugin_settings['label'] ),
-		);
-		
-		return $license_settings;
+		/**
+		 * Filter Handler: Add the a new License settings entry
+		 *
+		 * @filter e20r-license-add-new-licenses
+		 *
+		 * @param array $license_settings
+		 * @param array $plugin_settings
+		 *
+		 * @return array
+		 */
+		protected function add_new_license_info( $license_settings, $plugin_settings ) {
+			
+			$utils = Utilities::get_instance();
+			
+			if ( ! isset( $license_settings['new_licenses'] ) ) {
+				$license_settings['new_licenses'] = array();
+				$utils->log( "Init array of licenses entry" );
+			}
+			
+			$utils->log( "Have " . count( $license_settings['new_licenses'] ) . " new licenses to process already. Adding {$plugin_settings['key_prefix']}/{$plugin_settings['stub']}... " );
+			
+			$license_settings['new_licenses'][ $plugin_settings['key_prefix'] ] = array(
+				'label_for'     => $plugin_settings['key_prefix'],
+				'fulltext_name' => $plugin_settings['label'],
+				'new_product'   => $plugin_settings['key_prefix'],
+				'option_name'   => "e20r_license_settings",
+				'name'          => 'license_key',
+				'input_type'    => 'password',
+				'value'         => null,
+				'email_field'   => "license_email",
+				'email_value'   => null,
+				'placeholder'   => sprintf( __( "Paste the purchased %s key here", "e20r-licensing" ), $plugin_settings['label'] ),
+			);
+			
+			return $license_settings;
+		}
 	}
 }
