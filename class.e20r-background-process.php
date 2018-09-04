@@ -651,6 +651,8 @@ abstract class E20R_Background_Process extends E20R_Async_Request {
 	}
 	
 	/**
+	 * Modify the lock timeout based on the duration of the lock
+	 *
 	 * @param int $lock_duration
 	 *
 	 * @return int
