@@ -293,26 +293,12 @@ if ( ! class_exists( '\E20R\Utilities\Utilities' ) ) {
 		 *
 		 * @param string $type
 		 *
-		 * @return string
+		 * @return string[]
 		 */
 		public function get_message( $type = 'notice' ) {
 			
-			// Grab from the cache (if it exists)
-			if ( null !== ( $tmp = Cache::get( 'err_info', self::$cache_key ) ) ) {
-				
-				$this->msg        = $tmp['msg'];
-				$this->msgt       = $tmp['msgt'];
-				$this->msg_source = $tmp['msg_source'];
-			}
-			
-			$return = array();
-			foreach ( $this->msgt as $key => $mt ) {
-				if ( $mt === $type ) {
-					$return[] = $this->msg[ $key ];
-				}
-			}
-			
-			return $return;
+			$messages = new Message();
+			return $messages->get( $type );
 		}
 		
 		/**
@@ -326,53 +312,9 @@ if ( ! class_exists( '\E20R\Utilities\Utilities' ) ) {
 		 */
 		public function add_message( $message, $type = 'notice', $msg_source = 'default' ) {
 			
-			// Grab from the cache (if it exists)
-			if ( null !== ( $tmp = Cache::get( 'err_info', self::$cache_key ) ) ) {
-				$this->log( "Loading cached messages (" . count( $tmp['msg'] ) . ")" );
-				$this->msg        = $tmp['msg'];
-				$this->msgt       = $tmp['msgt'];
-				$this->msg_source = $tmp['msg_source'];
-			}
+			$this->msg[] = new Message( $message, $type, $msg_source );
 			
-			$msg_found = array();
-			
-			// Look for duplicate messages
-			foreach ( $this->msg as $key => $msg ) {
-				
-				if ( ! empty( $message ) && ! empty( $msg ) && false !== strpos( $message, $msg ) ) {
-					$msg_found[] = $key;
-				}
-			}
-			
-			// No duplicates found, so add the new one
-			if ( empty( $msg_found ) ) {
-				// Save new message
-				$this->log( "Adding a message to the admin errors: {$message}" );
-				
-				$this->msg[]        = $message;
-				$this->msgt[]       = $type;
-				$this->msg_source[] = $msg_source;
-			} else {
-				
-				// Potentially clean up duplicate messages
-				$total = count( $msg_found );
-				
-				// Remove extra instances of the message
-				for ( $i = 1; ( $total - 1 ) >= $i; $i ++ ) {
-					$this->log( "Removing duplicate message" );
-					unset( $this->msg[ $i ] );
-				}
-			}
-			
-			if ( ! empty ( $this->msg ) ) {
-				$values = array(
-					'msg'        => $this->msg,
-					'msgt'       => $this->msgt,
-					'msg_source' => $this->msg_source,
-				);
-				
-				Cache::set( 'err_info', $values, DAY_IN_SECONDS, self::$cache_key );
-			}
+			return true;
 		}
 		
 		/**
@@ -382,36 +324,8 @@ if ( ! class_exists( '\E20R\Utilities\Utilities' ) ) {
 		 */
 		public function display_messages( $source = 'default' ) {
 			
-			// Load from cache if there are no messages found
-			if ( empty( $this->msg ) ) {
-				
-				$msgs = Cache::get( 'err_info', self::$cache_key );
-				
-				$this->msg        = $msgs['msg'];
-				$this->msgt       = $msgs['msgt'];
-				$this->msg_source = $msgs['msg_source'];
-			}
-			
-			if ( ! empty( $this->msg ) && ! empty( $this->msgt ) ) {
-				
-				$this->log( "Have " . count( $this->msg ) . " admin message(s) to display" );
-				
-				foreach ( $this->msg as $key => $notice ) {
-					if ( ! empty( $notice ) ) { ?>
-                        <div class="notice notice-<?php esc_html_e( $this->msgt[ $key ] ); ?> is-dismissible <?php esc_html_e( $this->msg_source[ $key ] ); ?>">
-                            <p><?php echo $notice; ?></p>
-                        </div>
-						<?php
-					}
-				}
-			}
-			
-			// Clear the error message list
-			$this->msg        = array();
-			$this->msgt       = array();
-			$this->msg_source = array();
-			
-			Cache::delete( 'err_info', self::$cache_key );
+			$message = new Message();
+			$message->display( $source );
 		}
 		
 		/**
