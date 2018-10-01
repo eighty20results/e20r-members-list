@@ -176,9 +176,16 @@ class Message {
 	
 	/**
 	 * Minimize duplication of WooCommerce alert messages
+	 *
+	 * @param null|bool $passthrough
+	 *
+	 * @return bool
 	 */
-	public function clearNotices() {
-		wp_clear_notices();
+	public function clearNotices( $passthrough = null ) {
+		
+		wc_clear_notices();
+		
+		return $passthrough;
 	}
 	
 	/**
@@ -306,7 +313,7 @@ class Message {
 		
 		if ( $this->hasPMPro() ) {
 			
-			Utilities::get_instance()->log( "Attempting to show on PMPro front-end" );
+			Utilities::get_instance()->log( "Attempting to show {$message} on PMPro front-end" );
 			
 			global $pmpro_msg;
 			global $pmpro_msgt;
@@ -319,9 +326,45 @@ class Message {
 			$msgt       = $pmpro_msgt;
 			
 			pmpro_setMessage( $pmpro_msg, $pmpro_msgt, true );
+			$this->addPMProMessage( $pmpro_msg, $pmpro_msgt );
 		}
 	}
 	
+	/**
+	 * Passthrough for some of the PMPro filters so we can display error message(s) on the
+	 *
+	 * @param mixed $arg1
+	 * @param mixed $arg2
+	 * @param mixed $arg3
+	 * @param mixed $arg4
+	 * @param mixed $arg5
+	 * @param mixed $arg6
+	 *
+	 * @return mixed
+	 */
+	public function filter_passthrough( $arg1 = null, $arg2 = null, $arg3 = null, $arg4 = null, $arg5 = null, $arg6 = null ) {
+		
+		$utils = Utilities::get_instance();
+		
+		global $pmpro_pages;
+		global $post;
+		
+		$page_list = array(
+			$pmpro_pages['billing'],
+			$pmpro_pages['account'],
+		);
+		
+		if  ( !isset( $post->post_content) || ( isset( $post->post_content ) && ! is_page( $page_list ) ) ) {
+			
+			$utils->log("Not on billing or account shortcode/page");
+			return $arg1;
+		}
+		
+		$utils->log("Loading error messages for account/billing page: {$post->ID}");
+		$this->display( self::FRONTEND_LOCATION );
+		
+		return $arg1;
+	}
 	/**
 	 * WooCommerce is installed and active
 	 *
@@ -338,6 +381,22 @@ class Message {
 	 */
 	private function hasPMPro() {
 		return function_exists( 'pmpro_getAllLevels' );
+	}
+	
+	
+	/**
+	 * Display the PMPro error message(s)
+	 *
+	 * @param string $message
+	 * @param string $message_type
+	 */
+	public function addPMProMessage( $message, $message_type ) {
+		
+		Utilities::get_instance()->log("Adding for PMPro page");
+		
+		if ( ! empty( $message ) ) {
+			printf( '<div id="pmpro_message" class="pmpro_message %s">%s</div>',  $message_type, $message );
+		}
 	}
 	
 	/**
