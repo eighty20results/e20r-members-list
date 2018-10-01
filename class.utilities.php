@@ -69,26 +69,6 @@ if ( ! class_exists( '\E20R\Utilities\Utilities' ) ) {
 		 */
 		private static $instance = null;
 		
-		/**
-		 * Array of error messages
-		 *
-		 * @var array $msg
-		 */
-		private $msg = array();
-		
-		/**
-		 * Array of message types (notice, warning, error)
-		 *
-		 * @var array $msgt
-		 */
-		private $msgt = array();
-		
-		/**
-		 * Array of message sources (unlimited)
-		 * @var array $msg_source
-		 */
-		private $msg_source = array();
-		
 		private $blog_id = null;
 		
 		/**
@@ -108,25 +88,31 @@ if ( ! class_exists( '\E20R\Utilities\Utilities' ) ) {
 			$this->blog_id = get_current_blog_id();
 			
 			self::$cache_key = "e20r_pw_utils_{$this->blog_id}";
+			$messages        = new Message();
 			
-			if ( null !== ( $tmp = Cache::get( "err_info", self::$cache_key ) ) ) {
-				
-				$this->msg        = is_array( $tmp['msg'] ) ? $tmp['msg'] : array( $tmp['msg'] );
-				$this->msgt       = is_array( $tmp['msgt'] ) ? $tmp['msgt'] : array( $tmp['msgt'] );
-				$this->msg_source = is_array( $tmp['msg_source'] ) ? $tmp['msg_source'] : array( $tmp['msg_source'] );
-			}
+			$this->log( "Front or backend???" );
 			
-			if ( true === self::is_admin() ) {
-				if ( ! has_action( 'admin_notices', array( $this, 'display_messages' ) ) ) {
-					add_action( 'admin_notices', array( $this, 'display_messages' ), 10 );
-				}
+			if ( self::is_admin() ) {
 				
 				// Clear cache when updating discount codes or membership level definitions
 				add_action( 'pmpro_save_discount_code', array( $this, 'clear_delay_cache' ), 9999, 1 );
 				add_action( 'pmpro_save_membership_level', array( $this, 'clear_delay_cache' ), 9999, 1 );
 				
+				if ( ! has_action( 'admin_notices', array( $messages, 'display' ) ) ) {
+					
+					$this->log( "Loading message(s) for backend" );
+					add_action( 'admin_notices', array( $messages, 'display' ), 10 );
+					
+				}
+			} else {
+				
+				$this->log( "Loading message(s) for frontend" );
+				add_filter( 'woocommerce_update_cart_action_cart_updated', array( $messages, 'clearNotices' ), 10, 1 );
+				add_action( 'woocommerce_init', array( $messages, 'display' ), 1 );
+				
+				add_filter( 'pmpro_email_field_type', array( $messages, 'filter_passthrough' ), 1, 1 );
+				add_filter( 'pmpro_get_membership_levels_for_user', array( $messages, 'filter_passthrough' ), 10, 2 );
 			}
-			
 		}
 		
 		
@@ -293,26 +279,13 @@ if ( ! class_exists( '\E20R\Utilities\Utilities' ) ) {
 		 *
 		 * @param string $type
 		 *
-		 * @return string
+		 * @return string[]
 		 */
 		public function get_message( $type = 'notice' ) {
 			
-			// Grab from the cache (if it exists)
-			if ( null !== ( $tmp = Cache::get( 'err_info', self::$cache_key ) ) ) {
-				
-				$this->msg        = $tmp['msg'];
-				$this->msgt       = $tmp['msgt'];
-				$this->msg_source = $tmp['msg_source'];
-			}
+			$messages = new Message();
 			
-			$return = array();
-			foreach ( $this->msgt as $key => $mt ) {
-				if ( $mt === $type ) {
-					$return[] = $this->msg[ $key ];
-				}
-			}
-			
-			return $return;
+			return $messages->get( $type );
 		}
 		
 		/**
@@ -326,53 +299,9 @@ if ( ! class_exists( '\E20R\Utilities\Utilities' ) ) {
 		 */
 		public function add_message( $message, $type = 'notice', $msg_source = 'default' ) {
 			
-			// Grab from the cache (if it exists)
-			if ( null !== ( $tmp = Cache::get( 'err_info', self::$cache_key ) ) ) {
-				$this->log( "Loading cached messages (" . count( $tmp['msg'] ) . ")" );
-				$this->msg        = $tmp['msg'];
-				$this->msgt       = $tmp['msgt'];
-				$this->msg_source = $tmp['msg_source'];
-			}
+			$this->msg[] = new Message( $message, $type, $msg_source );
 			
-			$msg_found = array();
-			
-			// Look for duplicate messages
-			foreach ( $this->msg as $key => $msg ) {
-				
-				if ( ! empty( $message ) && ! empty( $msg ) && false !== strpos( $message, $msg ) ) {
-					$msg_found[] = $key;
-				}
-			}
-			
-			// No duplicates found, so add the new one
-			if ( empty( $msg_found ) ) {
-				// Save new message
-				$this->log( "Adding a message to the admin errors: {$message}" );
-				
-				$this->msg[]        = $message;
-				$this->msgt[]       = $type;
-				$this->msg_source[] = $msg_source;
-			} else {
-				
-				// Potentially clean up duplicate messages
-				$total = count( $msg_found );
-				
-				// Remove extra instances of the message
-				for ( $i = 1; ( $total - 1 ) >= $i; $i ++ ) {
-					$this->log( "Removing duplicate message" );
-					unset( $this->msg[ $i ] );
-				}
-			}
-			
-			if ( ! empty ( $this->msg ) ) {
-				$values = array(
-					'msg'        => $this->msg,
-					'msgt'       => $this->msgt,
-					'msg_source' => $this->msg_source,
-				);
-				
-				Cache::set( 'err_info', $values, DAY_IN_SECONDS, self::$cache_key );
-			}
+			return true;
 		}
 		
 		/**
@@ -382,36 +311,8 @@ if ( ! class_exists( '\E20R\Utilities\Utilities' ) ) {
 		 */
 		public function display_messages( $source = 'default' ) {
 			
-			// Load from cache if there are no messages found
-			if ( empty( $this->msg ) ) {
-				
-				$msgs = Cache::get( 'err_info', self::$cache_key );
-				
-				$this->msg        = $msgs['msg'];
-				$this->msgt       = $msgs['msgt'];
-				$this->msg_source = $msgs['msg_source'];
-			}
-			
-			if ( ! empty( $this->msg ) && ! empty( $this->msgt ) ) {
-				
-				$this->log( "Have " . count( $this->msg ) . " admin message(s) to display" );
-				
-				foreach ( $this->msg as $key => $notice ) {
-					if ( ! empty( $notice ) ) { ?>
-                        <div class="notice notice-<?php esc_html_e( $this->msgt[ $key ] ); ?> is-dismissible <?php esc_html_e( $this->msg_source[ $key ] ); ?>">
-                            <p><?php echo $notice; ?></p>
-                        </div>
-						<?php
-					}
-				}
-			}
-			
-			// Clear the error message list
-			$this->msg        = array();
-			$this->msgt       = array();
-			$this->msg_source = array();
-			
-			Cache::delete( 'err_info', self::$cache_key );
+			$message = new Message();
+			$message->display( $source );
 		}
 		
 		/**
