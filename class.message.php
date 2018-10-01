@@ -31,12 +31,12 @@ class Message {
 	/**
 	 * Constant indicating the WP back-end pages (wp-admin dashboard, etc)
 	 */
-	const BACKEND_LOCATION = 1;
+	const BACKEND_LOCATION = 2000;
 	
 	/**
 	 * Constant indicating the default location (wp-admin, I presume)
 	 */
-	const DEFAULT_LOCATION = 0;
+	const DEFAULT_LOCATION = 3000;
 	
 	/**
 	 * List of front or backend messages
@@ -76,28 +76,16 @@ class Message {
 		$utils     = Utilities::get_instance();
 		$cache_key = $utils->get_util_cache_key();
 		
-		
 		if ( null !== ( $tmp = Cache::get( 'err_info', $cache_key ) ) ) {
 			
 			$utils->log( "Loading cached messages (" . count( $tmp['msg'] ) . ")" );
 			
-			$this->msg      = $tmp['msg'];
-			$this->msgt     = $tmp['msgt'];
-			$this->location = $tmp['location'];
+			$this->msg      = isset( $tmp['msg'] ) ? $tmp['msg'] : array();
+			$this->msgt     = $tmp['msgt'] ? $tmp['msgt'] : array();
+			$this->location = isset( $tmp['location'] ) ? $tmp['location'] : ( isset( $tmp['msgt_source'] ) ? $tmp['msgt_source'] : array() );
 		}
 		
-		switch ( trim( $location ) ) {
-			case 'backend':
-				$location = self::BACKEND_LOCATION;
-				break;
-			
-			case 'frontend':
-				$location = self::FRONTEND_LOCATION;
-				break;
-			
-			default:
-				$location = self::DEFAULT_LOCATION;
-		}
+		$location = $this->convertDestination( $location );
 		
 		$msg_found = array();
 		
@@ -107,12 +95,17 @@ class Message {
 			if ( ! empty( $message ) && ! empty( $msg ) && false !== strpos( $message, $msg ) ) {
 				$msg_found[] = $key;
 			}
+			
+			// Fix bad location values
+			if ( ! empty( $location ) ) {
+				$this->location[ $key ] = $this->convertDestination( $location );
+			}
 		}
 		
 		// No duplicates found, so add the new one
 		if ( empty( $msg_found ) ) {
 			// Save new message
-			$utils->log( "Adding a message to the admin errors: {$message}" );
+			$utils->log( "Adding a message to the list: {$message}" );
 			
 			$this->msg[]      = $message;
 			$this->msgt[]     = $type;
@@ -136,6 +129,42 @@ class Message {
 	}
 	
 	/**
+	 * Minimize duplication of WooCommerce alert messages
+	 */
+	public function clearNotices() {
+		wp_clear_notices();
+	}
+	
+	/**
+	 * Return the correct Destination constant value
+	 *
+	 * @param string $destination
+	 *
+	 * @return int
+	 */
+	private function convertDestination( $destination ) {
+		
+		if ( is_numeric( $destination ) ) {
+			return $destination;
+		}
+		
+		switch ( trim( strtolower( $destination ) ) ) {
+			
+			case 'backend':
+				$destination = self::BACKEND_LOCATION;
+				break;
+			case 'frontend':
+				$destination = self::FRONTEND_LOCATION;
+				break;
+			
+			default:
+				$destination = self::BACKEND_LOCATION;
+		}
+		
+		return $destination;
+	}
+	
+	/**
 	 * Update the cached error/warning/notice messages
 	 */
 	private function updateCache() {
@@ -144,24 +173,29 @@ class Message {
 		$cache_key = $utils->get_util_cache_key();
 		
 		$values = array(
-			'msg'        => $this->msg,
-			'msgt'       => $this->msgt,
-			'msg_source' => $this->location,
+			'msg'      => $this->msg,
+			'msgt'     => $this->msgt,
+			'location' => $this->location,
 		);
 		
-		$utils->log("Caching the error/info/warning messages");
 		Cache::set( 'err_info', $values, DAY_IN_SECONDS, $cache_key );
 	}
 	
 	/**
 	 * Display the error/warning/notice messages in the appropriate destination
 	 *
-	 * @param $destination
+	 * @param string|null $destination
 	 */
-	public function display( $destination ) {
+	public function display( $destination = null ) {
+		
+		if ( ! is_string( $destination ) ) {
+			$destination = null;
+		}
 		
 		$utils     = Utilities::get_instance();
 		$cache_key = $utils->get_util_cache_key();
+		
+		global $pmpro_pages;
 		
 		// Load from cache if there are no messages found
 		if ( empty( $this->msg ) ) {
@@ -175,45 +209,60 @@ class Message {
 			}
 		}
 		
-		if ( ! empty( $this->msg ) && ! empty( $this->msgt ) ) {
+		if ( empty( $this->msg ) ) {
+			return;
+		}
+		
+		if ( empty( $destination ) && Utilities::is_admin() ) {
+			$destination = self::BACKEND_LOCATION;
+		}
+		
+		if ( empty( $destination ) && ( false === Utilities::is_admin() || is_page( $pmpro_pages ) || is_account_page() || is_cart() || is_checkout() ) ) {
+			$destination = self::FRONTEND_LOCATION;
+		}
+		
+		$found_keys = $this->extractByDestination( $this->convertDestination( $destination ) );
+		
+		$utils->log( "Have a total of " . count( $this->msg ) . " message(s). Found " . count( $found_keys ) . " messages for location {$destination}: ");
+		
+		foreach ( $found_keys as $key ) {
 			
-			$found_keys = $this->extractByDestination( $destination );
+			if ( empty( $this->location ) || ! isset( $this->location[ $key ] ) ) {
+				$location = self::BACKEND_LOCATION;
+			} else {
+				$location = $this->location[ $key ];
+				unset( $this->location[ $key ] );
+			}
 			
-			$utils->log( "Have a total of " . count( $this->msg ) . " admin message(s) to display" );
-			
-			foreach ( $found_keys as $key ) {
+			if ( ! empty( $this->msg[ $key ] ) ) {
 				
-				if ( ! empty( $this->msg[ $key ] ) ) {
+				switch ( intval( $location ) ) {
 					
-					switch ( $this->location[ $key ] ) {
-						
-						case self::FRONTEND_LOCATION:
-							$this->displayFrontend( $this->msg[ $key ], $this->msgt[ $key ] );
-							break;
-						
-						case self::BACKEND_LOCATION:
-							
-							$this->displayBackend( $this->msg[ $key ], $this->msgt[ $key ] );
-							break;
-						
-						default:
-							
-							global $msg;
-							global $msgt;
-							
-							$msg  = $this->msg[ $key ];
-							$msgt = $this->msgt[ $key ];
-					}
+					case self::FRONTEND_LOCATION:
+						$utils->log( "Showing on front-end of site" );
+						$this->displayFrontend( $this->msg[ $key ], $this->msgt[ $key ] );
+						break;
 					
-					unset( $this->msg[ $key ] );
-					unset( $this->msgt[ $key ] );
-					unset( $this->location[ $key ] );
+					case self::BACKEND_LOCATION:
+						$utils->log( "Showing on back-end of site" );
+						$this->displayBackend( $this->msg[ $key ], $this->msgt[ $key ] );
+						break;
+					
+					default:
+						
+						global $msg;
+						global $msgt;
+						
+						$msg  = $this->msg[ $key ];
+						$msgt = $this->msgt[ $key ];
 				}
+				
+				unset( $this->msg[ $key ] );
+				unset( $this->msgt[ $key ] );
 			}
 		}
 		
 		if ( ! empty( $this->msg ) ) {
-			
 			$this->updateCache();
 		} else {
 			Cache::delete( 'err_info', $cache_key );
@@ -223,7 +272,7 @@ class Message {
 	/**
 	 * Return list of message keys that match the specified destination
 	 *
-	 * @param $destination
+	 * @param int $destination
 	 *
 	 * @return array
 	 */
@@ -233,7 +282,7 @@ class Message {
 		
 		foreach ( $this->location as $msg_key => $location ) {
 			
-			if ( 1 === preg_match( '/' . preg_quote( $destination ) . '/', $location ) ) {
+			if ( $location == $destination ) {
 				$keys[] = $msg_key;
 			}
 		}
@@ -251,25 +300,21 @@ class Message {
 		
 		if ( $this->hasWooCommerce() ) {
 			
-			if ( is_checkout() || is_cart() || is_account_page() ) {
-				wc_add_notice( $msg, $type );
-			}
+			Utilities::get_instance()->log( "Attempting to show on WooCommerce front-end" );
+			wc_add_notice( $msg, $type );
 		}
 		
 		if ( $this->hasPMPro() ) {
 			
-			global $pmpro_pages;
+			Utilities::get_instance()->log( "Attempting to show on PMPro front-end" );
 			
-			if ( is_page( $pmpro_pages ) ) {
-				
-				global $pmpro_msg;
-				global $pmpro_msgt;
-				
-				$pmpro_msg  = $msg;
-				$pmpro_msgt = "pmpro_{$type}";
-				
-				pmpro_setMessage( $pmpro_msg, $pmpro_msgt, true );
-			}
+			global $pmpro_msg;
+			global $pmpro_msgt;
+			
+			$pmpro_msg  = $msg;
+			$pmpro_msgt = "pmpro_{$type}";
+			
+			pmpro_setMessage( $pmpro_msg, $pmpro_msgt, true );
 		}
 	}
 	
