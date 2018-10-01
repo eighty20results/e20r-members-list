@@ -129,13 +129,6 @@ class Message {
 	}
 	
 	/**
-	 * Minimize duplication of WooCommerce alert messages
-	 */
-	public function clearNotices() {
-		wp_clear_notices();
-	}
-	
-	/**
 	 * Return the correct Destination constant value
 	 *
 	 * @param string $destination
@@ -182,6 +175,13 @@ class Message {
 	}
 	
 	/**
+	 * Minimize duplication of WooCommerce alert messages
+	 */
+	public function clearNotices() {
+		wp_clear_notices();
+	}
+	
+	/**
 	 * Display the error/warning/notice messages in the appropriate destination
 	 *
 	 * @param string|null $destination
@@ -223,7 +223,7 @@ class Message {
 		
 		$found_keys = $this->extractByDestination( $this->convertDestination( $destination ) );
 		
-		$utils->log( "Have a total of " . count( $this->msg ) . " message(s). Found " . count( $found_keys ) . " messages for location {$destination}: ");
+		$utils->log( "Have a total of " . count( $this->msg ) . " message(s). Found " . count( $found_keys ) . " messages for location {$destination}: " );
 		
 		foreach ( $found_keys as $key ) {
 			
@@ -296,12 +296,12 @@ class Message {
 	 * @param string $msg
 	 * @param int    $type
 	 */
-	private function displayFrontend( $msg, $type ) {
+	private function displayFrontend( $message, $type ) {
 		
 		if ( $this->hasWooCommerce() ) {
 			
 			Utilities::get_instance()->log( "Attempting to show on WooCommerce front-end" );
-			wc_add_notice( $msg, $type );
+			wc_add_notice( $message, $type );
 		}
 		
 		if ( $this->hasPMPro() ) {
@@ -310,9 +310,13 @@ class Message {
 			
 			global $pmpro_msg;
 			global $pmpro_msgt;
+			global $msg;
+			global $msgt;
 			
-			$pmpro_msg  = $msg;
+			$pmpro_msg  = $message;
 			$pmpro_msgt = "pmpro_{$type}";
+			$msg        = $pmpro_msg;
+			$msgt       = $pmpro_msgt;
 			
 			pmpro_setMessage( $pmpro_msg, $pmpro_msgt, true );
 		}
