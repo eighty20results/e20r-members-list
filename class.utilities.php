@@ -69,26 +69,6 @@ if ( ! class_exists( '\E20R\Utilities\Utilities' ) ) {
 		 */
 		private static $instance = null;
 		
-		/**
-		 * Array of error messages
-		 *
-		 * @var array $msg
-		 */
-		private $msg = array();
-		
-		/**
-		 * Array of message types (notice, warning, error)
-		 *
-		 * @var array $msgt
-		 */
-		private $msgt = array();
-		
-		/**
-		 * Array of message sources (unlimited)
-		 * @var array $msg_source
-		 */
-		private $msg_source = array();
-		
 		private $blog_id = null;
 		
 		/**
@@ -108,25 +88,31 @@ if ( ! class_exists( '\E20R\Utilities\Utilities' ) ) {
 			$this->blog_id = get_current_blog_id();
 			
 			self::$cache_key = "e20r_pw_utils_{$this->blog_id}";
+			$messages        = new Message();
 			
-			if ( null !== ( $tmp = Cache::get( "err_info", self::$cache_key ) ) ) {
-				
-				$this->msg        = is_array( $tmp['msg'] ) ? $tmp['msg'] : array( $tmp['msg'] );
-				$this->msgt       = is_array( $tmp['msgt'] ) ? $tmp['msgt'] : array( $tmp['msgt'] );
-				$this->msg_source = is_array( $tmp['msg_source'] ) ? $tmp['msg_source'] : array( $tmp['msg_source'] );
-			}
+			$this->log( "Front or backend???" );
 			
-			if ( true === self::is_admin() ) {
-				if ( ! has_action( 'admin_notices', array( $this, 'display_messages' ) ) ) {
-					add_action( 'admin_notices', array( $this, 'display_messages' ), 10 );
-				}
+			if ( self::is_admin() ) {
 				
 				// Clear cache when updating discount codes or membership level definitions
 				add_action( 'pmpro_save_discount_code', array( $this, 'clear_delay_cache' ), 9999, 1 );
 				add_action( 'pmpro_save_membership_level', array( $this, 'clear_delay_cache' ), 9999, 1 );
 				
+				if ( ! has_action( 'admin_notices', array( $messages, 'display' ) ) ) {
+					
+					$this->log( "Loading message(s) for backend" );
+					add_action( 'admin_notices', array( $messages, 'display' ), 10 );
+					
+				}
+			} else {
+				
+				$this->log( "Loading message(s) for frontend" );
+				add_filter( 'woocommerce_update_cart_action_cart_updated', array( $messages, 'clearNotices' ), 10, 1 );
+				add_action( 'woocommerce_init', array( $messages, 'display' ), 1 );
+				
+				add_filter( 'pmpro_email_field_type', array( $messages, 'filter_passthrough' ), 1, 1 );
+				add_filter( 'pmpro_get_membership_levels_for_user', array( $messages, 'filter_passthrough' ), 10, 2 );
 			}
-			
 		}
 		
 		
@@ -298,6 +284,7 @@ if ( ! class_exists( '\E20R\Utilities\Utilities' ) ) {
 		public function get_message( $type = 'notice' ) {
 			
 			$messages = new Message();
+			
 			return $messages->get( $type );
 		}
 		
