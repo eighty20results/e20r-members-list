@@ -294,10 +294,9 @@
 
             window.console.log("Value: ", $date, select_val);
 
-            if (null !== select_val) {
+            if ('undefined' !== select_val) {
 
                 $label.text(select.find('option:selected').text());
-                $new_value_field.val(select_val);
                 test_checked = true;
             }
 
@@ -308,8 +307,6 @@
                 window.console.log("Date info? ", date);
 
                 if (Object.prototype.toString.call(date) === "[object Date]") {
-                    // Set the new input value
-                    $new_value_field.val($date);
                     $label.text(date.toLocaleDateString(e20rml.locale, self.dateOpts));
                 }
 
