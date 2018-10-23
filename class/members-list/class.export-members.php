@@ -244,12 +244,12 @@ class Export_Members {
 		$utils = Utilities::get_instance();
 		$level = $utils->get_variable( 'membership_id', '' );
 		
-		$header_list = "user_id,username,firstname,lastname,email,billing firstname,billing lastname,address1,address2,city,state,zipcode,country,phone,membership,initial payment,fee,term,discount_code_id,discount_code,registered,membership start";
+		$header_list = "user_id,user_loginname,first_name,last_name,user_email,pmpro_bfirstname,pmpro_blastname,pmpro_baddress1,pmpro_baddress2,pmpro_bcity,pmpro_bstate,pmpro_bzipcode,pmpro_bcountry,pmpro_bphone,membership_id,membership_initial_payment,membership_billing_amount,membership_cycle_period,membership_code_id,discount_code,user_registered,membership_startdate";
 		
 		if ( in_array( $level, array( "oldmembers", "expired", 'cancelled' ) ) ) {
-			$header_list .= ",membership end";
+			$header_list .= ",membership_enddate";
 		} else {
-			$header_list .= ",membership expired";
+			$header_list .= ",membership_enddate";
 		}
 		
 		$extra_cols = apply_filters( "pmpro_members_list_csv_extra_columns", array() );
