@@ -1,1 +1,5 @@
-BUG FIX: No longer supporting per line "Cancel Membership" link
+ENHANCEMENT: Change the names of the export .csv columns to match the expected column names for the Import Members from CSV plugin
+ENHANCEMENT: Added PHPDoc block for the Members_List::metadata_where() method
+ENHANCEMENT: WPCS formatting of Members_List() class
+ENHANCEMENT: Updated the Utilities sub-module
+BUG FIX: An update would sometimes get ignored (not saved)
