@@ -535,7 +535,7 @@ if ( ! class_exists( '\E20R\Utilities\Utilities' ) ) {
 			
 			$now = current_time( 'timestamp' );
 			
-			if ( true === $this->plugin_is_active( 'pmprosd_daysUntilDate' ) ) {
+			if ( true === $this->plugin_is_active( null, 'pmprosd_daysUntilDate' ) ) {
 				
 				$this->log( "The PMPro Subscription Delays add-on is active on this system" );
 				
