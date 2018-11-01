@@ -88,7 +88,7 @@ if ( ! class_exists( '\E20R\Utilities\Utilities' ) ) {
 			$this->blog_id = get_current_blog_id();
 			
 			self::$cache_key = "e20r_pw_utils_{$this->blog_id}";
-			$messages        = new Message();
+			$messages        = new \E20R\Utilities\Message();
 			
 			$this->log( "Front or backend???" );
 			
