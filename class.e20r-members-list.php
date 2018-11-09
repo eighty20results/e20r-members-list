@@ -2,8 +2,8 @@
 /*
 Plugin Name: Better Members List for Paid Memberships Pro
 Plugin URI: https://eighty20results.com/e20r-members-list
-Description: Extensible, sortable & bulk action capable members listing tool for Paid Memberships Pro
-Version: 2.7
+Description: Extensible, sortable & bulk action capable members listing + export to CSV tool for Paid Memberships Pro.
+Version: 3.0
 Author: Eighty / 20 Results by Wicked Strong Chicks, LLC <thomas@eighty20results.com>
 Author URI: https://eighty20results.com/thomas-sjolshagen/
 Text Domain: e20r-members-list
@@ -32,9 +32,15 @@ namespace E20R\Members_List\Controller;
 use E20R\Members_List\Admin\Members_List_Page;
 
 if ( ! class_exists( '\\E20R\Members_List\\Controller\E20R_Members_List' ) ) {
+	/**
+	 * Class E20R_Members_List
+	 * @package E20R\Members_List\Controller
+	 */
 	class E20R_Members_List {
 		
 		/**
+		 * Instance of the Member List controller
+		 *
 		 * @var null|E20R_Members_List
 		 */
 		private static $instance = null;
