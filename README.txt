@@ -1,13 +1,13 @@
-=== E20R Enhanced Members List for Paid Memberships Pro ===
+=== E20R Better Members List for Paid Memberships Pro ===
 Contributors: eighty20results
-Tags: paid memberships pro, members, memberships, pmpro enhancements, enhanced members list, members list
+Tags: paid memberships pro, members, memberships, pmpro enhancements, better members list, members list
 Requires at least: 4.9
-Tested up to: 4.9.8
-Stable tag: 2.7
+Tested up to: 5.0
+Stable tag: 3.0
 
 == Description ==
 
-Extensible, sortable & bulk action capable members listing tool for Paid Memberships Pro
+Extensible, sortable & bulk action capable members listing tool for Paid Memberships Pro. This plugin is a complete replacement for the "Members List" functionality in PMPro and supports most of the same filters and hooks. The key differences have to do with managing columns. Now you can use the [standard WordPress filters](https://developer.wordpress.org/reference/classes/wp_list_table/) to columns you can add/remove/make sortable, additional bulk actions, etc.
 
 == Installation ==
 
@@ -15,6 +15,11 @@ Extensible, sortable & bulk action capable members listing tool for Paid Members
 1. Activate the plugin through the 'Plugins' menu in WordPress.
 
 == Changelog ==
+
+== 3.0 ==
+
+* ENHANCEMENT: Pushing to WordPress.org repository
+* BUG FIX: Prevent defining controller class more than once
 
 == 2.7 ==
 
