@@ -421,7 +421,7 @@ if ( ! class_exists( '\E20R\Utilities\Message' ) ) {
 			} ?>
 			<div
 				class="notice notice-<?php esc_html_e( $type ); ?> is-dismissible backend">
-				<p><?php esc_html_e( wp_unslash( $msg ) ); ?></p>
+				<p><?php echo wp_unslash( $msg ); ?></p>
 			</div>
 			<?php
 		}
