@@ -523,14 +523,15 @@ if ( ! class_exists( '\E20R\Utilities\E20R_Background_Process' ) ) {
 					} else {
 						unset( $batch->data[ $key ] );
 						$utils->log( "Removed task with Key {$key} - We have " . count( $batch->data ) . " tasks left..." );
+						
+						if ( ! empty( $batch->data ) ) {
+							$this->update( $batch->key, $batch->data );
+						}
 					}
 				}
 				
 				// Update or delete current batch.
-				if ( ! empty( $batch->data ) ) {
-					$utils->log( "Update batch queue" );
-					$this->update( $batch->key, $batch->data );
-				} else {
+				if ( empty( $batch->data ) ) {
 					$utils->log( "Clear batch queue" );
 					$this->delete( $batch->key );
 				}
