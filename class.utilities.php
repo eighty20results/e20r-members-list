@@ -115,6 +115,35 @@ if ( ! class_exists( '\E20R\Utilities\Utilities' ) ) {
 			}
 		}
 		
+		/**
+		 * Mask the text if it's a valid email address
+		 *
+		 * @param string $email
+		 * @param int    $minLength
+		 * @param int    $maxLength
+		 * @param string $mask
+		 *
+		 * @return string
+		 */
+		public function maybeMaskEmail( $email, $minLength = 3, $maxLength = 10, $mask = '***' ) {
+			
+			if ( ! is_email( $email ) ) {
+				return $email;
+			}
+			
+			$atPos  = strpos( $email, '@' );
+			$name   = substr( $email, 0, $atPos );
+			$len    = strlen( $email );
+			$domain = substr( $email, $atPos );
+			
+			if ( ( $len / 2 ) < $maxLength ) {
+				$maxLength = ( $len / 2 );
+			}
+			
+			$shortenedEmail = ( ( $len > $minLength ) ? substr( $name, 0, $maxLength ) : '' );
+			
+			return "{$shortenedEmail}{$mask}{$domain}";
+		}
 		
 		/**
 		 * Pattern recognize whether the data is a valid date format for this plugin
@@ -310,7 +339,7 @@ if ( ! class_exists( '\E20R\Utilities\Utilities' ) ) {
 		 * @param string $source - The error source to show.
 		 */
 		public function display_messages( $source = 'default' ) {
-			
+      
 			$message = new Message();
 			$message->display( $source );
 		}
@@ -611,19 +640,32 @@ if ( ! class_exists( '\E20R\Utilities\Utilities' ) ) {
 		}
 		
 		/**
-		 * Print a message to the WP_DEBUG logger if configured
+		 * Print a message to the WP_DEBUG logger if configured (Tries to mask email addresses)
 		 *
-		 * @param $msg
+		 * @param string $msg
 		 */
 		public function log( $msg ) {
 			
+			if ( !defined( 'WP_DEBUG' ) || defined( 'WP_DEBUG' ) && false === WP_DEBUG ) {
+				return;
+			}
+			
+			/**
+			 * Mask email addresses if applicable
+			 */
+			if ( 1 === preg_match( '/\b[^\s]+@[^\s]+/i', $msg, $match, PREG_OFFSET_CAPTURE ) ) {
+				
+				$masked_email = $this->maybeMaskEmail( $match[1] );
+				$msg          = preg_replace( '\b[^\s]+@[^\s]+/i', $masked_email, $msg );
+			}
+			
+			// Get timestamp, thread ID and function calling us
 			$tid  = sprintf( "%08x", abs( crc32( $_SERVER['REMOTE_ADDR'] . $_SERVER['REQUEST_TIME'] ) ) );
-			$time = date_i18n( 'H:m:s', strtotime( get_option( 'timezone_string' ) ) );
+			$time = date( 'H:m:s', strtotime( get_option( 'timezone_string' ) ) );
 			$from = $this->_who_called_me();
 			
-			if ( defined( "WP_DEBUG" ) && true === WP_DEBUG ) {
-				error_log( "[{$tid}]({$time}) {$from} - {$msg}" );
-			}
+			error_log( "[{$tid}]({$time}) {$from} - {$msg}" );
+			
 		}
 		
 		/**
@@ -903,8 +945,15 @@ if ( ! class_exists( '\E20R\Utilities\Utilities' ) ) {
 			
 			$string  = '';
 			$max_len = mb_strlen( $keyspace, '8bit' ) - 1;
-			for ( $i = 0; $i < $length; ++ $i ) {
-				$string .= $keyspace[ random_int( 0, $max_len ) ];
+			
+			try {
+				for ( $i = 0; $i < $length; ++ $i ) {
+					$string .= $keyspace[ random_int( 0, $max_len ) ];
+				}
+			} catch ( \Exception $e ) {
+				$this->log( "Error generating random string: " . $e->getMessage() );
+				
+				return false;
 			}
 			
 			return $string;

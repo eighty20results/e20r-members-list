@@ -25,7 +25,7 @@ namespace E20R\Utilities\Licensing;
 use E20R\Utilities\Utilities;
 use E20R\Utilities\Cache;
 
-if ( !defined('E20R_LICENSING_DEBUG' ) ) {
+if ( ! defined( 'E20R_LICENSING_DEBUG' ) ) {
 	define( 'E20R_LICENSING_DEBUG', false );
 }
 if ( ! class_exists( '\E20R\Utilities\Licensing\Licensing' ) ) {
@@ -144,7 +144,8 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\Licensing' ) ) {
 			
 			if ( empty( $settings['expires'] ) ) {
 				
-				$utils->log("NOTICE: The {$product} license does not expire");
+				$utils->log( "NOTICE: The {$product} license does not expire" );
+				
 				return false;
 			}
 			
@@ -154,15 +155,15 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\Licensing' ) ) {
 			
 			$expiration_interval     = apply_filters( 'e20r_licensing_expiration_warning_intervals', 30 );
 			$calculated_warning_time = strtotime( "+ {$expiration_interval} day", current_time( 'timestamp' ) );
-			$diff                    = $settings['expires'] - current_time('timestamp' );
+			$diff                    = $settings['expires'] - current_time( 'timestamp' );
 			
 			if ( E20R_LICENSING_DEBUG ) {
 				$utils->log( "{$product} scheduled to expire on {$settings['expires']} vs {$calculated_warning_time}" );
 			}
 			
-			if ( $settings['expires'] <= $calculated_warning_time && $settings['expires'] >= current_time('timestamp' ) && $diff > 0 ) {
+			if ( $settings['expires'] <= $calculated_warning_time && $settings['expires'] >= current_time( 'timestamp' ) && $diff > 0 ) {
 				return true;
-			} else if ( $settings['expires'] <= current_time('timestamp' ) && $diff <= 0 ) {
+			} else if ( $settings['expires'] <= current_time( 'timestamp' ) && $diff <= 0 ) {
 				return - 1;
 			}
 			
@@ -259,7 +260,7 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\Licensing' ) ) {
 									if ( E20R_LICENSING_DEBUG ) {
 										$utils->log( "Flagging {$settings['key']} as already active for this server" );
 									}
-									$state = self::E20R_LICENSE_DOMAIN_ACTIVE;
+									$state              = self::E20R_LICENSE_DOMAIN_ACTIVE;
 									$settings['status'] = 'active';
 									break;
 							}
@@ -282,7 +283,7 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\Licensing' ) ) {
 		/**
 		 * Deactivate the specified license (product/license key)
 		 *
-		 * @param string $product
+		 * @param string     $product
 		 * @param array|null $settings
 		 *
 		 * @return bool
@@ -299,6 +300,7 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\Licensing' ) ) {
 				if ( E20R_LICENSING_DEBUG ) {
 					$utils->log( "No license key, so nothing to deactivate" );
 				}
+				
 				return false;
 			}
 			
@@ -335,8 +337,9 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\Licensing' ) ) {
 			
 			if ( 'success' !== $decoded->result ) {
 				if ( E20R_LICENSING_DEBUG ) {
-					$utils->log("Error deactivating the license!");
+					$utils->log( "Error deactivating the license!" );
 				}
+				
 				return false;
 			}
 			
@@ -359,7 +362,7 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\Licensing' ) ) {
 		 *
 		 * @param string     $product
 		 * @param null|array $settings
-		 * @param bool $force
+		 * @param bool       $force
 		 *
 		 * @return bool
 		 */
@@ -375,10 +378,11 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\Licensing' ) ) {
 				$settings = self::get_settings( $product );
 			}
 			
-			if ( empty( $settings['key'] )  ) {
+			if ( empty( $settings['key'] ) ) {
 				if ( E20R_LICENSING_DEBUG ) {
 					$utils->log( "{$product} has no key stored. Returning false" );
 				}
+				
 				return $license_status;
 			}
 			
@@ -520,7 +524,7 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\Licensing' ) ) {
 					'sslverify'   => true,
 					'httpversion' => '1.1',
 					'decompress'  => true,
-					'body' 	      => $api_params,
+					'body'        => $api_params,
 				)
 			);
 			
@@ -612,6 +616,7 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\Licensing' ) ) {
 			if ( E20R_LICENSING_DEBUG ) {
 				$utils->log( "Requested and returning settings for {$product}" );
 			}
+			
 			return isset( $settings[ $product ] ) ? $settings[ $product ] : null;
 		}
 		
@@ -771,7 +776,7 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\Licensing' ) ) {
 				return false;
 			}
 			
-			$item = $check_menu['options-general.php'];
+			$item = isset( $check_menu['options-general.php'] ) ? $check_menu['options-general.php'] : array();
 			
 			if ( true === $sub ) {
 				
@@ -851,14 +856,17 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\Licensing' ) ) {
 					$utils->log( "Generate settings fields for {$k}?" );
 				}
 				
-				if ( ! in_array( $k, array( 'example_gateway_addon', 'new_licenses' )) && isset( $license['key'] ) && $license['key'] != 'e20r_default_license' && ! empty( $license['key'] ) ) {
+				if ( ! in_array( $k, array(
+						'example_gateway_addon',
+						'new_licenses',
+					) ) && isset( $license['key'] ) && $license['key'] != 'e20r_default_license' && ! empty( $license['key'] ) ) {
 					
 					if ( E20R_LICENSING_DEBUG ) {
 						$utils->log( "Previously activated license: {$k}: adding {$license['fulltext_name']} fields" );
 						$utils->log( "Settings: " . print_r( $license, true ) );
 					}
 					
-					if ( empty( $license['status']) ) {
+					if ( empty( $license['status'] ) ) {
 						$license['status'] = 'inactive';
 					}
 					
