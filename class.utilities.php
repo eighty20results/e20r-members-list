@@ -653,9 +653,9 @@ if ( ! class_exists( '\E20R\Utilities\Utilities' ) ) {
 			/**
 			 * Mask email addresses if applicable
 			 */
-			if ( 1 === preg_match( '/\b[^\s]+@[^\s]+/i', $msg, $match, PREG_OFFSET_CAPTURE ) ) {
+			if ( 1 === preg_match( '/\b[^\s]+@[^\s]+/i', $msg, $match ) ) {
 				
-				$masked_email = $this->maybeMaskEmail( $match[1] );
+				$masked_email = $this->maybeMaskEmail( $match[0] );
 				$msg          = preg_replace( '\b[^\s]+@[^\s]+/i', $masked_email, $msg );
 			}
 			
