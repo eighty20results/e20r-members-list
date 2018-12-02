@@ -656,7 +656,7 @@ if ( ! class_exists( '\E20R\Utilities\Utilities' ) ) {
 			if ( 1 === preg_match( '/\b[^\s]+@[^\s]+/i', $msg, $match ) ) {
 				
 				$masked_email = $this->maybeMaskEmail( $match[0] );
-				$msg          = preg_replace( '\b[^\s]+@[^\s]+/i', $masked_email, $msg );
+				$msg          = preg_replace( '/\b[^\s]+@[^\s]+/i', $masked_email, $msg );
 			}
 			
 			// Get timestamp, thread ID and function calling us
