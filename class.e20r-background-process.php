@@ -583,9 +583,9 @@ if ( ! class_exists( '\E20R\Utilities\E20R_Background_Process' ) ) {
 		 */
 		protected function get_memory_limit() {
 			
-			if ( function_exists( 'ini_get' ) ) {
+			if ( function_exists( 'get_cfg_var' ) ) {
 				
-				$memory_limit = ini_get( 'memory_limit' );
+				$memory_limit = get_cfg_var( 'memory_limit' );
 			} else {
 				
 				// Sensible default.
@@ -615,7 +615,7 @@ if ( ! class_exists( '\E20R\Utilities\E20R_Background_Process' ) ) {
 			
 			$utils = Utilities::get_instance();
 			
-			$current_timeout    = intval( ini_get( 'max_execution_time' ) );
+			$current_timeout    = intval( get_cfg_var( 'max_execution_time' ) );
 			$default_time_limit = apply_filters( 'e20r-background-processing-time-limit', 20 );
 			$return             = false;
 			
@@ -662,7 +662,7 @@ if ( ! class_exists( '\E20R\Utilities\E20R_Background_Process' ) ) {
 			
 			$utils = Utilities::get_instance();
 			
-			$current_timeout    = intval( ini_get( 'max_execution_time' ) );
+			$current_timeout    = intval( get_cfg_var( 'max_execution_time' ) );
 			$default_time_limit = apply_filters( 'e20r-background-processing-time-limit', 20 );
 			
 			if ( ! empty( $current_timeout ) ) {
@@ -732,7 +732,7 @@ if ( ! class_exists( '\E20R\Utilities\E20R_Background_Process' ) ) {
 		 */
 		public function schedule_cron_healthcheck( $schedules ) {
 			
-			$current_timeout = ini_get( 'max_execution_time' );
+			$current_timeout = get_cfg_var( 'max_execution_time' );
 			$min_interval    = 2;
 			
 			if ( ! empty( $current_timeout ) ) {
