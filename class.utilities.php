@@ -653,12 +653,13 @@ if ( ! class_exists( '\E20R\Utilities\Utilities' ) ) {
 			/**
 			 * Mask email addresses if applicable
 			 */
+			/*
 			if ( 1 === preg_match( '/\b[^\s]+@[^\s]+/i', $msg, $match ) ) {
 				
 				$masked_email = $this->maybeMaskEmail( $match[0] );
 				$msg          = preg_replace( '/\b[^\s]+@[^\s]+/i', $masked_email, $msg );
 			}
-			
+			*/
 			// Get timestamp, thread ID and function calling us
 			$tid  = sprintf( "%08x", abs( crc32( $_SERVER['REMOTE_ADDR'] . $_SERVER['REQUEST_TIME'] ) ) );
 			$time = date( 'H:m:s', strtotime( get_option( 'timezone_string' ) ) );
