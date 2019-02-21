@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (c) 2017-2018 - Eighty / 20 Results by Wicked Strong Chicks.
+ * Copyright (c) 2017-2019 - Eighty / 20 Results by Wicked Strong Chicks.
  * ALL RIGHTS RESERVED
  *
  * This program is free software: you can redistribute it and/or modify
@@ -897,7 +897,7 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\Licensing' ) ) {
 			}
 			
 			
-			$new_licenses = $settings['new_licenses'];
+			$new_licenses = isset( $settings['new_licenses'] ) ? $settings['new_licenses'] : array();
 			
 			foreach ( $new_licenses as $nk => $new ) {
 				
