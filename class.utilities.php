@@ -723,9 +723,9 @@ if ( ! class_exists( '\E20R\Utilities\Utilities' ) ) {
 					}
 				}
 				
-				if ( ( ! is_array( $field ) ) && ctype_alpha( $field ) ||
+				if ( !is_email( $field ) && ( ( ! is_array( $field ) ) && ctype_alpha( $field ) ||
 				     ( ( ! is_array( $field ) ) && strtotime( $field ) ) ||
-				     ( ( ! is_array( $field ) ) && is_string( $field ) )
+				     ( ( ! is_array( $field ) ) && is_string( $field ) ) )
 				) {
 					
 					if ( strtolower( $field ) == 'yes' ) {
@@ -739,16 +739,22 @@ if ( ! class_exists( '\E20R\Utilities\Utilities' ) ) {
 					}
 				}
 				
+				if ( function_exists( 'is_email' ) && is_email( $field ) ) {
+					$field = sanitize_email( $field );
+				}
+				
 			} else {
 				
-				if ( is_float( $field + 1 ) ) {
-					
+				if ( is_float( $field + 1 ) ) {					
 					$field = sanitize_text_field( $field );
 				}
 				
-				if ( is_int( $field + 1 ) ) {
-					
+				if ( is_int( $field + 1 ) ) {				
 					$field = intval( $field );
+				}
+				
+				if ( is_bool( $field ) ) {
+					$field = (bool) $field;
 				}
 			}
 			
