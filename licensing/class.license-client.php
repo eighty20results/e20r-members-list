@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (c) 2017-2018 - Eighty / 20 Results by Wicked Strong Chicks.
+ * Copyright (c) 2017-2019 - Eighty / 20 Results by Wicked Strong Chicks.
  * ALL RIGHTS RESERVED
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,6 +18,7 @@
  */
 
 namespace E20R\Utilities\Licensing;
+
 use E20R\Utilities\Utilities;
 
 if ( ! class_exists( '\E20R\Utilities\Licensing\License_Client' ) ) {
@@ -94,7 +95,8 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\License_Client' ) ) {
 				'value'         => null,
 				'email_field'   => "license_email",
 				'email_value'   => null,
-				'placeholder'   => sprintf( __( "Paste the purchased %s key here", "e20r-licensing" ), $plugin_settings['label'] ),
+				'product_sku'   => strtoupper( $plugin_settings['key_prefix'] ),
+				'placeholder'   => sprintf( __( "Paste the received '%s' key here", "e20r-licensing" ), $plugin_settings['label'] ),
 			);
 			
 			return $license_settings;
