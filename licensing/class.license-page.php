@@ -1,5 +1,25 @@
 <?php
 /**
+ * *
+ *   * Copyright (c) 2019. - Eighty / 20 Results by Wicked Strong Chicks.
+ *   * ALL RIGHTS RESERVED
+ *   *
+ *   * This program is free software: you can redistribute it and/or modify
+ *   * it under the terms of the GNU General Public License as published by
+ *   * the Free Software Foundation, either version 3 of the License, or
+ *   * (at your option) any later version.
+ *   *
+ *   * This program is distributed in the hope that it will be useful,
+ *   * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   * GNU General Public License for more details.
+ *   *
+ *   * You should have received a copy of the GNU General Public License
+ *   * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+
+/**
  *  Copyright (c) 2019. - Eighty / 20 Results by Wicked Strong Chicks.
  *  ALL RIGHTS RESERVED
  *
@@ -65,24 +85,24 @@ class License_Page {
 		
 		$pricing_page = apply_filters( 'e20r-license-pricing-page-url', 'https://eighty20results.com/shop/' );
 		?>
-		<p class="e20r-licensing-section"><?php _e( "This add-on is distributed under version 2 of the GNU Public License (GPLv2). One of the things the GPLv2 license grants is the right to use this software on your site, free of charge.", Licensing::get_text_domain() ); ?></p>
+		<p class="e20r-licensing-section"><?php _e( "This add-on is distributed under version 2 of the GNU Public License (GPLv2). One of the things the GPLv2 license grants is the right to use this software on your site, free of charge.", 'e20r-licensing-utility' ); ?></p>
 		<p class="e20r-licensing-section">
 			<a href="<?php echo esc_url_raw( $pricing_page ); ?>"
-			   target="_blank"><?php _e( "Purchase Licenses/Add-ons &raquo;", Licensing::get_text_domain() ); ?></a>
+			   target="_blank"><?php _e( "Purchase Licenses/Add-ons &raquo;", 'e20r-licensing-utility' ); ?></a>
 		</p>
 		<div class="form-table">
 			<div class="e20r-license-settings-row">
 				<div class="e20r-license-settings-column e20r-license-settings-header e20r-license-name-column">
-					<?php _e( "Name", Licensing::get_text_domain() ); ?>
+					<?php _e( "Name", 'e20r-licensing-utility' ); ?>
 				</div>
 				<div class="e20r-license-settings-column e20r-license-settings-header e20r-license-key-column">
-					<?php _e( "Key", Licensing::get_text_domain() ); ?>
+					<?php _e( "Key", 'e20r-licensing-utility' ); ?>
 				</div>
 				<div class="e20r-license-settings-column e20r-license-settings-header e20r-license-email-column">
-					<?php _e( "Email", Licensing::get_text_domain() ); ?>
+					<?php _e( "Email", 'e20r-licensing-utility' ); ?>
 				</div>
 				<div class="e20r-license-settings-column e20r-license-settings-header e20r-license-deactivate-column">
-					<?php _e( "Deactivate", Licensing::get_text_domain() ); ?>
+					<?php _e( "Deactivate", 'e20r-licensing-utility' ); ?>
 				</div>
 			</div>
 		</div>
@@ -200,7 +220,7 @@ class License_Page {
 		     ( ! current_user_can( "manage_options" ) &&
 		       ! current_user_can( "e20r_license_admin" ) )
 		) {
-			wp_die( __( "You are not permitted to perform this action.", Licensing::get_text_domain() ) );
+			wp_die( __( "You are not permitted to perform this action.", 'e20r-licensing-utility' ) );
 		}
 		
 		$utils = Utilities::get_instance();
@@ -263,8 +283,8 @@ class License_Page {
 					<div class="notice notice-error inline">
 					<p>
 						<strong><?php printf(
-								__( 'Your <em>%s</em> license is either not configured, invalid or has expired.', Licensing::get_text_domain() ), $license['fulltext_name'] ); ?></strong>
-						<?php printf( __( 'Visit your Eighty / 20 Results <a href="%s" target="_blank">Support Account</a> page to confirm that your account is active and to locate your license key.', Licensing::get_text_domain() ), $support_account_url ); ?>
+								__( 'Your <em>%s</em> license is either not configured, invalid or has expired.', 'e20r-licensing-utility' ), $license['fulltext_name'] ); ?></strong>
+						<?php printf( __( 'Visit your Eighty / 20 Results <a href="%s" target="_blank">Support Account</a> page to confirm that your account is active and to locate your license key.', 'e20r-licensing-utility' ), $support_account_url ); ?>
 					</p>
 					</div><?php
 				}
@@ -273,8 +293,8 @@ class License_Page {
 					?>
 					<div class="notice notice-info inline">
 					<p>
-						<strong><?php _e( 'Thank you!', Licensing::get_text_domain() ); ?></strong>
-						<?php printf( __( "A valid %s license key is being used on this site.", Licensing::get_text_domain() ), $license['fulltext_name'] ); ?>
+						<strong><?php _e( 'Thank you!', 'e20r-licensing-utility' ); ?></strong>
+						<?php printf( __( "A valid %s license key is being used on this site.", 'e20r-licensing-utility' ), $license['fulltext_name'] ); ?>
 					</p>
 					</div><?php
 					

@@ -1,5 +1,25 @@
 <?php
 /**
+ * *
+ *   * Copyright (c) 2019. - Eighty / 20 Results by Wicked Strong Chicks.
+ *   * ALL RIGHTS RESERVED
+ *   *
+ *   * This program is free software: you can redistribute it and/or modify
+ *   * it under the terms of the GNU General Public License as published by
+ *   * the Free Software Foundation, either version 3 of the License, or
+ *   * (at your option) any later version.
+ *   *
+ *   * This program is distributed in the hope that it will be useful,
+ *   * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   * GNU General Public License for more details.
+ *   *
+ *   * You should have received a copy of the GNU General Public License
+ *   * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+
+/**
  *  Copyright (c) 2019. - Eighty / 20 Results by Wicked Strong Chicks.
  *  ALL RIGHTS RESERVED
  *
@@ -85,7 +105,7 @@ class License_Server {
 		// Check for error in the response
 		if ( is_wp_error( $response ) ) {
 			
-			$msg = sprintf( __( "E20R Licensing: %s", Licensing::get_text_domain() ), $response->get_error_message() );
+			$msg = sprintf( __( "E20R Licensing: %s", 'e20r-licensing-utility' ), $response->get_error_message() );
 			if ( E20R_LICENSING_DEBUG ) {
 				$utils->log( $msg );
 			}
@@ -104,22 +124,22 @@ class License_Server {
 			
 			switch ( json_last_error() ) {
 				case JSON_ERROR_DEPTH:
-					$error = __( 'Maximum stack depth exceeded', Licensing::get_text_domain() );
+					$error = __( 'Maximum stack depth exceeded', 'e20r-licensing-utility' );
 					break;
 				case JSON_ERROR_STATE_MISMATCH:
-					$error = __( 'Underflow or the modes mismatch', Licensing::get_text_domain() );
+					$error = __( 'Underflow or the modes mismatch', 'e20r-licensing-utility' );
 					break;
 				case JSON_ERROR_CTRL_CHAR:
-					$error = __( 'Unexpected control character found', Licensing::get_text_domain() );
+					$error = __( 'Unexpected control character found', 'e20r-licensing-utility' );
 					break;
 				case JSON_ERROR_SYNTAX:
-					$error = __( 'Syntax error, malformed JSON', Licensing::get_text_domain() );
+					$error = __( 'Syntax error, malformed JSON', 'e20r-licensing-utility' );
 					break;
 				case JSON_ERROR_UTF8:
-					$error = __( 'Malformed UTF-8 characters, possibly incorrectly encoded', Licensing::get_text_domain() );
+					$error = __( 'Malformed UTF-8 characters, possibly incorrectly encoded', 'e20r-licensing-utility' );
 					break;
 				default:
-					$error = sprintf( __( "No error, supposedly? %s", Licensing::get_text_domain() ), print_r( json_last_error(), true ) );
+					$error = sprintf( __( "No error, supposedly? %s", 'e20r-licensing-utility' ), print_r( json_last_error(), true ) );
 			}
 			
 			if ( E20R_LICENSING_DEBUG ) {
@@ -228,7 +248,7 @@ class License_Server {
 						$name = $product_name;
 					}
 					
-					$msg = sprintf( __( "Sorry, no valid license found for: %s", Licensing::get_text_domain() ), $name );
+					$msg = sprintf( __( "Sorry, no valid license found for: %s", 'e20r-licensing-utility' ), $name );
 					if ( E20R_LICENSING_DEBUG ) {
 						$utils->log( $msg );
 					}
@@ -265,7 +285,7 @@ class License_Server {
 							}
 							if ( false === self::update_settings( $product, $settings ) ) {
 								
-								$msg = sprintf( __( "Unable to save license settings for %s", Licensing::get_text_domain() ), $product );
+								$msg = sprintf( __( "Unable to save license settings for %s", 'e20r-licensing-utility' ), $product );
 								if ( E20R_LICENSING_DEBUG ) {
 									$utils->log( $msg );
 								}
@@ -295,7 +315,7 @@ class License_Server {
 				if ( isset( $settings['expires'] ) && $settings['expires'] < current_time( 'timestamp' ) || ( isset( $settings['active'] ) && 'active' !== $settings['status'] ) ) {
 					
 					$msg = sprintf(
-						__( "Your update license has expired for the %s add-on!", Licensing::get_text_domain() ),
+						__( "Your update license has expired for the %s add-on!", 'e20r-licensing-utility' ),
 						$settings['fulltext_name']
 					);
 					

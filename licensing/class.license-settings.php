@@ -1,5 +1,25 @@
 <?php
 /**
+ * *
+ *   * Copyright (c) 2019. - Eighty / 20 Results by Wicked Strong Chicks.
+ *   * ALL RIGHTS RESERVED
+ *   *
+ *   * This program is free software: you can redistribute it and/or modify
+ *   * it under the terms of the GNU General Public License as published by
+ *   * the Free Software Foundation, either version 3 of the License, or
+ *   * (at your option) any later version.
+ *   *
+ *   * This program is distributed in the hope that it will be useful,
+ *   * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   * GNU General Public License for more details.
+ *   *
+ *   * You should have received a copy of the GNU General Public License
+ *   * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+
+/**
  *  Copyright (c) 2019. - Eighty / 20 Results by Wicked Strong Chicks.
  *  ALL RIGHTS RESERVED
  *
@@ -77,7 +97,7 @@ class License_Settings {
 		
 		add_settings_section(
 			'e20r_licensing_section',
-			__( "Configure Licenses", Licensing::get_text_domain() ),
+			__( "Configure Licenses", 'e20r-licensing-utility' ),
 			'E20R\Utilities\Licensing\License_Page::show_licensing_section',
 			'e20r-licensing'
 		);
@@ -167,7 +187,7 @@ class License_Settings {
 						'email_field'   => "license_email",
 						'product_sku'   => $license['product_sku'],
 						'email_value'   => ! empty( $license['email'] ) ? $license['email'] : null,
-						'placeholder'   => __( "Paste the purchased key here", Licensing::get_text_domain() ),
+						'placeholder'   => __( "Paste the purchased key here", 'e20r-licensing-utility' ),
 					)
 				);
 				
@@ -194,7 +214,7 @@ class License_Settings {
 				
 				add_settings_field(
 					"e20r_license_new_{$nk}",
-					sprintf( __( "Add %s license", Licensing::get_text_domain() ), $new['fulltext_name'] ),
+					sprintf( __( "Add %s license", 'e20r-licensing-utility' ), $new['fulltext_name'] ),
 					'E20R\Utilities\Licensing\License_Page::show_input',
 					'e20r-licensing',
 					'e20r_licensing_section',
@@ -687,8 +707,8 @@ class License_Settings {
 		}
 		
 		$handle = add_options_page(
-			__( "E20R Licenses", Licensing::get_text_domain() ),
-			__( "E20R Licenses", Licensing::get_text_domain() ),
+			__( "E20R Licenses", 'e20r-licensing-utility' ),
+			__( "E20R Licenses", 'e20r-licensing-utility' ),
 			'manage_options',
 			'e20r-licensing',
 			array( License_Page::get_instance(), 'licensing_page' )
