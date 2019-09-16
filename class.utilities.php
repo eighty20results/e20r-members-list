@@ -653,12 +653,13 @@ if ( ! class_exists( '\E20R\Utilities\Utilities' ) ) {
 			/**
 			 * Mask email addresses if applicable
 			 */
-			if ( 1 === preg_match( '/\b[^\s]+@[^\s]+/i', $msg, $match, PREG_OFFSET_CAPTURE ) ) {
+			/*
+			if ( 1 === preg_match( '/\b[^\s]+@[^\s]+/i', $msg, $match ) ) {
 				
-				$masked_email = $this->maybeMaskEmail( $match[1] );
-				$msg          = preg_replace( '\b[^\s]+@[^\s]+/i', $masked_email, $msg );
+				$masked_email = $this->maybeMaskEmail( $match[0] );
+				$msg          = preg_replace( '/\b[^\s]+@[^\s]+/i', $masked_email, $msg );
 			}
-			
+			*/
 			// Get timestamp, thread ID and function calling us
 			$tid  = sprintf( "%08x", abs( crc32( $_SERVER['REMOTE_ADDR'] . $_SERVER['REQUEST_TIME'] ) ) );
 			$time = date( 'H:m:s', strtotime( get_option( 'timezone_string' ) ) );
@@ -722,9 +723,9 @@ if ( ! class_exists( '\E20R\Utilities\Utilities' ) ) {
 					}
 				}
 				
-				if ( ( ! is_array( $field ) ) && ctype_alpha( $field ) ||
+				if ( !is_email( $field ) && ( ( ! is_array( $field ) ) && ctype_alpha( $field ) ||
 				     ( ( ! is_array( $field ) ) && strtotime( $field ) ) ||
-				     ( ( ! is_array( $field ) ) && is_string( $field ) )
+				     ( ( ! is_array( $field ) ) && is_string( $field ) ) )
 				) {
 					
 					if ( strtolower( $field ) == 'yes' ) {
@@ -738,16 +739,22 @@ if ( ! class_exists( '\E20R\Utilities\Utilities' ) ) {
 					}
 				}
 				
+				if ( function_exists( 'is_email' ) && is_email( $field ) ) {
+					$field = sanitize_email( $field );
+				}
+				
 			} else {
 				
-				if ( is_float( $field + 1 ) ) {
-					
+				if ( is_float( $field + 1 ) ) {					
 					$field = sanitize_text_field( $field );
 				}
 				
-				if ( is_int( $field + 1 ) ) {
-					
+				if ( is_int( $field + 1 ) ) {				
 					$field = intval( $field );
+				}
+				
+				if ( is_bool( $field ) ) {
+					$field = (bool) $field;
 				}
 			}
 			
