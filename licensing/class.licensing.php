@@ -124,6 +124,11 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\Licensing' ) ) {
 		 * @return bool
 		 */
 		public static function get_ssl_verify() {
+			
+			if ( empty( self::$instance)) {
+				self::get_instance();
+			}
+			
 			return self::$ssl_verify;
 		}
 		
@@ -133,6 +138,9 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\Licensing' ) ) {
 		 * @return bool
 		 */
 		public static function is_new_version() {
+			if ( empty( self::$instance)) {
+				self::get_instance();
+			}
 			return self::$new_version;
 		}
 		
@@ -142,6 +150,10 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\Licensing' ) ) {
 		 * @return string
 		 */
 		public static function get_text_domain() {
+			if ( empty( self::$instance)) {
+				self::get_instance();
+			}
+			
 			return self::$text_domain;
 		}
 		
@@ -166,6 +178,10 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\Licensing' ) ) {
 				}
 				
 				return false;
+			}
+			
+			if ( empty( self::$instance)) {
+				self::get_instance();
 			}
 			
 			if ( E20R_LICENSING_DEBUG ) {
@@ -229,15 +245,19 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\Licensing' ) ) {
 			$utils     = Utilities::get_instance();
 			$is_active = false;
 			
+			if ( empty( self::$instance)) {
+				self::get_instance();
+			}
+			
 			if ( E20R_LICENSING_DEBUG ) {
-				$utils->log( "New or old licensing plugin? " . ( self::$new_version ? 'New' : 'Old' ) );
+				$utils->log( "New or old licensing plugin? " . ( self::is_new_version() ? 'New' : 'Old' ) );
 			}
 			
 			if ( isset( $license_settings[ $product_stub ] ) ) {
 				$license_settings = $license_settings[ $product_stub ];
 			}
 			
-			if ( true === self::$new_version ) {
+			if ( true === self::is_new_version() ) {
 				
 				if ( E20R_LICENSING_DEBUG ) {
 					$utils->log( "Status of license under new licensing plugin... Is licensed? " . ( $is_licensed ? 'True' : 'False' ) );
@@ -249,7 +269,7 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\Licensing' ) ) {
 				               'active' === $license_settings['status'] &&
 				               true === $is_licensed
 				);
-			} else if ( false === self::$new_version ) {
+			} else if ( false === self::is_new_version() ) {
 				
 				if ( E20R_LICENSING_DEBUG ) {
 					$utils->log( "Status of license under old licensing plugin... Is licensed? " . ( $is_licensed ? 'True' : 'False' ) );
@@ -285,6 +305,10 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\Licensing' ) ) {
 			
 			$utils = Utilities::get_instance();
 			
+			if ( empty( self::$instance)) {
+				self::get_instance();
+			}
+			
 			$settings = License_Settings::get_settings( $product );
 			$expires  = null;
 			
@@ -292,7 +316,7 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\Licensing' ) ) {
 				$utils->log( "Received settings for expiration check: " . print_r( $settings, true ) );
 			}
 			
-			if ( self::$new_version ) {
+			if ( self::is_new_version() ) {
 				$expires = (int) $settings['expire'];
 			} else {
 				$expires = (int) $settings['expires'];
@@ -344,6 +368,10 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\Licensing' ) ) {
 			
 			global $current_user;
 			
+			if ( empty( self::$instance)) {
+				self::get_instance();
+			}
+			
 			$state = null;
 			$utils = Utilities::get_instance();
 			
@@ -351,7 +379,7 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\Licensing' ) ) {
 				$utils->log( "Attempting to activate {$product} on remote server using: " . print_r( $settings, true ) );
 			}
 			
-			if ( E20R_LICENSING_DEBUG && self::$new_version ) {
+			if ( E20R_LICENSING_DEBUG && self::is_new_version() ) {
 				$utils->log( "Using new license server plugin for activation..." );
 			}
 			
@@ -361,7 +389,7 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\Licensing' ) ) {
 				$settings['key'] = $product;
 			}
 			
-			if ( ! self::$new_version ) {
+			if ( ! self::is_new_version() ) {
 				$api_params = array(
 					'slm_action'        => 'slm_activate',
 					'license_key'       => $settings['key'],
@@ -395,7 +423,7 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\Licensing' ) ) {
 				return array( 'status' => 'blocked', 'settings' => null );
 			}
 			
-			if ( ! self::$new_version ) {
+			if ( ! self::is_new_version() ) {
 				
 				$utils->log( "Using old licensing infrastructure" );
 				
@@ -519,6 +547,10 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\Licensing' ) ) {
 			
 			$utils = Utilities::get_instance();
 			
+			if ( empty( self::$instance)) {
+				self::get_instance();
+			}
+			
 			if ( is_null( $settings ) ) {
 				$settings = License_Settings::get_settings( $product );
 			}
@@ -535,11 +567,11 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\Licensing' ) ) {
 				$utils->log( "Attempting to deactivate {$product} on remote server" );
 			}
 			
-			if ( E20R_LICENSING_DEBUG && self::$new_version ) {
+			if ( E20R_LICENSING_DEBUG && self::is_new_version() ) {
 				$utils->log( "Using new license server plugin for deactivation..." );
 			}
 			
-			if ( ! self::$new_version ) {
+			if ( ! self::is_new_version() ) {
 				$api_params = array(
 					'slm_action'        => 'slm_deactivate',
 					'license_key'       => $settings['key'],
@@ -572,13 +604,13 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\Licensing' ) ) {
 				);
 			}
 			
-			if ( self::$new_version ) {
+			if ( self::is_new_version() ) {
 				$utils->log( "Sending to server: " . print_r( $api_params, true ) );
 			}
 			
 			$decoded = License_Server::send_to_license_server( $api_params );
 			
-			if ( self::$new_version ) {
+			if ( self::is_new_version() ) {
 				$utils->log( "Decoded: " . print_r( $decoded, true ) );
 			}
 			
@@ -586,7 +618,7 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\Licensing' ) ) {
 				return $decoded;
 			}
 			
-			if ( ! self::$new_version ) {
+			if ( ! self::is_new_version() ) {
 				/**
 				 * Check if the result is the 'Already inactive' ( status: 80 )
 				 */
@@ -665,6 +697,10 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\Licensing' ) ) {
 		 */
 		public static function get_license_page_url( $stub ) {
 			
+			if ( empty( self::$instance)) {
+				self::get_instance();
+			}
+			
 			$license_page_url = esc_url( add_query_arg(
 				array(
 					'page'         => 'e20r-licensing',
@@ -696,7 +732,7 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\Licensing' ) ) {
 				);
 				
 				if ( E20R_LICENSING_DEBUG ) {
-					$utils->log( "Using new or old version of licensing code..? " . ( self::$new_version ? 'New' : 'Old' ) );
+					$utils->log( "Using new or old version of licensing code..? " . ( self::is_new_version() ? 'New' : 'Old' ) );
 				}
 				
 				self::$ssl_verify = ( home_url() == E20R_LICENSE_SERVER_URL );
