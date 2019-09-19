@@ -161,11 +161,11 @@ class License_Settings {
 						'name'             => 'license_key',
 						'input_type'       => 'password',
 						'is_active'        => $is_active,
-						'expiration_ts'    => isset( $license['expire'] ) ? (int) $license['expire'] : (int) strtotime( $license['expires'] ),
+						'expiration_ts'    => Licensing::is_new_version() ? (int) $license['expire'] : (int) strtotime( $license['expires'] ),
 						'has_subscription' => ( isset( $license['subscription_status'] ) && 'active' === $license['subscription_status'] ),
 						'value'         => Licensing::is_new_version() ? $license['the_key'] : $license['key'],
 						'email_field'   => "license_email",
-						'product_sku'   => $license['product_sku'],
+						'product_sku'   => Licensing::is_new_version() ? $license['product_sku'] : null,
 						'email_value'   => ! empty( $license['email'] ) ? $license['email'] : null,
 						'placeholder'   => __( "Paste the purchased key here", 'e20r-licensing-utility' ),
 					)
