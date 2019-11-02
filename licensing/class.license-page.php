@@ -21,7 +21,6 @@
 
 namespace E20R\Utilities\Licensing;
 
-use E20R\PMPro\Addon\Email_Confirmation_Shortcode;
 use E20R\Utilities\Licensing\Licensing;
 use E20R\Utilities\Utilities;
 
