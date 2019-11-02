@@ -161,20 +161,41 @@ class License_Page {
 			<p class="e20r-license-settings-status">
 				<?php
 				
-				if ( empty( $args['expiration_ts'] ) ) {
-					$expiration_message = __('The license does not expire', 'e20r-licensing-utility' );
-				} else {
-					$expiration_date = date( get_option( 'date_format' ), $args['expiration_ts'] );
-					$expiration_message = sprintf(
-						__( 'The license %1$s %2$s', 'e20r-licensing-utility' ),
-						(
-							$args['has_subscription'] ?
-								__( 'will renew automatically on', 'e20r-licensing-utility' ) :
-								__( 'needs to be renewed manually before', 'e20r-licensing-utility' )
+				$is_subscription = ( isset( $args['subscription_status'] ) && ! empty( $args['subscription_status'] ) );
+				$has_expiration  = ( isset( $args['expiration_ts'] ) && empty( $args['expiration_ts'] ) );
+				
+				$expiration_message = __( 'This license does not expire', 'e20r-licensing-utility' );
+				$expiration_date    = '';
+				
+				if ( $has_expiration ) {
+					$expiration_date = __(
+						sprintf(
+							'on or before: %s',
+							date_i18n(
+								get_option( 'date_format' ),
+								$args['expiration_ts']
+							)
 						),
+						'e20r-licensing-utility'
+					);
+				}
+				
+				$body_msg = $is_subscription ?
+					__( 'will renew automatically ', 'e20r-licensing-utility' ) :
+					__( 'needs to be renewed manually ', 'e20r-licensing-utility' );
+				
+				if ( $is_subscription && ! $has_expiration ) {
+					$body_msg = __( 'does not need to be renewed', 'e20r-licensing-utility' );
+				}
+				
+				if ( $has_expiration || $is_subscription ) {
+					$expiration_message = sprintf(
+						__( 'This license %1$s %2$s', 'e20r-licensing-utility' ),
+						$body_msg,
 						$expiration_date
 					);
 				}
+				
 				printf( $expiration_message )
 				?>
 			</p>
