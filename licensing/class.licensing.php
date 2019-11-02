@@ -325,7 +325,7 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\Licensing' ) ) {
 			if ( empty( $expires ) ) {
 				
 				if ( E20R_LICENSING_DEBUG ) {
-					$utils->log( "NOTICE: The {$product} license does not expire (old store)" );
+					$utils->log( "NOTICE: The {$product} license does not expire" );
 				}
 				
 				return false;
