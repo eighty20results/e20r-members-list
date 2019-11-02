@@ -163,15 +163,15 @@ class License_Page {
 				<?php
 				
 				if ( empty( $args['expiration_ts'] ) ) {
-					$expiration_message = __('The license does not expire', Email_Confirmation_Shortcode::plugin_slug );
+					$expiration_message = __('The license does not expire', 'e20r-licensing-utility' );
 				} else {
 					$expiration_date = date( get_option( 'date_format' ), $args['expiration_ts'] );
 					$expiration_message = sprintf(
-						__( 'The license %1$s %2$s', Email_Confirmation_Shortcode::plugin_slug ),
+						__( 'The license %1$s %2$s', 'e20r-licensing-utility' ),
 						(
 							$args['has_subscription'] ?
-								__( 'will renew automatically on', Email_Confirmation_Shortcode::plugin_slug ) :
-								__( 'needs to be renewed manually before', Email_Confirmation_Shortcode::plugin_slug )
+								__( 'will renew automatically on', 'e20r-licensing-utility' ) :
+								__( 'needs to be renewed manually before', 'e20r-licensing-utility' )
 						),
 						$expiration_date
 					);
