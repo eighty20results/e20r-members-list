@@ -84,14 +84,15 @@ class License_Settings {
 		
 		$settings        = apply_filters( 'e20r-license-add-new-licenses', self::get_settings(), array() );
 		$license_counter = 0;
-		$is_licensed     = true;
-		$is_active       = false;
 		
 		if ( E20R_LICENSING_DEBUG ) {
 			$utils->log( "Found " . count( $settings ) . " potential licenses" );
 		}
 		
 		foreach ( $settings as $k => $license ) {
+			
+			$is_licensed     = true;
+			$is_active       = false;
 			
 			// Skip and clean up.
 			if ( isset( $license['key'] ) && empty( $license['key'] ) ) {
@@ -124,14 +125,17 @@ class License_Settings {
 				
 				if ( 'active' === $license['status'] ) {
 					$is_licensed = true;
+					$key         = ( isset( $license['license_key'] ) && ! Licensing::is_new_version() ?
+						$license['license_key'] :
+						strtolower( $license['product_sku'] )
+					);
+					
 					$is_active   = Licensing::is_active(
-						( isset( $license['license_key'] ) && ! Licensing::is_new_version() ?
-							$license['license_key'] :
-							strtolower( $license['product_sku'] )
-						),
+						$key,
 						$license,
 						$is_licensed
 					);
+					$utils->log( "The {$key} license is " . ( $is_active ? 'Active' : 'Inactive' ) );
 				}
 				
 				$status_class = 'e20r-license-inactive';
@@ -163,11 +167,11 @@ class License_Settings {
 						'is_active'        => $is_active,
 						'expiration_ts'    => Licensing::is_new_version() ? (int) $license['expire'] : (int) strtotime( $license['expires'] ),
 						'has_subscription' => ( isset( $license['subscription_status'] ) && 'active' === $license['subscription_status'] ),
-						'value'         => Licensing::is_new_version() ? $license['the_key'] : $license['key'],
-						'email_field'   => "license_email",
-						'product_sku'   => Licensing::is_new_version() ? $license['product_sku'] : null,
-						'email_value'   => ! empty( $license['email'] ) ? $license['email'] : null,
-						'placeholder'   => __( "Paste the purchased key here", 'e20r-licensing-utility' ),
+						'value'            => Licensing::is_new_version() ? $license['the_key'] : $license['key'],
+						'email_field'      => "license_email",
+						'product_sku'      => Licensing::is_new_version() ? $license['product_sku'] : null,
+						'email_value'      => ! empty( $license['email'] ) ? $license['email'] : null,
+						'placeholder'      => __( "Paste the purchased key here", 'e20r-licensing-utility' ),
 					)
 				);
 				
