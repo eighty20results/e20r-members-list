@@ -103,8 +103,12 @@ class License_Page {
 			$utils->log( "Loading input HTML for: " . print_r( $args, true ) );
 		}
 		
-		$product_sku  = $args['product_sku'];
-		$status_color = $args['is_active'] ? 'e20r-license-active' : 'e20r-license-inactive';
+		$is_active    = isset( $args['is_active'] ) && 1 === (int) $args['is_active'];
+		$product_sku  = isset( $args['product_sku'] ) ? $args['product_sku'] : '';
+		$status_color = $is_active ? 'e20r-license-active' : 'e20r-license-inactive';
+		$product      = __( 'Unknown', 'e20r-licensing-utility' );
+		$var_name     = "{$args['option_name']}[product][0]";
+		
 		if ( isset( $args['product'] ) ) {
 			
 			$product  = $args['product'];
@@ -161,11 +165,15 @@ class License_Page {
 			<p class="e20r-license-settings-status">
 				<?php
 				
-				$is_subscription = ( isset( $args['subscription_status'] ) && ! empty( $args['subscription_status'] ) );
-				$has_expiration  = ( isset( $args['expiration_ts'] ) && empty( $args['expiration_ts'] ) );
+				$is_subscription = ( isset( $args['has_subscription'] ) && ! empty( $args['has_subscription'] ) );
+				$has_expiration  = ( isset( $args['expiration_ts'] ) && ! empty( $args['expiration_ts'] ) );
+				$expiration_date = '';
 				
-				$expiration_message = __( 'This license does not expire', 'e20r-licensing-utility' );
-				$expiration_date    = '';
+				if ( $is_active ) {
+					$expiration_message = __( 'This license does not expire', 'e20r-licensing-utility' );
+				} else {
+					$expiration_message = __( 'This license is not activated', 'e20r-licensing-utility' );
+				}
 				
 				if ( $has_expiration ) {
 					$expiration_date = __(
@@ -180,11 +188,11 @@ class License_Page {
 					);
 				}
 				
-				$body_msg = $is_subscription ?
-					__( 'will renew automatically ', 'e20r-licensing-utility' ) :
-					__( 'needs to be renewed manually ', 'e20r-licensing-utility' );
+				$body_msg = $is_subscription && ! $has_expiration ?
+					__( 'will renew automatically (unless cancelled)', 'e20r-licensing-utility' ) :
+					__( 'needs to be renewed manually', 'e20r-licensing-utility' );
 				
-				if ( $is_subscription && ! $has_expiration ) {
+				if ( ! $is_subscription && ! $has_expiration ) {
 					$body_msg = __( 'does not need to be renewed', 'e20r-licensing-utility' );
 				}
 				
@@ -195,8 +203,8 @@ class License_Page {
 						$expiration_date
 					);
 				}
-				
-				printf( $expiration_message )
+				$utils->log( "License expiration info: {$expiration_message}" );
+				printf( $expiration_message );
 				?>
 			</p>
 		</div>
