@@ -36,7 +36,7 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\Licensing' ) ) {
 	}
 	
 	if ( ! defined( 'E20R_LICENSE_SERVER_URL' ) ) {
-		define( 'E20R_LICENSE_SERVER_URL', null );
+		define( 'E20R_LICENSE_SERVER_URL', 'https://eighty20results.com/' );
 	}
 	
 	/**
@@ -98,13 +98,18 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\Licensing' ) ) {
 			if ( E20R_LICENSING_DEBUG ) {
 				$utils->log( "Loading the Licensing class..." );
 			}
+			
+			if ( isset( $_SERVER['HTTP_HOST'] ) && $_SERVER['HTTP_HOST'] === 'eighty20results.com' ) {
+				$utils->log( "Running on own server. Deactivating SSL Verification" );
+				self::$ssl_verify = false;
+			}
 		}
 		
 		/**
 		 * Load action hooks for the E20R Licensing utilities module
 		 */
 		public function load_hooks() {
-			add_action( 'admin_enqueue_scripts', array( Licensing::get_instance(), 'enqueue' ), 10 );
+			add_action( 'admin_enqueue_scripts', array( self::get_instance(), 'enqueue' ), 10 );
 		}
 		
 		/**
@@ -125,7 +130,7 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\Licensing' ) ) {
 		 */
 		public static function get_ssl_verify() {
 			
-			if ( empty( self::$instance)) {
+			if ( empty( self::$instance ) ) {
 				self::get_instance();
 			}
 			
@@ -138,9 +143,10 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\Licensing' ) ) {
 		 * @return bool
 		 */
 		public static function is_new_version() {
-			if ( empty( self::$instance)) {
+			if ( empty( self::$instance ) ) {
 				self::get_instance();
 			}
+			
 			return self::$new_version;
 		}
 		
@@ -150,7 +156,7 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\Licensing' ) ) {
 		 * @return string
 		 */
 		public static function get_text_domain() {
-			if ( empty( self::$instance)) {
+			if ( empty( self::$instance ) ) {
 				self::get_instance();
 			}
 			
@@ -180,7 +186,7 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\Licensing' ) ) {
 				return false;
 			}
 			
-			if ( empty( self::$instance)) {
+			if ( empty( self::$instance ) ) {
 				self::get_instance();
 			}
 			
@@ -245,7 +251,7 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\Licensing' ) ) {
 			$utils     = Utilities::get_instance();
 			$is_active = false;
 			
-			if ( empty( self::$instance)) {
+			if ( empty( self::$instance ) ) {
 				self::get_instance();
 			}
 			
@@ -305,7 +311,7 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\Licensing' ) ) {
 			
 			$utils = Utilities::get_instance();
 			
-			if ( empty( self::$instance)) {
+			if ( empty( self::$instance ) ) {
 				self::get_instance();
 			}
 			
@@ -368,7 +374,7 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\Licensing' ) ) {
 			
 			global $current_user;
 			
-			if ( empty( self::$instance)) {
+			if ( empty( self::$instance ) ) {
 				self::get_instance();
 			}
 			
@@ -547,7 +553,7 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\Licensing' ) ) {
 			
 			$utils = Utilities::get_instance();
 			
-			if ( empty( self::$instance)) {
+			if ( empty( self::$instance ) ) {
 				self::get_instance();
 			}
 			
@@ -697,7 +703,7 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\Licensing' ) ) {
 		 */
 		public static function get_license_page_url( $stub ) {
 			
-			if ( empty( self::$instance)) {
+			if ( empty( self::$instance ) ) {
 				self::get_instance();
 			}
 			
