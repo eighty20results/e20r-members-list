@@ -741,7 +741,11 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\Licensing' ) ) {
 					$utils->log( "Using new or old version of licensing code..? " . ( self::is_new_version() ? 'New' : 'Old' ) );
 				}
 				
-				self::$ssl_verify = ( home_url() == E20R_LICENSE_SERVER_URL );
+				self::$ssl_verify = ( home_url() != E20R_LICENSE_SERVER_URL );
+				
+				if ( E20R_LICENSING_DEBUG ) {
+					$utils->log( "Do we verify the SSL certificate (no if local = home_url())? " . ( self::get_ssl_verify() ? 'Yes' : 'No' ) );
+				}
 			}
 			
 			return self::$instance;
