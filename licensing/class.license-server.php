@@ -51,7 +51,7 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\License_Server' ) ) {
 					E20R_LICENSE_SERVER_URL,
 					array(
 						'timeout'     => apply_filters( 'e20r-license-remote-server-timeout', 30 ),
-						'sslverify'   => true,
+						'sslverify'   => Licensing::get_ssl_verify(),
 						'httpversion' => '1.1',
 						'decompress'  => true,
 						'body'        => $api_params,
@@ -264,7 +264,7 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\License_Server' ) ) {
 								if ( E20R_LICENSING_DEBUG ) {
 									$utils->log( "Saving license data for {$domain->registered_domain}: " . print_r( $settings, true ) );
 								}
-								if ( false === self::update_settings( $product, $settings ) ) {
+								if ( false === License_Settings::update_settings( $product, $settings ) ) {
 									
 									$msg = sprintf( __( "Unable to save license settings for %s", 'e20r-licensing-utility' ), $product );
 									if ( E20R_LICENSING_DEBUG ) {
