@@ -314,7 +314,7 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\License_Server' ) ) {
 						$utils->log( "Returned data from validation check: " . print_r( $decoded, true ) );
 					}
 					
-					if ( true == $decoded->error && ( isset( $decoded->status ) && 500 === (int) $decoded->status ) ) {
+					if ( ! empty( $decoded ) && true == $decoded->error && ( isset( $decoded->status ) && 500 === (int) $decoded->status ) ) {
 						$msg = __( 'Error validating license: %s -> %s', 'e20r-utilities-licensing' );
 						foreach ( (array) $decoded->errors as $error_key => $error_info ) {
 							
