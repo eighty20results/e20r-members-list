@@ -98,6 +98,9 @@ if ( ! class_exists( '\E20R\Utilities\Utilities' ) ) {
 				add_action( 'pmpro_save_discount_code', array( $this, 'clear_delay_cache' ), 9999, 1 );
 				add_action( 'pmpro_save_membership_level', array( $this, 'clear_delay_cache' ), 9999, 1 );
 				
+				/** Disable SSL validation for localhost request(s) */
+				add_filter( 'http_request_args', array( $this, 'setSSLValidationForUpdates' ), 9999, 2 );
+				
 				if ( ! has_action( 'admin_notices', array( $messages, 'display' ) ) ) {
 					
 					$this->log( "Loading message(s) for backend" );
@@ -339,7 +342,7 @@ if ( ! class_exists( '\E20R\Utilities\Utilities' ) ) {
 		 * @param string $source - The error source to show.
 		 */
 		public function display_messages( $source = 'default' ) {
-   
+			
 			$message = new Message();
 			$message->display( $source );
 		}
@@ -646,7 +649,7 @@ if ( ! class_exists( '\E20R\Utilities\Utilities' ) ) {
 		 */
 		public function log( $msg ) {
 			
-			if ( !defined( 'WP_DEBUG' ) || defined( 'WP_DEBUG' ) && false === WP_DEBUG ) {
+			if ( ! defined( 'WP_DEBUG' ) || defined( 'WP_DEBUG' ) && false === WP_DEBUG ) {
 				return;
 			}
 			
@@ -723,9 +726,9 @@ if ( ! class_exists( '\E20R\Utilities\Utilities' ) ) {
 					}
 				}
 				
-				if ( !is_email( $field ) && ( ( ! is_array( $field ) ) && ctype_alpha( $field ) ||
-				     ( ( ! is_array( $field ) ) && strtotime( $field ) ) ||
-				     ( ( ! is_array( $field ) ) && is_string( $field ) ) )
+				if ( ! is_email( $field ) && ( ( ! is_array( $field ) ) && ctype_alpha( $field ) ||
+				                               ( ( ! is_array( $field ) ) && strtotime( $field ) ) ||
+				                               ( ( ! is_array( $field ) ) && is_string( $field ) ) )
 				) {
 					
 					if ( strtolower( $field ) == 'yes' ) {
@@ -983,9 +986,9 @@ if ( ! class_exists( '\E20R\Utilities\Utilities' ) ) {
 		/**
 		 * Substitute [IN] for proper SQL 'IN' statement containing array of like values
 		 *
-		 * @param  string $sql
-		 * @param  array  $values
-		 * @param string  $type
+		 * @param string $sql
+		 * @param array  $values
+		 * @param string $type
 		 *
 		 * @return string
 		 */
@@ -1056,7 +1059,7 @@ if ( ! class_exists( '\E20R\Utilities\Utilities' ) ) {
 		/**
 		 * Configure and load the plugin_update_checker
 		 *
-		 * @param string     $plugin_slug
+		 * @param string      $plugin_slug
 		 * @param null|string $path
 		 *
 		 * @return \Puc_v4_Plugin_UpdateChecker|\Puc_v4_Theme_UpdateChecker|\Puc_v4_Vcs_BaseChecker|\Puc_v4p2_Plugin_UpdateChecker|\Puc_v4p2_Theme_UpdateChecker|\Puc_v4p2_Vcs_BaseChecker|\Puc_v4p5_Plugin_UpdateChecker|\Puc_v4p5_Theme_UpdateChecker|\Puc_v4p5_Vcs_BaseChecker|\Puc_v4p8_Plugin_UpdateChecker|\Puc_v4p8_Theme_UpdateChecker|\Puc_v4p8_Vcs_BaseChecker
@@ -1074,12 +1077,50 @@ if ( ! class_exists( '\E20R\Utilities\Utilities' ) ) {
 			}
 			
 			$plugin_updates = \Puc_v4_Factory::buildUpdateChecker(
-				sprintf( 'https://eighty20results.com/protected-content/%1$s/metadata.json', $plugin_slug),
+				sprintf( 'https://eighty20results.com/protected-content/%1$s/metadata.json', $plugin_slug ),
 				__FILE__,
 				$plugin_slug
 			);
 			
 			return $plugin_updates;
+		}
+		
+		/**
+		 * Is the specified server is the same as the licensing server
+		 *
+		 * @param string|null $url - The URL to check the LICENSE_SERVER_URL against
+		 *
+		 * @return bool
+		 */
+		public static function is_local_server( $url = null ) {
+			
+			if ( is_null( $url ) ) {
+				$url = home_url();
+			}
+			
+			return defined( 'E20R_LICENSE_SERVER_URL' ) &&
+			       strpos( $url, E20R_LICENSE_SERVER_URL ) === 0;
+		}
+		
+		/**
+		 * Deactivate local SSL certificate validation for local server URL
+		 *
+		 * @param array  $request_args
+		 * @param string $url
+		 *
+		 * @return array
+		 * @uses 'http_request_args' -> Configure Request arguments (header)
+		 *
+		 */
+		public function setSSLValidationForUpdates( $request_args, $url ) {
+			
+			if ( ! self::is_local_server( $url ) ) {
+				return $request_args;
+			}
+			
+			$request_args['sslverify'] = false;
+			
+			return $request_args;
 		}
 	}
 }
