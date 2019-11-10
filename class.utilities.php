@@ -339,7 +339,7 @@ if ( ! class_exists( '\E20R\Utilities\Utilities' ) ) {
 		 * @param string $source - The error source to show.
 		 */
 		public function display_messages( $source = 'default' ) {
-      
+   
 			$message = new Message();
 			$message->display( $source );
 		}
@@ -745,11 +745,11 @@ if ( ! class_exists( '\E20R\Utilities\Utilities' ) ) {
 				
 			} else {
 				
-				if ( is_float( $field + 1 ) ) {					
+				if ( is_float( $field + 1 ) ) {
 					$field = sanitize_text_field( $field );
 				}
 				
-				if ( is_int( $field + 1 ) ) {				
+				if ( is_int( $field + 1 ) ) {
 					$field = intval( $field );
 				}
 				
@@ -1051,6 +1051,35 @@ if ( ! class_exists( '\E20R\Utilities\Utilities' ) ) {
 			}
 			
 			return self::$instance;
+		}
+		
+		/**
+		 * Configure and load the plugin_update_checker
+		 *
+		 * @param string     $plugin_slug
+		 * @param null|string $path
+		 *
+		 * @return \Puc_v4_Plugin_UpdateChecker|\Puc_v4_Theme_UpdateChecker|\Puc_v4_Vcs_BaseChecker|\Puc_v4p2_Plugin_UpdateChecker|\Puc_v4p2_Theme_UpdateChecker|\Puc_v4p2_Vcs_BaseChecker|\Puc_v4p5_Plugin_UpdateChecker|\Puc_v4p5_Theme_UpdateChecker|\Puc_v4p5_Vcs_BaseChecker|\Puc_v4p8_Plugin_UpdateChecker|\Puc_v4p8_Theme_UpdateChecker|\Puc_v4p8_Vcs_BaseChecker
+		 */
+		public static function configureUpdateServerV4( $plugin_slug, $path = null ) {
+			
+			if ( is_null( $path ) ) {
+				$path = 'plugin-updates/plugin-update-checker.php';
+			}
+			/**
+			 * One-click update handler & checker
+			 */
+			if ( ! class_exists( '\\Puc_v4_Factory' ) ) {
+				require_once( plugin_dir_path( __FILE__ ) . $path );
+			}
+			
+			$plugin_updates = \Puc_v4_Factory::buildUpdateChecker(
+				sprintf( 'https://eighty20results.com/protected-content/%1$s/metadata.json', $plugin_slug),
+				__FILE__,
+				$plugin_slug
+			);
+			
+			return $plugin_updates;
 		}
 	}
 }
