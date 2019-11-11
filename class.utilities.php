@@ -1074,7 +1074,7 @@ if ( ! class_exists( '\E20R\Utilities\Utilities' ) ) {
 			 * One-click update handler & checker
 			 */
 			if ( ! class_exists( '\\Puc_v4_Factory' ) ) {
-				require_once( WP_PLUGIN_DIR . $path );
+				require_once( plugin_dir_path( __FILE__ ) . 'inc/yahnis-elsts/plugin-update-checker/plugin-update-checker.php' );
 			}
 			
 			$plugin_updates = \Puc_v4_Factory::buildUpdateChecker(
