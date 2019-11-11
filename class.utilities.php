@@ -1060,14 +1060,14 @@ if ( ! class_exists( '\E20R\Utilities\Utilities' ) ) {
 		 * Configure and load the plugin_update_checker
 		 *
 		 * @param string      $plugin_slug
-		 * @param null|string $path
+		 * @param null|string $plugin_path
 		 *
 		 * @return \Puc_v4_Plugin_UpdateChecker|\Puc_v4_Theme_UpdateChecker|\Puc_v4_Vcs_BaseChecker|\Puc_v4p2_Plugin_UpdateChecker|\Puc_v4p2_Theme_UpdateChecker|\Puc_v4p2_Vcs_BaseChecker|\Puc_v4p5_Plugin_UpdateChecker|\Puc_v4p5_Theme_UpdateChecker|\Puc_v4p5_Vcs_BaseChecker|\Puc_v4p8_Plugin_UpdateChecker|\Puc_v4p8_Theme_UpdateChecker|\Puc_v4p8_Vcs_BaseChecker
 		 */
-		public static function configureUpdateServerV4( $plugin_slug, $path = null ) {
+		public static function configureUpdateServerV4( $plugin_slug, $plugin_path = null ) {
 			
-			if ( is_null( $path ) ) {
-				$path = 'plugin-updates/plugin-update-checker.php';
+			if ( is_null( $plugin_path ) ) {
+				$plugin_path = plugin_dir_path( $plugin_path ) . $plugin_slug . '.php';
 			}
 			
 			/**
@@ -1079,7 +1079,7 @@ if ( ! class_exists( '\E20R\Utilities\Utilities' ) ) {
 			
 			$plugin_updates = \Puc_v4_Factory::buildUpdateChecker(
 				sprintf( 'https://eighty20results.com/protected-content/%1$s/metadata.json', $plugin_slug ),
-				__FILE__,
+				$plugin_path,
 				$plugin_slug
 			);
 			
