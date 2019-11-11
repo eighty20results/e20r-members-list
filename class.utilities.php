@@ -1069,11 +1069,12 @@ if ( ! class_exists( '\E20R\Utilities\Utilities' ) ) {
 			if ( is_null( $path ) ) {
 				$path = 'plugin-updates/plugin-update-checker.php';
 			}
+			
 			/**
 			 * One-click update handler & checker
 			 */
 			if ( ! class_exists( '\\Puc_v4_Factory' ) ) {
-				require_once( plugin_dir_path( __FILE__ ) . $path );
+				require_once( WP_PLUGIN_DIR . $path );
 			}
 			
 			$plugin_updates = \Puc_v4_Factory::buildUpdateChecker(
