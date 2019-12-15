@@ -1,26 +1,6 @@
 <?php
 /**
- * *
- *   * Copyright (c) 2018. - Eighty / 20 Results by Wicked Strong Chicks.
- *   * ALL RIGHTS RESERVED
- *   *
- *   * This program is free software: you can redistribute it and/or modify
- *   * it under the terms of the GNU General Public License as published by
- *   * the Free Software Foundation, either version 3 of the License, or
- *   * (at your option) any later version.
- *   *
- *   * This program is distributed in the hope that it will be useful,
- *   * but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   * GNU General Public License for more details.
- *   *
- *   * You should have received a copy of the GNU General Public License
- *   * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
- */
-
-/**
- * Copyright (c) 2018 - Eighty / 20 Results by Wicked Strong Chicks.
+ * Copyright (c) 2018-2019 - Eighty / 20 Results by Wicked Strong Chicks.
  * ALL RIGHTS RESERVED
  *
  * This program is free software: you can redistribute it and/or modify
@@ -50,6 +30,7 @@ class Bulk_Update {
 	 * @var null|Bulk_Update
 	 */
 	private static $instance = null;
+	
 	/**
 	 * Update operation to perform
 	 *
@@ -65,10 +46,19 @@ class Bulk_Update {
 	private $members_to_update = array();
 	
 	/**
-	 * Bulk_Update constructor
+	 * Bulk_Update constructor (singleton)
+	 *
+	 * @access private
 	 */
-	public function __construct() {
+	private function __construct() {
 	}
+	
+	/**
+	 * __clone() method for Bulk_Update() (singleton class)
+	 *
+	 * @access private
+	 */
+	private function __clone(){}
 	
 	/**
 	 * Get or create an instance of the Bulk_Update class
@@ -453,20 +443,5 @@ class Bulk_Update {
 		$check_date = \DateTime::createFromFormat( $format, $date );
 		
 		return $check_date && $check_date->format( $format ) == $date;
-	}
-	
-	/**
-	 * @param        $user_id
-	 * @param        $level_id
-	 * @param string $status
-	 *
-	 * @return int
-	 */
-	private function get_last_membership_id( $user_id, $level_id, $status = 'active' ) {
-		
-		global $wpdb;
-		$record_id = null;
-		
-		return $record_id;
 	}
 }

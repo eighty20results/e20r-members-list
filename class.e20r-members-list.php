@@ -1,16 +1,16 @@
 <?php
 /*
 Plugin Name: Better Members List for Paid Memberships Pro
-Plugin URI: https://eighty20results.com/e20r-members-list
+Plugin URI: https://wordpress.org/plugins/e20r-members-list
 Description: Extensible, sortable & bulk action capable members listing + export to CSV tool for Paid Memberships Pro.
-Version: 3.0
-Author: Eighty / 20 Results by Wicked Strong Chicks, LLC <thomas@eighty20results.com>
+Version: 5.7
+Author: Thomas Sjolshagen @ Eighty / 20 Results by Wicked Strong Chicks, LLC <thomas@eighty20results.com>
 Author URI: https://eighty20results.com/thomas-sjolshagen/
 Text Domain: e20r-members-list
 Domain Path: /languages
 License:
 
-	Copyright 2016-2018 - Eighty / 20 Results by Wicked Strong Chicks, LLC (thomas@eighty20results.com)
+	Copyright 2016 - 2019 (c) Eighty / 20 Results by Wicked Strong Chicks, LLC (thomas@eighty20results.com)
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License, version 2, as
@@ -31,12 +31,18 @@ namespace E20R\Members_List\Controller;
 
 use E20R\Members_List\Admin\Members_List_Page;
 
-if ( ! class_exists( '\\E20R\Members_List\\Controller\E20R_Members_List' ) ) {
+if ( ! defined( 'E20R_MEMBERSLIST_VER' ) ) {
+	define( 'E20R_MEMBERSLIST_VER', '5.7' );
+}
+
+if ( ! class_exists( '\\E20R\Members_List\\Controller\\E20R_Members_List' ) ) {
 	/**
 	 * Class E20R_Members_List
 	 * @package E20R\Members_List\Controller
 	 */
 	class E20R_Members_List {
+		
+		const plugin_slug = 'e20r-members-list';
 		
 		/**
 		 * Instance of the Member List controller
@@ -123,37 +129,60 @@ if ( ! class_exists( '\\E20R\Members_List\\Controller\E20R_Members_List' ) ) {
 		
 		/**
 		 * Initialize the Enhanced Members List functionality
+		 *
+		 * @since v3.3 - ENHANCEMENT: Load translation/I18N
 		 */
 		public function load_hooks() {
-			add_action( 'http_api_curl', array( $this, 'forceTLS12' ) );
 			add_action( 'init', array( Members_List_Page::get_instance(), 'load_hooks' ), - 1 );
+			add_action( 'init', array( $this, 'loadTextDomain' ), 1 );
 		}
 		
 		/**
-		 * Connect to the license server using TLS 1.2
+		 * Load translation (I18N) file(s) if applicable
 		 *
-		 * @param $handle - File handle for the pipe to the CURL process
+		 * @since v3.3 - ENHANCEMENT: Added Translations if possible/applicable
 		 */
-		public function forceTLS12( $handle ) {
-			// set the CURL option to use.
-			curl_setopt( $handle, CURLOPT_SSLVERSION, 6 );
+		public function loadTextDomain() {
+			
+			$locale = apply_filters( "plugin_locale", get_locale(), self::plugin_slug );
+			$mo_file = self::plugin_slug . "-{$locale}.mo";
+			
+			// Path(s) to local and global (WP)
+			$mo_file_local  = dirname( __FILE__ ) . "/languages/{$mo_file}";
+			$mo_file_global = WP_LANG_DIR . "/e20r-members-list/{$mo_file}";
+			
+			// Start with the global file
+			if ( file_exists( $mo_file_global ) ) {
+				
+				load_textdomain(
+					E20R_Members_List::plugin_slug,
+					$mo_file_global
+				);
+			}
+			
+			// Load from local next (if applicable)
+			load_textdomain(
+				E20R_Members_List::plugin_slug,
+				$mo_file_local
+			);
+			
+			// Load with plugin_textdomain or GlotPress
+			load_plugin_textdomain(
+				E20R_Members_List::plugin_slug,
+				false,
+				dirname( __FILE__ ) . "/languages/"
+			);
 		}
 	}
 	
 }
-spl_autoload_register( 'E20R\Members_List\Controller\E20R_Members_List::autoLoader' );
+try {
+	spl_autoload_register( 'E20R\Members_List\Controller\E20R_Members_List::autoLoader' );
+} catch( \Exception $exception ) {
+	error_log("Unable to register autoloader: " . $exception->getMessage(),E_USER_ERROR );
+	return false;
+}
 
 add_action( 'plugins_loaded', array( E20R_Members_List::get_instance(), 'load_hooks' ) );
 
-/**
- * One-click update handler & checker
- */
-if ( ! class_exists( '\Puc_v4_Factory' ) ) {
-	require_once( plugin_dir_path( __FILE__ ) . 'plugin-updates/plugin-update-checker.php' );
-}
-
-$eml_updates = \Puc_v4_Factory::buildUpdateChecker(
-	'https://eighty20results.com/protected-content/e20r-members-list/metadata.json',
-	__FILE__,
-	'e20r-members-list'
-);
+\E20R\Utilities\Utilities::configureUpdateServerV4( 'e20r-members-list', plugin_dir_path( __FILE__ ) . 'class.e20r-members-list.php' );

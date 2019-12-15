@@ -1,0 +1,18 @@
+# Directories
+/.github export-ignore
+/bin export-ignore
+/build_readmes export-ignore
+/build export-ignore
+/plugin-updates export-ignore
+/class/utilities/inc export-ignore
+/class/utilities/licensing export-ignore
+
+# Files
+/.gitattributes export-ignore
+/.gitmodules export-ignore
+/.editorconfig export-ignore
+/.gitignore export-ignore
+/metadata.json export-ignore
+/class/utilities/.gitignore export-ignore
+/class/utilities/.editorconfig export-ignore
+

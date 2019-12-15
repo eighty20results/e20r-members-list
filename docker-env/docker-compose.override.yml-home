@@ -1,0 +1,89 @@
+version: "3.2"
+
+services:
+  mariadb:
+    image: wodby/mariadb:$MARIADB_TAG
+    volumes:
+    - /Volumes/Development/www/docker-images/docker4wordpress/mariadb-init:/docker-entrypoint-initdb.d # Place init .sql file(s) here.
+
+  nginx:
+    volumes:
+      - /Volumes/Development/www/clean.local/wp-content/themes/e20r-coaching:/var/www/html/wp-content/themes/e20r-coaching
+      - /Volumes/Development/www/clean.local/wp-content/plugins/paid-memberships-pro:/var/www/html/wp-content/plugins/paid-memberships-pro:ro
+      - /Volumes/Development/www/clean.local/wp-content/plugins/e20r-members-list:/var/www/html/wp-content/plugins/e20r-members-list:ro
+    ports:
+    - target: 80 # Web server
+      published: 80
+      protocol: tcp
+      mode: host
+    - target: 443
+      published: 443
+      protocol: tcp
+      mode: host
+
+  php:
+    image: wodby/wordpress:$WORDPRESS_TAG
+    #    networks:
+    #    - host
+    #    ports:
+    #    - "80:80"
+    #    - "443:443"
+    # user: apache
+    environment:
+      PHP_FPM_CLEAR_ENV: "no"
+      DB_NAME: clean
+      PHP_FPM_USER: wodby
+      PHP_FPM_GROUP: wodby
+      ## Read instructions at https://wodby.com/stacks/wordpress/docs/local/xdebug/
+      PHP_XDEBUG: 1
+      PHP_XDEBUG_DEFAULT_ENABLE: 1
+      PHP_XDEBUG_REMOTE_AUTOSTART: 1
+      PHP_XDEBUG_REMOTE_CONNECT_BACK: 1
+      PHP_IDE_CONFIG: serverName=my-ide
+      # PHP_XDEBUG_REMOTE_HOST: 172.17.0.1 # Linux
+      PHP_XDEBUG_REMOTE_HOST: ts-laptop.local # macOS
+    #      PHP_XDEBUG_REMOTE_HOST: 10.0.75.1 # Windows
+    volumes:
+    - ./:/var/www/html
+    - /Volumes/Development/www/clean.local/wp-content/themes/e20r-coaching:/var/www/html/wp-content/themes/e20r-coaching
+    - /Volumes/Development/www/clean.local/wp-content/plugins/paid-memberships-pro:/var/www/html/wp-content/plugins/paid-memberships-pro:ro
+    - /Volumes/Development/www/clean.local/wp-content/plugins/e20r-members-list:/var/www/html/wp-content/plugins/e20r-members-list:ro
+    labels:
+    - "traefik.enable=true"
+    - "traefik.frontend.rule=Host:development.local"
+
+      #  wordpress-cli:
+      #    depends_on:
+      #    - mariadb
+      #    - php
+      #    image: wordpress:cli
+      #    container_name: "${PROJECT_NAME}_wp-cli"
+      # vstm: This is required to run wordpress-cli with the same
+      # user-id as wordpress. This way there are no permission problems
+      # when running the cli
+      #    user: xfs
+    # vstm: The sleep 10 is required so that the command is run after
+    # mysql is initialized. Depending on your machine this might take
+    # longer or it can go faster.
+  #    command: >
+  #      /bin/sh -c '
+  #      sleep 10;
+  #      wp core install --path="/var/www/html" --url="http://localhost:8000" --title="E20R MailChimp test" --admin_user=admin --admin_password=Gr1q2womit! --admin_email=thomas@eighty20results.com
+  #      '
+  #    volumes:
+  #    - ./:/var/www/html
+
+  traefik:
+    image: traefik:alpine
+    ports:
+    #      - '127.0.0.1:80:192.168.1.202:8000/tcp'
+    #      - '127.0.0.1:443:192.168.1.202:8443/tcp'
+    #      - '127.0.0.1:8080:192.168.1.202:8081/tcp'
+    - target: 8080
+      published: 8081
+      protocol: tcp
+      mode: host
+    # - '80:8000'
+    # - '8081:8080' # Dashboard
+#    volumes:
+#      - ./traefik:/etc

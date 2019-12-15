@@ -2,7 +2,7 @@
 /*
  * License:
 
-	Copyright 2016-2018 - Eighty / 20 Results by Wicked Strong Chicks, LLC (thomas@eighty20results.com)
+	Copyright 2016-2019 - Eighty / 20 Results by Wicked Strong Chicks, LLC (thomas@eighty20results.com)
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License, version 2, as
@@ -25,64 +25,144 @@ if ( ! class_exists( '\\WP_List_Table' ) ) {
 	require_once( ABSPATH . "wp-admin/includes/class-wp-list-table.php" );
 }
 
+use E20R\Members_List\Controller\E20R_Members_List;
 use E20R\Utilities\Utilities;
 
 class Members_List extends \WP_List_Table {
 	
 	/**
-	 * @var     Members_List $instance Class instance variable (singleton support).
+	 * Class instance variable (singleton support).
+	 * @var     Members_List $instance
 	 */
 	private static $instance;
 	
 	/**
-	 * @var     string $sql_from The table & condition section of the SQL.
+	 * The table & condition section of the SQL.
+	 *
+	 * @var     string $sql_from
 	 */
 	private static $sql_from;
 	
 	/**
-	 * @var array $sql_col_list List of columns to fetch by default from DB
+	 * List of columns to fetch by default from DB
+	 *
+	 * @var array $sql_col_list
 	 */
 	private $sql_col_list = array();
 	
 	/**
-	 * @var array $default_columns The default Members_List table columns
+	 * The default Members_List table columns
+	 *
+	 * @var array $default_columns
 	 */
 	private $default_columns = array();
 	
 	/**
-	 * @var array $hidden_columns The columns that should be hidden in the table
+	 * The columns that should be hidden in the table
+	 *
+	 * @var array $hidden_columns
 	 */
 	private $hidden_columns = array();
 	
 	/**
-	 * @var null|int The total number of records found after SQL
+	 * The total number of records found after SQL
+	 *
+	 * @var null|int $total_members_found
 	 */
 	private $total_members_found = null;
 	
 	/**
-	 * @var string $sqlQuery The completed SQL query used to generate the membership list
+	 * The completed SQL query used to generate the membership list
+	 *
+	 * @var string $sqlQuery
 	 */
 	private $sqlQuery = '';
 	
 	/**
-	 * @var     Utilities $utils Instance of the Utilities class
+	 * Instance of the Utilities class
+	 *
+	 * @var     Utilities $utils
 	 */
 	private $utils;
+	
 	/**
 	 * Various elements of the SQL query as it's being built.
 	 */
 	private $table_list = array();
+	
+	/**
+	 * Search string
+	 *
+	 * @var null|string $search
+	 */
 	private $search = null;
+	
+	/**
+	 * The ORDER BY portion of the SQL statement
+	 *
+	 * @var null|string $order_by
+	 */
 	private $order_by = null;
+	
+	/**
+	 * The LIMIT OFFSET part of the SQL statement
+	 * @var null|string $offset
+	 */
 	private $offset = null;
+	
+	/**
+	 * The LIMIT part of the SQL statement
+	 *
+	 * @var null|string $limit
+	 */
 	private $limit = null;
+	
+	/**
+	 * The PMPro levels specific part of the SQL statement
+	 *
+	 * @var null|string $levels
+	 */
 	private $levels = null;
+	
+	/**
+	 * The SQL search string
+	 * @var null|string $find
+	 */
 	private $find = null;
+	
+	/**
+	 * The WHERE clause for the SQL statement
+	 *
+	 * @var null|string $where
+	 */
 	private $where = null;
+	
+	/**
+	 * The JOIN clauses for the SQL statement
+	 *
+	 * @var null|string $joins
+	 */
 	private $joins = null;
+	
+	/**
+	 * The FROM clause for the SQL statement
+	 *
+	 * @var null|string $from
+	 */
 	private $from = null;
+	
+	/**
+	 * The GROUP BY clause for the SQL statement
+	 *
+	 * @var null|string $group_by
+	 */
 	private $group_by = null;
 	
+	/**
+	 * The Action parameter from the Bulk Action option
+	 *
+	 * @var mixed
+	 */
 	private $action = null;
 	
 	/**
@@ -91,8 +171,8 @@ class Members_List extends \WP_List_Table {
 	public function __construct() {
 		
 		parent::__construct( array(
-				'singular' => __( "member", "e20r-members-list" ),
-				'plural'   => __( "members", "e20r-members-list" ),
+				'singular' => __( "member", E20R_Members_List::plugin_slug ),
+				'plural'   => __( "members", E20R_Members_List::plugin_slug ),
 				'ajax'     => false,
 			)
 		);
@@ -107,29 +187,39 @@ class Members_List extends \WP_List_Table {
 		$level        = $this->utils->get_variable( 'level', '' );
 		$this->action = $this->utils->get_variable( 'action', '' );
 		
+		/**
+		 * The default Members List columns to display (with labels)
+		 */
 		$this->default_columns = array(
-			'cb'         => '<input type="checkbox" />',
-			// 'user_id'    => _x( "ID", "e20r-members-list" ),
-			'username'   => _x( "Login", "e20r-members-list" ),
-			'first_name' => _x( "First Name", "e20r-members-list" ),
-			'last_name'  => _x( "Last Name", "e20r-members-list" ),
-			'user_email' => _x( "Email", "e20r-members-list" ),
-			'baddress'   => _x( "Billing Info", "e20r-members-list" ),
-			'membership' => _x( "Level", "e20r-members-list" ),
-			'fee'        => _x( "Fee", "e20r-members-list" ),
-			'status'     => _x( "Status", 'e20r-members-list' ),
-			'joindate'   => _x( "Joined", "e20r-members-list" ),
-			'startdate'  => _x( "Start", "e20r-members-list" ),
+			'cb'              => '<input type="checkbox" />',
+			// 'user_id'    => _x( "ID", E20R_Members_List::plugin_slug ),
+			'user_login'      => _x( "Login", E20R_Members_List::plugin_slug ),
+			'first_name'      => _x( "First Name", E20R_Members_List::plugin_slug ),
+			'last_name'       => _x( "Last Name", E20R_Members_List::plugin_slug ),
+			'user_email'      => _x( "Email", E20R_Members_List::plugin_slug ),
+			'baddress'        => _x( "Billing Info", E20R_Members_List::plugin_slug ),
+			'name'            => _x( "Level", E20R_Members_List::plugin_slug ),
+			'fee'             => _x( "Fee", E20R_Members_List::plugin_slug ),
+			'code'            => _x( "Discount Code", E20R_Members_List::plugin_slug ),
+			'status'          => _x( "Status", E20R_Members_List::plugin_slug ),
+			'user_registered' => _x( "Joined", E20R_Members_List::plugin_slug ),
+			'startdate'       => _x( "Start", E20R_Members_List::plugin_slug ),
 		);
 		
+		/**
+		 * Should the final column use 'Expired' or 'Expires' as the label
+		 */
 		if ( 'oldmembers' == $level ) {
-			$this->default_columns['last'] = apply_filters( 'e20r-members-list-enddate-col-name', _x( "Expired", "e20r-members-list" ), $level );
+			$this->default_columns['last'] = apply_filters( 'e20r-members-list-enddate-col-name', _x( "Expired", E20R_Members_List::plugin_slug ), $level );
 		} else {
-			$this->default_columns['last'] = apply_filters( 'e20r-members-list-enddate-col-name', _x( "Expires", "e20r-members-list" ), $level );
+			$this->default_columns['last'] = apply_filters( 'e20r-members-list-enddate-col-name', _x( "Expires", E20R_Members_List::plugin_slug ), $level );
 		}
 		
+		/**
+		 * Prepare the Export bulk action
+		 */
 		if ( 'e20rml_export_records' === $this->utils->get_variable( 'action', null ) ) {
-			$this->utils->log( "Adding export handler" );
+			$this->utils->log( "Adding export handler" . (headers_sent() ? ' Sent' : ' Not sent') );
 			add_action( 'e20r_memberslist_process_action', array( $this, 'export_members' ), 10, 3 );
 		}
 	}
@@ -144,26 +234,31 @@ class Members_List extends \WP_List_Table {
 		// Format: 'name' => 'alias'
 		$sql_cols = array(
 			'mu.id'              => 'record_id',
-			'u.ID'               => 'user_id',
-			'u.user_login'       => 'username',
+			'u.ID'               => 'ID',
+			'u.user_login'       => 'user_login',
 			'u.user_email'       => 'user_email',
-			'u.user_registered'  => 'joindate',
+			'u.user_registered'  => 'user_registered',
 			'mu.membership_id'   => 'membership_id',
 			'mu.initial_payment' => 'initial_payment',
-			'mu.billing_amount'  => 'recurring_payment',
-			'mu.cycle_period'    => 'billing_period_name',
-			'mu.cycle_number'    => 'billing_period_duration',
+			'mu.billing_amount'  => 'billing_amount',
+			'mu.cycle_period'    => 'cycle_period',
+			'mu.cycle_number'    => 'cycle_number',
 			'mu.billing_limit'   => 'billing_limit',
-			'mu.code_id'         => 'discount_code_id',
+			'mu.code_id'         => 'code_id',
 			'mu.status'          => 'status',
 			'mu.trial_amount'    => 'trial_amount',
 			'mu.trial_limit'     => 'trial_limit',
 			'mu.startdate'       => 'startdate',
 			'mu.enddate'         => 'enddate',
-			'ml.name'            => 'membership',
+			'ml.name'            => 'name',
 		);
 		
-		return apply_filters( 'e20r_memberslist_sql_columns', $sql_cols );
+		/**
+		 * The default mapping of DB columns (<table alias>.<column name>) to their respective alias(s)
+		 *
+		 * @filter e20r-members-list-default-sql-column-alias-map
+		 */
+		return apply_filters( 'e20r-members-list-default-sql-column-alias-map', $sql_cols );
 	}
 	
 	/**
@@ -223,7 +318,7 @@ class Members_List extends \WP_List_Table {
 		$this->items = $this->get_members( $per_page, $current_page, $level );
 		$total_items = $this->record_count();
 		
-		$this->utils->log( "Configure pagination for {$total_items} records and " . count( $this->items ) . " counted records" );
+		$this->utils->log( "Configure pagination for {$total_items} records and " . is_countable( $this->items ) ? count( $this->items ) : 0 . " counted records" );
 		
 		// Configure pagination
 		$this->set_pagination_args(
@@ -248,14 +343,16 @@ class Members_List extends \WP_List_Table {
 		/**
 		 * Add/remove columns from the members list.
 		 *
-		 * @filter 'e20r_memberslist_columnlist'
+		 * @filter 'e20r-members-list-add-to-default-table-columns'
 		 *
-		 * @param   array $columns - List of columns
+		 * @param   array $new_columns - New columns to add to the WP_List_Table output
+		 * @param   array $columns     - List of existing/default columns
 		 */
+		$new_columns = apply_filters( 'e20r_memberslist_columnlist', array(), $columns );
+		$new_columns = apply_filters( 'e20r-members-list-add-to-default-table-columns', $new_columns, $columns );
 		
-		$new_columns = apply_filters( 'e20r_memberslist_columnlist', array() );
 		
-		if ( apply_filters( 'e20r_memberslist_page_prepend_cols', false ) && ! empty( $new_columns ) ) {
+		if ( apply_filters( 'e20r-members-list-page-prepend-cols', false ) && ! empty( $new_columns ) ) {
 			$columns = $new_columns + $this->default_columns;
 		} else if ( ! empty( $new_columns ) ) {
 			$columns = $this->default_columns + $new_columns;
@@ -273,15 +370,22 @@ class Members_List extends \WP_List_Table {
 		
 		global $current_user;
 		
-		$columns_to_hide = get_user_meta( $current_user->ID, 'managememberships_page_e20r-memberslistcolumnshidden', true );
+		$columns_to_hide = get_user_meta( $current_user->ID, 'managememberships_page_pmpro-memberslistcolumnshidden', true );
 		
 		if ( empty( $columns_to_hide ) ) {
-			$this->hidden_columns = array( 'baddress', 'status' );
+			$this->hidden_columns = array( 'baddress', 'status', 'code_id' );
 		} else {
+			
+			if ( ! in_array( 'code_id', $columns_to_hide ) ) {
+				$columns_to_hide[] = 'code_id';
+			}
+			
 			$this->hidden_columns = $columns_to_hide;
 		}
 		
-		return apply_filters( 'e20r_memberslist_hidden_columns', $this->hidden_columns );
+		$this->hidden_columns = apply_filters( 'e20r_memberslist_hidden_columns', $this->hidden_columns );
+		
+		return apply_filters( 'e20r-members-list-hidden-columns', $this->hidden_columns );
 	}
 	
 	/**
@@ -298,9 +402,9 @@ class Members_List extends \WP_List_Table {
 			
 			// Some of the default columns are sortable
 			switch ( $col ) {
-				case 'username':
+				case 'user_login':
 				case 'user_email':
-				case 'membership':
+				case 'name':
 				case 'startdate':
 				case 'status':
 				case 'last':
@@ -346,7 +450,7 @@ class Members_List extends \WP_List_Table {
 			$this->utils->log( "Nonce is: {$nonce} for action: " . $this->current_action() );
 			
 			if ( ! wp_verify_nonce( $nonce, 'bulk-' . $this->_args['plural'] ) ) {
-				$this->utils->add_message( __( 'Error: Insecure bulk action denied.', 'e20r-members-list' ), 'warning', 'backend' );
+				$this->utils->add_message( __( 'Error: Insecure bulk action denied.', E20R_Members_List::plugin_slug ), 'warning', 'backend' );
 				
 				return;
 			}
@@ -423,12 +527,12 @@ class Members_List extends \WP_List_Table {
 					
 					if ( false === $cancel->cancel() ) {
 						if ( function_exists( 'pmpro_setMessage' ) ) {
-							pmpro_setMessage( __( "Error cancelling membership", "e20r-members-list" ), 'error' );
+							pmpro_setMessage( __( "Error cancelling membership", E20R_Members_List::plugin_slug ), 'error' );
 						} else {
 							global $msg;
 							global $msgt;
 							
-							$msg  = __( "Error cancelling membership", "e20r-members-list" );
+							$msg  = __( "Error cancelling membership", E20R_Members_List::plugin_slug );
 							$msgt = 'error';
 						}
 					}
@@ -459,6 +563,7 @@ class Members_List extends \WP_List_Table {
 		$this->utils->log( "Called by: " . $this->utils->_who_called_me() );
 		$search_level = $this->utils->get_variable( 'level', '' );
 		
+		$this->utils->log("Content sent...?" . ( headers_sent() ? 'Yes' : 'No' ) );
 		if ( empty( $search_level ) ) {
 			$search_level = 'active';
 		}
@@ -491,9 +596,9 @@ class Members_List extends \WP_List_Table {
 		$this->generate_member_sql( $per_page, $page_number, $status );
 		
 		// Fetch the data
-		$result = $wpdb->get_results( $this->sqlQuery, ARRAY_A );
-		
+		$result                    = $wpdb->get_results( $this->sqlQuery, ARRAY_A );
 		$this->total_members_found = $wpdb->get_var( "SELECT FOUND_ROWS() AS found_rows" );
+		
 		// Return the result set unless an error occurred.
 		if ( ! empty( $result ) ) {
 			
@@ -513,7 +618,7 @@ class Members_List extends \WP_List_Table {
 			
 			$error_msg = $wpdb->print_error();
 			if ( ! empty( $error_msg ) ) {
-				$this->utils->add_message( sprintf( __( "Error processing Members List database query: %s", "e20r-members-list" ), $error_msg ), 'error', 'backend' );
+				$this->utils->add_message( sprintf( __( "Error processing Members List database query: %s", E20R_Members_List::plugin_slug ), $error_msg ), 'error', 'backend' );
 			}
 			
 			return null;
@@ -540,7 +645,7 @@ class Members_List extends \WP_List_Table {
 			$order_by = 'enddate';
 		}
 		
-		// Start the SELECT statement
+		// Start the SELECT statement (FIXME: Remove dependency on SQL_CALC_FOUND_ROWS)
 		$sql = "SELECT SQL_CALC_FOUND_ROWS
 		";
 		
@@ -560,7 +665,7 @@ class Members_List extends \WP_List_Table {
 		
 		// Error out if something is wrong here.
 		if ( false === $this->table_list ) {
-			wp_die( __( "Error: Invalid list of tables & joins for member list!", "e20r-members-list" ) );
+			wp_die( __( "Error: Invalid list of tables & joins for member list!", E20R_Members_List::plugin_slug ) );
 		}
 		
 		if ( ! empty( $this->table_list['from'] ) ) {
@@ -569,7 +674,7 @@ class Members_List extends \WP_List_Table {
 			$this->from .= ( empty( $this->table_list['from']['alias'] ) ? null : " AS {$this->table_list['from']['alias']}" );
 		} else {
 			
-			wp_die( __( "Error: No FROM table specified for member list!", "e20r-members-list" ) );
+			wp_die( __( "Error: No FROM table specified for member list!", E20R_Members_List::plugin_slug ) );
 		}
 		
 		foreach ( $this->table_list as $type => $config ) {
@@ -597,7 +702,7 @@ class Members_List extends \WP_List_Table {
 		}
 		
 		
-		// Is the user searching for something (meta value, username, email, start or end date
+		// Is the user searching for something (meta value, user_login, email, start or end date
 		if ( ! empty ( $user_search ) ) {
 			
 			$is_time = false;
@@ -643,10 +748,11 @@ class Members_List extends \WP_List_Table {
 				'changed',
 				'inactive',
 			) );
-			$active_statuses    = apply_filters( 'e20r_memberslist_active_statuses', array( 'active' ) );
-			$expired_statuses   = apply_filters( 'e20r_memberslist_expired_statuses', array( 'expired' ) );
 			
-			$this->utils->log( "Only returning records for membership level {$status}" );
+			$active_statuses  = apply_filters( 'e20r_memberslist_active_statuses', array( 'active' ) );
+			$expired_statuses = apply_filters( 'e20r_memberslist_expired_statuses', array( 'expired' ) );
+			
+			$this->utils->log( "Only returning records for membership level: {$status}" );
 			
 			switch ( $status ) {
 				
@@ -751,18 +857,24 @@ class Members_List extends \WP_List_Table {
 					'alias'     => 'ml',
 					'condition' => 'ON mu.membership_id = ml.id',
 				),
+				2 => array(
+					'name'      => $wpdb->usermeta,
+					'join_type' => 'LEFT JOIN ',
+					'alias'     => 'um',
+					'condition' => 'ON u.ID = um.user_id',
+				),
 			),
 		);
 		
 		// We're searching so need to add the usermeta table.
-		// if ( null !== $this->utils->get_variable( 'find', null ) ) {
+		/* if ( null !== $this->utils->get_variable( 'find', null ) ) {
 		$this->table_list['joins'][2] = array(
 			'name'      => $wpdb->usermeta,
 			'join_type' => 'LEFT JOIN ',
 			'alias'     => 'um',
 			'condition' => 'ON u.ID = um.user_id',
 		);
-		//}
+		} */
 		
 		$search_level = $this->utils->get_variable( 'level', null );
 		
@@ -783,18 +895,18 @@ class Members_List extends \WP_List_Table {
 		
 		$this->table_list = apply_filters( 'e20r_memberslist_tables_and_joins', $this->table_list );
 		
-		// TODO: Need to validate the table/join array (only one 'from' allowed, etc.)
+		// FIXME: Need to (actually!) validate the table/join array (only one 'from' allowed, etc.)
 		if ( true === $this->is_valid_tnj_list( $this->table_list ) ) {
 			return $this->table_list;
 		} else {
-			pmpro_setMessage( __( "Error: Invalid configuration!!!", "e20r-members-list" ), "error" );
+			pmpro_setMessage( __( "Error: Invalid configuration!!!", E20R_Members_List::plugin_slug ), "error" );
 		}
 	}
 	
 	/**
 	 * Test validity of the table & join list.
 	 *
-	 * TODO: Actually test the validity of the tables and jointed tables list
+	 * FIXME: Actually test the validity of the tables and jointed tables list
 	 *
 	 * @param array $list The list of tables to search
 	 *
@@ -807,6 +919,9 @@ class Members_List extends \WP_List_Table {
 	
 	/**
 	 * Calculate pagination data (number of records found (total) based on the SQL used)
+	 *
+	 * FIXME: Implement https://wpartisan.me/tutorials/wordpress-database-queries-speed-sql_calc_found_rows
+	 * @credit https://wpartisan.me/tutorials/wordpress-database-queries-speed-sql_calc_found_rows
 	 *
 	 * @return int
 	 */
@@ -934,9 +1049,9 @@ class Members_List extends \WP_List_Table {
 	public function get_bulk_actions() {
 		
 		$actions = array(
-			'bulk-cancel' => __( 'Cancel', 'e20r-members-list' ),
-			'bulk-update' => __( 'Update', 'e20r-members-list' ),
-			'bulk-export' => __( 'Export', 'e20r-members-list' ),
+			'bulk-cancel' => __( 'Cancel', E20R_Members_List::plugin_slug ),
+			'bulk-update' => __( 'Update', E20R_Members_List::plugin_slug ),
+			'bulk-export' => __( 'Export', E20R_Members_List::plugin_slug ),
 		);
 		
 		return apply_filters( 'e20r_memberlist_bulk_actions', $actions );
@@ -956,25 +1071,25 @@ class Members_List extends \WP_List_Table {
 			sprintf(
 				'<input type="checkbox" name="%1$s[]" value="%2$s" />',
 				"{$this->_args['singular']}_id",
-				$item['user_id']
+				$item['ID']
 			)
 		);
 	}
 	
 	/**
-	 * Configure the username field in table
+	 * Configure the user_login field in table
 	 *
 	 * @param   array $item Database record for the row being processed
 	 *
 	 * @return  string          Content for the cell
 	 */
-	public function column_username( $item ) {
+	public function column_user_login( $item ) {
 		
-		$user = new \WP_User( $item['user_id'] );
+		$user = new \WP_User( $item['ID'] );
 		
 		$edit_url = add_query_arg(
 			array(
-				'user_id'         => $item['user_id'],
+				'user_id'         => $item['ID'],
 				'wp_http_referer' => urlencode( wp_get_referer() ),
 			),
 			get_admin_url( get_current_blog_id(), 'user-edit.php' )
@@ -989,32 +1104,32 @@ class Members_List extends \WP_List_Table {
 					array(
 						'page_no'       => $this->utils->get_variable( 'page_no', 1 ),
 						'action'        => 'cancel',
-						'user_id'       => $item['user_id'],
+						'user_id'       => $item['ID'],
 						'membership_id' => $item['membership_id'],
 						'_row_nonce'    => $row_nonce,
 					),
 					get_admin_url( get_current_blog_id(), 'admin.php' )
 				),
-				__( 'Cancel membership', 'e20r-members-list' ),
-				__( 'Cancel', 'e20r-members-list' )
+				__( 'Cancel membership', E20R_Members_List::plugin_slug ),
+				__( 'Cancel', E20R_Members_List::plugin_slug )
 			), */
 			'update' => sprintf( '<a href="%1$s" title="%2$s" class="e20r-update-member">%3$s</a>',
 				add_query_arg(
 					array(
 						'page_no'       => $this->utils->get_variable( 'page_no', 1 ),
 						'action'        => 'update',
-						'user_id'       => $item['user_id'],
+						'user_id'       => $item['ID'],
 						'membership_id' => $item['membership_id'],
 						'_row_nonce'    => $row_nonce,
 					),
 					get_admin_url( get_current_blog_id(), 'admin.php' )
 				),
-				__( 'Update member info', 'e20r-members-list' ),
-				__( 'Update', 'e20r-members-list' )
+				__( 'Update member info', E20R_Members_List::plugin_slug ),
+				__( 'Update', E20R_Members_List::plugin_slug )
 			),
 		);
 		
-		$avatar  = get_avatar( $item['user_id'], 32 );
+		$avatar  = get_avatar( $item['ID'], 32 );
 		$actions = apply_filters( 'e20r_memberslist_user_row_actions', $actions, $user );
 		
 		$col_content = sprintf(
@@ -1025,7 +1140,7 @@ class Members_List extends \WP_List_Table {
 			<br>
 			%3$s',
 			$avatar,
-			"<a href=\"{$edit_url}\">{$item['username']}</a>",
+			"<a href=\"{$edit_url}\">{$item['user_login']}</a>",
 			$this->row_actions( $actions )
 		);
 		
@@ -1041,7 +1156,7 @@ class Members_List extends \WP_List_Table {
 	 */
 	public function column_first_name( $item ) {
 		
-		$user = get_userdata( $item['user_id'] );
+		$user = get_userdata( $item['ID'] );
 		
 		if ( ! empty( $user->first_name ) ) {
 			return $user->first_name;
@@ -1051,7 +1166,7 @@ class Members_List extends \WP_List_Table {
 			return $user->user_firstname;
 		}
 		
-		$bfirstname = get_user_meta( $item['user_id'], 'pmpro_bfirstname', true );
+		$bfirstname = get_user_meta( $item['ID'], 'pmpro_bfirstname', true );
 		
 		if ( ! empty( $bfirstname ) ) {
 			return $bfirstname;
@@ -1069,7 +1184,7 @@ class Members_List extends \WP_List_Table {
 	 */
 	public function column_last_name( $item ) {
 		
-		$user = get_userdata( $item['user_id'] );
+		$user = get_userdata( $item['ID'] );
 		
 		if ( ! empty( $user->last_name ) ) {
 			return $user->last_name;
@@ -1114,10 +1229,10 @@ class Members_List extends \WP_List_Table {
 	public function column_baddress( $item ) {
 		
 		if ( ! function_exists( 'pmpro_formatAddress' ) ) {
-			return __( "Not found", 'e20r-members-list' );
+			return __( "Not found", E20R_Members_List::plugin_slug );
 		}
-		$user = get_user_by( 'id', $item['user_id'] );
 		
+		$user    = get_user_by( 'id', $item['ID'] );
 		$address = pmpro_formatAddress(
 			trim( "{$user->pmpro_bfirstname} {$user->pmpro_blastname}" ),
 			$user->pmpro_baddress1,
@@ -1131,10 +1246,10 @@ class Members_List extends \WP_List_Table {
 		
 		if ( empty( $address ) ) {
 			
-			$address = __( "Not found", 'e20r-members-list' );
+			$address = __( "Not found", E20R_Members_List::plugin_slug );
 			
-			if ( 0 >= intval( $item['initial_payment'] ) && 0 >= intval( $item['recurring_payment'] ) ) {
-				return $address = __( "N/A", 'e20r-members-list' );
+			if ( 0 >= intval( $item['initial_payment'] ) && 0 >= intval( $item['billing_amount'] ) ) {
+				return $address = __( "N/A", E20R_Members_List::plugin_slug );
 			}
 			
 		}
@@ -1149,9 +1264,7 @@ class Members_List extends \WP_List_Table {
 	 *
 	 * @return  string          Content for the cell
 	 */
-	public function column_membership( $item ) {
-		
-		$membership_id = $item['membership_id'];
+	public function column_name( $item ) {
 		
 		// These are used to configure the membership level with JavaScript
 		$membership_input = sprintf(
@@ -1163,8 +1276,8 @@ class Members_List extends \WP_List_Table {
 			<input type="hidden" value="%5$d" class="e20r-members-list-db_record_id" name="e20r-members-list-db_record_id_%2$s" />
 			<input type="hidden" value="%4$s" class="e20r-members-list-field-name" name="e20r-members-list-field_name_%2$s" />',
 			$item['membership_id'],
-			$item['user_id'],
-			$item['membership'],
+			$item['ID'],
+			$item['name'],
 			'membership_id',
 			$item['record_id']
 		);
@@ -1177,7 +1290,7 @@ class Members_List extends \WP_List_Table {
 			// Default info if PMPro is disabled
 			$null_level           = new \stdClass();
 			$null_level->level_id = 0;
-			$null_level->name     = __( 'No levels found. Paid Memberships Pro is inactive!', 'e20r-members-list' );
+			$null_level->name     = __( 'No levels found. Paid Memberships Pro is inactive!', E20R_Members_List::plugin_slug );
 			$levels               = array( $null_level );
 		}
 		
@@ -1199,15 +1312,15 @@ class Members_List extends \WP_List_Table {
 					<a href="#" class="e20r-members-list-cancel e20r-members-list-link">%4$s</a>
 				</div>',
 			$membership_input,
-			$item['user_id'],
+			$item['ID'],
 			$options,
-			__( "Reset", "e20r-members-list" )
+			__( "Reset", E20R_Members_List::plugin_slug )
 		);
 		
 		$value = sprintf(
 			'<a href="#" class="e20r-members-list_membership_id e20r-members-list-editable" title="%1$s">%2$s<span class="dashicons dashicons-edit"></a>%3$s',
-			__( "Click to editmembership level", "e20rapp" ),
-			$item['membership'],
+			__( "Click to edit membership level", "e20rapp" ),
+			$item['name'],
 			$new_membershiplevel_input
 		);
 		
@@ -1223,35 +1336,52 @@ class Members_List extends \WP_List_Table {
 	 */
 	public function column_fee( $item ) {
 		
-		
-		$initial = 0.00;
-		
-		$fee_string = '';
+		$fee_string = array();
 		
 		if ( $item['initial_payment'] > 0 ) {
 			
-			$fee_string .= sprintf( "%s", pmpro_formatPrice( (float) $item['initial_payment'] ) );
+			$fee_string[] = sprintf( "%s", pmpro_formatPrice( (float) $item['initial_payment'] ) );
 		}
 		
-		if ( $item['initial_payment'] > 0 && $item['recurring_payment'] > 0 ) {
-			$fee_string .= " + <br />";
+		if ( $item['initial_payment'] > 0 && $item['billing_amount'] > 0 ) {
+			$fee_string[] = " + <br />";
 		}
 		
-		if ( $item['recurring_payment'] > 0 ) {
-			if ( $item['billing_period_duration'] > 1 ) {
-				$freq = sprintf( '%1$s %2$ss', $item['billing_period_duration'], $item['billing_period_name'] );
+		if ( $item['billing_amount'] > 0 ) {
+			
+			if ( $item['cycle_number'] > 1 ) {
+				$freq = sprintf( '%1$s %2$s(s)', $item['cycle_number'], $item['cycle_period'] );
 			} else {
-				$freq = sprintf( '%s', $item['billing_period_name'] );
+				$freq = sprintf( '%s', $item['cycle_period'] );
 			}
 			
-			$fee_string .= sprintf( '%1$s / %2$s', pmpro_formatPrice( $item['recurring_payment'] ), $freq );
+			$fee_string[] = sprintf( '%1$s / %2$s', pmpro_formatPrice( $item['billing_amount'] ), $freq );
 		}
 		
 		if ( empty( $fee_string ) ) {
-			$fee_string = '--';
+			$fee_string[] = apply_filters( 'e20r-memberslist-column-value-free', __( 'Free', E20R_Members_List::plugin_slug ) );
 		}
 		
-		return $fee_string;
+		return implode( ' ', $fee_string );
+	}
+	
+	/**
+	 * Display the Discount Code used by the member
+	 *
+	 * @param array $item
+	 *
+	 * @return \stdClass
+	 */
+	public function column_code( $item ) {
+		
+		$code_info     = Export_Members::get_pmpro_discount_code( $item['code_id'], $item['ID'], $item['membership_id'] );
+		$discount_code = null;
+		
+		if ( ! empty( $code_info ) ) {
+			$discount_code = $code_info->pmpro_discount_code;
+		}
+		
+		return $discount_code;
 	}
 	
 	/**
@@ -1261,9 +1391,9 @@ class Members_List extends \WP_List_Table {
 	 *
 	 * @return  string          Content for the cell
 	 */
-	public function column_joindate( $item ) {
+	public function column_user_registered( $item ) {
 		
-		return sprintf( '%s', date( 'M j, \'y', strtotime( $item['joindate'], current_time( 'timestamp' ) ) ) );
+		return sprintf( '%s', date( 'M j, \'y', strtotime( $item['user_registered'], current_time( 'timestamp' ) ) ) );
 	}
 	
 	/**
@@ -1277,7 +1407,7 @@ class Members_List extends \WP_List_Table {
 		
 		if ( '0000-00-00 00:00:00' == $item['startdate'] || empty( $item['startdate'] ) ) {
 			$date_value  = null;
-			$start_label = __( 'Invalid', 'e20r-members-list' );
+			$start_label = __( 'Invalid', E20R_Members_List::plugin_slug );
 		} else {
 			$date_value  = ! empty( $item['startdate'] ) ? date( 'Y-m-d', strtotime( $item['startdate'], current_time( 'timestamp' ) ) ) : null;
 			$start_label = date( 'M j, \'y', strtotime( $item['startdate'], current_time( 'timestamp' ) ) );
@@ -1295,7 +1425,7 @@ class Members_List extends \WP_List_Table {
 			<input type="hidden" value="%5$d" class="e20r-members-list-db_record_id" name="e20r-members-list-db_record_id_%2$s" />
 			<input type="hidden" value="%6$s" class="e20r-members-list-field-name" name="e20r-members-list-field_name_%2$s" />',
 			$item['membership_id'],
-			$item['user_id'],
+			$item['ID'],
 			$date_value,
 			$start_label,
 			$item['record_id'],
@@ -1310,10 +1440,10 @@ class Members_List extends \WP_List_Table {
 					<a href="#" class="e20r-members-list-cancel e20r-members-list-list-link">%5$s</a>
 				</div>',
 			$startdate_input,
-			$item['user_id'],
+			$item['ID'],
 			$date_value,
 			$min_val,
-			__( "Cancel", "e20r-members-list" )
+			__( "Cancel", E20R_Members_List::plugin_slug )
 		);
 		
 		$value = sprintf(
@@ -1335,10 +1465,38 @@ class Members_List extends \WP_List_Table {
 	 */
 	public function column_last( $item ) {
 		
+	    $date_format = get_option('date_format');
+	    
 		if ( empty( $item['enddate'] ) || '0000-00-00 00:00:00' === $item['enddate'] ) {
-			$enddate = __( "Never", "e20r-members-list" );
+			$enddate = __( "Never", E20R_Members_List::plugin_slug );
+			$enddate_label = $enddate;
 		} else {
-			$enddate = date( 'M j, \'y', strtotime( $item['enddate'], current_time( 'timestamp' ) ) );
+			$enddate = date(
+			        $date_format,
+                    strtotime( $item['enddate'], current_time( 'timestamp' ) )
+            );
+			$enddate_label = $enddate;
+		}
+		
+		// The membership level has recurring payment
+		if ( ( empty( $item['enddate'] ) || '0000-00-00 00:00:00' === $item['enddate'] ) &&
+             ! empty( $item['billing_amount'] && ! empty( $item['cycle_number'] ) )
+        ) {
+			$enddate_label = sprintf(
+			        __( 'N/A (%1$sNext Payment: %2$s%3$s)', E20R_Members_List::plugin_slug ),
+                    '<span class="e20r-members-list-small" style="font-size: 10px; font-style: italic;">',
+                    date(
+	                    $date_format,
+                            pmpro_next_payment(
+                                    $item['ID'],
+                                    'success',
+                                    'timestamp'
+                            )
+                    ),
+                    '</span>'
+                );
+			
+			$enddate = null;
 		}
 		
 		$enddate = apply_filters( 'e20r-members-list-enddate-col-result', $enddate, $item );
@@ -1357,7 +1515,7 @@ class Members_List extends \WP_List_Table {
 			<input type="hidden" value="%5$d" class="e20r-members-list-db_record_id" name="e20r-members-list-db_record_id_%2$s" />
 			<input type="hidden" value="%6$s" class="e20r-members-list-field-name" name="e20r-members-list-field_name_%2$s" />',
 			$item['membership_id'],
-			$item['user_id'],
+			$item['ID'],
 			$enddate,
 			$date_value,
 			$item['record_id'],
@@ -1372,15 +1530,15 @@ class Members_List extends \WP_List_Table {
 					<a href="#" class="e20r-members-list-cancel e20r-members-list-list-link">%4$s</a>
 				</div>',
 			$enddate_input,
-			$item['user_id'],
+			$item['ID'],
 			$date_value,
-			__( "Cancel", "e20r-members-list" )
+			__( "Cancel", E20R_Members_List::plugin_slug )
 		);
 		
 		$value = sprintf(
 			'<a href="#" class="e20r-members-list_enddate e20r-members-list-editable" title="%1$s">%2$s<span class="dashicons dashicons-edit"></a></span>%3$s',
-			__( "Bulk update membership end/expiration date", "e20r-members-list" ),
-			$enddate,
+			__( "Bulk update membership end/expiration date", E20R_Members_List::plugin_slug ),
+			$enddate_label,
 			$new_date_input
 		
 		);
@@ -1418,7 +1576,7 @@ class Members_List extends \WP_List_Table {
 			<input type="hidden" value="%5$d" class="e20r-members-list-db_record_id" name="e20r-members-list-db_record_id_%2$s" />
 			<input type="hidden" value="%4$s" class="e20r-members-list-field-name" name="e20r-members-list-field_name_%2$s" />',
 			$item['membership_id'],
-			$item['user_id'],
+			$item['ID'],
 			$item['status'],
 			'status',
 			$item['record_id'],
@@ -1452,14 +1610,14 @@ class Members_List extends \WP_List_Table {
 					<a href="#" class="e20r-members-list-cancel e20r-members-list-link">%4$s</a>
 				</div>',
 			$status_input,
-			$item['user_id'],
+			$item['ID'],
 			$options,
-			__( "Reset", "e20r-members-list" )
+			__( "Reset", E20R_Members_List::plugin_slug )
 		);
 		
 		$value = sprintf(
 			'<a href="#" class="e20r-members-list_status e20r-members-list-editable" title="%1$s">%2$s<span class="dashicons dashicons-edit"></a></span>%3$s',
-			__( "Update the member's membership status", "e20r-members-list" ),
+			__( "Update the member's membership status", E20R_Members_List::plugin_slug ),
 			$label_text,
 			$new_status_input
 		
@@ -1529,6 +1687,124 @@ class Members_List extends \WP_List_Table {
 	 * Default text when no records are found/returned
 	 */
 	public function no_items() {
-		_e( "No members found", 'e20r-members-list' );
+		
+		$utils      = Utilities::get_instance();
+		$search_for = $utils->get_variable( 'find', '' );
+		$level      = $utils->get_variable( 'level', '' );
+		
+		$active_members_url = add_query_arg(
+			array(
+				'page'  => 'pmpro-memberslist',
+				'level' => 'active',
+				'find'  => esc_attr( $search_for ),
+			),
+			admin_url( 'admin.php' )
+		);
+		
+		$all_members_url = add_query_arg(
+			array(
+				'page'  => 'pmpro-memberslist',
+				'level' => 'all',
+				'find'  => esc_attr( $search_for ),
+			),
+			admin_url( 'admin.php' )
+		);
+		
+		$cancelled_url = add_query_arg(
+			array(
+				'page'  => 'pmpro-memberslist',
+				'level' => 'cancelled',
+				'find'  => esc_attr( $search_for ),
+			),
+			admin_url( 'admin.php' )
+		);
+		
+		$expired_url = add_query_arg(
+			array(
+				'page'  => 'pmpro-memberslist',
+				'level' => 'expired',
+				'find'  => esc_attr( $search_for ),
+			),
+			admin_url( 'admin.php' )
+		);
+		
+		$old_members_url = add_query_arg(
+			array(
+				'page'  => 'pmpro-memberslist',
+				'level' => 'oldmembers',
+				'find'  => esc_attr( $search_for ),
+			),
+			admin_url( 'admin.php' )
+		);
+		
+		$all_users_url = add_query_arg(
+			array(
+				's' => esc_attr( $search_for ),
+			),
+			admin_url( 'users.php' )
+		);
+		
+		_e( "No members found", E20R_Members_List::plugin_slug );
+		?>
+        <hr/>
+        <div class="e20r-pmpro-memberslist-no-members-found-list">
+            <p class=""><?php _e( "It's possible the information you're looking for can be found in one of the following categories:", E20R_Members_List::plugin_slug ); ?></p>
+            <ul class="ul-disc">
+				<?php if ( $level !== 'active' ) { ?>
+                    <li class="e20r-pmpro-memberslist-not-found active-members">
+						<?php printf(
+							__( 'Repeat search: %1$sActive Members list%2$s', E20R_Members_List::plugin_slug ),
+							sprintf( '<a href="%1$s">', $active_members_url ),
+							'</a>'
+						); ?>
+                    </li>
+				<?php } ?>
+				
+				<?php if ( $level !== 'all' ) { ?>
+                    <li class="e20r-pmpro-memberslist-not-found all-members">
+						<?php printf(
+							__( 'Repeat search: %1$sAll Members list%2$s', E20R_Members_List::plugin_slug ),
+							sprintf( '<a href="%1$s">', $all_members_url ),
+							'</a>'
+						); ?>
+                    </li>
+				<?php } ?>
+				<?php if ( $level !== 'cancelled' ) { ?>
+                    <li class="e20r-pmpro-memberslist-not-found cancelled-members">
+						<?php printf(
+							__( 'Repeat search: %1$sCancelled Members list%2$s', E20R_Members_List::plugin_slug ),
+							sprintf( '<a href="%1$s">', $cancelled_url ),
+							'</a>'
+						); ?>
+                    </li>
+				<?php } ?>
+				<?php if ( $level !== 'expired' ) { ?>
+                    <li class="e20r-pmpro-memberslist-not-found expired-members">
+						<?php printf(
+							__( 'Repeat search: %1$sExpired Members list%2$s', E20R_Members_List::plugin_slug ),
+							sprintf( '<a href="%1$s">', $expired_url ),
+							'</a>'
+						); ?>
+                    </li>
+				<?php } ?>
+				<?php if ( $level !== 'oldmembers' ) { ?>
+                    <li class="e20r-pmpro-memberslist-not-found old-members">
+						<?php printf(
+							__( 'Repeat search: %1$sOld Members list%2$s', E20R_Members_List::plugin_slug ),
+							sprintf( '<a href="%1$s">', $old_members_url ),
+							'</a>'
+						); ?>
+                    </li>
+				<?php } ?>
+                <li class="e20r-pmpro-memberslist-not-found all-users">
+					<?php printf(
+						__( 'Repeat search: %1$sAll Users list%2$s', E20R_Members_List::plugin_slug ),
+						sprintf( '<a href="%1$s">', $all_users_url ),
+						'</a>'
+					); ?>
+                </li>
+            </ul>
+        </div>
+		<?php
 	}
 }

@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (c) 2018 - Eighty / 20 Results by Wicked Strong Chicks.
+ * Copyright (c) 2018-2019 - Eighty / 20 Results by Wicked Strong Chicks.
  * ALL RIGHTS RESERVED
  *
  * This program is free software: you can redistribute it and/or modify
@@ -19,23 +19,27 @@
 
 namespace E20R\Members_List\Admin;
 
-define( 'E20R_MEMBERSLIST_VER', '2.4' );
-
+use E20R\Members_List\Controller\E20R_Members_List;
 use E20R\Utilities\Utilities;
 
 class Members_List_Page {
 	
 	/**
-	 * @var
+	 * Instance of the Members_List_Page class (Singleton)
+	 *
+	 * @var null|Members_List_Page $instance
 	 */
-	private static $instance;
+	private static $instance = null;
 	
 	/**
+	 * Holds the list of members (Members_List class)
 	 * @var Members_List $member_list
 	 */
 	public $member_list;
 	
 	/**
+	 * Holds the standard Utilities class
+	 *
 	 * @var     Utilities $utils - Utilities class
 	 */
 	private $utils;
@@ -65,7 +69,14 @@ class Members_List_Page {
 	 */
 	public static function admin_bar_menu() {
 		
+		$is_pmpro_v2 = version_compare( PMPRO_VERSION, '2.0', 'ge' );
+		
+		if ( true === $is_pmpro_v2 ) {
+			return;
+		}
+		
 		global $wp_admin_bar;
+		
 		
 		if ( ! is_admin_bar_showing() || ( ! is_super_admin() && ( ! current_user_can( 'manage_options' ) ) && ! current_user_can( 'pmpro_memberslist' ) && ! current_user_can( 'e20r_memberslist' ) ) ) {
 			if ( ! is_null( self::$instance ) ) {
@@ -84,7 +95,7 @@ class Members_List_Page {
 			'title'  => __( 'Members List', 'pmpro' ),
 			'href'   => add_query_arg(
 				'page',
-				'e20r-memberslist',
+				'pmpro-memberslist',
 				get_admin_url( get_current_blog_id(), 'admin.php' )
 			),
 			'parent' => 'paid-memberships-pro',
@@ -110,6 +121,9 @@ class Members_List_Page {
 		return $status;
 	}
 	
+	/**
+	 * Load Action and Filter hooks for the Members List page
+	 */
 	public function load_hooks() {
 		
 		$this->utils = Utilities::get_instance();
@@ -117,11 +131,13 @@ class Members_List_Page {
 		// Filters
 		add_filter( 'set-screen-option', array( $this, 'set_screen' ), 10, 3 );
 		add_filter( 'set_url_scheme', array( $this, 'add_to_pagination' ), 10, 3 );
+		
 		// Actions
 		add_action( 'admin_menu', array( $this, 'plugin_menu' ), 9999 );
 		add_action( 'admin_init', 'E20R\Members_List\Admin\Export_Members::clear_temp_files' );
-		add_action( 'admin_bar_menu', array( $this, 'admin_bar_menu' ), 9999 );
+		// add_action( 'admin_bar_menu', array( $this, 'admin_bar_menu' ), 9999 );
 		add_action( 'admin_enqueue_scripts', array( $this, 'load_scripts_styles' ) );
+		
 	}
 	
 	/**
@@ -129,7 +145,7 @@ class Members_List_Page {
 	 */
 	public function load_scripts_styles( $hook_suffix ) {
 		
-		if ( is_admin() && ( ! defined( 'DOING_AJAX' ) || false == DOING_AJAX ) && 1 === preg_match( '/e20r-memberslist/', $hook_suffix ) ) {
+		if ( is_admin() && ( ! defined( 'DOING_AJAX' ) || false == DOING_AJAX ) && 1 === preg_match( '/(pmpro|e20r)-memberslist/', $hook_suffix ) ) {
 			
 			wp_enqueue_style( 'jquery-ui', '//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css' );
 			wp_enqueue_script( 'jquery-ui-datepicker' );
@@ -138,10 +154,13 @@ class Members_List_Page {
 			
 			wp_register_script( 'e20r-memberslist-page', plugins_url( "/js/e20r-memberslist-page.js", __FILE__ ), array( 'jquery' ), E20R_MEMBERSLIST_VER, true );
 			
+			// $is_pmpro_v2 = version_compare( PMPRO_VERSION, '2.0', 'ge' );
+			// $url         = ( false === $is_pmpro_v2 ) ? 'e20r-memberslist' : 'pmpro-memberslist';
+			
 			wp_localize_script( 'e20r-memberslist-page', 'e20rml',
 				array(
 					'locale' => str_replace( '_', '-', get_locale() ),
-					'url'    => add_query_arg( 'page', 'e20r-memberslist', admin_url( 'admin.php' ) ),
+					'url'    => add_query_arg( 'page', 'pmpro-memberslist', admin_url( 'admin.php' ) ),
 					'lang'   => array(
 						'save_btn_text'    => __( 'Save Updates', 'e20r-members-list' ),
 						'clearing_enddate' => __( "This action will clear the current membership end date/expiration date!", 'e20r-members-list' ),
@@ -154,36 +173,62 @@ class Members_List_Page {
 	}
 	
 	/**
-	 * (re)Load the Members List menu
+	 * Point Members List menu handler(s) to this plugin
 	 */
 	public function plugin_menu() {
+	 
+		$this->utils->log( "Headers sent? " . ( headers_sent() ? 'Yes' : 'No' ) );
 		
-		// Unhook old members list functionality
-		if ( false == ( $page = remove_submenu_page( 'pmpro-membershiplevels', 'pmpro-memberslist' ) ) ) {
+		
+		$pmpro_menu_slug = 'pmpro-membershiplevels';
+		$is_pmpro_v2     = version_compare( PMPRO_VERSION, '2.0', 'ge' );
+		
+		if ( defined( 'PMPRO_VERSION' ) && $is_pmpro_v2 ) {
+			$pmpro_menu_slug = 'pmpro-dashboard';
+		}
+		
+		$this->utils->log( "Remove the default members list page.. (under: {$pmpro_menu_slug})" );
+		
+		// Just replace the action that loads the PMPro Members List
+		
+		$hookname = get_plugin_page_hookname( 'pmpro-memberslist', $pmpro_menu_slug );
+		$this->utils->log("Found hook name: {$hookname}. Sent yet? " . (headers_sent() ? 'Yes' : 'No') );
+		remove_action( $hookname, 'pmpro_memberslist', 10 );
+		add_action( $hookname, array( $this, 'memberslist_settings_page' ), 11 );
+		add_action( "load-memberships_page_pmpro-memberslist", array( $this, 'screen_option' ), 9999 );
+		
+		/*
+		// Unhook old members list functionality (pre v2.0 of PMPro)
+		if ( false == ( $page = remove_submenu_page( $pmpro_menu_slug, 'pmpro-memberslist' ) ) ) {
 			
 			$this->utils->log( "Unable to remove the default membership levels page!" );
-			pmpro_setMessage( __( 'Error while attempting to reassign member list menu', 'pmpro' ), 'error' );
+			pmpro_setMessage( __( 'Error while attempting to reassign member list menu', E20R_Members_List::plugin_slug ), 'error' );
+			
+			return;
 		}
 		
 		// Load the (new) WP_Table_List based Members List
 		$hook = add_submenu_page(
-			'pmpro-membershiplevels',
-			__( 'Members List', 'pmpro' ),
-			__( 'Members List', 'pmpro' ),
-			'manage_options',
-			'e20r-memberslist',
+			$pmpro_menu_slug,
+			__( 'Members List', 'paid-memberships-pro' ),
+			__( 'Members List', 'paid-memberships-pro' ),
+			'pmpro_memberslist',
+			'pmpro-memberslist',
 			array( $this, 'memberslist_settings_page' )
 		);
 		
-		// Add 'Screeen Options' when this page loads.
-		if ( false !== $hook ) {
-			
-			add_action( "load-{$hook}", array( $this, 'screen_option' ), 9999 );
-		} else {
+		// Show error if we're unable to update the members list
+		if ( false === $hook ) {
 			
 			$this->utils->log( "Unable to load the replacement Members List page!" );
 			pmpro_setMessage( __( "Unable to load Members List menu entry", "e20r-members-list" ), "error" );
+			
+			return;
 		}
+		
+		// Process the screen option
+		add_action( "load-memberships_page_pmpro-memberslist", array( $this, 'screen_option' ), 9999 );
+        */
 	}
 	
 	/**
@@ -199,7 +244,7 @@ class Members_List_Page {
 		
 		$page = $this->utils->get_variable( 'page', '' );
 		
-		if ( 1 === preg_match( "/{$_SERVER['HTTP_HOST']}\/wp-admin\/admin.php\?page=e20r-memberslist/i", $url ) ) {
+		if ( 1 === preg_match( "/{$_SERVER['HTTP_HOST']}\/wp-admin\/admin.php\?page=pmpro-memberslist/i", $url ) ) {
 			
 			$arg_list = array();
 			
@@ -255,6 +300,7 @@ class Members_List_Page {
 	 */
 	public function memberslist_settings_page() {
 		
+	    $this->utils->log("Have we sent content? " . (headers_sent() ? 'yes' : 'no'));
 		global $pmpro_msg;
 		global $pmpro_msgt;
 		
@@ -268,6 +314,7 @@ class Members_List_Page {
 				'action' => 'memberslist_csv',
 				's'      => esc_attr( $search ),
 				'l'      => esc_attr( $level ),
+                'showDebugTrace' => 'true'
 			)
 		);
 		
@@ -277,8 +324,29 @@ class Members_List_Page {
 		);
 		
 		$e20r_error_msgs   = $this->utils->get_message( 'error' );
-		$e20r_warning_msgs = $this->utils->get_variable( 'warning' );
-		$e20r_info_msgs    = $this->utils->get_variable( 'info' );
+		$e20r_warning_msgs = $this->utils->get_message( 'warning' );
+		$e20r_info_msgs    = $this->utils->get_message( 'info' );
+		
+		$top_list = array(
+			'active' => __( 'Active Members', E20R_Members_List::plugin_slug ),
+			'all'    => __( 'All Members', E20R_Members_List::plugin_slug ),
+		);
+		
+		$bottom_list = array(
+			'cancelled'  => __( 'Cancelled Members', 'paid-membership-pro' ),
+			'expired'    => __( 'Expired Members', 'paid-membership-pro' ),
+			'oldmembers' => __( 'Old Members', 'paid-membership-pro' ),
+		);
+		
+		$level_list = array();
+		
+		$list = function_exists( 'pmpro_getAllLevels' ) ? pmpro_getAllLevels( true, true ) : array();
+		
+		foreach ( $list as $item ) {
+			$level_list[ $item->id ] = $item->name;
+		}
+		
+		$option_list = $top_list + $level_list + $bottom_list;
 		
 		if ( ! empty( $pmpro_msg ) ) { ?>
 
@@ -292,58 +360,59 @@ class Members_List_Page {
 		?>
         <div class="wrap e20r-pmpro-memberslist-page">
             <h1>
-				<?php _e( "Members List", "pmpro" ); ?>
+				<?php _e( "Members List", "paid-memberships-pro" ); ?>
                 <a href="<?php echo esc_url_raw( $csv_url ); ?>" class="page-title-action e20r-memberslist-export"
-                   target="_blank"><?php _e( 'Export to CSV', 'pmpro' ); ?></a>
+                   target="_blank"><?php _e( 'Export to CSV', 'paid-memberships-pro' ); ?></a>
+				<?php if ( ! empty( $search ) ) {
+					printf(
+						'<span class="e20r-pmpro-memberslist-search-info">%1$s</span>',
+						sprintf(
+							__( 'Search results for "%1$s" in %2$s', E20R_Members_List::plugin_slug ),
+							$search,
+							$option_list[ $level ]
+						)
+					);
+				} ?>
             </h1>
             <hr class="e20r-memberslist-hr"/>
             <h2 class="screen-reader-text"><?php _e( "Filter list of members", "e20r-members-list" ); ?></h2>
             <form method="post" id="posts-filter">
                 <div class="e20r-search-arguments">
                     <p class="search-box float-left">
-                        <?php
-                        $label = __('Update List', "e20r-members-list" );
-                        $button_def = 'button';
-                        
-                        if ( isset( $_REQUEST['find'] ) && !empty( $_REQUEST['find'] ) ) {
-                            
-                            $label = __('Clear Search', "e20r-members-list" );
-                            $button_def .= " button-primary";
-                        }?>
-                        
-                        <input id="e20r-update-list" class="<?php esc_attr_e( $button_def ); ?>" type="submit" value="<?php echo $label; ?>"/>
+						<?php
+						$label      = __( 'Update List', E20R_Members_List::plugin_slug );
+						$button_def = 'button';
+						
+						if ( isset( $_REQUEST['find'] ) && ! empty( $_REQUEST['find'] ) ) {
+							
+							$label      = __( 'Clear Search', E20R_Members_List::plugin_slug );
+							$button_def .= " button-primary";
+						} ?>
+
+                        <input id="e20r-update-list" class="<?php esc_attr_e( $button_def ); ?>" type="submit"
+                               value="<?php esc_attr_e( $label ); ?>"/>
                     </p>
                     <ul class="subsubsub">
                         <li>
 							<?php _e( 'Show', 'e20r-members-list' ); ?>
                             <select name="level" id="e20r-pmpro-memberslist-levels">
-                                <option value="active" <?php selected( '', $level ); ?>><?php _e( 'Active Members', 'pmpro' ); ?></option>
-                                <option value="all" <?php selected( $level, 'all' ); ?>><?php _e( 'All Members', 'pmpro' ); ?></option>
-								<?php
-								
-								$list = pmpro_getAllLevels( true, true );
-								
-								foreach ( $list as $item ) {
-									?>
-                                    <option value="<?php esc_attr_e( $item->id ); ?>" <?php selected( $level, $item->id ); ?>><?php esc_attr_e( $item->name ); ?></option>
-									<?php
-								}
-								?>
-                                <option value="cancelled" <?php selected( $level, 'cancelled' ); ?>><?php _e( 'Cancelled Members', 'pmpro' ); ?></option>
-                                <option value="expired" <?php selected( $level, "expired" ); ?>><?php _e( 'Expired Members', 'pmpro' ); ?></option>
-                                <option value="oldmembers" <?php selected( $level, "oldmembers" ); ?>><?php _e( 'Old Members', 'pmpro' ); ?></option>
+								<?php foreach ( $option_list as $option_id => $option_name ) { ?>
+                                    <option value="<?php esc_attr_e( $option_id ); ?>" <?php selected( $level, $option_id ); ?>><?php esc_attr_e( $option_name ); ?></option> <?php
+								} ?>
                             </select>
                         </li>
 						<?php do_action( 'e20r_memberslist_addl_search_options', $search, $level ); ?>
                     </ul>
                     <p class="search-box float-right">
-                        <label class="hidden" for="post-search-input"><?php _e( 'Search', 'pmpro' ); ?>:</label>
+                        <label class="hidden" for="post-search-input"><?php _e( 'Search', 'paid-memberships-pro' ); ?>
+                            :</label>
                         <input type="hidden" name="page" value="e20r-memberslist"/>
                         <input id="post-search-input" type="text" value="<?php esc_attr_e( $search ); ?>" name="find"/>
-                        <input class="button" type="submit" value="<?php _e( 'Search Members', 'pmpro' ); ?>"/>
+                        <input class="button" type="submit"
+                               value="<?php _e( 'Search Members', 'paid-memberships-pro' ); ?>"/>
                     </p>
                 </div>
-                <h2 class="screen-reader-text"><?php _e( 'Member list', 'e20r-members-list' ); ?></h2>
+                <h2 class="screen-reader-text"><?php _e( 'Member list', E20R_Members_List::plugin_slug ); ?></h2>
                 <hr class="e20r-memberslist-hr"/>
 				<?php
 				$this->member_list->prepare_items();
@@ -354,6 +423,12 @@ class Members_List_Page {
 		
 		<?php
 		echo pmpro_loadTemplate( 'admin_footer', 'local', 'adminpages' );
+	}
+	
+	/**
+	 * Deactivated __clone() method for the Members_List_Page class
+	 */
+	private function __clone() {
 	}
 	
 }

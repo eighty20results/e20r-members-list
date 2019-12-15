@@ -1,7 +1,7 @@
 /*
  * License:
 
-	Copyright 2016-2018 - Eighty / 20 Results by Wicked Strong Chicks, LLC (thomas@eighty20results.com)
+	Copyright 2016-2019 - Eighty / 20 Results by Wicked Strong Chicks, LLC (thomas@eighty20results.com)
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License, version 2, as
@@ -71,13 +71,6 @@
             });
             */
 
-
-            self.updateMemberLnk.unbind('click').on('click', function(ev){
-
-                ev.preventDefault();
-
-            });
-
             self.changed_select.unbind('change').on('change', function() {
 
                 var current_select = $(this);
@@ -110,6 +103,8 @@
 
                     export_args.action = "e20rml_export_records";
                     export_args._wpnonce = $('#_wpnonce').val();
+                    export_args.showDebugTrace = true;
+                    // export_args.showDebugArgs = true;
 
                     inputs.each(function () {
 
@@ -230,6 +225,7 @@
 
                 export_args.action = "e20rml_export_records";
                 export_args._wpnonce = $('#_wpnonce').val();
+                export_args.showDebugTrace = true;
 
                 inputs.each(function () {
 

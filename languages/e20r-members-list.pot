@@ -1,0 +1,485 @@
+#, fuzzy
+msgid ""
+msgstr ""
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+"Project-Id-Version: Better Members List for Paid Memberships Pro\n"
+"POT-Creation-Date: 2018-11-12 16:40-0700\n"
+"PO-Revision-Date: 2018-11-12 16:40-0700\n"
+"Last-Translator: Thomas Sjolshagen <thomas@eighty20results.com>\n"
+"Language-Team: Thomas Sjolshagen <thomas@eighty20results.com>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.8.12\n"
+"X-Poedit-Basepath: ..\n"
+"X-Poedit-WPHeader: class.e20r-members-list.php\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Poedit-KeywordsList: __;_e;_n:1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;esc_attr__;"
+"esc_attr_e;esc_attr_x:1,2c;esc_html__;esc_html_e;esc_html_x:1,2c;_n_noop:1,2;"
+"_nx_noop:3c,1,2;__ngettext_noop:1,2\n"
+"X-Poedit-SearchPath-0: .\n"
+"X-Poedit-SearchPathExcluded-0: *.js\n"
+
+#: class/members-list/class.bulk-cancel.php:84
+#, php-format
+msgid "Unable to cancel membership(s) for the following user IDs: %s"
+msgstr ""
+
+#: class/members-list/class.bulk-update.php:196
+#, php-format
+msgid ""
+"Error updating data for %1$s (ID: %2$d). Could not update %3$s from %4$s to "
+"%5$s (current membership level: '%6$s')"
+msgstr ""
+
+#: class/members-list/class.bulk-update.php:209
+msgid "membership level"
+msgstr ""
+
+#: class/members-list/class.bulk-update.php:211
+#: class/members-list/class.bulk-update.php:212
+msgid "Not Applicable"
+msgstr ""
+
+#: class/members-list/class.bulk-update.php:227
+msgid "membership end date"
+msgstr ""
+
+#: class/members-list/class.bulk-update.php:244
+msgid "membership start date"
+msgstr ""
+
+#: class/members-list/class.bulk-update.php:262
+msgid "membership status"
+msgstr ""
+
+#: class/members-list/class.bulk-update.php:333
+#, php-format
+msgid "Invalid date format for %s (record: %d/email: %s)"
+msgstr ""
+
+#: class/members-list/class.bulk-update.php:335
+msgid "Unknown"
+msgstr ""
+
+#: class/members-list/class.export-members.php:427
+#: class/members-list/class.members-list.php:1361
+msgid "Never"
+msgstr ""
+
+#: class/members-list/class.export-members.php:672
+msgid "Cannot transmit the .CSV file to the user's browser!"
+msgstr ""
+
+#: class/members-list/class.members-list-page.php:94
+#: class/members-list/class.members-list-page.php:184
+#: class/members-list/class.members-list-page.php:185
+#: class/members-list/class.members-list-page.php:329
+msgid "Members List"
+msgstr ""
+
+#: class/members-list/class.members-list-page.php:159
+msgid "Save Updates"
+msgstr ""
+
+#: class/members-list/class.members-list-page.php:160
+msgid "This action will clear the current membership end date/expiration date!"
+msgstr ""
+
+#: class/members-list/class.members-list-page.php:178
+msgid "Error while attempting to reassign member list menu"
+msgstr ""
+
+#: class/members-list/class.members-list-page.php:198
+msgid "Unable to load Members List menu entry"
+msgstr ""
+
+#: class/members-list/class.members-list-page.php:256
+msgctxt "members per page (screen options)"
+msgid "Members per page"
+msgstr ""
+
+#: class/members-list/class.members-list-page.php:297
+msgid "Active Members"
+msgstr ""
+
+#: class/members-list/class.members-list-page.php:298
+msgid "All Members"
+msgstr ""
+
+#: class/members-list/class.members-list-page.php:302
+msgid "Cancelled Members"
+msgstr ""
+
+#: class/members-list/class.members-list-page.php:303
+msgid "Expired Members"
+msgstr ""
+
+#: class/members-list/class.members-list-page.php:304
+msgid "Old Members"
+msgstr ""
+
+#: class/members-list/class.members-list-page.php:331
+msgid "Export to CSV"
+msgstr ""
+
+#: class/members-list/class.members-list-page.php:336
+#, php-format
+msgid "Search results for \"%1$s\" in %2$s"
+msgstr ""
+
+#: class/members-list/class.members-list-page.php:344
+msgid "Filter list of members"
+msgstr ""
+
+#: class/members-list/class.members-list-page.php:349
+msgid "Update List"
+msgstr ""
+
+#: class/members-list/class.members-list-page.php:354
+msgid "Clear Search"
+msgstr ""
+
+#: class/members-list/class.members-list-page.php:363
+msgid "Show"
+msgstr ""
+
+#: class/members-list/class.members-list-page.php:373
+msgid "Search"
+msgstr ""
+
+#: class/members-list/class.members-list-page.php:376
+msgid "Search Members"
+msgstr ""
+
+#: class/members-list/class.members-list-page.php:379
+msgid "Member list"
+msgstr ""
+
+#: class/members-list/class.members-list.php:112
+msgid "member"
+msgstr ""
+
+#: class/members-list/class.members-list.php:113
+msgid "members"
+msgstr ""
+
+#: class/members-list/class.members-list.php:367
+msgid "Error: Insecure bulk action denied."
+msgstr ""
+
+#: class/members-list/class.members-list.php:444
+#: class/members-list/class.members-list.php:449
+msgid "Error cancelling membership"
+msgstr ""
+
+#: class/members-list/class.members-list.php:534
+#, php-format
+msgid "Error processing Members List database query: %s"
+msgstr ""
+
+#: class/members-list/class.members-list.php:581
+msgid "Error: Invalid list of tables & joins for member list!"
+msgstr ""
+
+#: class/members-list/class.members-list.php:590
+msgid "Error: No FROM table specified for member list!"
+msgstr ""
+
+#: class/members-list/class.members-list.php:809
+msgid "Error: Invalid configuration!!!"
+msgstr ""
+
+#: class/members-list/class.members-list.php:959
+#: class/members-list/class.members-list.php:1338
+#: class/members-list/class.members-list.php:1399
+msgid "Cancel"
+msgstr ""
+
+#: class/members-list/class.members-list.php:960
+#: class/members-list/class.members-list.php:1035
+msgid "Update"
+msgstr ""
+
+#: class/members-list/class.members-list.php:961
+msgid "Export"
+msgstr ""
+
+#: class/members-list/class.members-list.php:1034
+msgid "Update member info"
+msgstr ""
+
+#: class/members-list/class.members-list.php:1139
+#: class/members-list/class.members-list.php:1156
+msgid "Not found"
+msgstr ""
+
+#: class/members-list/class.members-list.php:1159
+#: class/members-list/class.members-list.php:1273
+msgid "N/A"
+msgstr ""
+
+#: class/members-list/class.members-list.php:1202
+msgid "No levels found. Paid Memberships Pro is inactive!"
+msgstr ""
+
+#: class/members-list/class.members-list.php:1226
+#: class/members-list/class.members-list.php:1479
+msgid "Reset"
+msgstr ""
+
+#: class/members-list/class.members-list.php:1231
+msgid "Click to editmembership level"
+msgstr ""
+
+#: class/members-list/class.members-list.php:1302
+msgid "Invalid"
+msgstr ""
+
+#: class/members-list/class.members-list.php:1343
+msgid "Edit to bulk update membership start date"
+msgstr ""
+
+#: class/members-list/class.members-list.php:1404
+msgid "Bulk update membership end/expiration date"
+msgstr ""
+
+#: class/members-list/class.members-list.php:1484
+msgid "Update the member's membership status"
+msgstr ""
+
+#: class/members-list/class.members-list.php:1611
+msgid "No members found"
+msgstr ""
+
+#: class/members-list/class.members-list.php:1615
+msgid ""
+"It's possible the information you're looking for can be found in one of the "
+"following categories:"
+msgstr ""
+
+#: class/members-list/class.members-list.php:1620
+#, php-format
+msgid "Repeat search: %1$sActive Members list%2$s"
+msgstr ""
+
+#: class/members-list/class.members-list.php:1630
+#, php-format
+msgid "Repeat search: %1$sAll Members list%2$s"
+msgstr ""
+
+#: class/members-list/class.members-list.php:1639
+#, php-format
+msgid "Repeat search: %1$sCancelled Members list%2$s"
+msgstr ""
+
+#: class/members-list/class.members-list.php:1648
+#, php-format
+msgid "Repeat search: %1$sExpired Members list%2$s"
+msgstr ""
+
+#: class/members-list/class.members-list.php:1657
+#, php-format
+msgid "Repeat search: %1$sOld Members list%2$s"
+msgstr ""
+
+#: class/members-list/class.members-list.php:1665
+#, php-format
+msgid "Repeat search: %1$sAll Users list%2$s"
+msgstr ""
+
+#: class/utilities/class.e20r-background-process.php:632
+msgid "PHP setting 'max_execution_time' is too low!"
+msgstr ""
+
+#: class/utilities/class.e20r-background-process.php:751
+#, php-format
+msgid "Every %d Minutes"
+msgstr ""
+
+#: class/utilities/class.gdpr-enablement.php:95
+msgid "No extra data collected"
+msgstr ""
+
+#: class/utilities/class.gdpr-enablement.php:110
+msgid ""
+"No plugin developed by Eighty/20 Results by Wicked Strong Chicks was found"
+msgstr ""
+
+#: class/utilities/class.gdpr-enablement.php:128
+msgid "3rd party services"
+msgstr ""
+
+#: class/utilities/class.gdpr-enablement.php:129
+msgid ""
+"The following 3rd party sites may receive information about the user/member "
+"as part of the registration process:"
+msgstr ""
+
+#: class/utilities/class.gdpr-enablement.php:160
+msgid "Eighty / 20 Results by Wicked Strong Chicks, LLC"
+msgstr ""
+
+#: class/utilities/class.gdpr-enablement.php:211
+#: class/utilities/class.gdpr-enablement.php:228
+msgid "E20R Plugin Data"
+msgstr ""
+
+#: class/utilities/class.license-client.php:97
+#, php-format
+msgid "Paste the purchased %s key here"
+msgstr ""
+
+#: class/utilities/class.licensing.php:214
+msgid "Error transmitting to the remote licensing server"
+msgstr ""
+
+#: class/utilities/class.licensing.php:268
+#, php-format
+msgid "For %s: %s"
+msgstr ""
+
+#: class/utilities/class.licensing.php:421
+#, php-format
+msgid "Sorry, no valid license found for: %s"
+msgstr ""
+
+#: class/utilities/class.licensing.php:458
+#, php-format
+msgid "Unable to save license settings for %s"
+msgstr ""
+
+#: class/utilities/class.licensing.php:485
+#, php-format
+msgid "Your update license has expired for the %s add-on!"
+msgstr ""
+
+#: class/utilities/class.licensing.php:530
+#, php-format
+msgid "E20R Licensing: %s"
+msgstr ""
+
+#: class/utilities/class.licensing.php:549
+msgid "Maximum stack depth exceeded"
+msgstr ""
+
+#: class/utilities/class.licensing.php:552
+msgid "Underflow or the modes mismatch"
+msgstr ""
+
+#: class/utilities/class.licensing.php:555
+msgid "Unexpected control character found"
+msgstr ""
+
+#: class/utilities/class.licensing.php:558
+msgid "Syntax error, malformed JSON"
+msgstr ""
+
+#: class/utilities/class.licensing.php:561
+msgid "Malformed UTF-8 characters, possibly incorrectly encoded"
+msgstr ""
+
+#: class/utilities/class.licensing.php:564
+#, php-format
+msgid "No error, supposedly? %s"
+msgstr ""
+
+#: class/utilities/class.licensing.php:733
+#: class/utilities/class.licensing.php:734
+msgid "E20R Licenses"
+msgstr ""
+
+#: class/utilities/class.licensing.php:825
+msgid "Configure Licenses"
+msgstr ""
+
+#: class/utilities/class.licensing.php:882
+msgid "Paste the purchased key here"
+msgstr ""
+
+#: class/utilities/class.licensing.php:909
+#, php-format
+msgid "Add %s license"
+msgstr ""
+
+#: class/utilities/class.licensing.php:949
+msgid ""
+"This add-on is distributed under version 2 of the GNU Public License "
+"(GPLv2). One of the things the GPLv2 license grants is the right to use this "
+"software on your site, free of charge."
+msgstr ""
+
+#: class/utilities/class.licensing.php:952
+msgid "Purchase Licenses/Add-ons &raquo;"
+msgstr ""
+
+#: class/utilities/class.licensing.php:956
+msgid "Name"
+msgstr ""
+
+#: class/utilities/class.licensing.php:957
+msgid "Key"
+msgstr ""
+
+#: class/utilities/class.licensing.php:958
+msgid "Email"
+msgstr ""
+
+#: class/utilities/class.licensing.php:959
+msgid "Deactivate"
+msgstr ""
+
+#: class/utilities/class.licensing.php:1013
+msgid "Email used to buy license"
+msgstr ""
+
+#: class/utilities/class.licensing.php:1043
+msgid "You are not permitted to perform this action."
+msgstr ""
+
+#: class/utilities/class.licensing.php:1081
+#, php-format
+msgid ""
+"Your <em>%s</em> license is either not configured, invalid or has expired."
+msgstr ""
+
+#: class/utilities/class.licensing.php:1082
+#, php-format
+msgid ""
+"Visit your Eighty / 20 Results <a href=\"%s\" target=\"_blank\">Support "
+"Account</a> page to confirm that your account is active and to locate your "
+"license key."
+msgstr ""
+
+#: class/utilities/class.licensing.php:1091
+msgid "Thank you!"
+msgstr ""
+
+#: class/utilities/class.licensing.php:1092
+#, php-format
+msgid "A valid %s license key is being used on this site."
+msgstr ""
+
+#. Plugin Name of the plugin/theme
+msgid "Better Members List for Paid Memberships Pro"
+msgstr ""
+
+#. Plugin URI of the plugin/theme
+msgid "https://wordpress.org/plugins/e20r-members-list"
+msgstr ""
+
+#. Description of the plugin/theme
+msgid ""
+"Extensible, sortable & bulk action capable members listing + export to CSV "
+"tool for Paid Memberships Pro."
+msgstr ""
+
+#. Author of the plugin/theme
+msgid ""
+"Thomas Sjolshagen @ Eighty / 20 Results by Wicked Strong Chicks, LLC "
+"<thomas@eighty20results.com>"
+msgstr ""
+
+#. Author URI of the plugin/theme
+msgid "https://eighty20results.com/thomas-sjolshagen/"
+msgstr ""
