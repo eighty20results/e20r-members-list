@@ -2,6 +2,8 @@
 /.git
 /.github
 /node_modules
-
+/build_readmes
+/bin
+/docker-env
 .distignore
 .gitignore
