@@ -189,7 +189,7 @@ My apologies for not yet having a solution for the incompatibility introduced by
 == Changelog ==
 
 == 5.7 ==
-* BUG FIX: PMPro v2.2+ is sending HTTP content to the browser early which messes up session management and sending the Export to CSV content to your browser
+* BUG FIX: PMPro v2.2+ is sending HTTP coactionntent to the browser early which messes up session management and sending the Export to CSV content to your browser
 
 == 5.6 ==
 * ENHANCEMENT: Updated utilities library
