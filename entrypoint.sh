@@ -92,6 +92,11 @@ else
 	rsync -rc "$TMP_DIR/" trunk/ --delete
 fi
 
+# Removal of unsupported/disallowed one-click update functionality
+if [[ -f bin/remove_update.sh ]]; then
+	bin/remove_update.sh
+fi
+
 # Copy dotorg assets to /assets
 if [[ -d "$GITHUB_WORKSPACE/$ASSETS_DIR/" ]]; then
 	rsync -rc "$GITHUB_WORKSPACE/$ASSETS_DIR/" assets/ --delete
