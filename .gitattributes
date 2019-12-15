@@ -12,6 +12,7 @@
 /.gitmodules export-ignore
 /.editorconfig export-ignore
 /.gitignore export-ignore
+/.distignore export-ignore
 /metadata.json export-ignore
 /class/utilities/.gitignore export-ignore
 /class/utilities/.editorconfig export-ignore
