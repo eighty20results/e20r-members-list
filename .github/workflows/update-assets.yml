@@ -2,8 +2,8 @@ name: Plugin asset/readme update
 on:
   push:
     paths:
-    - README.txt
-    - .wordpress-org/**.jpg
+    - /README.txt
+    - /.wordpress-org/**.jpg
 jobs:
   master:
     name: Update readme or .jpg
