@@ -1,5 +1,4 @@
 name: Plugin asset/readme update
-author: Thomas Sjolshagen
 on:
   push:
     paths:
