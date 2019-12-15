@@ -10,11 +10,11 @@ License URI: http://www.gnu.org/licenses/gpl
 
 == Description ==
 
-Extensible, sortable & bulk action capable members listing tool for Paid Memberships Pro. This plugin is a complete replacement for the "Members List" functionality in PMPro and supports most of the same filters and hooks. The key differences have to do with managing columns. Now you can use the [standard WordPress filters](https://developer.wordpress.org/reference/classes/wp_list_table/) to columns you can add/remove/make sortable, additional bulk actions, etc.
+Extensible, sortable & bulk action capable members listing tool for Paid Memberships Pro. This plugin is a complete replacement for the "Members List" functionality in PMPro and supports most of the same filters and hooks. The key differences have to do with managing columns. Now you can also use the [standard WordPress filters](https://developer.wordpress.org/reference/classes/wp_list_table/) to columns you can add/remove/make sortable, additional bulk actions, etc.
 
 == Installation ==
 
-1. Upload the `e20r-better-pmpro-members-list` folder to the `/wp-content/plugins/` directory.
+1. Upload the `e20r-members-list` folder to the `/wp-content/plugins/` directory.
 1. Activate the plugin through the 'Plugins' menu in WordPress.
 
 == Extending the Members List ==
@@ -70,7 +70,7 @@ Dependencies: N/A
 
 Default: 'Expired' if viewing old/expired members list. 'Expires' if viewing a list of active members
 
-Example: `add_filter( '', function( $label ) { return 'Terminated'; } ); // Replace enddate header with 'Terminated'`
+Example: `add_filter( 'e20r-members-list-enddate-col-name', function( $label ) { return 'Terminated'; } ); // Replace enddate header with 'Terminated'`
 
 === e20r_memberslist_sql_columns ===
 
@@ -178,7 +178,18 @@ Example: `add_filter( 'e20r-members-list-db-type-header-map', 'e20r_add_to_db_he
 
 To Be Announced...
 
+== Known Issues ==
+
+As of Paid Memberships Pro v2.2+, the PMPro plugin started sending HTTP content to the browser at a very early stage of the connection process. As a result, anything that uses the standard action hooks in WordPress (like this plugin) and wants to send header info to the browser so it "does the right thing" is being messed up.
+
+I am working to isolate the source of this problem and resolving it.
+
+My apologies for not yet having a solution for the incompatibility introduced by PMPro v2.2+.
+
 == Changelog ==
+
+== 5.7 ==
+* BUG FIX: PMPro v2.2+ is sending HTTP content to the browser early which messes up session management and sending the Export to CSV content to your browser
 
 == 5.6 ==
 * ENHANCEMENT: Updated utilities library
