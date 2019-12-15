@@ -44,7 +44,7 @@ Purpose: Update/add/remove HTTP headers for compatibility with HTTP server and H
 Dependencies: N/A
 
 Default: List (array) of valid HTTP headers to support file download for both Apache and ngnix HTTP servers:
-
+`
 $headers = array(
     "Content-Type: text/csv",
     "Cache-Control: max-age=0, no-cache, no-store",
@@ -52,7 +52,7 @@ $headers = array(
 	"Connection: close",
 	'Content-Disposition: attachment; filename="members_list.csv"',
 );
-
+`
 Example: `add_filter( 'e20r-memberslist-http-headers', array(
                                                           "Content-Type: text/csv",
                                                           "Cache-Control: max-age=0, no-cache, no-store",
