@@ -49,6 +49,9 @@ cd "$SVN_DIR"
 svn update --set-depth infinity assets
 svn update --set-depth infinity trunk
 
+echo "➤ Updating/Fetching the Utilities submodule..."
+git submodule update --remote "$SNV_DIR/class/utilities"
+
 echo "➤ Copying files..."
 if [[ -e "$GITHUB_WORKSPACE/.distignore" ]]; then
 	echo "ℹ︎ Using .distignore"
