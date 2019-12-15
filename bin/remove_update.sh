@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Remove any wordpress.org prohibited one-click update functionality when necessary
-BASE_FILE=class.e20r-members-list.php
+BASE_FILE="class.e20r-members-list.php"
 
 if [[ -f trunk/${BASE_FILE} ]]; then
 	has_update=$(grep "Utilities::configureUpdateServerV4" trunk/${BASE_FILE} | wc -l)

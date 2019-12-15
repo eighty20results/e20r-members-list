@@ -2,7 +2,7 @@
 # Build script: Copyright 2016-2018 Eighty/20 Results by Wicked Strong Chicks, LLC
 # New Plugin Framework
 #
-short_name="e20r-better-pmpro-members-list"
+short_name="e20r-members-list"
 server="eighty20results.com"
 include=(class plugin-updates class.${short_name}.php README.txt)
 exclude=(*.yml *.phar composer.* vendor)

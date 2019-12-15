@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-short_name="e20r-better-pmpro-members-list"
+short_name="e20r-members-list"
 server="eighty20results.com"
 sed=/usr/bin/sed
 readme_path="../build_readmes/"
