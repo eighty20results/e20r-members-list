@@ -4,7 +4,7 @@ Tags: paid memberships pro, members, memberships, pmpro enhancements, better mem
 Requires at least: 4.9
 Tested up to: 5.3
 Requires PHP: 7.0
-Stable tag: 5.7
+Stable tag: 5.7.q
 License: GPLv2
 License URI: http://www.gnu.org/licenses/gpl
 
@@ -188,8 +188,10 @@ My apologies for not yet having a solution for the incompatibility introduced by
 
 == Changelog ==
 
-== 5.7 ==
-* ENH: Pushing to wordpress.org from Github.com
+== 5.7.1 ==
+* ENHANCEMENT: Pushing to WordPress.org repository
+* ENHANCEMENT: Pushing to wordpress.org from Github.com
+* BUG FIX: Prevent defining controller class more than once
 
 == 5.6 ==
 * ENHANCEMENT: Updated utilities library
