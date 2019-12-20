@@ -266,7 +266,7 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\License_Server' ) ) {
 								}
 								if ( false === License_Settings::update_settings( $product, $settings ) ) {
 									
-									$msg = sprintf( __( "Unable to save license settings for %s", 'e20r-licensing-utility' ), $product );
+									$msg = sprintf( __( "Unable to save the %s license settings", 'e20r-licensing-utility' ), $settings['fulltext_name'] );
 									if ( E20R_LICENSING_DEBUG ) {
 										$utils->log( $msg );
 									}
@@ -293,10 +293,12 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\License_Server' ) ) {
 						$license_status = false;
 					}
 					
-					if ( isset( $settings['expires'] ) && $settings['expires'] < current_time( 'timestamp' ) || ( isset( $settings['active'] ) && 'active' !== $settings['status'] ) ) {
+					if ( isset( $settings['expires'] ) && $settings['expires'] < current_time( 'timestamp' ) ||
+					     ( isset( $settings['active'] ) && 'active' !== $settings['status'] )
+					) {
 						
 						$msg = sprintf(
-							__( "Your update license has expired for the %s add-on!", 'e20r-licensing-utility' ),
+							__( "Your %s license has expired!", 'e20r-licensing-utility' ),
 							$settings['fulltext_name']
 						);
 						
@@ -315,11 +317,11 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\License_Server' ) ) {
 					}
 					
 					if ( ! empty( $decoded ) && true == $decoded->error && ( isset( $decoded->status ) && 500 === (int) $decoded->status ) ) {
-						$msg = __( 'Error validating license: %s -> %s', 'e20r-utilities-licensing' );
+						$msg = __( 'Error validating the %s license: %s -> %s', 'e20r-utilities-licensing' );
 						foreach ( (array) $decoded->errors as $error_key => $error_info ) {
 							
 							$utils->add_message(
-								sprintf( $msg, $error_key, array_pop( $error_info ) ),
+								sprintf( $msg, $settings['fulltext_name'], $error_key, array_pop( $error_info ) ),
 								'error',
 								'backend'
 							);
