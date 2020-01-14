@@ -2,8 +2,9 @@ name: Deploy plugin to WordPress.org
 on:
   release:
     types:
-    - created
-    - edited
+      - created
+      - published
+      - edited
 jobs:
   tag:
     name: New tag
