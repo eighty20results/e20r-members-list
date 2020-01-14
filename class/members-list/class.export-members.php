@@ -812,7 +812,7 @@ class Export_Members {
 					c.code AS pmpro_discount_code
 				FROM {$wpdb->pmpro_discount_codes_uses} AS cu
 				LEFT JOIN {$wpdb->pmpro_discount_codes} AS c ON cu.code_id = c.id
-				WHERE cu.id = %d AND cu.user_id = %d
+				WHERE c.id = %d AND cu.user_id = %d
 				ORDER BY c.id DESC
 				LIMIT 1",
 			$code_id,
