@@ -49,9 +49,6 @@ cd "$SVN_DIR"
 svn update --set-depth infinity assets
 svn update --set-depth infinity trunk
 
-echo "➤ Updating/Fetching the Utilities submodule..."
-git submodule update --remote "$SNV_DIR/class/utilities"
-
 echo "➤ Copying files..."
 if [[ -e "$GITHUB_WORKSPACE/.distignore" ]]; then
 	echo "ℹ︎ Using .distignore"
@@ -67,8 +64,8 @@ else
 	TMP_DIR="/github/archivetmp"
 	mkdir "$TMP_DIR"
 
-	git config --global user.email "thomas@eighty20results.com"
-	git config --global user.name "eighty20results"
+	git config --global user.email "10upbot+github@10up.com"
+	git config --global user.name "10upbot on GitHub"
 
 	# If there's no .gitattributes file, write a default one into place
 	if [[ ! -e "$GITHUB_WORKSPACE/.gitattributes" ]]; then
@@ -95,11 +92,6 @@ else
 	rsync -rc "$TMP_DIR/" trunk/ --delete
 fi
 
-# Removal of unsupported/disallowed one-click update functionality
-if [[ -f /remove_update.sh ]]; then
-	/remove_update.sh
-fi
-
 # Copy dotorg assets to /assets
 if [[ -d "$GITHUB_WORKSPACE/$ASSETS_DIR/" ]]; then
 	rsync -rc "$GITHUB_WORKSPACE/$ASSETS_DIR/" assets/ --delete
@@ -115,7 +107,7 @@ svn add . --force > /dev/null
 
 # SVN delete all deleted files
 # Also suppress stdout here
-svn status | grep '^\!' | sed 's/! *//' | xargs -I% svn rm % > /dev/null
+svn status | grep '^\!' | sed 's/! *//' | xargs -I% svn rm %@ > /dev/null
 
 # Copy tag locally to make this a single commit
 echo "➤ Copying tag..."
