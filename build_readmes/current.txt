@@ -1,2 +1,1 @@
-ENHANCEMENT: Pushing to WordPress.org repository
-BUG FIX: Prevent defining controller class more than once
+BUG FIX: Didn't always include the discount code in exported data
