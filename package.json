@@ -1,0 +1,19 @@
+{
+  "name": "e20r-members-list",
+  "version": "5.7.2",
+  "description": "E20R Enhanced Members List Paid Memberships Pro",
+  "homepage": "https://wordpress.org/plugins/e20r-members-list",
+  "bugs": {
+    "url": "https://github.com/eighty20results/e20r-better-pmpro-members-list/issues",
+    "email": "thomas@eighty20results.com"
+  },
+  "license": "GPL-2.0",
+  "author": {
+    "name": "Thomas Sjolshagen",
+    "email": "thomas@sjolshagen.net",
+    "url": "https://eighty20results.com/thomas-sjolshagen"
+  },
+  "dependencies": {
+
+  }
+}
