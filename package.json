@@ -1,5 +1,9 @@
 {
   "name": "e20r-members-list",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/eighty20results/e20r-members-list.git"
+  },
   "version": "5.7.2",
   "description": "E20R Enhanced Members List Paid Memberships Pro",
   "homepage": "https://wordpress.org/plugins/e20r-members-list",
