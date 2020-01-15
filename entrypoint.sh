@@ -94,6 +94,7 @@ fi
 
 # Removal of unsupported/disallowed one-click update functionality
 if [[ -f /remove_update.sh ]]; then
+	echo "➤ Trigger removal of custom one-click update functionality. In ${PWD}"
 	/remove_update.sh
 fi
 
