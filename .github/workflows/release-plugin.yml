@@ -1,10 +1,10 @@
 name: Release to wordpress.org
 
 on:
-  push:
+  # push:
     # Deploy when a new release tag was created
-    tags:
-      - v*
+  #  tags:
+  #    - v*
   release:
     # Only deploy when the admin creates/publishes/edits/pre-releases from GitHub
     types: [created, edited, published]
