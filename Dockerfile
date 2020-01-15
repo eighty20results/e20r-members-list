@@ -6,5 +6,5 @@ RUN apt-get update \
 	&& rm -rf /var/lib/apt/lists/*
 
 COPY entrypoint.sh /entrypoint.sh
-COPY bin/remove_update.sh /remove_update.sh
+COPY remove_update.sh /remove_update.sh
 ENTRYPOINT ["/entrypoint.sh"]
