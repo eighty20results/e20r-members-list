@@ -11,7 +11,7 @@ jobs:
     steps:
     - uses: actions/checkout@master
     - name: WordPress.org plugin asset/readme update
-      uses: 10up/action-wordpress-plugin-asset-update@master
+      uses: eighty20results/e20r-members-list@master
       env:
         SLUG: e20r-members-list
         SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
