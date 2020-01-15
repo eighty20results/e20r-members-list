@@ -1,9 +1,14 @@
-name: Deploy release of plugin to WordPress.org
+name: Release to wordpress.org
+
 on:
   release:
+    # Only deploy when the admin creates/publishes/edits/pre-releases from GitHub
+    types: [created, published, edited, prereleased]
+
 jobs:
-  tag:
-    name: New tag
+  # To push the release (sources) to the WordPress.org SVN instance for this plugin
+  wordpress:
+    name: Push to wordpress.org
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@master
