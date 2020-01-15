@@ -1,9 +1,13 @@
 name: Release to wordpress.org
 
 on:
+  push:
+    # Deploy when a new release tag was created
+    tags:
+      - v*
   release:
     # Only deploy when the admin creates/publishes/edits/pre-releases from GitHub
-    types: [created, published, edited, prereleased]
+    types: [created, edited, published]
 
 jobs:
   # To push the release (sources) to the WordPress.org SVN instance for this plugin
