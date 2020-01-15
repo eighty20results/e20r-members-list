@@ -7,7 +7,7 @@ on:
   #    - v*
   release:
     # Only deploy when the admin creates/publishes/edits/pre-releases from GitHub
-    types: [created, edited, published]
+    types: [edited, published]
 
 jobs:
   # To push the release (sources) to the WordPress.org SVN instance for this plugin

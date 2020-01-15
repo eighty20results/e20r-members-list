@@ -1,0 +1,26 @@
+/.github
+/bin
+/build_readmes
+/build
+/docker-env
+/plugin-updates
+/class/utilities/inc
+/class/utilities/licensing
+/node_modules
+/.wordpress-org
+
+# Files
+/.gitattributes
+/.gitmodules
+/.editorconfig
+/.gitignore
+/.distignore
+# /action.yml
+# /Dockerfile
+/entrypoint.sh
+/metadata.json
+/package.json
+/remove_updates.sh
+/class/utilities/.gitignore
+/class/utilities/.editorconfig
+

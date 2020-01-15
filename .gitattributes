@@ -16,12 +16,11 @@
 /.editorconfig export-ignore
 /.gitignore export-ignore
 /.distignore export-ignore
-/action.yml export-ignore
-/Dockerfile export-ignore
+# /action.yml export-ignore
+# /Dockerfile export-ignore
 /entrypoint.sh export-ignore
 /metadata.json export-ignore
 /package.json export-ignore
-
 /remove_updates.sh export-ignore
 /class/utilities/.gitignore export-ignore
 /class/utilities/.editorconfig export-ignore
