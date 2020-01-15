@@ -94,7 +94,7 @@ fi
 
 # Removal of unsupported/disallowed one-click update functionality
 if [[ -f /remove_update.sh ]]; then
-	./remove_update.sh
+	/remove_update.sh
 fi
 
 # Copy dotorg assets to /assets
