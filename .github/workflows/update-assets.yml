@@ -12,6 +12,9 @@ jobs:
     - uses: actions/checkout@master
     - name: WordPress.org plugin asset/readme update
       uses: 10up/action-wordpress-plugin-asset-update@master
-      env:
+      with:
         SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
         SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+        SLUG: e20r-members-list
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB }}
