@@ -115,6 +115,11 @@ svn add . --force > /dev/null
 # Also suppress stdout here
 svn status | grep '^\!' | sed 's/! *//' | xargs -I% svn rm %@ > /dev/null
 
+if [[ -d "$GITHUB_WORKSPACE/.git" ]]; then
+	echo "ℹ︎ Removing .git directory - not to be included in SVN"
+	rm -rf .git
+fi
+
 # Copy tag locally to make this a single commit
 echo "➤ Copying tag..."
 svn cp "trunk" "tags/$VERSION"

@@ -1,4 +1,5 @@
 # Directories
+/.git export-ignore
 /.github export-ignore
 /bin export-ignore
 /build_readmes export-ignore
