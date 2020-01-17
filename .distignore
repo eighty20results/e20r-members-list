@@ -1,4 +1,5 @@
 /.github
+/.git
 /bin
 /build_readmes
 /build
@@ -15,12 +16,11 @@
 /.editorconfig
 /.gitignore
 /.distignore
-# /action.yml
-# /Dockerfile
+/action.yml
+/Dockerfile
 /entrypoint.sh
 /metadata.json
 /package.json
 /remove_updates.sh
 /class/utilities/.gitignore
 /class/utilities/.editorconfig
-
