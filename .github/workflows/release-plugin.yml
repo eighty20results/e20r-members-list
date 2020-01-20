@@ -17,11 +17,11 @@ jobs:
     steps:
     - uses: actions/checkout@master
     - name: WordPress Plugin Deploy
-      uses: eighty20results/e20r-members-list@master
       with:
-          repository: git@github.com:eighty20results/Utilities.git
-          token: ${{ secrets.UTILITIES_ACCESS }}
-          path: class/utilities
+        repository: git@github.com:eighty20results/Utilities.git
+        token: ${{ secrets.UTILITIES_ACCESS }}
+        path: class/utilities
+      uses: eighty20results/e20r-members-list@master
       env:
         SLUG: e20r-members-list
         SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
