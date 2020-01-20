@@ -113,12 +113,13 @@ if [[ -f "${GITHUB_WORKSPACE}/.gitmodules" ]]; then
 	git submodule update --remote
 fi
 
-if [[ -d "${SVN_DIR}/class/utilities" ]]; then
-	echo "ℹ︎ Refreshing the Utilities module from ${SVN_DIR}/class/utilities:"
+if [[ -f "${GITHUB_WORKSPACE}/class/utilities/class.utilities.php" ]]; then
+	echo "ℹ︎ Refreshing the Utilities module from ${GITHUB_WORKSPACE}/class/utilities:"
 	cp -R "${SVN_DIR}/class/utilities/*" "trunk/class/utilities/"
 	rm -rf "trunk/class/utilities/.git"
 	rm -rf "trunk/class/utilities/.gitignore"
 	rm -rf "trunk/class/utilities/.editorconfig"
+	rm -rf "trunk/class/utilities/composer.json"
 fi
 
 if [[ -d "trunk/.git" ]]; then
