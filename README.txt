@@ -4,7 +4,7 @@ Tags: paid memberships pro, members, memberships, pmpro enhancements, better mem
 Requires at least: 4.9
 Tested up to: 5.4
 Requires PHP: 7.0
-Stable tag: 5.7.6
+Stable tag: 5.7.7
 License: GPLv2
 License URI: http://www.gnu.org/licenses/gpl
 
