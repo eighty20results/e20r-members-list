@@ -120,7 +120,12 @@ if [[ -d "$GITHUB_WORKSPACE/.git" ]]; then
 	rm -rf .git
 fi
 
-# Copy tag locally to make this a single commit
+# Copy tag locally to make this a single commit (if the tag doesn't exist already
+if [[ -d "tags/$VERSION" ]]; then
+	echo "➤ Refresh $VERSION tag..."
+	rm -rf "tags/$VERSION"
+fi
+
 echo "➤ Copying tag..."
 svn cp "trunk" "tags/$VERSION"
 
