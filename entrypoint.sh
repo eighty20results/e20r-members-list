@@ -110,6 +110,24 @@ if [[ -d "trunk/.git" ]]; then
 	rm -rf "trunk/.git"
 fi
 
+if [[ -f "trunk/Dockerfile" ]]; then
+	echo "ℹ︎ Removing Dockerfile - not to be included in SVN"
+	rm -rf "trunk/Dockerfile"
+fi
+
+if [[ -f "trunk/remove_update.sh" ]]; then
+	echo "ℹ︎ Removing remove_update.sh - not to be included in SVN"
+	rm -rf "trunk/remove_update.sh"
+fi
+
+if [[ -d "$GITHUB_WORKSPACE/class/utilities" ]]; then
+	echo "ℹ︎ Refreshing the Utilities module"
+	cp -R "$GITHUB_WORKSPACE/class/utilities/*" "trunk/class/utilities/"
+	rm -rf "trunk/class/utilities/.git"
+	rm -rf "trunk/class/utilities/.gitignore"
+	rm -rf "trunk/class/utilities/.editorconfig"
+fi
+
 # Copy tag locally to make this a single commit (if the tag doesn't exist already
 if [[ -d "tags/$VERSION" ]]; then
 	echo "➤ Refresh $VERSION tag..."
