@@ -6,6 +6,7 @@
 /docker-env
 /plugin-updates
 /class/utilities/inc
+/class/utilities/.git
 /class/utilities/licensing
 /node_modules
 /.wordpress-org
@@ -22,5 +23,6 @@
 /metadata.json
 /package.json
 /remove_updates.sh
+/class/utilities/composer.json
 /class/utilities/.gitignore
 /class/utilities/.editorconfig

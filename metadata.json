@@ -1,13 +1,13 @@
 {
   "name" : "E20R Enhanced Members List Paid Memberships Pro",
   "slug" : "e20r-members-list",
-  "download_url" : "https://eighty20results.com/protected-content/e20r-members-list/e20r-members-list-5.7.4.zip",
-  "version" : "5.7.4",
+  "download_url" : "https://eighty20results.com/protected-content/e20r-members-list/e20r-members-list-5.7.5.zip",
+  "version" : "5.7.5",
   "tested": "5.4",
   "requires": "4.8",
   "author" : "Thomas Sjolshagen <thomas@eighty20results.com>",
   "author_homepage": "https://eighty20results.com/thomas-sjolshagen",
-  "last_updated": "2020-01-17 09:15:00 MDT",
+  "last_updated": "2020-01-20 13:30:00 MDT",
   "homepage": "https://eighty20results.com/wordpress-plugins/paid-memberships-pro/e20r-members-list/",
   "sections" : {
     "description" : "Extensible, sortable & bulk action capable members listing tool for Paid Memberships Pro, fully compatible with the existing filters and hooks for the PMPro Members List functionality. Will also export members to CSV.",
