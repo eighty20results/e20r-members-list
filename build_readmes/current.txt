@@ -1,1 +1,1 @@
-BUG FIX: Didn't always include the discount code in exported data
+BUG FIX: Possibly causing fatal error when running/activated

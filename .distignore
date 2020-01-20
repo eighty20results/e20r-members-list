@@ -5,9 +5,7 @@
 /build
 /docker-env
 /plugin-updates
-/class/utilities/inc
 /class/utilities/.git
-/class/utilities/licensing
 /node_modules
 /.wordpress-org
 
