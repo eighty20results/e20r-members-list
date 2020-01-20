@@ -38,6 +38,14 @@ if [[ -z "$ASSETS_DIR" ]]; then
 fi
 echo "ℹ︎ ASSETS_DIR is $ASSETS_DIR"
 
+if [[ -f "${GITHUB_WORKSPACE}/.gitmodules" ]]; then
+	git config --global user.email "thomas@eighty20results.com"
+	git config --global user.name "Eighty/20Results Bot on Github"
+
+	echo "➤ Refresh all submodule(s) for the project"
+	git submodule update --remote
+fi
+
 SVN_URL="http://plugins.svn.wordpress.org/${SLUG}/"
 SVN_DIR="/github/svn-${SLUG}"
 
@@ -103,14 +111,6 @@ if [[ -d "$GITHUB_WORKSPACE/$ASSETS_DIR/" ]]; then
 	rsync -rc "$GITHUB_WORKSPACE/$ASSETS_DIR/" assets/ --delete
 else
 	echo "ℹ︎ No assets directory found; skipping asset copy"
-fi
-
-if [[ -f "${GITHUB_WORKSPACE}/.gitmodules" ]]; then
-	git config --global user.email "thomas@eighty20results.com"
-	git config --global user.name "Eighty/20Results Bot on Github"
-
-	echo "➤ Refresh all submodule(s) for the project"
-	git submodule update --remote
 fi
 
 if [[ -f "${GITHUB_WORKSPACE}/class/utilities/class.utilities.php" ]]; then
