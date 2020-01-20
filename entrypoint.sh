@@ -105,6 +105,22 @@ else
 	echo "ℹ︎ No assets directory found; skipping asset copy"
 fi
 
+if [[ -d "trunk/.git" ]]; then
+	echo "ℹ︎ Removing .git directory - not to be included in SVN"
+	rm -rf "trunk/.git"
+fi
+
+# Copy tag locally to make this a single commit (if the tag doesn't exist already
+if [[ -d "tags/$VERSION" ]]; then
+	echo "➤ Refresh $VERSION tag..."
+	rm -rf "tags/$VERSION"
+fi
+
+if [[ -d "tags/$VERSION/.git" ]]; then
+	echo "➤ Refresh $VERSION tag..."
+	rm -rf "tags/$VERSION/.git"
+fi
+
 # Add everything and commit to SVN
 # The force flag ensures we recurse into subdirectories even if they are already added
 # Suppress stdout in favor of svn status later for readability
@@ -114,17 +130,6 @@ svn add . --force > /dev/null
 # SVN delete all deleted files
 # Also suppress stdout here
 svn status | grep '^\!' | sed 's/! *//' | xargs -I% svn rm %@ > /dev/null
-
-if [[ -d "$GITHUB_WORKSPACE/.git" ]]; then
-	echo "ℹ︎ Removing .git directory - not to be included in SVN"
-	rm -rf .git
-fi
-
-# Copy tag locally to make this a single commit (if the tag doesn't exist already
-if [[ -d "tags/$VERSION" ]]; then
-	echo "➤ Refresh $VERSION tag..."
-	rm -rf "tags/$VERSION"
-fi
 
 echo "➤ Copying tag..."
 svn cp "trunk" "tags/$VERSION"
