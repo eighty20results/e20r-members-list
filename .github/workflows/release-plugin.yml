@@ -16,14 +16,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@master
-#    - name: Build
-#      run: |
-#        npm install
-#        npm run build
     - name: WordPress Plugin Deploy
+      with:
+        repository: git@github.com:eighty20results/Utilities.git
+        token: ${{ secrets.UTILITIES_ACCESS }}
+        path: class/utilities
       uses: eighty20results/e20r-members-list@master
       env:
         SLUG: e20r-members-list
         SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
         SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
         GITHUB_TOKEN: ${{ secrets.GITHUB }}
+
