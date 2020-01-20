@@ -6,6 +6,14 @@
 # it does not exit with a 0, and I only care about the final exit.
 set -eo
 
+if [[ -f .gitmodules ]]; then
+	git config --global user.email "thomas@eighty20results.com"
+	git config --global user.name "Eighty/20Results Bot on Github"
+
+	echo "➤ Refresh all submodule(s) for the project"
+	git submodule update --remote
+fi
+
 # Ensure SVN username and password are set
 # IMPORTANT: while secrets are encrypted and not viewable in the GitHub UI,
 # they are by necessity provided as plaintext in the context of the Action,
