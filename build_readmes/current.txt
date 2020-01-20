@@ -1,1 +1,1 @@
-BUG FIX: Possibly causing fatal error when running/activated
+BUG FIX: Didn't include required utilities
