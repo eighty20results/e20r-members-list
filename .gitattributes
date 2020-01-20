@@ -11,7 +11,6 @@
 
 # Files
 /.gitattributes export-ignore
-/.gitmodules export-ignore
 /.editorconfig export-ignore
 /.gitignore export-ignore
 /.distignore export-ignore
@@ -21,6 +20,7 @@
 /class/utilities/.editorconfig export-ignore
 
 #/action.yml export-ignore
+#/.gitmodules export-ignore
 #/Dockerfile export-ignore
 #/entrypoint.sh export-ignore
 #/remove_updates.sh export-ignore
