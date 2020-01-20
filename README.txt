@@ -4,7 +4,7 @@ Tags: paid memberships pro, members, memberships, pmpro enhancements, better mem
 Requires at least: 4.9
 Tested up to: 5.4
 Requires PHP: 7.0
-Stable tag: 5.7.5
+Stable tag: 5.7.6
 License: GPLv2
 License URI: http://www.gnu.org/licenses/gpl
 
@@ -187,6 +187,9 @@ I am working to isolate the source of this problem and resolving it.
 My apologies for not yet having a solution for the incompatibility introduced by PMPro v2.2+.
 
 == Changelog ==
+
+== 5.7.6 ==
+* BUG FIX: Possibly causing fatal error when running/activated
 
 == 5.7.5 ==
 * BUG FIX: Migrate origin sources to github.com
