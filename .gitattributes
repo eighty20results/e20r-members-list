@@ -1,5 +1,4 @@
 # Directories
-/.git export-ignore
 /.github export-ignore
 /bin export-ignore
 /build_readmes export-ignore
@@ -19,6 +18,7 @@
 /class/utilities/.gitignore export-ignore
 /class/utilities/.editorconfig export-ignore
 
+#/.git export-ignore
 #/action.yml export-ignore
 #/.gitmodules export-ignore
 #/Dockerfile export-ignore
