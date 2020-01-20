@@ -6,14 +6,6 @@
 # it does not exit with a 0, and I only care about the final exit.
 set -eo
 
-if [[ -f .gitmodules ]]; then
-	git config --global user.email "thomas@eighty20results.com"
-	git config --global user.name "Eighty/20Results Bot on Github"
-
-	echo "➤ Refresh all submodule(s) for the project"
-	git submodule update --remote
-fi
-
 # Ensure SVN username and password are set
 # IMPORTANT: while secrets are encrypted and not viewable in the GitHub UI,
 # they are by necessity provided as plaintext in the context of the Action,
@@ -59,12 +51,12 @@ svn update --set-depth infinity trunk
 
 echo "➤ Copying files..."
 if [[ -e "$GITHUB_WORKSPACE/.distignore" ]]; then
-	echo "ℹ︎ Using .distignore"
+	echo "ℹ︎ Using .distignore in ${GITHUB_WORKSPACE}"
 	# Copy from current branch to /trunk, excluding dotorg assets
 	# The --delete flag will delete anything in destination that no longer exists in source
 	rsync --recursive --checksum --verbose --exclude-from="$GITHUB_WORKSPACE/.distignore" "$GITHUB_WORKSPACE/" trunk/ --delete-during
 else
-	echo "ℹ︎ Using .gitattributes"
+	echo "ℹ︎ Using .gitattributes in ${GITHUB_WORKSPACE}"
 
 	cd "$GITHUB_WORKSPACE"
 
@@ -113,6 +105,22 @@ else
 	echo "ℹ︎ No assets directory found; skipping asset copy"
 fi
 
+if [[ -f "${GITHUB_WORKSPACE}/.gitmodules" ]]; then
+	git config --global user.email "thomas@eighty20results.com"
+	git config --global user.name "Eighty/20Results Bot on Github"
+
+	echo "➤ Refresh all submodule(s) for the project"
+	git submodule update --remote
+fi
+
+if [[ -d "${SVN_DIR}/class/utilities" ]]; then
+	echo "ℹ︎ Refreshing the Utilities module from ${SVN_DIR}/class/utilities:"
+	cp -R "${SVN_DIR}/class/utilities/*" "trunk/class/utilities/"
+	rm -rf "trunk/class/utilities/.git"
+	rm -rf "trunk/class/utilities/.gitignore"
+	rm -rf "trunk/class/utilities/.editorconfig"
+fi
+
 if [[ -d "trunk/.git" ]]; then
 	echo "ℹ︎ Removing .git directory - not to be included in SVN"
 	rm -rf "trunk/.git"
@@ -126,14 +134,6 @@ fi
 if [[ -f "trunk/remove_update.sh" ]]; then
 	echo "ℹ︎ Removing remove_update.sh - not to be included in SVN"
 	rm -rf "trunk/remove_update.sh"
-fi
-
-if [[ -d "$GITHUB_WORKSPACE/class/utilities" ]]; then
-	echo "ℹ︎ Refreshing the Utilities module"
-	cp -R "$GITHUB_WORKSPACE/class/utilities/*" "trunk/class/utilities/"
-	rm -rf "trunk/class/utilities/.git"
-	rm -rf "trunk/class/utilities/.gitignore"
-	rm -rf "trunk/class/utilities/.editorconfig"
 fi
 
 # Copy tag locally to make this a single commit (if the tag doesn't exist already
