@@ -66,3 +66,7 @@ fabric.properties
 /build_readmes/readme_changelog.txt
 /build_readmes/json_changelog.txt
 /build/kits/
+/class/utilities/.git
+/class/utilities/.gitignore
+/class/utilities/.editorconfig
+/class/utilities/composer.json

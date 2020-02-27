@@ -1,1 +1,1 @@
-BUG FIX: Didn't include required utilities
+BUG FIX: Shipping plugin lacks standard utilities library

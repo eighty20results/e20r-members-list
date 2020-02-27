@@ -17,6 +17,7 @@
 /package.json export-ignore
 /class/utilities/.gitignore export-ignore
 /class/utilities/.editorconfig export-ignore
+/class/utilities/composer.json export-ignore
 
 #/.git export-ignore
 #/action.yml export-ignore
