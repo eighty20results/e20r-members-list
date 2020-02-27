@@ -11,4 +11,9 @@ if [[ -f trunk/${BASE_FILE} ]]; then
 		grep -v "Utilities::configureUpdateServerV4" trunk/${BASE_FILE} > trunk/${BASE_FILE}.new
 		mv trunk/${BASE_FILE}.new trunk/${BASE_FILE}
 	fi
+
+	if [[ -d trunk/class/utilities/inc/yahnis-elsts ]]; then
+		echo "ℹ︎ Found unsupported update utility. Removing"
+		rm -rf trunk/class/utilities/inc/yahnis-elsts
+	fi
 fi
