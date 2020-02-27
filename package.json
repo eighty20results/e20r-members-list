@@ -4,7 +4,7 @@
     "type": "git",
     "url": "git://github.com/eighty20results/e20r-members-list.git"
   },
-  "version": "5.7.2",
+  "version": "5.8",
   "description": "E20R Enhanced Members List Paid Memberships Pro",
   "homepage": "https://wordpress.org/plugins/e20r-members-list",
   "bugs": {
@@ -18,6 +18,5 @@
     "url": "https://eighty20results.com/thomas-sjolshagen"
   },
   "dependencies": {
-
   }
 }
