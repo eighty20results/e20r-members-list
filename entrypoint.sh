@@ -115,9 +115,9 @@ else
 	echo "ℹ︎ No assets directory found; skipping asset copy"
 fi
 
-if [[ -f "${GITHUB_WORKSPACE}/class/utilities/class.utilities.php" ]]; then
+if [[ -f "trunk/class/utilities/class.utilities.php" ]]; then
 	echo "ℹ︎ Refreshing the Utilities module from ${GITHUB_WORKSPACE}/class/utilities:"
-	cp -R "${SVN_DIR}/class/utilities/*" "trunk/class/utilities/"
+	cp -R "${GITHUB_WORKSPACE}/class/utilities/*" "trunk/class/utilities/"
 	rm -rf "trunk/class/utilities/.git"
 	rm -rf "trunk/class/utilities/.gitignore"
 	rm -rf "trunk/class/utilities/.editorconfig"
