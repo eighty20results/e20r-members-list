@@ -51,7 +51,7 @@ SVN_DIR="/github/svn-${SLUG}"
 
 # Checkout just trunk and assets for efficiency
 # Tagging will be handled on the SVN level
-echo "➤ Checking out .org repository..."
+echo "➤ Checking out .org repository with SVN..."
 svn checkout --depth immediates "$SVN_URL" "$SVN_DIR"
 cd "$SVN_DIR"
 svn update --set-depth infinity assets
@@ -115,9 +115,9 @@ else
 	echo "ℹ︎ No assets directory found; skipping asset copy"
 fi
 
-if [[ -f "trunk/class/utilities/class.utilities.php" ]]; then
-	echo "ℹ︎ Refreshing the Utilities module from ${GITHUB_WORKSPACE}/class/utilities:"
-	cp -R "${GITHUB_WORKSPACE}/class/utilities/*" "trunk/class/utilities/"
+if [[ -f "${SVN_DIR}/class/utilities/class.utilities.php" ]]; then
+	echo "ℹ︎ Refreshing the Utilities module from ${SVN_DIR}/class/utilities:"
+	cp -R "${SVN_DIR}/class/utilities/*" "trunk/class/utilities/"
 	rm -rf "trunk/class/utilities/.git"
 	rm -rf "trunk/class/utilities/.gitignore"
 	rm -rf "trunk/class/utilities/.editorconfig"
