@@ -3,7 +3,7 @@ description: 'Deploy to the WordPress Plugin Repository'
 author: '10up'
 runs:
   using: 'docker'
-  image: 'Dockerfile'
+  image: '/build_env/Dockerfile'
 branding:
   icon: 'upload-cloud'
   color: 'blue'
