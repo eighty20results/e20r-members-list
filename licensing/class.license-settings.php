@@ -130,6 +130,7 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\License_Settings' ) ) {
 						$key         = ( ! Licensing::is_new_version() && isset( $license['license_key'] ) ?
 							$license['license_key'] :
 							isset( $license['product_sku'] ) ? $license['product_sku'] : null
+
 						);
 
 						$is_active = Licensing::is_active(
