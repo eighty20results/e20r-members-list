@@ -1,1 +1,1 @@
-BUG FIX: Shipping plugin lacks standard utilities library
+BUG FIX: Improved performance from Utilities library
