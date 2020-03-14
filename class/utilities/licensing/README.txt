@@ -189,7 +189,7 @@ Example 'check_licenses' client method:
 
 		$utils = Utilities::get_instance();
 
-		switch ( Licensing::is_license_expiring( 'my_license' ) ) {
+		switch ( Licensing::is_license_expiring( 'my_license_sku' ) ) {
 
 			case true:
 				$utils->add_message(
@@ -241,7 +241,7 @@ To check if the plugin is licensed, you can add a simple `if/then` statement:
 
 
 `
-if ( ! Licensing::is_licensed( 'my_plugin' ) ) {
+if ( ! Licensing::is_licensed( 'MY_LICENSE_SKU' ) ) {
 	die( "The license for this plugin has not been activated yet, or has expired!" );
 }
 `
@@ -317,9 +317,9 @@ class My_License extends License_Client {
 
 		$utils->log( "Load settings for my example client license class" );
 		$plugin_settings['e20r_pmpec'] = array(
-			'key_prefix'  => 'my_license',
-			'stub'        => 'my_license',
-			'product_sku' => 'MY_LICENSE', // The Woocommerce Product SKU string to use when identifying the license
+			'key_prefix'  => 'my_license_sku',
+			'stub'        => 'my_license_sku',
+			'product_sku' => 'MY_LICENSE_SKU', // The Woocommerce Product SKU string to use when identifying the license
 			'label'       => __( 'My Custom Client License', 't10n-slug' ),
 		);
 
@@ -335,7 +335,7 @@ class My_License extends License_Client {
 
 		$utils = Utilities::get_instance();
 
-		switch ( Licensing::is_license_expiring( 'my_license' ) ) {
+		switch ( Licensing::is_license_expiring( 'MY_LICENSE_SKU' ) ) {
 
 			case true:
 				$utils->add_message( sprintf( __( 'The license for \'%s\' will renew soon. As this is an automatic payment, you will not have to do anything. To change %syour license%s, please go to %syour account page%s' ), __( 'My Custom License', 't10n-slug' ), '<a href="https://mywebserver.com/shop/licenses/" target="_blank">', '</a>', '<a href="https://mywebserver.com/account/" target="_blank">', '</a>' ), 'info', 'backend' );

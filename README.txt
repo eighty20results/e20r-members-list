@@ -3,8 +3,8 @@ Contributors: eighty20results
 Tags: paid memberships pro, members, memberships, pmpro enhancements, better members list, members list
 Requires at least: 4.9
 Tested up to: 5.4
-Requires PHP: 7.0
-Stable tag: 5.9
+Requires PHP: 7.1
+Stable tag: 5.9.1
 License: GPLv2
 License URI: http://www.gnu.org/licenses/gpl
 
@@ -187,6 +187,9 @@ I am working to isolate the source of this problem and resolving it.
 My apologies for not yet having a solution for the incompatibility introduced by PMPro v2.2+.
 
 == Changelog ==
+
+== 5.9.1 ==
+* BUG FIX: Improved performance from Utilities library
 
 == 5.9 ==
 * BUG FIX: Adding utilities library as subtree
