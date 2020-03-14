@@ -160,13 +160,33 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\License_Settings' ) ) {
 						if ( ! empty( $license['expire'] ) ) {
 							$expiration_ts = (int) $license['expire'];
 						} else {
-							$utils->add_message( __( 'Error: No expiration info found. Using default value (expired)', Utilities::$plugin_slug ), 'warning', 'backend' );
+							$utils->add_message(
+								sprintf(
+									__(
+										'Error: No expiration info found for %s. Using default value (expired)',
+										Utilities::$plugin_slug
+									),
+									$license_name
+								),
+								'warning',
+								'backend'
+							);
 						}
 					} else {
 						if ( ! empty( $license['expires'] ) ) {
 							$expiration_ts = (int) strtotime( $license['expires'] );
 						} else {
-							$utils->add_message( __( 'Warning: No expiration info found. Using default value (expired)', Utilities::$plugin_slug ), 'warning', 'backend' );
+							$utils->add_message(
+								sprintf(
+									__(
+										'Warning: No expiration info found for %s. Using default value (expired)',
+										Utilities::$plugin_slug
+									),
+									$license_name
+								),
+								'warning',
+								'backend'
+							);
 						}
 					}
 
