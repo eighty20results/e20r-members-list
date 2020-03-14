@@ -28,6 +28,7 @@ namespace E20R\Utilities;
  * @credit https://github.com/A5hleyRich/wp-background-processing
  * @since   1.9.6 - ENHANCEMENT: Added fixes and updates from EWWW Image Optimizer code
  */
+
 use E20R\Utilities\Utilities;
 
 if ( ! class_exists( '\E20R\Utilities\E20R_Async_Request' ) ) {
@@ -71,13 +72,16 @@ if ( ! class_exists( '\E20R\Utilities\E20R_Async_Request' ) ) {
 		 * @access protected
 		 */
 		protected $data = array();
-		
+
 		protected $query_args;
-		
+
+		/**
+		 * @var string $query_url - URL for the query. Empty by default.
+		 */
 		protected $query_url;
-		
+
 		protected $post_args;
-		
+
 		/**
 		 * Initiate new async request
 		 */
@@ -86,7 +90,7 @@ if ( ! class_exists( '\E20R\Utilities\E20R_Async_Request' ) ) {
 			add_action( 'wp_ajax_' . $this->identifier, array( $this, 'maybe_handle' ) );
 			add_action( 'wp_ajax_nopriv_' . $this->identifier, array( $this, 'maybe_handle' ) );
 		}
-		
+
 		/**
 		 * Set data used during the request
 		 *
@@ -96,61 +100,69 @@ if ( ! class_exists( '\E20R\Utilities\E20R_Async_Request' ) ) {
 		 */
 		public function data( $data ) {
 			$this->data = $data;
-			
+
 			return $this;
 		}
-		
+
 		/**
 		 * Dispatch the async request
 		 *
 		 * @return array|\WP_Error
 		 */
 		public function dispatch() {
-			$url  = esc_url( add_query_arg( $this->get_query_args(), $this->get_query_url() ) );
+
+			$url   = esc_url( add_query_arg( $this->get_query_args(), $this->get_query_url() ) );
+			$utils = Utilities::get_instance();
+			$utils->log( "Using URL: {$url} to submit request" );
 			$args = $this->get_post_args();
-			
+
 			return wp_remote_post( esc_url_raw( $url ), $args );
 		}
-		
+
 		/**
 		 * Get query args
 		 *
 		 * @return array
 		 */
 		protected function get_query_args() {
-			if ( property_exists( $this, 'query_args' ) ) {
+
+			if ( property_exists( $this, 'query_args' ) && ! empty( $this->query_args ) ) {
 				return $this->query_args;
 			}
-			
+
 			return array(
 				'action' => $this->identifier,
 				'nonce'  => wp_create_nonce( $this->identifier ),
 			);
 		}
-		
+
 		/**
 		 * Get query URL
 		 *
 		 * @return string
 		 */
 		protected function get_query_url() {
-			if ( property_exists( $this, 'query_url' ) ) {
+
+			$utils = Utilities::get_instance();
+			$utils->log( "Is the query_url param set? {$this->query_url}" );
+
+			if ( property_exists( $this, 'query_url' ) && !empty( $this->query_url ) ) {
 				return $this->query_url;
 			}
-			
+
 			return admin_url( 'admin-ajax.php' );
 		}
-		
+
 		/**
 		 * Get post args
 		 *
 		 * @return array
 		 */
 		protected function get_post_args() {
-			if ( property_exists( $this, 'post_args' ) ) {
+			if ( property_exists( $this, 'post_args' ) && !empty( $this->post_args ) ) {
 				return $this->post_args;
 			}
-			
+
 			return array(
 				'timeout'   => 0.01,
 				'blocking'  => false,
@@ -159,26 +171,26 @@ if ( ! class_exists( '\E20R\Utilities\E20R_Async_Request' ) ) {
 				'sslverify' => apply_filters( 'https_local_ssl_verify', false ),
 			);
 		}
-		
+
 		/**
 		 * Maybe handle
 		 *
 		 * Check for correct nonce and pass to handler.
 		 */
 		public function maybe_handle() {
-			
+
 			$utils = Utilities::get_instance();
-			
+
 			// Don't lock up other requests while processing
 			session_write_close();
 			check_ajax_referer( $this->identifier, 'nonce' );
-			
+
 			$this->handle();
-			
+
 			$utils->log( "Terminating for single request" );
 			wp_die();
 		}
-		
+
 		/**
 		 * Handle
 		 *
