@@ -79,3 +79,6 @@ p.e20r-license-settings-status {
 	padding: 0 5px;
 	font-size: smaller !important;
 }
+input.e20r-check-license {
+	width: 150px;
+}
