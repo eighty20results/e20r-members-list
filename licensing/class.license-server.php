@@ -323,11 +323,28 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\License_Server' ) ) {
 				} else {
 
 					if ( E20R_LICENSING_DEBUG ) {
-						$utils->log( "Returned data from validation check: " . print_r( $decoded, true ) );
+						$utils->log( "Returned data from (new) validation check: " . print_r( $decoded, true ) );
 					}
 
-					if ( ! empty( $decoded ) && true == $decoded->error && ( isset( $decoded->status ) && 500 === (int) $decoded->status ) ) {
+					if (empty($decoded)) {
+
+						$msg = __('No data received from license server for %1$s. Please contact the store owner!', 'e20r-utilities-licensing');
+
+						$utils->add_message(
+							sprintf( $msg, $settings['fulltext_name'] ),
+							'error',
+							'backend'
+						);
+
+						$license_status = false;
+						Cache::set( "{$sku}_status", $license_status, DAY_IN_SECONDS, 'e20r_licensing' );
+						return $license_status;
+					}
+
+					if ( 1 === (int) $decoded->error && ( isset( $decoded->status ) && 500 === (int) $decoded->status ) ) {
+
 						$msg = __( 'Error validating the %s license: %s -> %s', 'e20r-utilities-licensing' );
+
 						foreach ( (array) $decoded->errors as $error_key => $error_info ) {
 
 							$utils->add_message(
@@ -336,6 +353,10 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\License_Server' ) ) {
 								'backend'
 							);
 						}
+
+						$license_status = false;
+						Cache::set( "{$sku}_status", $license_status, DAY_IN_SECONDS, 'e20r_licensing' );
+						return $license_status;
 					}
 
 					if ( isset( $decoded->status ) && 200 === (int) $decoded->status ) {
@@ -347,12 +368,13 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\License_Server' ) ) {
 						}
 
 						$utils->log( "License status: " . ( $license_status ? 'True' : 'False' ) );
-						Cache::set( "{$sku}_status", $license_status, DAY_IN_SECONDS, 'e20r_licensing' );
 					}
+
+					Cache::set( "{$sku}_status", $license_status, DAY_IN_SECONDS, 'e20r_licensing' );
 				}
 			} else {
 				if ( E20R_LICENSING_DEBUG ) {
-					$utils->log( "Loaded the cached (local) license status info for {$sku}" );
+					$utils->log( "Loaded the cached (local) license status ({$license_status}) info for {$sku}" );
 				}
 			}
 
