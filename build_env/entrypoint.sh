@@ -58,7 +58,7 @@ SVN_DIR="/github/svn-${SLUG}"
 # Tagging will be handled on the SVN level
 echo "➤ Checking out .org repository with SVN..."
 svn checkout --depth immediates "${SVN_URL}" "${SVN_DIR}"
-cd "{$SVN_DIR}"
+cd "${SVN_DIR}"
 svn update --set-depth infinity assets
 svn update --set-depth infinity trunk
 
