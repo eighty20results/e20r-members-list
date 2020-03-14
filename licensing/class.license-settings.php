@@ -160,6 +160,7 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\License_Settings' ) ) {
 						if ( ! empty( $license['expire'] ) ) {
 							$expiration_ts = (int) $license['expire'];
 						} else {
+							$utils->log("License info (new) w/o expiration info: " . print_r( $license, true  ));
 							$utils->add_message(
 								sprintf(
 									__(
@@ -176,6 +177,7 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\License_Settings' ) ) {
 						if ( ! empty( $license['expires'] ) ) {
 							$expiration_ts = (int) strtotime( $license['expires'] );
 						} else {
+							$utils->log("License info (old) w/o expiration info: " . print_r( $license, true  ));
 							$utils->add_message(
 								sprintf(
 									__(
