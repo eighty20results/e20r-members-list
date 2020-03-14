@@ -8,9 +8,9 @@ RUN apt-get update \
 	&& apt-get clean -y \
 	&& rm -rf /var/lib/apt/lists/*
 
-RUN mkdir -p $BUILD_DIR
+RUN mkdir -p /build_env
 
-COPY .${BUILD_DIR}/entrypoint.sh ${BUILD_DIR}/entrypoint.sh
-COPY .${BUILD_DIR}/remove_update.sh ${BUILD_DIR}/remove_update.sh
+COPY .${BUILD_DIR}/entrypoint.sh /build_env/entrypoint.sh
+COPY .${BUILD_DIR}/remove_update.sh /build_env/remove_update.sh
 
 ENTRYPOINT ["${BUILD_DIR}/entrypoint.sh"]
