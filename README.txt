@@ -4,7 +4,7 @@ Tags: paid memberships pro, members, memberships, pmpro enhancements, better mem
 Requires at least: 4.9
 Tested up to: 5.4
 Requires PHP: 7.1
-Stable tag: 5.9.1
+Stable tag: 5.10
 License: GPLv2
 License URI: http://www.gnu.org/licenses/gpl
 
@@ -187,6 +187,15 @@ I am working to isolate the source of this problem and resolving it.
 My apologies for not yet having a solution for the incompatibility introduced by PMPro v2.2+.
 
 == Changelog ==
+
+== 5.10 ==
+* BUG FIX: Fatal error in Utilities library
+* BUG FIX: Got IDE warning for missing variable (thinks $this->items may be dynamic)
+* BUG FIX: Didn't initiate the total_items variable
+* BUG FIX: Avoid PHP Warning when logging debug info about records found & pagination
+* BUG FIX: Handle situations where there are no records found (w/o logging warnings or errors)
+* ENHANCEMENT: Use $wpdb->num_rows instead of 'FOUND_ROWS()' which is slow when possible
+
 
 == 5.9.1 ==
 * BUG FIX: Improved performance from Utilities library

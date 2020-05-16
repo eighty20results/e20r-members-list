@@ -1,1 +1,6 @@
-BUG FIX: Improved performance from Utilities library
+BUG FIX: Fatal error in Utilities library
+BUG FIX: Got IDE warning for missing variable (thinks $this->items may be dynamic)
+BUG FIX: Didn't initiate the total_items variable
+BUG FIX: Avoid PHP Warning when logging debug info about records found & pagination
+BUG FIX: Handle situations where there are no records found (w/o logging warnings or errors)
+ENHANCEMENT: Use $wpdb->num_rows instead of "FOUND_ROWS()" which is slow when possible
