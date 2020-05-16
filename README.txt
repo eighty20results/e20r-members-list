@@ -12,6 +12,8 @@ License URI: http://www.gnu.org/licenses/gpl
 
 Extensible, sortable & bulk action capable members listing tool for Paid Memberships Pro. This plugin is a complete replacement for the "Members List" functionality in PMPro and supports most of the same filters and hooks. The key differences have to do with managing columns. Now you can also use the [standard WordPress filters](https://developer.wordpress.org/reference/classes/wp_list_table/) to columns you can add/remove/make sortable, additional bulk actions, etc.
 
+![Release to wordpress.org](https://github.com/eighty20results/e20r-members-list/workflows/Release%20to%20wordpress.org/badge.svg?branch=master)
+
 == Installation ==
 
 1. Upload the `e20r-members-list` folder to the `/wp-content/plugins/` directory.
