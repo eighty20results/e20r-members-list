@@ -18,6 +18,7 @@ then
     # scp -r ${PLUGIN_DIR}/traefik docker.local:./www/docker/docker4wordpress/traefik
     ssh docker.local "cd ./www/docker-images/docker4wordpress/ ; make down ; make up"
     ssh docker.local "cd ./www/docker-images/docker4wordpress/ ; chmod +x ./import-db.sh ; nohup ./import-db.sh"
+    ssh docker.local "rm -rf ./www/docker-images/docker4wordpress/mariadb-init/${PROJECT_NAME}.sql"
     ssh docker.local "cd ./www/docker-images/docker4wordpress/ ; make wp plugin activate ${PLUGIN_LIST}"
 
 else
@@ -34,6 +35,7 @@ else
     make up
     chmod +x ./import-db.sh
     nohup ./import-db.sh
+    rm -rf  "/Users/sjolshag/PhpStormProjects/docker-images/docker4wordpress/${PROJECT_NAME}.sql"
     # ./import-db.sh
    make wp plugin activate ${PLUGIN_LIST}
 
