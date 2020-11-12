@@ -51,6 +51,5 @@ crashlytics-build.properties
 fabric.properties
 
 .idea/
-.gitignore
 /composer.phar
 /composer.lock
