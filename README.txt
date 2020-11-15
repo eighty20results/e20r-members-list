@@ -20,6 +20,13 @@ Please report all issues/problems on the [plugin's GitHub 'Issues' page](https:/
 
 = Changelog =
 
+== v1.0.6 ==
+
+* BUG FIX: Need the path to the plugin for plugin-update-checker to work
+* BUG FIX: Shellcheck updates
+* BUG FIX: Typo in changelog script
+* ENH: Adding changelog generation and updating metadata
+
 == v1.0.4 ==
 
 * BUG FIX: Wrong path when loading the plugin update checker
