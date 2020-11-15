@@ -1067,6 +1067,7 @@ if ( ! class_exists( '\E20R\Utilities\Utilities' ) ) {
 		public static function configureUpdateServerV4( $plugin_slug, $plugin_path = null ) {
 
 			$plugin_updates = null;
+			$plugin = self::get_instance();
 
 			if ( is_null( $plugin_path ) ) {
 				$plugin_path = plugin_dir_path( $plugin_path ) . $plugin_slug . '.php';
@@ -1076,6 +1077,7 @@ if ( ! class_exists( '\E20R\Utilities\Utilities' ) ) {
 				plugin_dir_path( __FILE__ ) .
 				'inc/yahnis-elsts/plugin-update-checker/plugin-update-checker.php' )
 			) {
+				$plugin->add_message( "File not found: Unable to load the plugin update checker!", 'warning' );
 				return $plugin_updates;
 			}
 

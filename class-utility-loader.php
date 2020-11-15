@@ -3,7 +3,7 @@
 Plugin Name: E20R Utilties Module
 Plugin URI: https://eighty20results.com/
 Description: Plugin required by some of the Eighty/20 Results developed plugins
-Version: 1.0.2
+Version: 1.0.3
 Author: Thomas Sjolshagen <thomas@eighty20results.com>
 Author URI: https://eighty20results.com/thomas-sjolshagen/
 License: GPLv2

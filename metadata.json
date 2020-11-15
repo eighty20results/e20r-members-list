@@ -1,13 +1,13 @@
 {
   "name" : "Eighty/20 Results Utilities Module",
-  "slug" : "e20r-utilities",
-  "download_url" : "https://eighty20results.com/protected-content/ispcan-custom-functionality/e20r-utilities-1.0.2.zip",
-  "version" : "1.0.2",
+  "slug" : "00-e20r-utilities",
+  "download_url" : "https://eighty20results.com/protected-content/ispcan-custom-functionality/00-e20r-utilities-1.0.3.zip",
+  "version" : "1.0.3",
   "tested" : "5.5.1",
   "requires" : "5.0",
   "author" : "Thomas Sjolshagen <thomas@eighty20results.com>",
   "author_homepage" : "https://eighty20results.com/thomas-sjolshagen",
-  "last_updated" : "2020-11-15 13:00:00 MST",
+  "last_updated" : "2020-11-15 14:00:00 MST",
   "homepage" : "https://eighty20results.com/paid-memberships-pro/do-it-for-me/",
   "sections" : {
     "description" : ".",
