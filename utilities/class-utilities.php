@@ -1070,12 +1070,12 @@ if ( ! class_exists( '\E20R\Utilities\Utilities' ) ) {
 			$plugin = self::get_instance();
 
 			if ( is_null( $plugin_path ) ) {
-				$plugin_path = plugin_dir_path( $plugin_path ) . $plugin_slug . '.php';
+				$plugin_path = plugin_dir_path( $plugin_path ) . '../' . $plugin_slug . '.php';
 			}
 
 			if ( ! file_exists(
 				plugin_dir_path( __FILE__ ) .
-				'inc/yahnis-elsts/plugin-update-checker/plugin-update-checker.php' )
+				'../inc/yahnis-elsts/plugin-update-checker/plugin-update-checker.php' )
 			) {
 				$plugin->add_message( "File not found: Unable to load the plugin update checker!", 'warning' );
 				return $plugin_updates;
@@ -1085,7 +1085,7 @@ if ( ! class_exists( '\E20R\Utilities\Utilities' ) ) {
 			 * One-click update handler & checker
 			 */
 			if ( ! class_exists( '\\Puc_v4_Factory' ) ) {
-				require_once( plugin_dir_path( __FILE__ ) . 'inc/yahnis-elsts/plugin-update-checker/plugin-update-checker.php' );
+				require_once( plugin_dir_path( __FILE__ ) . '../inc/yahnis-elsts/plugin-update-checker/plugin-update-checker.php' );
 			}
 
 			$plugin_updates = \Puc_v4_Factory::buildUpdateChecker(
