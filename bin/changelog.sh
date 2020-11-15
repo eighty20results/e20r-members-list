@@ -7,7 +7,7 @@ changelog_source="${readme_path}current.txt"
 incomplete_out=tmp.txt
 json_out=json_changelog.txt
 readme_out=readme_changelog.txt
-version=$(egrep "^Version:" ../class-utilitiy-loader.php | "${sed}" 's/[[:alpha:]|(|[:space:]|\:]//g' | awk -F- '{printf "%s", $1}')
+version=$(egrep "^Version:" ../class-utility-loader.php | ${sed} 's/[[:alpha:]|(|[:space:]|\:]//g' | awk -F- '{printf "%s", $1}')
 json_header="<h3>v${version}</h3><ol>"
 json_footer="</ol>"
 readme_header="== v${version} =="
@@ -24,7 +24,6 @@ rm "${readme_path}${incomplete_out}"
 #
 # Create a README.txt friendly changelog entry for the current ${version}
 #
-echo "${readme_header}" > "${readme_path}${readme_out}"
-echo '' >> "${readme_path}${readme_out}"
+{ echo "${readme_header}"; echo ''; } > "${readme_path}${readme_out}"
 ${sed} -e"s/\"/\'/g" -e"s/.*/\*\ &/" "${changelog_source}" >> "${readme_path}${readme_out}"
 echo '' >> "${readme_path}${readme_out}"

@@ -1,17 +1,17 @@
 {
   "name" : "Eighty/20 Results Utilities Module",
   "slug" : "00-e20r-utilities",
-  "download_url" : "https://eighty20results.com/protected-content/ispcan-custom-functionality/00-e20r-utilities-1.0.4.zip",
-  "version" : "1.0.4",
+  "download_url" : "https://eighty20results.com/protected-content/ispcan-custom-functionality/00-e20r-utilities-1.0.6.zip",
+  "version" : "1.0.6",
   "tested" : "5.5.1",
   "requires" : "5.0",
   "author" : "Thomas Sjolshagen <thomas@eighty20results.com>",
   "author_homepage" : "https://eighty20results.com/thomas-sjolshagen",
-  "last_updated" : "2020-11-15 14:00:00 MST",
+  "last_updated" : "2020-11-15 17:30:00 CET",
   "homepage" : "https://eighty20results.com/paid-memberships-pro/do-it-for-me/",
   "sections" : {
     "description" : ".",
-    "changelog" : "<h3>1.0</h3><ol><li>Initial release as a standalone module/plugin</li></ol>",
+    "changelog" : "<h3>v1.0.4</h3><ol><li>BUG FIX: Wrong path when loading the plugin update checker</li><li>ENH: Bumping version number and change log management logic</li></ol><h3>1.0</h3><ol><li>Initial release as a standalone module/plugin</li></ol>",
     "faq" : "<h3>I found a bug in the plugin.</h3>Please report your issue to us by using the <a href='https://github.com/eighty20results/Utilities/issues' target='_blank'>GitHub Issues page</a> and we'll try to respond as quickly as possible to your inquiry."
     }
 }

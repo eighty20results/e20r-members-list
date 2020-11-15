@@ -1,9 +1,9 @@
 <?php
 /*
-Plugin Name: E20R Utilties Module
+Plugin Name: E20R Utilities Module
 Plugin URI: https://eighty20results.com/
 Description: Plugin required by some of the Eighty/20 Results developed plugins
-Version: 1.0.3
+Version: 1.0.6
 Author: Thomas Sjolshagen <thomas@eighty20results.com>
 Author URI: https://eighty20results.com/thomas-sjolshagen/
 License: GPLv2
