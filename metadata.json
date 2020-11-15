@@ -1,8 +1,8 @@
 {
   "name" : "Eighty/20 Results Utilities Module",
   "slug" : "00-e20r-utilities",
-  "download_url" : "https://eighty20results.com/protected-content/ispcan-custom-functionality/00-e20r-utilities-1.0.3.zip",
-  "version" : "1.0.3",
+  "download_url" : "https://eighty20results.com/protected-content/ispcan-custom-functionality/00-e20r-utilities-1.0.4.zip",
+  "version" : "1.0.4",
   "tested" : "5.5.1",
   "requires" : "5.0",
   "author" : "Thomas Sjolshagen <thomas@eighty20results.com>",
