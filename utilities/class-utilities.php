@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (c) 2016-2018 - Eighty / 20 Results by Wicked Strong Chicks.
+ * Copyright (c) 2016-2020 - Eighty / 20 Results by Wicked Strong Chicks.
  * ALL RIGHTS RESERVED
  *
  * This program is free software: you can redistribute it and/or modify
@@ -1062,7 +1062,7 @@ if ( ! class_exists( '\E20R\Utilities\Utilities' ) ) {
 		 * @param string      $plugin_slug
 		 * @param null|string $plugin_path
 		 *
-		 * @return \Puc_v4_Plugin_UpdateChecker|\Puc_v4_Theme_UpdateChecker|\Puc_v4_Vcs_BaseChecker|\Puc_v4p2_Plugin_UpdateChecker|\Puc_v4p2_Theme_UpdateChecker|\Puc_v4p2_Vcs_BaseChecker|\Puc_v4p5_Plugin_UpdateChecker|\Puc_v4p5_Theme_UpdateChecker|\Puc_v4p5_Vcs_BaseChecker|\Puc_v4p8_Plugin_UpdateChecker|\Puc_v4p8_Theme_UpdateChecker|\Puc_v4p8_Vcs_BaseChecker
+		 * @return mixed
 		 */
 		public static function configureUpdateServerV4( $plugin_slug, $plugin_path = null ) {
 

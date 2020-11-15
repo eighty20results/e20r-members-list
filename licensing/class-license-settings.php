@@ -214,9 +214,7 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\License_Settings' ) ) {
 							'is_active'        => $is_active,
 							'expiration_ts'    => $expiration_ts,
 							'has_subscription' => ( isset( $license['subscription_status'] ) && 'active' === $license['subscription_status'] ),
-							'value'            => Licensing::is_new_version() && isset( $license['the_key'] ) ?
-								$license['the_key'] :
-								isset( $license['key'] ) ? $license['key'] : null,
+							'value'            => ( Licensing::is_new_version() && isset( $license['the_key'] ) ? $license['the_key'] : isset( $license['key'] ) ) ? $license['key'] : null,
 							'email_field'      => "license_email",
 							'product_sku'      => Licensing::is_new_version() && isset( $license['product_sku'] ) ?
 								$license['product_sku'] :
