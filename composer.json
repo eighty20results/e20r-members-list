@@ -2,7 +2,7 @@
   "config": {
     "vendor-dir": "inc/"
   },
-  "name": "eight20results/Utilities",
+  "name": "eight20results/utilities",
   "type": "plugin",
   "description": "Adds various utility functions and license capabilities",
   "keywords": ["wordpress", "utilities", "licensing"],
