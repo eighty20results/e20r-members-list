@@ -3,12 +3,12 @@
 Plugin Name: E20R Utilities Module
 Plugin URI: https://eighty20results.com/
 Description: Plugin required by some of the Eighty/20 Results developed plugins
-Version: 1.0.6
+Version: 1.0.7
 Author: Thomas Sjolshagen <thomas@eighty20results.com>
 Author URI: https://eighty20results.com/thomas-sjolshagen/
 License: GPLv2
 
- * Copyright (c) 2014 - 2020. - Eighty / 20 Results by Wicked Strong Chicks.
+ * Copyright (c) 2014 - 2021. - Eighty / 20 Results by Wicked Strong Chicks.
  * ALL RIGHTS RESERVED
  *
  * This program is free software: you can redistribute it and/or modify

@@ -2,8 +2,8 @@
 Contributors: eighty20results
 Tags: e20r-utilties, module, licensing, tools
 Requires at least: 5.0
-Tested up to: 5.5.1
-Stable tag: 1.0.6
+Tested up to: 5.6
+Stable tag: 1.0.7
 
 Adds various utility functions and license capabilities for Eighty/20 Results developed plugins
 
@@ -19,6 +19,10 @@ The plugin consolidates required functionality for a number of Eighty / 20 Resul
 Please report all issues/problems on the [plugin's GitHub 'Issues' page](https://github.com/eighty20results/Utilities/issues)
 
 = Changelog =
+
+== v1.0.7 ==
+
+* BUG FIX: Exception handling in autoloader
 
 == v1.0.6 ==
 
