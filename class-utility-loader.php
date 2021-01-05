@@ -3,12 +3,12 @@
 Plugin Name: E20R Utilities Module
 Plugin URI: https://eighty20results.com/
 Description: Plugin required by some of the Eighty/20 Results developed plugins
-Version: 1.0.6
+Version: 1.0.7
 Author: Thomas Sjolshagen <thomas@eighty20results.com>
 Author URI: https://eighty20results.com/thomas-sjolshagen/
 License: GPLv2
 
- * Copyright (c) 2014 - 2020. - Eighty / 20 Results by Wicked Strong Chicks.
+ * Copyright (c) 2014 - 2021. - Eighty / 20 Results by Wicked Strong Chicks.
  * ALL RIGHTS RESERVED
  *
  * This program is free software: you can redistribute it and/or modify
@@ -75,7 +75,7 @@ if ( ! class_exists( 'E20R\Utilities\Loader' ) ) {
 			$filter = new \RecursiveCallbackFilterIterator(
 				$iterator,
 				/** @SuppressWarnings("unused") */
-				function( $current, $key, $iterator ) use ( $filename ) {
+				function ( $current, $key, $iterator ) use ( $filename ) {
 					$file_name = $current->getFilename();
 
 					// Skip hidden files and directories.
@@ -93,8 +93,26 @@ if ( ! class_exists( 'E20R\Utilities\Loader' ) ) {
 				}
 			);
 
-			/** @SuppressWarnings("unused") */
-			foreach ( new \RecursiveIteratorIterator( $iterator ) as $f_filename => $f_file ) {
+
+			try {
+				/** @SuppressWarnings("unused") */
+				$rec_iterator = new \RecursiveIteratorIterator(
+					$iterator,
+					\RecursiveIteratorIterator::LEAVES_ONLY,
+					\RecursiveIteratorIterator::CATCH_GET_CHILD
+				);
+			} catch ( \UnexpectedValueException $uvexception ) {
+				error_log( sprintf(
+						"Error: %s.\nState: %s",
+						$uvexception->getMessage(),
+						print_r( $iterator, true )
+					)
+				);
+				return false;
+			}
+
+			// Walk through filesystem looking for our class file
+			foreach ( $rec_iterator as $f_filename => $f_file ) {
 
 				$class_path = sprintf( '%s/%s', $f_file->getPath(), basename( $f_filename ) );
 
