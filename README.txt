@@ -12,7 +12,7 @@ The plugin consolidates required functionality for a number of Eighty / 20 Resul
 
 == Installation ==
 
-1. Upload the `e20r-utilities` directory to the `/wp-content/plugins/` directory of your site.
+1. Upload the `00-e20r-utilities` directory to the `/wp-content/plugins/` directory of your site.
 1. Activate the plugin through the 'Plugins' menu in WordPress.
 
 == Reporting Issues/Problems ==
