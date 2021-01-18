@@ -70,3 +70,4 @@ fabric.properties
 /class/utilities/.gitignore
 /class/utilities/.editorconfig
 /class/utilities/composer.json
+docker-env/e20r-members-list.sql
