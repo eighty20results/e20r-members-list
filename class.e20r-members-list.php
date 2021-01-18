@@ -176,6 +176,9 @@ if ( ! class_exists( '\\E20R\Members_List\\Controller\\E20R_Members_List' ) ) {
 	}
 
 }
+
+require_once plugin_dir_path( __FILE__ ) . "class/utilities/class-utility-loader.php";
+
 try {
 	spl_autoload_register( 'E20R\Members_List\Controller\E20R_Members_List::autoLoader' );
 } catch( \Exception $exception ) {
