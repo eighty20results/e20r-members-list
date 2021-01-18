@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (c) 2018-2019 - Eighty / 20 Results by Wicked Strong Chicks.
+ * Copyright (c) 2018-2021 - Eighty / 20 Results by Wicked Strong Chicks.
  * ALL RIGHTS RESERVED
  *
  * This program is free software: you can redistribute it and/or modify
@@ -22,7 +22,7 @@ namespace E20R\Members_List\Admin;
 use E20R\Utilities\Utilities;
 
 class Bulk_Cancel {
-	
+
 	/**
 	 * Instance of this class
 	 *
@@ -35,14 +35,14 @@ class Bulk_Cancel {
 	 * @var null|string
 	 */
 	private $operation = null;
-	
+
 	/**
 	 * List of member IDs to update
 	 *
 	 * @var array|int[]
 	 */
 	private $members_to_update = array();
-	
+
 	/**
 	 * Bulk_Cancel constructor (singleton)
 	 *
@@ -50,54 +50,54 @@ class Bulk_Cancel {
 	 */
 	private function __construct() {
 	}
-	
+
 	/**
 	 * The __clone() method for Bulk_Cancel() (singleton class)
 	 *
 	 * @access private
 	 */
 	private function __clone() {}
-	
+
 	/**
 	 * Process cancellations for all members/membership_ids
 	 */
 	public function cancel() {
-		
+
 		// Process all User & level ID for the single action.
 		$failed = array();
-		
+
 		$utils = Utilities::get_instance();
 		$utils->log("Cancelling " . count( $this->members_to_update ) . " members");
-		
+
 		// Process all selected records/members
 		foreach ( $this->members_to_update as $key => $cancel_info ) {
-			
+
 			if ( false == $this->cancel_member( $cancel_info['user_id'], $cancel_info['level_id']  ) ) {
 				$failed[] = $cancel_info['user_id']; // FIXME: Add level info for multiple membership levels
 			}
 		}
-		
+
 		//Check for errors & display error banner if we got one.
 		if ( ! empty( $failed ) ) {
-			
+
 			$message = sprintf(
 				__( "Unable to cancel membership(s) for the following user IDs: %s", "e20r-members-list" ),
 				implode( ', ', $failed )
 			);
-			
+
 			if ( function_exists( 'pmpro_setMessage' ) ) {
 				pmpro_setMessage( $message, "error" );
 			} else {
 				global $msg;
 				global $msgt;
-				
+
 				$msg  = $message;
 				$msgt = 'error';
 			}
-			
+
 		}
 	}
-	
+
 	/**
 	 * The cancel member action
 	 *
@@ -107,29 +107,29 @@ class Bulk_Cancel {
 	 * @return bool
 	 */
 	public static function cancel_member( $id, $level_id = null ) {
-		
+
 		if ( function_exists( 'pmpro_cancelMembershipLevel' ) ) {
 			return pmpro_cancelMembershipLevel( $level_id, $id, 'admin_cancelled' );
 		} else {
 			return false;
 		}
-		
+
 	}
-	
+
 	/**
 	 * Get or create an instance of the Bulk_Cancel class
 	 *
 	 * @return Bulk_Cancel|null
 	 */
 	public static function get_instance() {
-		
+
 		if ( is_null( self::$instance ) ) {
 			self::$instance = new self;
 		}
-		
+
 		return self::$instance;
 	}
-	
+
 	/**
 	 * Set the list of members & their levels to update
 	 *
@@ -138,7 +138,7 @@ class Bulk_Cancel {
 	public function set_members( $member_info ) {
 		$this->members_to_update = $member_info;
 	}
-	
+
 	/**
 	 * Return the list of members being updated
 	 *
