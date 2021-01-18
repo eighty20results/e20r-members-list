@@ -3,7 +3,7 @@
 Plugin Name: Better Members List for Paid Memberships Pro
 Plugin URI: https://wordpress.org/plugins/e20r-members-list
 Description: Extensible, sortable & bulk action capable members listing + export to CSV tool for Paid Memberships Pro.
-Version: 6.2
+Version: 6.3
 Author: Thomas Sjolshagen @ Eighty / 20 Results by Wicked Strong Chicks, LLC <thomas@eighty20results.com>
 Author URI: https://eighty20results.com/thomas-sjolshagen/
 Text Domain: e20r-members-list
@@ -32,7 +32,7 @@ namespace E20R\Members_List\Controller;
 use E20R\Members_List\Admin\Members_List_Page;
 
 if ( ! defined( 'E20R_MEMBERSLIST_VER' ) ) {
-	define( 'E20R_MEMBERSLIST_VER', '6.2' );
+	define( 'E20R_MEMBERSLIST_VER', '6.3' );
 }
 
 if ( ! class_exists( '\\E20R\Members_List\\Controller\\E20R_Members_List' ) ) {
@@ -177,7 +177,10 @@ if ( ! class_exists( '\\E20R\Members_List\\Controller\\E20R_Members_List' ) ) {
 
 }
 
-require_once plugin_dir_path( __FILE__ ) . "class/utilities/class-utility-loader.php";
+// BUG FIX: Fatal error when e20r-Utilities module is present
+if ( ! file_exists( WP_PLUGIN_DIR . "/00-e20r-utilities/" ) ) {
+	require_once plugin_dir_path( __FILE__ ) . "class/utilities/class-utility-loader.php";
+}
 
 try {
 	spl_autoload_register( 'E20R\Members_List\Controller\E20R_Members_List::autoLoader' );
