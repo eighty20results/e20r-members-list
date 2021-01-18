@@ -190,6 +190,16 @@ My apologies for not yet having a solution for the incompatibility introduced by
 
 == Changelog ==
 
+== 6.0 ==
+* BUG FIX: Didn't paginate correctly because the LIMIT logic caused us to not return the full number of records for the level/status
+* BUG FIX: Potentially a fatal PHP error
+* BUG FIX: Bad path to downloadable archive
+* BUG FIX: Didn't (always) import the database needed for testing
+* BUG FIX: Readme directions for installation were imprecise
+* BUG FIX: Removed copy/paste Utilities module and using git subtree instead
+* BUG FIX: Updated copyright notice
+
+
 == 5.10 ==
 * BUG FIX: Fatal error in Utilities library
 * BUG FIX: Got IDE warning for missing variable (thinks $this->items may be dynamic)
