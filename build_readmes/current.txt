@@ -1,2 +1,2 @@
-BUG FIX: Fatal error if Utilities module isn't pre-installed
-BUG FIX: Didn't remove the update functionality
+BUG FIX: Fatal error when e20r-Utilities module is present
+BUG FIX: Should also remove custom updater code from embedded utilities module
