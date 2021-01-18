@@ -29,9 +29,8 @@ if [[ -f "trunk/${BASE_FILE}" ]]; then
 	if [[ "${utils_has_update}" -gt 0 ]]; then
 		echo "ℹ︎ Found unsupported external update script in utilities module. Removing"
 		grep -v "Utilities::configureUpdateServerV4" "trunk/class/utilities/${UTILS_FILE}" > "trunk/class/utilities/${UTILS_FILE}.new"
-		mv "trunk/class/utilities/${UTILS_FILE}.new" trunk/class/utilities/${UTILS_FILE}"
+		mv "trunk/class/utilities/${UTILS_FILE}.new" "trunk/class/utilities/${UTILS_FILE}"
 	fi
-
 
 	if [[ -d trunk/class/utilities/inc/yahnis-elsts ]]; then
 		echo "ℹ︎ Found unsupported update utility. Removing"
