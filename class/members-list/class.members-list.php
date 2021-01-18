@@ -72,6 +72,21 @@ class Members_List extends \WP_List_Table {
 	 * @var null|int $total_members_found
 	 */
 	private $total_members_found = null;
+
+	/**
+	 * The total number of records in the PMPro Membership DB
+	 *
+	 * @var int $total_member_records
+	 */
+	private $total_member_records = 0;
+
+	/**
+	 * The status of the membership when searching for totals
+	 *
+	 * @var string $membership_status
+	 */
+	private $membership_status = 'active';
+
 	/**
 	 * The completed SQL query used to generate the membership list
 	 *
@@ -175,6 +190,21 @@ class Members_List extends \WP_List_Table {
 		$level        = $this->utils->get_variable( 'level', '' );
 		$this->action = $this->utils->get_variable( 'action', '' );
 
+		if ( ! empty( $level ) ) {
+			switch ($level) {
+				case 'cancelled':
+					$this->membership_status = array( 'cancelled' );
+					break;
+				case 'expired':
+					$this->membership_status = array( 'expired' );
+					break;
+				case 'old':
+					$this->membership_status = array( 'cancelled', 'expired' );
+					break;
+				default:
+					$this->membership_status = array('active');
+			}
+		}
 		/**
 		 * The default Members List columns to display (with labels)
 		 */
@@ -203,6 +233,8 @@ class Members_List extends \WP_List_Table {
 			$this->default_columns['last'] = apply_filters( 'e20r-members-list-enddate-col-name', _x( "Expires", E20R_Members_List::plugin_slug ), $level );
 		}
 
+		$this->total_member_records = $this->get_member_record_count();
+
 		/**
 		 * Prepare the Export bulk action
 		 */
@@ -210,6 +242,22 @@ class Members_List extends \WP_List_Table {
 			$this->utils->log( "Adding export handler" . ( headers_sent() ? ' Sent' : ' Not sent' ) );
 			add_action( 'e20r_memberslist_process_action', array( $this, 'export_members' ), 10, 3 );
 		}
+	}
+
+	/**
+	 * Private function to capture the count of records in the membership database
+	 *
+	 * @return int|null
+	 */
+	private function get_member_record_count() {
+
+		$status = $this->utils->get_variable( 'level', 'active' );
+
+		// Get SQL for all records in the paginated data
+		$this->generate_member_sql( $status );
+		$records = $this->get_members( -1, -1, $status );
+
+		return is_countable( $records ) ? count( $records ) : 0;
 	}
 
 	/**
@@ -293,11 +341,7 @@ class Members_List extends \WP_List_Table {
 		$per_page = $this->get_items_per_page( 'per_page', 15 );
 
 		// Do we need to limit?
-		$level = $this->utils->get_variable( 'level', '' );
-
-		if ( empty( $level ) ) {
-			$level = 'active';
-		}
+		$level = $this->utils->get_variable( 'level', 'active' );
 
 		// Get the current page number
 		$current_page = $this->get_pagenum();
@@ -308,11 +352,10 @@ class Members_List extends \WP_List_Table {
 
 		// BUG FIX: Handle situation(s) where there are no records found
 		if ( null !== $this->items ) {
-			$total_items = count($this->items );
 			$this->utils->log(
 				sprintf(
 				"Configure pagination for %d total records and %d counted (returned) records",
-				$total_items,
+				$this->total_member_records,
 				(is_countable( $this->items ) ? count( $this->items ) : 0)
 				)
 			);
@@ -322,9 +365,9 @@ class Members_List extends \WP_List_Table {
 		// Configure pagination
 		$this->set_pagination_args(
 			array(
-				'total_items' => $total_items,
+				'total_items' => $this->total_member_records,
 				'per_page'    => $per_page,
-				'total_pages' => ceil( $total_items / $per_page ),
+				'total_pages' => ceil( $this->total_member_records / $per_page ),
 			)
 		);
 
@@ -592,20 +635,16 @@ class Members_List extends \WP_List_Table {
 
 		global $wpdb;
 
-		$this->generate_member_sql( $per_page, $page_number, $status );
+		// Get Pagination SQL
+		$this->sqlQuery = $this->generate_member_sql( $status, $per_page, $page_number, );
 
 		// Fetch the data
-		$result                    = $wpdb->get_results( $this->sqlQuery, ARRAY_A );
+		$result = $wpdb->get_results( $this->sqlQuery, ARRAY_A );
+
 		if ( ! empty( $result ) ) {
 			$this->utils->log("Found records in DB...");
 			$this->total_members_found = $wpdb->num_rows;
 		}
-		/*
-		if ( ! empty( $result ) ) {
-			$this->total_members_found = $result->num_rows;
-			// $this->total_members_found = $wpdb->get_var( "SELECT FOUND_ROWS() AS found_rows" );
-		}
-		*/
 
 		// Return the result set unless an error occurred.
 		if ( ! empty( $result ) ) {
@@ -639,8 +678,10 @@ class Members_List extends \WP_List_Table {
 	 * @param int    $per_page
 	 * @param int    $page_number
 	 * @param string $status
+	 *
+	 * @return string - Returns the SQL statement
 	 */
-	private function generate_member_sql( $per_page, $page_number, $status = 'active' ) {
+	private function generate_member_sql( $status = 'active', $per_page = -1, $page_number = -1 ) {
 
 		$this->utils->log( "Called by: " . $this->utils->_who_called_me() );
 
@@ -838,10 +879,11 @@ class Members_List extends \WP_List_Table {
 			{$this->limit}
 		";
 
-		// Define the SQL statement
-		$this->sqlQuery = $sql . self::$sql_from;
+		// Created the SQL statement
+		$sqlQuery = $sql . self::$sql_from;
 
-		$this->utils->log( "SQL for fetching membership records:\n {$this->sqlQuery}" );
+		$this->utils->log( "SQL for fetching membership records:\n {$sqlQuery}" );
+		return $sqlQuery;
 	}
 
 	/**
