@@ -4,7 +4,7 @@ Tags: paid memberships pro, members, memberships, pmpro enhancements, better mem
 Requires at least: 4.9
 Tested up to: 5.4
 Requires PHP: 7.1
-Stable tag: 6.0
+Stable tag: 6.1
 License: GPLv2
 License URI: http://www.gnu.org/licenses/gpl
 
@@ -189,6 +189,9 @@ I am working to isolate the source of this problem and resolving it.
 My apologies for not yet having a solution for the incompatibility introduced by PMPro v2.2+.
 
 == Changelog ==
+
+== 6.1 ==
+* BUG FIX: Updated for wordpress.org
 
 == 6.0 ==
 * BUG FIX: Didn't paginate correctly because the LIMIT logic caused us to not return the full number of records for the level/status
