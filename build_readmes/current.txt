@@ -1,6 +1,7 @@
-BUG FIX: Fatal error in Utilities library
-BUG FIX: Got IDE warning for missing variable (thinks $this->items may be dynamic)
-BUG FIX: Didn't initiate the total_items variable
-BUG FIX: Avoid PHP Warning when logging debug info about records found & pagination
-BUG FIX: Handle situations where there are no records found (w/o logging warnings or errors)
-ENHANCEMENT: Use $wpdb->num_rows instead of "FOUND_ROWS()" which is slow when possible
+BUG FIX: Didn't paginate correctly because the LIMIT logic caused us to not return the full number of records for the level/status
+BUG FIX: Potentially a fatal PHP error
+BUG FIX: Bad path to downloadable archive
+BUG FIX: Didn't (always) import the database needed for testing
+BUG FIX: Readme directions for installation were imprecise
+BUG FIX: Removed copy/paste Utilities module and using git subtree instead
+BUG FIX: Updated copyright notice

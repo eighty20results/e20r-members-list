@@ -5,7 +5,7 @@ PLUGIN_DIR=../docker-env
 PLUGIN_LIST="paid-memberships-pro ${PROJECT_NAME}"
 #PLUGIN_LIST="paid-memberships-pro pmpro-email-confirmation"
 CURRENT_DIR=$(pwd)
-if [[ ${DEV_ENVIRONMENT} = "10.0.0.101" || ${DEV_ENVIRONMENT} == "10.0.0.175" ]];
+if [[ ${DEV_ENVIRONMENT} = "10.0.0.27" || ${DEV_ENVIRONMENT} == "10.0.0.175" ]];
 then
     echo "At home so using the docker env on docker.local"
     ssh docker.local "cd ./www/docker-images/docker4wordpress/ ; mkdir -p ./mariadb-init" # mkdir -p ./traefik

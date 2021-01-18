@@ -2,7 +2,7 @@
   "config": {
     "vendor-dir": "inc/"
   },
-  "name": "eight20results/Utilities",
+  "name": "eight20results/utilities",
   "type": "plugin",
   "description": "Adds various utility functions and license capabilities",
   "keywords": ["wordpress", "utilities", "licensing"],
@@ -19,6 +19,7 @@
   ],
   "require": {
     "php": ">=7.1",
-    "yahnis-elsts/plugin-update-checker": ">=4.5"
+    "yahnis-elsts/plugin-update-checker": ">=4.5",
+      "ext-curl": "*"
   }
 }
