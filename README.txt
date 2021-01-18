@@ -4,7 +4,7 @@ Tags: paid memberships pro, members, memberships, pmpro enhancements, better mem
 Requires at least: 4.9
 Tested up to: 5.4
 Requires PHP: 7.1
-Stable tag: 6.1
+Stable tag: 6.2
 License: GPLv2
 License URI: http://www.gnu.org/licenses/gpl
 
@@ -189,6 +189,10 @@ I am working to isolate the source of this problem and resolving it.
 My apologies for not yet having a solution for the incompatibility introduced by PMPro v2.2+.
 
 == Changelog ==
+
+== 6.2 ==
+* BUG FIX: Fatal error if Utilities module isn't pre-installed
+* BUG FIX: Didn't remove the update functionality
 
 == 6.1 ==
 * BUG FIX: Updated for wordpress.org
