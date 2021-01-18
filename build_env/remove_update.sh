@@ -12,7 +12,7 @@ fi
 echo "ℹ︎ BUILD_DIR is ${BUILD_DIR}"
 
 # Remove any wordpress.org prohibited one-click update functionality as necessary
-BASE_FILE="$class.e20r-members-list.php"
+BASE_FILE="class.e20r-members-list.php"
 
 if [[ -f "trunk/${BASE_FILE}" ]]; then
 
