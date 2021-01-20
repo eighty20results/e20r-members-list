@@ -416,7 +416,7 @@ class Members_List_Page {
                             :</label>
                         <input type="hidden" name="page" value="e20r-memberslist"/>
                         <input id="post-search-input" type="text" value="<?php esc_attr_e( $search ); ?>" name="find"/>
-                        <input class="button" type="submit"
+                        <input class="button" type="submit" id="e20r-memberslist-search-data"
                                value="<?php _e( 'Search Members', 'paid-memberships-pro' ); ?>"/>
                     </p>
                 </div>

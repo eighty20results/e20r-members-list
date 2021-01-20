@@ -35,8 +35,9 @@
             this.changed_select = $( 'select[class^="e20r-members-list-select-"]');
             this.bulkUpdate = $('#doaction, #doaction2');
             this.updateListBtn = $('#e20r-update-list');
-
+			this.search_field = $('#post-search-input');
             this.dateFields = $('.e20r-members-list-input-enddate, .e20r-members-list-input-startdate');
+			this.dataSearchBtn = $('#e20r-memberslist-search-data');
 
             this.bulkActionSelectTop = $('select#bulk-action-selector-top');
             this.bulkActionSelectBottom = $('select#bulk-action-selector-bottom');
@@ -51,6 +52,13 @@
             self.dateFields.datepicker({
                 dateFormat: "yy-mm-dd"
             });
+
+            self.search_field.unbind('keydown').on('keydown', function(event){
+            	let keycode = parseInt((event.keyCode ? event.keyCode : event.which));
+            	if (13 === keycode) {
+					self.dataSearchBtn.click();
+				}
+			});
 
             self.changed_input.unbind('blur').on('blur', function(ev) {
                 self.set_update( this );
@@ -271,6 +279,9 @@
             });
             */
         },
+		search_submit: function () {
+
+		},
         set_update: function( $element ) {
             var self = this;
 

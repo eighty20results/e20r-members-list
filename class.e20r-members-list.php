@@ -3,7 +3,7 @@
 Plugin Name: Better Members List for Paid Memberships Pro
 Plugin URI: https://wordpress.org/plugins/e20r-members-list
 Description: Extensible, sortable & bulk action capable members listing + export to CSV tool for Paid Memberships Pro.
-Version: 6.3
+Version: 7.0
 Author: Thomas Sjolshagen @ Eighty / 20 Results by Wicked Strong Chicks, LLC <thomas@eighty20results.com>
 Author URI: https://eighty20results.com/thomas-sjolshagen/
 Text Domain: e20r-members-list
@@ -32,7 +32,7 @@ namespace E20R\Members_List\Controller;
 use E20R\Members_List\Admin\Members_List_Page;
 
 if ( ! defined( 'E20R_MEMBERSLIST_VER' ) ) {
-	define( 'E20R_MEMBERSLIST_VER', '6.3' );
+	define( 'E20R_MEMBERSLIST_VER', '7.0' );
 }
 
 if ( ! class_exists( '\\E20R\Members_List\\Controller\\E20R_Members_List' ) ) {
@@ -117,13 +117,18 @@ if ( ! class_exists( '\\E20R\Members_List\\Controller\\E20R_Members_List' ) ) {
 				}
 			} );
 
-			foreach ( new \ RecursiveIteratorIterator( $iterator ) as $f_filename => $f_file ) {
+			try {
+				foreach ( new \ RecursiveIteratorIterator( $iterator ) as $f_filename => $f_file ) {
 
-				$class_path = $f_file->getPath() . "/" . $f_file->getFilename();
+					$class_path = $f_file->getPath() . "/" . $f_file->getFilename();
 
-				if ( $f_file->isFile() && false !== strpos( $class_path, $filename ) ) {
-					require_once( $class_path );
+					if ( $f_file->isFile() && false !== strpos( $class_path, $filename ) ) {
+						require_once( $class_path );
+					}
 				}
+			} catch( \Exception $e ) {
+				error_log("Error loading ${class_name}: " . $e->getMessage() );
+				return false;
 			}
 		}
 

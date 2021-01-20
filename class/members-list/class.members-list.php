@@ -768,16 +768,68 @@ class Members_List extends \WP_List_Table {
 				$is_time     = true;
 			}
 
-			$s          = esc_sql( sanitize_text_field( $user_search ) );
-			$this->find = " ( u.user_login LIKE '%{$s}%' OR u.user_email LIKE '%{$s}%' OR um.meta_value LIKE '%{$s}%' ";
+			// Set up the search-for part of the query (i.e. user_login, usermeta, nicename,
+			// dispay_name and user_email)
+			$srch_str          = esc_sql( sanitize_text_field( $user_search ) );
 
-			// Search for records that have a startdate or enddate
+			$user_table_search = apply_filters(
+					'e20r_memberslist_search_user_fields',
+					array(
+						'user_login',
+						'user_nicename',
+						'display_name',
+						'user_email'
+					)
+			);
+
+			$meta_table_fields = apply_filters(
+					'e20r_memberslist_search_usermeta_fields',
+					array( 'meta_value' )
+			);
+
+			// Start the search portion of the SQL statement
+			$this->find = sprintf( " ( u.%s LIKE '%%%s%%'",
+					array_shift( $user_table_search),
+					$srch_str
+			);
+
+			// Add all user table fields to search by
+			foreach( $user_table_search as $idx => $field_name ) {
+				$this->find .= "OR u.${field_name} LIKE '%{$srch_str}%' ";
+			}
+
+			// Handle SQL if there's no user table fields include
+			if ( ! empty($meta_table_fields) &&
+				 0 === preg_match( '/ OR /', $this->find ) &&
+				 0 === preg_match( '/\( ', $this->find )
+			) {
+				$this->find = sprintf( " ( um.%s LIKE '%%%s%%'",
+						array_shift( $meta_table_fields ),
+						$srch_str
+				);
+			} else if ( ! empty($meta_table_fields) &&
+					   0 === preg_match( "/ OR /", $this->find ) &&
+					   1 === preg_match( '/\( ', $this->find )
+			) {
+				$this->find = sprintf( " ( um.%s LIKE \'%%%s%%\'",
+						array_shift( $meta_table_fields ),
+					$srch_str
+				);
+			}
+
+			// Add all/any metadata fields to search by
+			// Frankly surprising if this is more than the meta_value field..
+			foreach( $meta_table_fields as $field_name ) {
+				$this->find .= "OR um.meta_value LIKE '%{$srch_str}%' ";
+			}
+
+			// Search for records by start-date or end-date
 			if ( true === $is_time && 'desc' === strtolower( $order ) ) {
-				$this->find .= "OR mu.startdate >= '{$s} 00:00:00' OR mu.enddate >= '{$s} 00:00:00' ";
+				$this->find .= "OR mu.startdate >= '{$srch_str} 00:00:00' OR mu.enddate >= '{$srch_str} 00:00:00' ";
 			}
 
 			if ( true === $is_time && 'asc' === strtolower( $order ) ) {
-				$this->find .= "OR mu.startdate <= '{$s} 00:00:00' OR mu.enddate <= '{$s} 23:59:59' ";
+				$this->find .= "OR mu.startdate <= '{$srch_str} 00:00:00' OR mu.enddate <= '{$srch_str} 23:59:59' ";
 			}
 
 			$this->find .= ") ";
@@ -973,7 +1025,8 @@ class Members_List extends \WP_List_Table {
 	/**
 	 * Calculate pagination data (number of records found (total) based on the SQL used)
 	 *
-	 * FIXME: Implement https://wpartisan.me/tutorials/wordpress-database-queries-speed-sql_calc_found_rows
+	 * @deprecated See https://wpartisan.me/tutorials/wordpress-database-queries-speed-sql_calc_found_rows
+	 *
 	 * @credit https://wpartisan.me/tutorials/wordpress-database-queries-speed-sql_calc_found_rows
 	 *
 	 * @return int
@@ -994,10 +1047,12 @@ class Members_List extends \WP_List_Table {
 	 *
 	 * @param string $order_by
 	 *
+	 * @uses string e20r_memberslist_export_sort_order - Filter to return comma separated list of DB fields
+	 *
 	 * @return string
 	 */
 	public function export_order_by( $order_by ) {
-		return 'mu.membership_id, u.user_email';
+		return apply_filters( 'e20r_memberslist_export_sort_order', 'mu.membership_id, u.user_email' );
 	}
 
 	/**
@@ -1689,7 +1744,9 @@ class Members_List extends \WP_List_Table {
 		global $e20r_pmpro_statuses;
 
 		if ( empty( $e20r_pmpro_statuses ) ) {
-			$e20r_pmpro_statuses = $wpdb->get_col( "SELECT DISTINCT mu.status FROM {$wpdb->pmpro_memberships_users} AS mu" );
+			$e20r_pmpro_statuses = $wpdb->get_col(
+					"SELECT DISTINCT mu.status FROM {$wpdb->pmpro_memberships_users} AS mu"
+			);
 		}
 
 		if ( empty( $e20r_pmpro_statuses ) ) {
