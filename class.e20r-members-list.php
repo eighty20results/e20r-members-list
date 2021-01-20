@@ -117,13 +117,18 @@ if ( ! class_exists( '\\E20R\Members_List\\Controller\\E20R_Members_List' ) ) {
 				}
 			} );
 
-			foreach ( new \ RecursiveIteratorIterator( $iterator ) as $f_filename => $f_file ) {
+			try {
+				foreach ( new \ RecursiveIteratorIterator( $iterator ) as $f_filename => $f_file ) {
 
-				$class_path = $f_file->getPath() . "/" . $f_file->getFilename();
+					$class_path = $f_file->getPath() . "/" . $f_file->getFilename();
 
-				if ( $f_file->isFile() && false !== strpos( $class_path, $filename ) ) {
-					require_once( $class_path );
+					if ( $f_file->isFile() && false !== strpos( $class_path, $filename ) ) {
+						require_once( $class_path );
+					}
 				}
+			} catch( \Exception $e ) {
+				error_log("Error loading ${class_name}: " . $e->getMessage() );
+				return false;
 			}
 		}
 
