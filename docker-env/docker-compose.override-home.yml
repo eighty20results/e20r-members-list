@@ -23,7 +23,7 @@ services:
 
   php:
     image: wodby/wordpress:$WORDPRESS_TAG
-    # user: www-data
+    user: wodby
     environment:
       PHP_FPM_CLEAR_ENV: "no"
       DB_NAME: clean
@@ -36,7 +36,7 @@ services:
       PHP_XDEBUG_REMOTE_CONNECT_BACK: 1
       PHP_IDE_CONFIG: serverName=my-ide
       # PHP_XDEBUG_REMOTE_HOST: 172.17.0.1 # Linux
-      PHP_XDEBUG_REMOTE_HOST: ts-laptop.local # macOS
+      PHP_XDEBUG_REMOTE_HOST: 10.0.0.27 # macOS
     #      PHP_XDEBUG_REMOTE_HOST: 10.0.75.1 # Windows
     volumes:
       - ./:/var/www/html
@@ -51,9 +51,9 @@ services:
     image: traefik:alpine
     ports:
       # Dashboard
-      - target: 8081
+      - target: 8080
         published: 8080
         protocol: tcp
         mode: host
-    volumes:
-      - ./traefik:/etc
+    # volumes:
+    #   - ./traefik:/etc

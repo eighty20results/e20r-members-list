@@ -804,8 +804,8 @@ class Members_List extends \WP_List_Table {
 				 0 === preg_match( '/\( ', $this->find )
 			) {
 				$this->find = sprintf( " ( um.%s LIKE '%%%s%%'",
-						array_shift( $meta_table_fields,
-								$srch_str)
+						array_shift( $meta_table_fields ),
+						$srch_str
 				);
 			} else if ( ! empty($meta_table_fields) &&
 					   0 === preg_match( "/ OR /", $this->find ) &&
