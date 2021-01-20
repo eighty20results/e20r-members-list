@@ -1,2 +1,8 @@
-BUG FIX: Fatal error when e20r-Utilities module is present
-BUG FIX: Should also remove custom updater code from embedded utilities module
+ENH: Allow filtering of User table fields to search by
+ENH: Allow filtering of usermeta table fields to search by
+ENH: Allow filtering of sort order in export
+ENH: Deprecate use of FOUND_ROWS() in pagination
+BUG FIX: Syntax error in update removal action
+BUG FIX: Uncaught exception in autoLoader()
+BUG FIX: Didn't include all logical user table fields in search query
+BUG FIX: Didn't trigger search if typing the "enter" key
