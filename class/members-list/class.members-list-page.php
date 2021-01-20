@@ -78,7 +78,12 @@ class Members_List_Page {
 		global $wp_admin_bar;
 
 
-		if ( ! is_admin_bar_showing() || ( ! is_super_admin() && ( ! current_user_can( 'manage_options' ) ) && ! current_user_can( 'pmpro_memberslist' ) && ! current_user_can( 'e20r_memberslist' ) ) ) {
+		if ( ! is_admin_bar_showing() ||
+			 ( ! is_super_admin() && ( ! current_user_can( 'manage_options' ) )
+			   && ! current_user_can( 'pmpro_memberslist' )
+			   && ! current_user_can( 'e20r_memberslist' )
+			 )
+		) {
 			if ( ! is_null( self::$instance ) ) {
 				self::$instance->utils->log( "Unable to change admin bar (wrong capabilities for user)" );
 			}
@@ -126,7 +131,12 @@ class Members_List_Page {
 	 */
 	public function load_hooks() {
 
-		$this->utils = Utilities::get_instance();
+		if ( class_exists( '\E20R\Utilities\Utilities' ) ) {
+			$this->utils = Utilities::get_instance();
+		} else {
+			error_log("Unable to load the E20R Utilities library!" );
+			return false;
+		}
 
 		// Filters
 		add_filter( 'set-screen-option', array( $this, 'set_screen' ), 10, 3 );
