@@ -63,6 +63,12 @@ cd "${SVN_DIR}"
 svn update --set-depth infinity assets
 svn update --set-depth infinity trunk
 
+if [[ -d "${SVN_DIR}/tags/${VERSION}" ]]; then
+	echo "ℹ︎ Removing pre-existing release from /tags/ directory"
+	rm -rf "${SVN_DIR}/tags/${VERSION}"
+	# TODO(?): Remove commit that contains the update(d) version from SVN?
+fi
+
 echo "➤ Copying files..."
 if [[ -e "${GITHUB_WORKSPACE}/.distignore" ]]; then
 	echo "ℹ︎ Using .distignore in ${GITHUB_WORKSPACE}"
