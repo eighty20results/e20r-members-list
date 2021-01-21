@@ -2,9 +2,9 @@
 Contributors: eighty20results
 Tags: paid memberships pro, members, memberships, pmpro enhancements, better members list, members list
 Requires at least: 4.9
-Tested up to: 5.4
+Tested up to: 5.6
 Requires PHP: 7.1
-Stable tag: 7.0
+Stable tag: 7.1
 License: GPLv2
 License URI: http://www.gnu.org/licenses/gpl
 
@@ -212,6 +212,10 @@ I am working to isolate the source of this problem and resolving it.
 My apologies for not yet having a solution for the incompatibility introduced by PMPro v2.2+.
 
 == Changelog ==
+
+== 7.1 ==
+* BUG FIX: Avoid fatal error if E20R Utilities library is missing
+* BUG FIX: Update removal logic when building SVN repo to commit as part of GitHub action
 
 == 7.0 ==
 * ENH: Allow filtering of User table fields to search by
