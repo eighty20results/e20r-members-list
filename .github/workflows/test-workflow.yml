@@ -1,0 +1,25 @@
+name: Test of "Release to wordpress.org" workflows
+
+on:
+  push:
+    tags:
+      - test_workflow*
+
+jobs:
+  # To push the release (sources) to the WordPress.org SVN instance for this plugin
+  wordpress:
+    name: Test of "Push to wordpress.org" workflow
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        repository: eighty20results/e20r-members-list
+        ref: test_workflow_updates
+    - name: Test of "WordPress Plugin Deploy" for ${{ github.ref }}
+      uses: eighty20results/e20r-members-list@test_workflow_updates
+      env:
+        SLUG: e20r-members-list
+        SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
+        SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB }}
+

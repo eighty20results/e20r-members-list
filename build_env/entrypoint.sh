@@ -31,6 +31,11 @@ if [[ -z "${SLUG}" ]]; then
 fi
 echo "ℹ︎ SLUG is ${SLUG}"
 
+if [[ -z "${BRANCH}" ]]; then
+	BRANCH=$(echo "${GITHUB_REF}" |  awk -F\/ '{ print $NF }')
+fi
+echo "ℹ︎ BRANCH is ${BRANCH}"
+
 # Does it even make sense for VERSION to be editable in a workflow definition?
 if [[ -z "${VERSION}" ]]; then
 	VERSION="${GITHUB_REF#refs/tags/}"
@@ -63,6 +68,12 @@ cd "${SVN_DIR}"
 svn update --set-depth infinity assets
 svn update --set-depth infinity trunk
 
+if [[ -d "${SVN_DIR}/tags/${VERSION}" ]]; then
+	echo "ℹ︎ Removing pre-existing release from /tags/ directory"
+	rm -rf "${SVN_DIR}/tags/${VERSION}"
+	# TODO(?): Remove commit that contains the update(d) version from SVN?
+fi
+
 echo "➤ Copying files..."
 if [[ -e "${GITHUB_WORKSPACE}/.distignore" ]]; then
 	echo "ℹ︎ Using .distignore in ${GITHUB_WORKSPACE}"
@@ -70,7 +81,6 @@ if [[ -e "${GITHUB_WORKSPACE}/.distignore" ]]; then
 	# The --delete flag will delete anything in destination that no longer exists in source
 	rsync --recursive --checksum --verbose --exclude-from="${GITHUB_WORKSPACE}/.distignore" "${GITHUB_WORKSPACE}/" trunk/ --delete-during
 	echo "ℹ︎ Copied data to ${GITHUB_WORKSPACE}/"
-	ls -l ${GITHUB_WORKSPACE}/class/
 else
 	echo "ℹ︎ Using .gitattributes in ${GITHUB_WORKSPACE}"
 
@@ -83,7 +93,7 @@ else
 	git config --global user.email "thomas@eighty20results.com"
 	git config --global user.name "Eighty/20Results Bot on Github"
 
-	# If there's no .gitattributes file, write a default one into place
+	# If there"s no .gitattributes file, write a default one into place
 	if [[ ! -e "${GITHUB_WORKSPACE}/.gitattributes" ]]; then
 		cat > "${GITHUB_WORKSPACE}/.gitattributes" <<-EOL
 		/${ASSETS_DIR} export-ignore
@@ -149,7 +159,13 @@ svn cp "trunk" "tags/${VERSION}"
 
 svn status
 
-echo "➤ Committing files to Wordpress.org SVN repository..."
-svn commit -m "Update to version ${VERSION} from GitHub" --no-auth-cache --non-interactive  --username "${SVN_USERNAME}" --password "${SVN_PASSWORD}"
+echo "➤ Testing that we need to push to Wordpress.org"
 
-echo "✓ Plugin deployed!"
+if [[ ! -z "${BRANCH}" && "master" == "${BRANCH}" ]]; then
+	echo "➤ In master branch so committing files to Wordpress.org SVN repository..."
+	svn commit -m \"Update to version ${VERSION} from GitHub\" --no-auth-cache --non-interactive  --username \"${SVN_USERNAME}\" --password \"${SVN_PASSWORD}\"
+	echo "✓ Plugin deployed! - Test complete"
+else
+	echo "➤ Not in master branch. Nothing to do"
+fi
+
