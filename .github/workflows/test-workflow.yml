@@ -5,8 +5,9 @@ on:
     # Deploy when a new release tag was created
   #  tags:
   #    - v*
-  tags:
-    - test_workflow*
+  push:
+    tags:
+      - test_workflow*
   # release:
     # Only deploy when the admin creates/publishes/edits/pre-releases from GitHub
   #  types: [edited, published]
