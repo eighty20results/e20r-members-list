@@ -32,7 +32,7 @@ fi
 echo "ℹ︎ SLUG is ${SLUG}"
 
 if [[ -z "${BRANCH}" ]]; then
-	BRANCH=$(echo "${GITHUB_REF}" |  awk -F\/ '{ print $NF }')
+	BRANCH=$( awk -F/ '{ print $NF }' <<< "${GITHUB_REF}" )
 fi
 echo "ℹ︎ BRANCH is ${BRANCH}"
 
