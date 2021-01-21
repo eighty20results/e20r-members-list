@@ -11,16 +11,16 @@ jobs:
     name: Test of "Push to wordpress.org" workflow
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@master
+    - uses: actions/checkout@v2
       with:
-        ref: ${{ github.ref }}
+        repository: eighty20results/e20r-members-list
+        ref: test_workflow_updates
     - name: Test of "WordPress Plugin Deploy" for ${{ github.ref }}
       #with:
       #  repository: git@github.com:eighty20results/Utilities.git
       #  token: ${{ secrets.UTILITIES_ACCESS }}
       #  path: class/utilities
-      # uses: eighty20results/e20r-members-list@master
-      uses: eighty20results/e20r-members-list
+      uses: eighty20results/e20r-members-list@master
       env:
         SLUG: e20r-members-list
         SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
