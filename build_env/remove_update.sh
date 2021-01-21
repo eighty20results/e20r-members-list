@@ -22,7 +22,7 @@ find ./ -print
 for file_name in "${FILE_LIST[@]}"; do
 
 	# Look for the file we're processing in the build directory
-	found_file=$(find "${BUILD_DIR}" -name "${file_name}" -print)
+	found_file=$(find ./ -name "${file_name}" -print)
 
 	echo "ℹ︎ Found File path: '${found_file}'"
 
