@@ -32,9 +32,9 @@ fi
 echo "ℹ︎ SLUG is ${SLUG}"
 
 if [[ -z "${BRANCH}" ]]; then
-	BRANCH="${GITHUB_REF#refs/heads/}"
+	BRANCH="${GITHUB_REF#*refs/heads/}"
 fi
-echo "ℹ︎ Branch is ${BRANCH}"
+echo "ℹ︎ BRANCH is ${BRANCH}"
 
 # Does it even make sense for VERSION to be editable in a workflow definition?
 if [[ -z "${VERSION}" ]]; then
@@ -166,5 +166,7 @@ if [[ ! -z "${BRANCH}" && "master" == "${BRANCH}" ]]; then
 	echo "➤ In master branch so committing files to Wordpress.org SVN repository..."
 	svn commit -m \"Update to version ${VERSION} from GitHub\" --no-auth-cache --non-interactive  --username \"${SVN_USERNAME}\" --password \"${SVN_PASSWORD}\"
 	echo "✓ Plugin deployed! - Test complete"
+else
+	echo "➤ Not in master branch. Nothing to do"
 fi
 

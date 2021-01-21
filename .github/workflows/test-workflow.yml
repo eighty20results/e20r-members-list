@@ -16,10 +16,6 @@ jobs:
         repository: eighty20results/e20r-members-list
         ref: test_workflow_updates
     - name: Test of "WordPress Plugin Deploy" for ${{ github.ref }}
-      #with:
-      #  repository: git@github.com:eighty20results/Utilities.git
-      #  token: ${{ secrets.UTILITIES_ACCESS }}
-      #  path: class/utilities
       uses: eighty20results/e20r-members-list@test_workflow_updates
       env:
         SLUG: e20r-members-list
