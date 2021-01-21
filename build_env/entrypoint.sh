@@ -34,7 +34,6 @@ echo "ℹ︎ SLUG is ${SLUG}"
 if [[ -z "${BRANCH}" ]]; then
 	BRANCH="${GITHUB_REF#refs/heads/}"
 fi
-
 echo "ℹ︎ Branch is ${BRANCH}"
 
 # Does it even make sense for VERSION to be editable in a workflow definition?
