@@ -16,26 +16,20 @@ fi
 
 echo "ℹ︎ BUILD_DIR is ${BUILD_DIR}"
 
-echo "Working in: $(pwd)"
-find ./ -print
-
 for file_name in "${FILE_LIST[@]}"; do
 
 	# Look for the file we're processing in the build directory
-	echo "ℹ︎ Looking for '${file_name}'"
 	found_file=$(find ./ -name "${file_name}" -print)
-
-	echo "ℹ︎ Found File path: '${found_file}'"
 
 	if [[ -z "${found_file}" ]]; then
 		echo "ℹ︎ ${file_name} not found... Skipping!"
 		continue
 	fi
 
+	echo "ℹ︎ Found '${found_file}'"
+
 	# See if it contains the stuff we want to remove
 	has_update=$(grep -c "${srch_string}" "${found_file}")
-
-	echo "ℹ︎ Contains a call-out to the 3rd party update logic: '${has_update}'"
 
 	if [[ "${has_update}" -eq 0 ]]; then
 		echo "ℹ︎ ${found_file} does not contain ${srch_string}. Skipping!"
@@ -49,6 +43,7 @@ for file_name in "${FILE_LIST[@]}"; do
 done
 
 for dir_name in "${UPDATE_LIST[@]}"; do
+	echo "ℹ︎ Looking for the ${dir_name} module..."
 	# Remove all instances of the update module
 	if ! find ./ -name "${dir_name}" -print -delete; then
 		echo "ℹ︎ Update utility not found..."
