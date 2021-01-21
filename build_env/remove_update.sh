@@ -19,6 +19,7 @@ echo "ℹ︎ BUILD_DIR is ${BUILD_DIR}"
 for file_name in "${FILE_LIST[@]}"; do
 
 	# Look for the file we're processing in the build directory
+	find "${BUILD_DIR}" -name "${file_name}" -print
 	found_file=$(find "${BUILD_DIR}" -name "${file_name}" -print)
 
 	if [[ -z "${found_file}" ]]; then
