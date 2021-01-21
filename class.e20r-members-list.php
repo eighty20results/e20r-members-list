@@ -196,4 +196,6 @@ try {
 
 add_action( 'plugins_loaded', array( E20R_Members_List::get_instance(), 'load_hooks' ) );
 
-\E20R\Utilities\Utilities::configureUpdateServerV4( 'e20r-members-list', plugin_dir_path( __FILE__ ) . 'class.e20r-members-list.php' );
+if ( class_exists( '\E20R\Utilities\Utilities' )  ) {
+	\E20R\Utilities\Utilities::configureUpdateServerV4( 'e20r-members-list', plugin_dir_path( __FILE__ ) . 'class.e20r-members-list.php' );
+}
