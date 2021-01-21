@@ -81,6 +81,7 @@ if [[ -e "${GITHUB_WORKSPACE}/.distignore" ]]; then
 	# The --delete flag will delete anything in destination that no longer exists in source
 	rsync --recursive --checksum --verbose --exclude-from="${GITHUB_WORKSPACE}/.distignore" "${GITHUB_WORKSPACE}/" trunk/ --delete-during
 	echo "ℹ︎ Copied data to ${GITHUB_WORKSPACE}/"
+	ls -l ${GITHUB_WORKSPACE}/class/
 else
 	echo "ℹ︎ Using .gitattributes in ${GITHUB_WORKSPACE}"
 
