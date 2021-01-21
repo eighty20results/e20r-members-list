@@ -160,8 +160,11 @@ svn cp "trunk" "tags/${VERSION}"
 
 svn status
 
+echo "➤ Testing that we need to push to Wordpress.org"
+
 if [[ -n "${BRANCH}" && "master" == "${BRANCH}" ]]; then
 	echo "➤ In master branch so committing files to Wordpress.org SVN repository..."
-	echo "svn commit -m \"Update to version ${VERSION} from GitHub\" --no-auth-cache --non-interactive  --username \"${SVN_USERNAME}\" --password \"${SVN_PASSWORD}\""
+	svn commit -m \"Update to version ${VERSION} from GitHub\" --no-auth-cache --non-interactive  --username \"${SVN_USERNAME}\" --password \"${SVN_PASSWORD}\"
+	echo "✓ Plugin deployed! - Test complete"
 fi
-echo "✓ Plugin deployed! - Test complete"
+
