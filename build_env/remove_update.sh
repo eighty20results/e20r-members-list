@@ -16,10 +16,12 @@ fi
 
 echo "ℹ︎ BUILD_DIR is ${BUILD_DIR}"
 
+echo "Working in: $(pwd)"
+find ./ -print
+
 for file_name in "${FILE_LIST[@]}"; do
 
 	# Look for the file we're processing in the build directory
-	find "${BUILD_DIR}" -name "${file_name}" -print
 	found_file=$(find "${BUILD_DIR}" -name "${file_name}" -print)
 
 	if [[ -z "${found_file}" ]]; then
@@ -42,8 +44,8 @@ for file_name in "${FILE_LIST[@]}"; do
 done
 
 for dir_name in "${UPDATE_LIST[@]}"; do
-	# -delete
-	if ! find ./ -name "${dir_name}" -print; then
+	# Remove all instances of the update module
+	if ! find ./ -name "${dir_name}" -print -delete; then
 		echo "ℹ︎ Update utility not found..."
 	fi
 done
