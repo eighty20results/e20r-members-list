@@ -4,6 +4,11 @@
 # Copyright (c) 2020 - Thomas Sjolshagen at Eighty/20 Results by Wicked Strong Chicks, LLC
 #
 
+# Remove any wordpress.org prohibited one-click update functionality as necessary
+read -r -a FILE_LIST <<< "class.e20r-members-list.php class-utility-loader.php"
+read -r -a UPDATE_LIST <<< "yahnis-elsts"
+srch_string="Utilities::configureUpdateServer"
+
 if [[ -z "${BUILD_DIR}" ]]; then
 	echo "➤ No BUILD_DIR environment variable found!"
 	exit 1
@@ -11,29 +16,33 @@ fi
 
 echo "ℹ︎ BUILD_DIR is ${BUILD_DIR}"
 
-# Remove any wordpress.org prohibited one-click update functionality as necessary
-BASE_FILE="class.e20r-members-list.php"
-UTILS_FILE="class-utility-loader.php"
+for file_name in "${FILE_LIST[@]}"; do
 
-if [[ -f "trunk/${BASE_FILE}" ]]; then
+	# Look for the file we're processing in the build directory
+	found_file=$(find "${BUILD_DIR}" -name "${file_name}" -print)
 
-	has_update=$(grep "Utilities::configureUpdateServerV4" "trunk/${BASE_FILE}" | wc -l)
-	utils_has_update=$(grep "Utilities::configureUpdateServerV4" "trunk/class/utilities/${UTILS_FILE}" | wc -l)
-
-	if [[ "${has_update}" -gt 0 ]]; then
-		echo "ℹ︎ Found unsupported external update script in plugin. Removing"
-		grep -v "Utilities::configureUpdateServerV4" "trunk/${BASE_FILE}" > "trunk/${BASE_FILE}.new"
-		mv "trunk/${BASE_FILE}.new" "trunk/${BASE_FILE}"
+	if [[ -z "${found_file}" ]]; then
+		echo "ℹ︎ ${file_name} not found... Skipping!"
+		continue
 	fi
 
-	if [[ "${utils_has_update}" -gt 0 ]]; then
-		echo "ℹ︎ Found unsupported external update script in utilities module. Removing"
-		grep -v "Utilities::configureUpdateServerV4" "trunk/class/utilities/${UTILS_FILE}" > "trunk/class/utilities/${UTILS_FILE}.new"
-		mv "trunk/class/utilities/${UTILS_FILE}.new" "trunk/class/utilities/${UTILS_FILE}"
+	# See if it contains the stuff we want to remove
+	has_update=$(grep -c "${srch_string}" "${found_file}")
+
+	if [[ "${has_update}" -eq 0 ]]; then
+		echo "ℹ︎ ${found_file} does not contain ${srch_string}. Skipping!"
+		continue
 	fi
 
-	if [[ -d trunk/class/utilities/inc/yahnis-elsts ]]; then
-		echo "ℹ︎ Found unsupported update utility. Removing"
-		rm -rf trunk/class/utilities/inc/yahnis-elsts
+	# Remove the actual line +1 line in front of, and after, the target line.
+	echo "ℹ︎ Found ${srch_string} in ${found_file}. Removing..."
+	sed -i "/\n/!N;/\n.*\n/!N;/\n.*\n.*${srch_string}/{\$d;N;N;d};P;D" "${found_file}"
+
+done
+
+for dir_name in "${UPDATE_LIST[@]}"; do
+	# -delete
+	if ! find ./ -name "${dir_name}" -print; then
+		echo "ℹ︎ Update utility not found..."
 	fi
-fi
+done
