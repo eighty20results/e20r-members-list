@@ -32,7 +32,7 @@ fi
 echo "ℹ︎ SLUG is ${SLUG}"
 
 if [[ -z "${BRANCH}" ]]; then
-	BRANCH="${GITHUB_REF#*refs/heads/}"
+	BRANCH=$(echo "${GITHUB_REF}" | sed -e "s/^refs\/tags\/(.*)/\1/")
 fi
 echo "ℹ︎ BRANCH is ${BRANCH}"
 
@@ -94,7 +94,7 @@ else
 	git config --global user.email "thomas@eighty20results.com"
 	git config --global user.name "Eighty/20Results Bot on Github"
 
-	# If there's no .gitattributes file, write a default one into place
+	# If there"s no .gitattributes file, write a default one into place
 	if [[ ! -e "${GITHUB_WORKSPACE}/.gitattributes" ]]; then
 		cat > "${GITHUB_WORKSPACE}/.gitattributes" <<-EOL
 		/${ASSETS_DIR} export-ignore
