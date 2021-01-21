@@ -14,14 +14,13 @@ jobs:
     - uses: actions/checkout@master
       with:
         ref: ${{ github.ref }}
-    - name: Test of "WordPress Plugin Deploy"
+    - name: Test of "WordPress Plugin Deploy" for ${{ github.ref }}
       #with:
       #  repository: git@github.com:eighty20results/Utilities.git
       #  token: ${{ secrets.UTILITIES_ACCESS }}
       #  path: class/utilities
-      uses: eighty20results/e20r-members-list@master
-      with:
-        ref: ${{ github.ref }}
+      # uses: eighty20results/e20r-members-list@master
+      uses: eighty20results/e20r-members-list
       env:
         SLUG: e20r-members-list
         SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
