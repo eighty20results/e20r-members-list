@@ -53,6 +53,7 @@ fi
 
 SVN_URL="http://plugins.svn.wordpress.org/${SLUG}/"
 SVN_DIR="/github/svn-${SLUG}"
+read -r -a RM_LIST <<< "trunk/.git trunk/Dockerfile trunk/remove_update.sh trunk/metadata.json trunk/package.json tags/${VERSION} tags/${VERSION}/.git trunk/class/utilities/.git trunk/class/utilities/.gitignore trunk/class/utilities/.editorconfig trunk/class/utilities/composer.json"
 
 # Checkout just trunk and assets for efficiency
 # Tagging will be handled on the SVN level
@@ -110,7 +111,7 @@ fi
 # Removal of unsupported/disallowed one-click update functionality
 if [[ -f "${BUILD_DIR}/remove_update.sh" ]]; then
 	echo "➤ Trigger removal of custom one-click update functionality. In ${PWD}"
-	${BUILD_DIR}/remove_update.sh
+	"${BUILD_DIR}/remove_update.sh"
 fi
 
 # Copy dotorg assets to /assets
@@ -123,48 +124,15 @@ fi
 if [[ -f "${SVN_DIR}/class/utilities/class.utilities.php" ]]; then
 	echo "ℹ︎ Refreshing the Utilities module from ${SVN_DIR}/class/utilities:"
 	cp -R "${SVN_DIR}/class/utilities/*" "trunk/class/utilities/"
-	rm -rf "trunk/class/utilities/.git"
-	rm -rf "trunk/class/utilities/.gitignore"
-	rm -rf "trunk/class/utilities/.editorconfig"
-	rm -rf "trunk/class/utilities/composer.json"
 fi
 
-if [[ -d "trunk/.git" ]]; then
-	echo "ℹ︎ Removing .git directory - not to be included in SVN"
-	rm -rf "trunk/.git"
-fi
-
-if [[ -f "trunk/Dockerfile" ]]; then
-	echo "ℹ︎ Removing Dockerfile - not to be included in SVN"
-	rm -rf "trunk/Dockerfile"
-fi
-
-if [[ -f "trunk/remove_update.sh" ]]; then
-	echo "ℹ︎ Removing remove_update.sh - not to be included in SVN"
-	rm -rf "trunk/remove_update.sh"
-fi
-
-if [[ -f "trunk/metadata.json" ]]; then
-	echo "ℹ︎ Removing metadata.json - not to be included in SVN"
-	rm -rf "trunk/metadata.json"
-fi
-
-if [[ -f "trunk/package.json" ]]; then
-	echo "ℹ︎ Removing package.json - not to be included in SVN"
-	rm -rf "trunk/package.json"
-fi
-
-
-# Copy tag locally to make this a single commit (if the tag doesn't exist already
-if [[ -d "tags/${VERSION}" ]]; then
-	echo "➤ Refresh ${VERSION} tag..."
-	rm -rf "tags/${VERSION}"
-fi
-
-if [[ -d "tags/${VERSION}/.git" ]]; then
-	echo "➤ Refresh ${VERSION} tag..."
-	rm -rf "tags/${VERSION}/.git"
-fi
+for remove_file in "${RM_LIST[@]}"; do
+	# Only need to remove the file if it exists
+	if [[ -f "${remove_file}" || -d $"${remove_file}" ]]; then
+		echo "ℹ︎ Removing ${remove_file}. Not included in SVN repo"
+		rm -rf "${remove_file}"
+	fi
+done
 
 # Add everything and commit to SVN
 # The force flag ensures we recurse into subdirectories even if they are already added
@@ -181,7 +149,7 @@ svn cp "trunk" "tags/${VERSION}"
 
 svn status
 
-echo "➤ Committing files..."
-svn commit -m "Update to version $VERSION from GitHub" --no-auth-cache --non-interactive  --username "${SVN_USERNAME}" --password "${SVN_PASSWORD}"
+echo "➤ Committing files to Wordpress.org SVN repository..."
+svn commit -m "Update to version ${VERSION} from GitHub" --no-auth-cache --non-interactive  --username "${SVN_USERNAME}" --password "${SVN_PASSWORD}"
 
 echo "✓ Plugin deployed!"
