@@ -16,10 +16,13 @@ fi
 
 echo "ℹ︎ BUILD_DIR is ${BUILD_DIR}"
 
+echo "Working in: $(pwd)"
+find ./ -print
+
 for file_name in "${FILE_LIST[@]}"; do
 
 	# Look for the file we're processing in the build directory
-	found_file=$(find ./ -name "${file_name}" -print)
+	found_file=$(find "${BUILD_DIR}" -name "${file_name}" -print)
 
 	if [[ -z "${found_file}" ]]; then
 		echo "ℹ︎ ${file_name} not found... Skipping!"
