@@ -24,6 +24,8 @@ for file_name in "${FILE_LIST[@]}"; do
 	# Look for the file we're processing in the build directory
 	found_file=$(find "${BUILD_DIR}" -name "${file_name}" -print)
 
+	echo "ℹ︎ Found File path: '${found_file}'"
+
 	if [[ -z "${found_file}" ]]; then
 		echo "ℹ︎ ${file_name} not found... Skipping!"
 		continue
@@ -33,6 +35,8 @@ for file_name in "${FILE_LIST[@]}"; do
 
 	# See if it contains the stuff we want to remove
 	has_update=$(grep -c "${srch_string}" "${found_file}")
+
+	echo "ℹ︎ Contains a call-out to the 3rd party update logic: '${has_update}'"
 
 	if [[ "${has_update}" -eq 0 ]]; then
 		echo "ℹ︎ ${found_file} does not contain ${srch_string}. Skipping!"
