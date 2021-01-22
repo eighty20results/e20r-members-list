@@ -163,8 +163,12 @@ echo "➤ Testing that we need to push to Wordpress.org"
 
 if [[ -n "${BRANCH}" && "${BRANCH}" =~ ^v[0-9]+\..*[0-9]$ ]]; then
 	echo "➤ In main branch so committing files to Wordpress.org SVN repository..."
-	svn commit -m \"Update to version ${VERSION} from GitHub\" --no-auth-cache --non-interactive  --username \"${SVN_USERNAME}\" --password \"${SVN_PASSWORD}\"
-	echo "✓ Plugin deployed! - Test complete"
+	svn commit -m "Update to version ${VERSION} from GitHub" \
+	--no-auth-cache \
+	--non-interactive  \
+	--username "${SVN_USERNAME}" \
+	--password "${SVN_PASSWORD}"
+	echo "✓ Plugin deployed!"
 else
 	echo "✓ Not in main branch. Nothing to do"
 fi
