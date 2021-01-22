@@ -4,7 +4,7 @@ Tags: paid memberships pro, members, memberships, pmpro enhancements, better mem
 Requires at least: 4.9
 Tested up to: 5.6
 Requires PHP: 7.1
-Stable tag: 7.1
+Stable tag: 7.2
 License: GPLv2
 License URI: http://www.gnu.org/licenses/gpl
 
@@ -212,6 +212,10 @@ I am working to isolate the source of this problem and resolving it.
 My apologies for not yet having a solution for the incompatibility introduced by PMPro v2.2+.
 
 == Changelog ==
+
+== 7.2 ==
+
+* BUG FIX: Better detection of custom one-click update when not using wordpress.org repo version of plugin
 
 == 7.1 ==
 * BUG FIX: Avoid fatal error if E20R Utilities library is missing
