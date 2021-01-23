@@ -1,1 +1,1 @@
-BUG FIX: Better detection of custom one-click update when not using wordpress.org repo version of plugin
+BUG FIX: Didn't remove one-click utility library correctly

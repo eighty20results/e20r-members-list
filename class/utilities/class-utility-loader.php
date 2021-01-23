@@ -3,7 +3,7 @@
 Plugin Name: E20R Utilities Module
 Plugin URI: https://eighty20results.com/
 Description: Plugin required by some of the Eighty/20 Results developed plugins
-Version: 1.0.7
+Version: 1.0.8
 Author: Thomas Sjolshagen <thomas@eighty20results.com>
 Author URI: https://eighty20results.com/thomas-sjolshagen/
 License: GPLv2
@@ -133,6 +133,8 @@ try {
 	return false;
 }
 
-Utilities::configureUpdateServerV4( '00-e20r-utilities', __FILE__ );
-
 add_filter( 'e20r_utilities_module_installed', '__return_true', 99999, 0 );
+
+if ( class_exists( '\E20R\Utilities\Utilities' )  ) {
+	Utilities::configureUpdateServerV4( '00-e20r-utilities', __FILE__ );
+}
