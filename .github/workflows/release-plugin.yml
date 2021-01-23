@@ -1,10 +1,7 @@
 name: Release to wordpress.org
 
 on:
-  # push:
-    # Deploy when a new release tag was created
-  #  tags:
-  #    - v*
+  # Deploy when a new release is created
   release:
     # Only deploy when the admin creates/publishes/edits/pre-releases from GitHub
     types: [edited, published]
@@ -12,19 +9,19 @@ on:
 jobs:
   # To push the release (sources) to the WordPress.org SVN instance for this plugin
   wordpress:
-    name: Push to wordpress.org
+    name: Push plugin to wordpress.org
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@master
-    - name: WordPress Plugin Deploy
-      #with:
-      #  repository: git@github.com:eighty20results/Utilities.git
-      #  token: ${{ secrets.UTILITIES_ACCESS }}
-      #  path: class/utilities
-      uses: eighty20results/e20r-members-list@master
-      env:
-        SLUG: e20r-members-list
-        SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
-        SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
-        GITHUB_TOKEN: ${{ secrets.GITHUB }}
+      - uses: actions/checkout@main
+      - name: WordPress Plugin Deploy
+        #with:
+        #  repository: git@github.com:eighty20results/Utilities.git
+        #  token: ${{ secrets.UTILITIES_ACCESS }}
+        #  path: class/utilities
+        uses: eighty20results/e20r-members-list@main
+        env:
+          SLUG: e20r-members-list
+          SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
+          SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB }}
 

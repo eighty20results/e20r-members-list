@@ -4,7 +4,7 @@ Tags: paid memberships pro, members, memberships, pmpro enhancements, better mem
 Requires at least: 4.9
 Tested up to: 5.6
 Requires PHP: 7.1
-Stable tag: 7.1
+Stable tag: 7.3
 License: GPLv2
 License URI: http://www.gnu.org/licenses/gpl
 
@@ -12,7 +12,7 @@ License URI: http://www.gnu.org/licenses/gpl
 
 Extensible, sortable & bulk action capable members listing tool for Paid Memberships Pro. This plugin is a complete replacement for the "Members List" functionality in PMPro and supports most of the same filters and hooks. The key differences have to do with managing columns. Now you can also use the [standard WordPress filters](https://developer.wordpress.org/reference/classes/wp_list_table/) to columns you can add/remove/make sortable, additional bulk actions, etc.
 
-![Release to wordpress.org](https://github.com/eighty20results/e20r-members-list/workflows/Release%20to%20wordpress.org/badge.svg?branch=master)
+![Release to wordpress.org](https://github.com/eighty20results/e20r-members-list/workflows/Release%20to%20wordpress.org/badge.svg?branch=main)
 
 == Installation ==
 
@@ -212,6 +212,10 @@ I am working to isolate the source of this problem and resolving it.
 My apologies for not yet having a solution for the incompatibility introduced by PMPro v2.2+.
 
 == Changelog ==
+
+== 7.2 ==
+
+* BUG FIX: Better detection of custom one-click update when not using wordpress.org repo version of plugin
 
 == 7.1 ==
 * BUG FIX: Avoid fatal error if E20R Utilities library is missing

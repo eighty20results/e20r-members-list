@@ -161,11 +161,15 @@ svn status
 
 echo "➤ Testing that we need to push to Wordpress.org"
 
-if [[ ! -z "${BRANCH}" && "master" == "${BRANCH}" ]]; then
-	echo "➤ In master branch so committing files to Wordpress.org SVN repository..."
-	svn commit -m \"Update to version ${VERSION} from GitHub\" --no-auth-cache --non-interactive  --username \"${SVN_USERNAME}\" --password \"${SVN_PASSWORD}\"
-	echo "✓ Plugin deployed! - Test complete"
+if [[ -n "${BRANCH}" && "${BRANCH}" =~ ^v[0-9]+\..*[0-9]$ ]]; then
+	echo "➤ In main branch so committing files to Wordpress.org SVN repository..."
+	svn commit -m "Update to version ${VERSION} from GitHub" \
+	--no-auth-cache \
+	--non-interactive  \
+	--username "${SVN_USERNAME}" \
+	--password "${SVN_PASSWORD}"
+	echo "✓ Plugin deployed!"
 else
-	echo "➤ Not in master branch. Nothing to do"
+	echo "✓ Not in main branch. Nothing to do"
 fi
 
