@@ -1,2 +1,1 @@
-BUG FIX: Avoid fatal error if E20R Utilities library is missing
-BUG FIX: Update removal logic when building SVN repo to commit as part of GitHub action
+BUG FIX: Didn't remove one-click utility library correctly
