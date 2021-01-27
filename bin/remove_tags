@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+#
+# Remove all tags
+
+for t_item in $(git tag -l); do
+	echo "Removing ${t_item}?"
+	if [[ "${t_item}" == *"${1}"* ]]; then
+		echo "Yes. ${t_item} is being removed"
+		git tag -d "${t_item}"; git push origin ":refs/tags/${t_item}"
+	fi
+done
