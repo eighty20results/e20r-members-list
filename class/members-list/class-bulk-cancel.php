@@ -19,6 +19,7 @@
 
 namespace E20R\Members_List\Admin;
 
+use E20R\Members_List\Controller\E20R_Members_List;
 use E20R\Utilities\Utilities;
 
 class Bulk_Cancel {
@@ -81,7 +82,10 @@ class Bulk_Cancel {
 		if ( ! empty( $failed ) ) {
 
 			$message = sprintf(
-				__( "Unable to cancel membership(s) for the following user IDs: %s", "e20r-members-list" ),
+				__(
+					"Unable to cancel membership(s) for the following user IDs: %s",
+					E20R_Members_List::plugin_slug
+				),
 				implode( ', ', $failed )
 			);
 
