@@ -1,9 +1,22 @@
 name: Test of "Release to wordpress.org" workflows
 
 on:
+<<<<<<< HEAD
   push:
     tags:
       - test_workflow*
+=======
+  # push:
+    # Deploy when a new release tag was created
+  #  tags:
+  #    - v*
+  push:
+    tags:
+      - test_workflow*
+  # release:
+    # Only deploy when the admin creates/publishes/edits/pre-releases from GitHub
+  #  types: [edited, published]
+>>>>>>> ENH: Adding separate workflow for github action testing
 
 jobs:
   # To push the release (sources) to the WordPress.org SVN instance for this plugin
