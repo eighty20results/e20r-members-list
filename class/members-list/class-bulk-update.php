@@ -20,6 +20,7 @@
 namespace E20R\Members_List\Admin;
 
 
+use E20R\Members_List\Controller\E20R_Members_List;
 use E20R\Utilities\Utilities;
 
 class Bulk_Update {
@@ -94,9 +95,18 @@ class Bulk_Update {
 		foreach ( $this->members_to_update as $key => $user_info ) {
 
 			$level_changed  = false;
-			$old_user_level = $utils->get_variable( "e20r-members-list-db_membership_id_{$user_info['user_id']}", 0 );
-			$new_user_level = $utils->get_variable( "e20r-members-list-new_membership_id_{$user_info['user_id']}", 0 );
-			$record_id      = $utils->get_variable( "e20r-members-list-db_record_id_{$user_info['user_id']}", 0 );
+			$old_user_level = $utils->get_variable(
+				"e20r-members-list-db_membership_id_{$user_info['user_id']}",
+				0
+			);
+			$new_user_level = $utils->get_variable(
+				"e20r-members-list-new_membership_id_{$user_info['user_id']}",
+				0
+			);
+			$record_id      = $utils->get_variable(
+				"e20r-members-list-db_record_id_{$user_info['user_id']}",
+				0
+			);
 
 			if ( empty( $user_info['user_id'] ) ) {
 				$utils->log("User ID is NULL. Returning!" );
@@ -122,10 +132,18 @@ class Bulk_Update {
 				}
 			}
 
-			$old_startdate = $utils->get_variable( "e20r-members-list-db_startdate_{$user_info['user_id']}", '' );
-			$new_startdate = $utils->get_variable( "e20r-members-list-new_startdate_{$user_info['user_id']}", '' );
+			$old_startdate = $utils->get_variable(
+				"e20r-members-list-db_startdate_{$user_info['user_id']}",
+				''
+			);
+			$new_startdate = $utils->get_variable(
+				"e20r-members-list-new_startdate_{$user_info['user_id']}",
+				''
+			);
 
-			$utils->log("Have to update start date for {$user_info['user_id']}? N:{$new_startdate} vs O:{$old_startdate}" );
+			$utils->log(
+				"Have to update start date for {$user_info['user_id']}? N:{$new_startdate} vs O:{$old_startdate}"
+			);
 
 			if ( $old_startdate !== $new_startdate ) {
 
@@ -134,7 +152,15 @@ class Bulk_Update {
 					$new_startdate = $old_startdate;
 				}
 
-				if ( false === $this->update_date( 'startdate', $user_info['user_id'], $old_user_level, $new_user_level, $new_startdate, $record_id, $level_changed ) ) {
+				if ( false === $this->update_date(
+					'startdate',
+					$user_info['user_id'],
+					$old_user_level,
+					$new_user_level,
+					$new_startdate,
+					$record_id,
+					$level_changed )
+				) {
 					$startdate_failed[] = array(
 						'user_id'  => $user_info['user_id'],
 						'old_date' => $old_startdate,
@@ -144,8 +170,12 @@ class Bulk_Update {
 				}
 			}
 
-			$old_enddate = $utils->get_variable( "e20r-members-list-db_enddate_{$user_info['user_id']}", '' );
-			$new_enddate = $utils->get_variable( "e20r-members-list-new_enddate_{$user_info['user_id']}", '' );
+			$old_enddate = $utils->get_variable(
+				"e20r-members-list-db_enddate_{$user_info['user_id']}", ''
+			);
+			$new_enddate = $utils->get_variable(
+				"e20r-members-list-new_enddate_{$user_info['user_id']}", ''
+			);
 
 			$utils->log("Have to update end date for {$user_info['user_id']}? N:{$new_enddate} vs O:{$old_enddate}");
 
@@ -153,7 +183,15 @@ class Bulk_Update {
 
 				$utils->log("Updating end date to {$new_enddate}");
 
-				if ( false === $this->update_date( 'enddate', $user_info['user_id'], $old_user_level, $new_user_level, $new_enddate, $record_id, $level_changed ) ) {
+				if ( false === $this->update_date(
+					'enddate',
+					$user_info['user_id'],
+					$old_user_level,
+					$new_user_level,
+					$new_enddate,
+					$record_id,
+					$level_changed )
+				) {
 					$enddate_failed[] = array(
 						'user_id'  => $user_info['user_id'],
 						'old_date' => $old_startdate,
@@ -163,8 +201,12 @@ class Bulk_Update {
 				}
 			}
 
-			$old_status = $utils->get_variable( "e20r-members-list-db_status_{$user_info['user_id']}", '' );
-			$new_status = $utils->get_variable( "e20r-members-list-new_status_{$user_info['user_id']}", '' );
+			$old_status = $utils->get_variable(
+				"e20r-members-list-db_status_{$user_info['user_id']}", ''
+			);
+			$new_status = $utils->get_variable(
+				"e20r-members-list-new_status_{$user_info['user_id']}", ''
+			);
 
 			$utils->log("Have to update status for {$user_info['user_id']}? {$new_status}" );
 
@@ -193,7 +235,10 @@ class Bulk_Update {
 		/**
 		 * Error handling for build-in edit fields
 		 */
-		$msg_template = __( 'Error updating data for %1$s (ID: %2$d). Could not update %3$s from %4$s to %5$s (current membership level: \'%6$s\')', 'e20r-members-list' );
+		$msg_template = __(
+			'Error updating data for %1$s (ID: %2$d). Could not update %3$s from %4$s to %5$s (current membership level: \'%6$s\')',
+			E20R_Members_List::plugin_slug
+		);
 
 		if ( ! empty( $level_failed ) ) {
 
@@ -208,8 +253,14 @@ class Bulk_Update {
 					$user->ID,
 					__( 'membership level', 'e20r-members-list' ),
 					$old_user_level->name,
-					( !empty( $new_user_level->name ) ? $new_user_level->name : __('Not Applicable', 'e20r-members-list') ),
-					( !empty( $old_user_level->name ) ? $old_user_level->name : __('Not Applicable', 'e20r-members-list') )
+					( !empty( $new_user_level->name ) ?
+						$new_user_level->name :
+						__('Not Applicable', E20R_Members_List::plugin_slug)
+					),
+					( !empty( $old_user_level->name ) ?
+						$old_user_level->name :
+						__('Not Applicable', E20R_Members_List::plugin_slug)
+					)
 				);
 			}
 
@@ -300,7 +351,12 @@ class Bulk_Update {
 
 		// Execute the membership level change for the specified user ID/Level ID
 		if ( function_exists( 'pmpro_changeMembershipLevel' ) ) {
-			return pmpro_changeMembershipLevel( $new_level_id, $user_id, 'admin_change', $current_level_id );
+			return pmpro_changeMembershipLevel(
+				$new_level_id,
+				$user_id,
+				'admin_change',
+				$current_level_id
+			);
 		} else {
 			return false;
 		}
@@ -319,7 +375,15 @@ class Bulk_Update {
 	 *
 	 * @return bool|false|int
 	 */
-	public function update_date( $field_name, $user_id, $current_level, $new_level, $new_date, $record_id = null, $use_new = false ) {
+	public function update_date(
+		$field_name,
+		$user_id,
+		$current_level,
+		$new_level,
+		$new_date,
+		$record_id = null,
+		$use_new = false
+	) {
 
 		$utils = Utilities::get_instance();
 		$date = null;
@@ -357,12 +421,24 @@ class Bulk_Update {
 
 		if ( !empty( $new_date ) ) {
 			if ( true === apply_filters( 'e20r_memberslist_membership_starts_at_midnight', __return_true() ) ) {
-				$date = date( 'Y-m-d 00:00:00', strtotime( $new_date, current_time( 'timestamp' ) ) );
+				$date = date(
+					'Y-m-d 00:00:00',
+					strtotime( $new_date, current_time( 'timestamp' ) )
+				);
 			} else {
-				$date = date( 'Y-m-d h:i:s', strtotime( $new_date, current_time( 'timestamp' ) ) );
+				$date = date(
+					'Y-m-d h:i:s',
+					strtotime( $new_date, current_time( 'timestamp' ) )
+				);
 			}
 		}
-		$retval = $wpdb->update( $wpdb->pmpro_memberships_users, array( $field_name => $date ), $where, array( '%s' ), $where_format );
+		$retval = $wpdb->update(
+			$wpdb->pmpro_memberships_users,
+			array( $field_name => $date ),
+			$where,
+			array( '%s' ),
+			$where_format
+		);
 
 		if ( false === $retval ) {
 			return $retval;
@@ -383,7 +459,13 @@ class Bulk_Update {
 
 		global $wpdb;
 
-		$retval = $wpdb->update( $wpdb->pmpro_memberships_users, array( 'status' => $status ), array( 'id' => $record_id ), array( '%s' ), array( '%d' ) );
+		$retval = $wpdb->update(
+			$wpdb->pmpro_memberships_users,
+			array( 'status' => $status ),
+			array( 'id' => $record_id ),
+			array( '%s' ),
+			array( '%d' )
+		);
 
 		if ( ! empty( $retval ) ) {
 			return true;
