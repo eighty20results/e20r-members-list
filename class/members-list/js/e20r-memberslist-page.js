@@ -19,13 +19,13 @@
 
 (function ($) {
     'use strict';
-    var e20rMembersList_Page = {
+    let e20rMembersList_Page = {
         init: function () {
 
-            this.memberslist_form = $('.e20r-pmpro-memberslist-page form#posts-filter');
-            // this.levels_dropdown = $('select#e20r-pmpro-memberslist-levels');
-            this.edit_lnk = $('a.e20r-members-list-editable');
-            // this.enddate_lnk = $('a.e20r-members-list_enddate');
+			// this.levels_dropdown = $('select#e20r-pmpro-memberslist-levels');
+			// this.enddate_lnk = $('a.e20r-members-list_enddate');
+			this.memberslist_form = $('.e20r-pmpro-memberslist-page form#posts-filter');
+			this.edit_lnk = $('a.e20r-members-list-editable');
             this.resetBtn = $('a.e20r-members-list-cancel');
             this.cancelMemberLnk = $('a.e20r-cancel-member');
             this.updateBtn = $('a.e20r-members-list-save');
@@ -35,6 +35,7 @@
             this.changed_select = $( 'select[class^="e20r-members-list-select-"]');
             this.bulkUpdate = $('#doaction, #doaction2');
             this.updateListBtn = $('#e20r-update-list');
+            this.clearSearchBtn = $('#e20r-clear-search');
 			this.search_field = $('#post-search-input');
             this.dateFields = $('.e20r-members-list-input-enddate, .e20r-members-list-input-startdate');
 			this.dataSearchBtn = $('#e20r-memberslist-search-data');
@@ -47,45 +48,47 @@
                 day: 'numeric'
             };
 
-            var self = this;
+            let self = this;
 
             self.dateFields.datepicker({
                 dateFormat: "yy-mm-dd"
             });
 
-            self.search_field.unbind('keydown').on('keydown', function(event){
-            	let keycode = parseInt((event.keyCode ? event.keyCode : event.which));
-            	if (13 === keycode) {
-					self.dataSearchBtn.click();
+            self.search_field.unbind('keypress').on('keypress', function(event){
+            	let keycode = (event.key ? event.key : event.keyCode);
+            	if ('Enter' !== keycode) {
+					return;
 				}
+
+            	self.dataSearchBtn.click();
 			});
 
-            self.changed_input.unbind('blur').on('blur', function(ev) {
+            // self.changed_input.unbind('blur').on('blur', function(ev) {
+            self.changed_input.unbind('blur').on('blur', function() {
                 self.set_update( this );
             });
 
+			// self.updateListBtn.unbind('click').on('click', function(ev) {
             self.updateListBtn.unbind('click').on('click', function(ev) {
 
-                if ( 'Clear Search' === self.updateListBtn.val() ) {
+            	ev.preventDefault();
+
+				if ( 'Clear Search' === self.updateListBtn.val() ) {
+                	console.log("We're clearing the search...");
                     window.console.log(e20rml.url);
-                    location.href = e20rml.url;
+                    window.location.assign(e20rml.url);
                 }
 
                 $('#post-search-input').val(null);
             });
-            /*
-            self.changed_select.unbind('blur').on('blur', function() {
-                self.set_update( this );
-            });
-            */
 
             self.changed_select.unbind('change').on('change', function() {
 
-                var current_select = $(this);
-                var current_select_info = current_select.val();
-                var $field_name = current_select.closest('div.ml-row-settings').find('.e20r-members-list-field-name').val();
-                var previous_select_info = current_select.closest('div.ml-row-settings').find('input.e20r-members-list-db_' + $field_name ).val();
-                var enddate = $('#the-list').find('.last .e20r-members-list-db-enddate').val();
+                let current_select = $(this);
+                let current_select_info = current_select.val();
+                let $field_name = current_select.closest('div.ml-row-settings').find('.e20r-members-list-field-name').val();
+                let previous_select_info = current_select.closest('div.ml-row-settings').find('input.e20r-members-list-db_' + $field_name ).val();
+                let enddate = $('#the-list').find('.last .e20r-members-list-db-enddate').val();
 
                 window.console.log("Previous value: " + previous_select_info );
                 window.console.log("New value: " + current_select_info );
@@ -101,48 +104,14 @@
 
             self.bulkUpdate.unbind('click').on('click', function (ev) {
 
-                var button = $(this);
                 ev.preventDefault();
 
                 if ('bulk-export' === self.bulkActionSelectTop.val() || 'bulk-export' === self.bulkActionSelectBottom.val()) {
-                    var export_args = {};
-                    var inputs = $('.e20r-search-arguments input, .e20r-search-arguments textarea, .e20r-search-arguments select')
+                    let inputs = $('.e20r-search-arguments input, .e20r-search-arguments textarea, .e20r-search-arguments select')
                         .not(':input[type=button], :input[type=submit], input[type=reset]');
+                    let export_args = {};
 
-                    export_args.action = "e20rml_export_records";
-                    export_args._wpnonce = $('#_wpnonce').val();
-                    export_args.showDebugTrace = true;
-                    // export_args.showDebugArgs = true;
-
-                    inputs.each(function () {
-
-                        var input = $(this);
-                        var name = input.attr('name');
-                        var value = input.val();
-
-                        if (false === self.is_empty(value)) {
-                            window.console.log(name + " contains " + value);
-
-                            export_args[name] = value;
-                        }
-                    });
-
-                    var is_checked = false;
-                    var selected_ids = [];
-
-                    $('input[name^="member_id"]').each(function () {
-
-                        if ($(this).is(':checked')) {
-                            is_checked = true;
-                            selected_ids.push($(this).val());
-                        }
-                    });
-
-                    if (selected_ids.length > 0) {
-                        export_args.member_id = selected_ids;
-                    }
-
-                    self.submit_export(this, export_args);
+                    self.prepare_export(self, export_args, inputs);
                     return true;
                 }
 
@@ -152,24 +121,24 @@
             self.updateMemberLnk.unbind('click').on('click', function (ev) {
 
                 ev.preventDefault();
-                var btn = $(this);
-                var row = btn.closest('tr');
+                let btn = $(this);
+                let row = btn.closest('tr');
 
-                var membership_col = row.find('td.column-membership');
-                var membership_settings = membership_col.find('div.ml-row-settings');
-                var membership_label = membership_col.find('a.e20r-members-list-editable');
+                let membership_col = row.find('td.column-membership');
+                let membership_settings = membership_col.find('div.ml-row-settings');
+                let membership_label = membership_col.find('a.e20r-members-list-editable');
 
-                var startdate_col = row.find('td.column-startdate');
-                var startdate_settings = startdate_col.find('div.ml-row-settings');
-                var startdate_label = startdate_col.find('a.e20r-members-list-editable');
+                let startdate_col = row.find('td.column-startdate');
+                let startdate_settings = startdate_col.find('div.ml-row-settings');
+                let startdate_label = startdate_col.find('a.e20r-members-list-editable');
 
-                var enddate_col = row.find('td.column-last');
-                var enddate_settings = enddate_col.find('div.ml-row-settings');
-                var enddate_label = enddate_col.find('a.e20r-members-list-editable');
+                let enddate_col = row.find('td.column-last');
+                let enddate_settings = enddate_col.find('div.ml-row-settings');
+                let enddate_label = enddate_col.find('a.e20r-members-list-editable');
 
-                var status_col = row.find( 'td.column-status');
-                var status_settings = status_col.find('div.ml-row-settings');
-                var status_label = status_col.find('a.e20r-members-list-editable');
+                let status_col = row.find( 'td.column-status');
+                let status_settings = status_col.find('div.ml-row-settings');
+                let status_label = status_col.find('a.e20r-members-list-editable');
 
                 membership_label.toggle();
                 membership_settings.toggle();
@@ -193,8 +162,8 @@
 
                 $event.preventDefault();
 
-                var $edit = $(this);
-                var $input = $edit.next('div.ml-row-settings');
+                let $edit = $(this);
+                let $input = $edit.next('div.ml-row-settings');
 
                 $input.toggle();
                 $edit.toggle();
@@ -208,14 +177,14 @@
 
                 ev.preventDefault();
 
-                var $btn = $(this);
-                var $settings = $btn.closest('div.ml-row-settings');
-                var $label = $settings.prev('a.e20r-members-list-editable');
-                var $field_name = $settings.find('.e20r-members-list-field-name').val();
+                let $btn = $(this);
+                let $settings = $btn.closest('div.ml-row-settings');
+                let $label = $settings.prev('a.e20r-members-list-editable');
+                let $field_name = $settings.find('.e20r-members-list-field-name').val();
 
                 // Return the select value (or input value) to its original value...
-                var $original = $settings.find('.e20r-members-list-db-' + $field_name ).val();
-                var $field_input_key = 'e20r-members-list-new_' + $field_name;
+                let $original = $settings.find('.e20r-members-list-db-' + $field_name ).val();
+                let $field_input_key = 'e20r-members-list-new_' + $field_name;
 
                 $settings.find('select[name^="' + $field_input_key + '"], input[name^="'+ $field_input_key + '"]').val( $original );
 
@@ -227,51 +196,19 @@
 
                 ev.preventDefault();
                 window.console.log("Export button clicked!");
-                var export_args = {};
-                var inputs = $('.e20r-search-arguments input, .e20r-search-arguments textarea, .e20r-search-arguments select')
+                let export_args = {};
+                let inputs = $('.e20r-search-arguments input, .e20r-search-arguments textarea, .e20r-search-arguments select')
                     .not(':input[type=button], :input[type=submit], input[type=reset]');
 
-                export_args.action = "e20rml_export_records";
-                export_args._wpnonce = $('#_wpnonce').val();
-                export_args.showDebugTrace = true;
-
-                inputs.each(function () {
-
-                    var input = $(this);
-                    var name = input.attr('name');
-                    var value = input.val();
-
-                    if (false === self.is_empty(value)) {
-                        window.console.log(name + " contains " + value);
-
-                        export_args[name] = value;
-                    }
-                });
-
-                var is_checked = false;
-                var selected_ids = [];
-
-                $('input[name^="member_id"]').each(function () {
-
-                    if ($(this).is(':checked')) {
-                        is_checked = true;
-                        selected_ids.push($(this).val());
-                    }
-                });
-
-                if (selected_ids.length > 0) {
-                    export_args.member_id = selected_ids;
-                }
-
-                self.submit_export(this, export_args);
+                self.prepare_export(self, export_args, inputs);
             });
 
             /*
             self.updateBtn.unbind('click').on('click', function (ev) {
 
                 ev.preventDefault();
-                var $link = $(this).attr('href');
-                var url = document.createElement('a');
+                let $link = $(this).attr('href');
+                let url = document.createElement('a');
 
                 url.href = $link;
 
@@ -279,25 +216,61 @@
             });
             */
         },
+		prepare_export: function( self, export_args, inputs ) {
+
+			export_args.action = "e20rml_export_records";
+			export_args._wpnonce = $('#_wpnonce').val();
+			export_args.showDebugTrace = true;
+
+			inputs.each(function () {
+
+				let input = $(this);
+				let name = input.attr('name');
+				let value = input.val();
+
+				if (false === self.is_empty(value)) {
+					window.console.log(name + " contains " + value);
+
+					export_args[name] = value;
+				}
+			});
+
+			let is_checked = false;
+			let selected_ids = [];
+
+			$('input[name^="member_id"]').each(function () {
+
+				if ($(this).is(':checked')) {
+					is_checked = true;
+					selected_ids.push($(this).val());
+				}
+			});
+
+			if (selected_ids.length > 0) {
+				export_args.member_id = selected_ids;
+			}
+
+			self.submit_export(this, export_args);
+		},
 		search_submit: function () {
 
 		},
         set_update: function( $element ) {
-            var self = this;
+            let self = this;
 
-            var element = $($element);
-            var $settings = element.closest('div.ml-row-settings');
-            var users_id = $settings.find('input.e20r-members-list-user-id').val();
-            var field_name = $settings.find('input.e20r-members-list-field-name').val();
-            var $label = $settings.prev('a.e20r-members-list-' + field_name + '-label');
-            var $new_value_field = $settings.find('input.e20r-members-list-db-' + field_name);
-            var select = $settings.find('.e20r-members-list-select-' + field_name);
+            let element = $($element);
+            let $settings = element.closest('div.ml-row-settings');
+            // let users_id = $settings.find('input.e20r-members-list-user-id').val();
+            let field_name = $settings.find('input.e20r-members-list-field-name').val();
+            let $label = $settings.prev('a.e20r-members-list-' + field_name + '-label');
+            // let $new_value_field = $settings.find('input.e20r-members-list-db-' + field_name);
+            let select = $settings.find('.e20r-members-list-select-' + field_name);
 
-            var $checkbox = element.closest('tr').find('th.check-column input[type="checkbox"]');
+            let $checkbox = element.closest('tr').find('th.check-column input[type="checkbox"]');
 
-            var $date = $settings.find('.e20r-members-list-input-' + field_name).val();
-            var select_val = select.val();
-            var test_checked = false;
+            let $date = $settings.find('.e20r-members-list-input-' + field_name).val();
+            let select_val = select.val();
+            let test_checked = false;
 
             window.console.log("Value: ", $date, select_val);
 
@@ -309,7 +282,7 @@
 
             if (null !== $date) {
 
-                var date = new Date($date);
+                let date = new Date($date);
 
                 window.console.log("Date info? ", date);
 
@@ -346,10 +319,10 @@
 
             window.console.log("About to transmit: ", data);
 
-            var form = $('<form></form>').attr('action', e20rml.url).attr('method', 'post');
+            let form = $('<form></form>').attr('action', e20rml.url).attr('method', 'post');
 
             Object.keys(data).forEach(function (key) {
-                var value = data[key];
+                let value = data[key];
 
                 if (value instanceof Array) {
                     value.forEach(function (v) {
@@ -377,9 +350,9 @@
                 return data.length === 0;
             }
 
-            var count = 0;
+            let count = 0;
 
-            for (var i in data) {
+            for (let i in data) {
 
                 if (data.hasOwnProperty(i)) {
                     count++;
