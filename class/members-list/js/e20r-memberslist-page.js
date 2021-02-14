@@ -24,11 +24,11 @@
 
 			// this.levels_dropdown = $('select#e20r-pmpro-memberslist-levels');
 			// this.enddate_lnk = $('a.e20r-members-list_enddate');
+			// this.cancelMemberLnk = $('a.e20r-cancel-member');
+			// this.updateBtn = $('a.e20r-members-list-save');
 			this.memberslist_form = $('.e20r-pmpro-memberslist-page form#posts-filter');
 			this.edit_lnk = $('a.e20r-members-list-editable');
-            this.resetBtn = $('a.e20r-members-list-cancel');
-            this.cancelMemberLnk = $('a.e20r-cancel-member');
-            this.updateBtn = $('a.e20r-members-list-save');
+			this.resetBtn = $('a.e20r-members-list-cancel');
             this.updateMemberLnk = $('a.e20r-update-member');
             this.exportBtn = $('a.e20r-memberslist-export');
             this.changed_input = $('input[class^="e20r-members-list-input-"]');
@@ -68,7 +68,7 @@
             });
 
 			// self.updateListBtn.unbind('click').on('click', function(ev) {
-            self.updateListBtn.unbind('click').on('click', function(ev) {
+            self.updateListBtn.unbind('click').on('click', function() {
 
 				if ( 'Clear Search' === self.updateListBtn.val() ) {
                 	console.log("We're clearing the search...");
