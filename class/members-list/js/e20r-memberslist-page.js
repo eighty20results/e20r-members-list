@@ -33,13 +33,12 @@
             this.exportBtn = $('a.e20r-memberslist-export');
             this.changed_input = $('input[class^="e20r-members-list-input-"]');
             this.changed_select = $( 'select[class^="e20r-members-list-select-"]');
-            this.bulkUpdate = $('#doaction, #doaction2');
-            this.updateListBtn = $('#e20r-update-list');
-            this.clearSearchBtn = $('#e20r-clear-search');
+			this.levels_dropdown = $('#e20r-pmpro-memberslist-levels');
+			this.bulkUpdate = $('#doaction, #doaction2');
+			this.updateListBtn = $('#e20r-update-list');
 			this.search_field = $('#post-search-input');
-            this.dateFields = $('.e20r-members-list-input-enddate, .e20r-members-list-input-startdate');
+			this.dateFields = $('.e20r-members-list-input-enddate, .e20r-members-list-input-startdate');
 			this.dataSearchBtn = $('#e20r-memberslist-search-data');
-
             this.bulkActionSelectTop = $('select#bulk-action-selector-top');
             this.bulkActionSelectBottom = $('select#bulk-action-selector-bottom');
 
@@ -71,8 +70,6 @@
 			// self.updateListBtn.unbind('click').on('click', function(ev) {
             self.updateListBtn.unbind('click').on('click', function(ev) {
 
-            	ev.preventDefault();
-
 				if ( 'Clear Search' === self.updateListBtn.val() ) {
                 	console.log("We're clearing the search...");
                     window.console.log(e20rml.url);
@@ -81,6 +78,11 @@
 
                 $('#post-search-input').val(null);
             });
+
+            // Trigger search whenever the levels drop-down is changed
+            self.levels_dropdown.unbind('change').on('change', function() {
+				self.dataSearchBtn.click();
+			});
 
             self.changed_select.unbind('change').on('change', function() {
 
