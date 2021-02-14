@@ -63,6 +63,19 @@ class Export_Members {
 	private $member_discount_info = null;
 
 	/**
+	 * The list of default columns (empty by default)
+	 *
+	 * @var array|void $default_columns
+	 */
+	private $default_columns = array();
+
+	/**
+	 * List of header labels
+	 *
+	 * @var array|void
+	 */
+	private $header_map = array();
+	/**
 	 * Export_Members constructor.
 	 *
 	 * @param stdClass[] $db_records
@@ -111,6 +124,8 @@ class Export_Members {
 
 		/**
 		 * Map of Database column keys and CSV export column keys
+		 *
+		 * @filter e20r-members-list-db-type-header-map
 		 */
 		$this->header_map = apply_filters( 'e20r-members-list-db-type-header-map', array(
 				'user_id'          => array( 'db_key' => 'ID', 'type' => 'wp_user', 'header_key' => 'ID' ),
@@ -276,9 +291,8 @@ class Export_Members {
 
 		// Generate a temporary file to store the data in.
 		$tmp_dir   = sys_get_temp_dir();
-		$file_name = tempnam( $tmp_dir, 'pmpro_ml_' );
 
-		return $file_name;
+		return tempnam( $tmp_dir, 'pmpro_ml_' );
 	}
 
 	/**
@@ -304,7 +318,10 @@ class Export_Members {
 			}
 		}
 
-		$header_list       = apply_filters( 'pmpro_members_list_csv_heading', implode( ',', array_keys( $this->header_map ) ) );
+		$header_list       = apply_filters(
+			'pmpro_members_list_csv_heading',
+			implode( ',', array_keys( $this->header_map ) )
+		);
 		$this->csv_headers = array_map( 'trim', explode( ',', $header_list ) );
 
 		$utils->log( "Using " . count( $this->csv_headers ) . " header columns" );
@@ -629,16 +646,33 @@ class Export_Members {
 					if ( in_array( $level, array( "oldmembers", "expired", 'cancelled' ) ) &&
 					     ( ! empty( $column_value ) && '0000-00-00 00:00:00' !== $column_value ) ) {
 
-						$enddate_value = apply_filters( "pmpro_memberslist_expires_column", date( $datetime_format, strtotime( $column_value, current_time( 'timestamp' ) ) ), $member );
+						$enddate_value = apply_filters(
+							"pmpro_memberslist_expires_column",
+							date(
+								$datetime_format,
+								strtotime( $column_value, current_time( 'timestamp' ) )
+							),
+							$member
+						);
 
 					}
 
-					if ( ! empty( $member->membership_id ) && ( empty( $column_value ) || '0000-00-00 00:00:00' === $column_value ) ) {
+					if ( ! empty( $member->membership_id ) &&
+					     ( empty( $column_value ) || '0000-00-00 00:00:00' === $column_value )
+					) {
 						$enddate_value = apply_filters( "pmpro_memberslist_expires_column", null, $member );
 					}
 
-					if ( ! empty( $member->membership_id ) && ( ! empty( $column_value ) && '0000-00-00 00:00:00' !== $column_value ) ) {
-						$enddate_value = date( $datetime_format, strtotime( $column_value, current_time( 'timestamp' ) ) );
+					if ( ! empty( $member->membership_id ) &&
+					     ( ! empty( $column_value ) && '0000-00-00 00:00:00' !== $column_value )
+					) {
+						$enddate_value = date(
+							$datetime_format,
+							strtotime(
+								$column_value,
+								current_time( 'timestamp' )
+							)
+						);
 					}
 
 					// Save record info for the column
@@ -734,7 +768,12 @@ class Export_Members {
 		 *
 		 * @since  4.0
 		 */
-		$datetime_format = apply_filters( 'e20r-members-list-csv-datetime-format', $expected_format, $date_format, $time_format );
+		$datetime_format = apply_filters(
+			'e20r-members-list-csv-datetime-format',
+			$expected_format,
+			$date_format,
+			$time_format
+		);
 
 		return $datetime_format;
 	}
@@ -768,12 +807,16 @@ class Export_Members {
 				break;
 
 			case 'meta_values':
-				$column_value = isset( $member->meta_values->{$column_name} ) ? $member->meta_values->{$column_name} : null;
+				$column_value = isset( $member->meta_values->{$column_name} ) ?
+					$member->meta_values->{$column_name} :
+					null;
 				break;
 
 			default:
 				$utils->log( "Using default type (type = {$column_type}) for {$column_name}" );
-				$column_value = isset( $member->{$column_type}->{$column_name} ) ? $member->{$column_type}->{$column_name} : null;
+				$column_value = isset( $member->{$column_type}->{$column_name} ) ?
+					$member->{$column_type}->{$column_name} :
+					null;
 
 				/**
 				 * Let 3rd party define the value to use for a 3rd party defined default column
@@ -787,7 +830,12 @@ class Export_Members {
 				 *
 				 * @since  v4.0
 				 */
-				$column_value = apply_filters( 'e20r-members-list-set-default-column-value', $column_value, $column_name, $column_type, $member );
+				$column_value = apply_filters(
+					'e20r-members-list-set-default-column-value',
+					$column_value,
+					$column_name,
+					$column_type,
+					$member );
 		}
 
 		return $column_value;
@@ -937,6 +985,8 @@ class Export_Members {
 	 */
 	private function map_header_to_column( $header_name ) {
 
-		return isset( $this->header_map[ $header_name ]['header_key'] ) ? $this->header_map[ $header_name ]['header_key'] : null;
+		return isset( $this->header_map[ $header_name ]['header_key'] ) ?
+			$this->header_map[ $header_name ]['header_key'] :
+			null;
 	}
 }
