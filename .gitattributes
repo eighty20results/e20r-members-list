@@ -7,6 +7,8 @@
 /plugin-updates export-ignore
 /node_modules export-ignore
 /.wordpress-org export-ignore
+/test export-ignore
+/build_env export-ignore
 
 # Files
 /.gitattributes export-ignore
@@ -15,6 +17,9 @@
 /.distignore export-ignore
 /metadata.json export-ignore
 /package.json export-ignore
+action.yml export-ignore
+Dockerfile export-ignore
+package.json export-ignore
 /class/utilities/.gitignore export-ignore
 /class/utilities/.editorconfig export-ignore
 /class/utilities/composer.json export-ignore
