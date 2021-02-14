@@ -2,9 +2,9 @@
 Contributors: eighty20results
 Tags: paid memberships pro, members, memberships, pmpro enhancements, better members list, members list
 Requires at least: 4.9
-Tested up to: 5.6
+Tested up to: 5.7
 Requires PHP: 7.1
-Stable tag: 7.2
+Stable tag: 7.4
 License: GPLv2
 License URI: http://www.gnu.org/licenses/gpl
 
@@ -212,6 +212,19 @@ I am working to isolate the source of this problem and resolving it.
 My apologies for not yet having a solution for the incompatibility introduced by PMPro v2.2+.
 
 == Changelog ==
+
+== 7.4 ==
+
+* ENH: Adding script to remove local & upstream tasks based on string pattern
+* ENH: Adding support for auto-labeling of Pull Requests upon commit
+* ENH: Adding automated release draft creation action
+* ENH: Do not include the test and build_env directories
+* ENH: Initial dockerfile for unittests
+* ENH: Refactored to support autoloader
+* BUG FIX: Make it work on the new hosting account
+* BUG FIX: Didn't handle return key press for search functionality
+* BUG FIX: Didn't reset the URI when clicking 'Clear Search'
+* BUG FIX: Updated autoloader to support new file name structure
 
 == 7.2 ==
 
