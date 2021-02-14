@@ -199,6 +199,17 @@ Dependencies: N/A
 
 Example: `add_filter( 'e20r_memberslist_search_usermeta_fields', 'e20r_update_usertable_fields', 10, 1 );`
 
+=== e20r_memberslist_default_sort_order ===
+
+Modifies: The default database sort order for the members list
+Purpose: Allow a developer to change the default sort order from Ascending to Descending (DESC) if that's a desirable order for them
+
+Default: 'ASC'
+
+Dependencies: N/A
+
+Example: `add_filter( 'e20r_memberslist_search_usermeta_fields', "function() { return 'DESC'; }", 10, 1 );`
+
 == Actions ==
 
 To Be Announced...
