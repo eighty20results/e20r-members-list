@@ -4,7 +4,7 @@ Tags: paid memberships pro, members, memberships, pmpro enhancements, better mem
 Requires at least: 4.9
 Tested up to: 5.7
 Requires PHP: 7.1
-Stable tag: 7.4
+Stable tag: 7.5
 License: GPLv2
 License URI: http://www.gnu.org/licenses/gpl
 
@@ -213,8 +213,10 @@ My apologies for not yet having a solution for the incompatibility introduced by
 
 == Changelog ==
 
-== 7.4 ==
+== 7.5 ==
+* BUG FIX: Didn't automatically search for levels only when selected level is changed
 
+== 7.4 ==
 * ENH: Adding script to remove local & upstream tasks based on string pattern
 * ENH: Adding support for auto-labeling of Pull Requests upon commit
 * ENH: Adding automated release draft creation action
@@ -227,7 +229,6 @@ My apologies for not yet having a solution for the incompatibility introduced by
 * BUG FIX: Updated autoloader to support new file name structure
 
 == 7.2 ==
-
 * BUG FIX: Better detection of custom one-click update when not using wordpress.org repo version of plugin
 
 == 7.1 ==
