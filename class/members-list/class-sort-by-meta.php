@@ -19,7 +19,7 @@
 
 namespace E20R\Members_List\Support;
 
-if ( ! class_exists( 'E20R\Members_List\Support\Sort_By_Meta' ) ) {
+if ( ! class_exists( '\E20R\Members_List\Support\Sort_By_Meta' ) ) {
 
 	class Sort_By_Meta {
 
@@ -52,8 +52,12 @@ if ( ! class_exists( 'E20R\Members_List\Support\Sort_By_Meta' ) ) {
 			// $utils->log( "A: " . print_r( $a, true));
 			// $utils->log("B: " . print_r( $b, true));
 
-			$a_user_id = is_array( $a ) ? $a['user_id'] : ( is_a( $a, '\WP_User' ) ? $a->ID : null );
-			$b_user_id = is_array( $b ) ? $b['user_id'] : ( is_a( $b, '\WP_User' ) ? $b->ID : null );
+			$a_user_id = is_array( $a ) ?
+				$a['user_id'] :
+				( is_a( $a, '\WP_User' ) ? $a->ID : null );
+			$b_user_id = is_array( $b ) ?
+				$b['user_id'] :
+				( is_a( $b, '\WP_User' ) ? $b->ID : null );
 
 			if ( is_null($a_user_id ) || is_null( $b_user_id ) ) {
 				return false;
@@ -84,8 +88,6 @@ if ( ! class_exists( 'E20R\Members_List\Support\Sort_By_Meta' ) ) {
 			if ( 'ASC' == $this->order ) {
 				return ( $a_value < $b_value ? 1 : - 1 );
 			}
-
-
 		}
 
 	}
