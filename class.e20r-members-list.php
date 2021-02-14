@@ -93,7 +93,8 @@ if ( ! class_exists( '\\E20R\Members_List\\Controller\\E20R_Members_List' ) ) {
 				$base_path = plugin_dir_path( __FILE__ ) . 'class/';
 			}
 
-			$filename = "class.{$c_name}.php";
+			$filename = "class-{$c_name}.php";
+
 			$iterator = new \RecursiveDirectoryIterator( $base_path, \RecursiveDirectoryIterator::SKIP_DOTS | \RecursiveIteratorIterator::SELF_FIRST | \RecursiveIteratorIterator::CATCH_GET_CHILD | \RecursiveDirectoryIterator::FOLLOW_SYMLINKS );
 
 			/**
