@@ -984,12 +984,17 @@ class Members_List extends \WP_List_Table {
 		$search_level = $this->utils->get_variable( 'level', null );
 
 		// We're looking for a specific membership level
-		if ( in_array( $search_level, array(
-				'oldmembers',
-				'expired',
-				'cancelled',
-				'all',
-			) ) || is_numeric( $search_level ) ) {
+		if ( in_array(
+				$search_level,
+				array(
+						'oldmembers',
+						'expired',
+						'cancelled',
+						'all',
+						)
+			 ) ||
+			 is_numeric( $search_level )
+		) {
 			$this->table_list['joins'][3] = array(
 				'name'      => $wpdb->pmpro_memberships_users,
 				'join_type' => 'LEFT JOIN ',
@@ -1058,13 +1063,19 @@ class Members_List extends \WP_List_Table {
 	/**
 	 * Use A-Z sort order
 	 *
-	 * @param string $sort_order
+	 * @param string $sort_order - Default: 'ASC'
 	 *
 	 * @return string
 	 */
-	public function export_sort_order( $sort_order ) {
-
-		return 'ASC';
+	public function export_sort_order( $sort_order = 'ASC' ) {
+		/**
+		 * Filter to set the default sort order for the members list
+		 *
+		 * @filter e20r_memberslist_default_sort_order
+		 *
+		 * @param string $sort_order = 'ASC'
+		 */
+		return apply_filters( 'e20r_memberslist_default_sort_order', $sort_order);
 	}
 
 	/**
