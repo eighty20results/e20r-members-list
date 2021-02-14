@@ -155,25 +155,46 @@ class Members_List_Page {
 	 */
 	public function load_scripts_styles( $hook_suffix ) {
 
-		if ( is_admin() && ( ! defined( 'DOING_AJAX' ) || false == DOING_AJAX ) && 1 === preg_match( '/(pmpro|e20r)-memberslist/', $hook_suffix ) ) {
+		if ( is_admin() &&
+			 ( ! defined( 'DOING_AJAX' ) || false == DOING_AJAX ) &&
+			 1 === preg_match( '/(pmpro|e20r)-memberslist/', $hook_suffix )
+		) {
 
-			wp_enqueue_style( 'jquery-ui', '//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css' );
+			wp_enqueue_style(
+					'jquery-ui',
+					'//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css'
+			);
 			wp_enqueue_script( 'jquery-ui-datepicker' );
 
-			wp_enqueue_style( 'e20r-memberslist-page', plugins_url( "/css/e20r-memberslist-page.css", __FILE__ ), array( 'pmpro_admin' ), E20R_MEMBERSLIST_VER );
+			wp_enqueue_style(
+					'e20r-memberslist-page',
+					plugins_url( "/css/e20r-memberslist-page.css", __FILE__ ),
+					array( 'pmpro_admin' ),
+					E20R_MEMBERSLIST_VER
+			);
 
-			wp_register_script( 'e20r-memberslist-page', plugins_url( "/js/e20r-memberslist-page.js", __FILE__ ), array( 'jquery' ), E20R_MEMBERSLIST_VER, true );
+			wp_register_script(
+					'e20r-memberslist-page',
+					plugins_url( "/js/e20r-memberslist-page.js", __FILE__ ),
+					array( 'jquery' ),
+					E20R_MEMBERSLIST_VER,
+					true
+			);
 
-			// $is_pmpro_v2 = version_compare( PMPRO_VERSION, '2.0', 'ge' );
-			// $url         = ( false === $is_pmpro_v2 ) ? 'e20r-memberslist' : 'pmpro-memberslist';
-
-			wp_localize_script( 'e20r-memberslist-page', 'e20rml',
+			wp_localize_script(
+					'e20r-memberslist-page',
+					'e20rml',
 				array(
 					'locale' => str_replace( '_', '-', get_locale() ),
 					'url'    => add_query_arg( 'page', 'pmpro-memberslist', admin_url( 'admin.php' ) ),
 					'lang'   => array(
-						'save_btn_text'    => __( 'Save Updates', 'e20r-members-list' ),
-						'clearing_enddate' => __( "This action will clear the current membership end date/expiration date!", 'e20r-members-list' ),
+						'save_btn_text'    =>
+								__( 'Save Updates', E20R_Members_List::plugin_slug ),
+						'clearing_enddate' =>
+								__(
+										"This action will clear the current membership end date/expiration date!",
+										E20R_Members_List::plugin_slug
+								),
 					),
 				)
 			);
@@ -189,7 +210,6 @@ class Members_List_Page {
 
 		$this->utils->log( "Headers sent? " . ( headers_sent() ? 'Yes' : 'No' ) );
 
-
 		$pmpro_menu_slug = 'pmpro-membershiplevels';
 		$is_pmpro_v2     = version_compare( PMPRO_VERSION, '2.0', 'ge' );
 
@@ -199,46 +219,12 @@ class Members_List_Page {
 
 		$this->utils->log( "Remove the default members list page.. (under: {$pmpro_menu_slug})" );
 
-		// Just replace the action that loads the PMPro Members List
-
+		// "Just" replace the action that loads the PMPro Members List
 		$hookname = get_plugin_page_hookname( 'pmpro-memberslist', $pmpro_menu_slug );
 		$this->utils->log("Found hook name: {$hookname}. Sent yet? " . (headers_sent() ? 'Yes' : 'No') );
 		remove_action( $hookname, 'pmpro_memberslist', 10 );
 		add_action( $hookname, array( $this, 'memberslist_settings_page' ), 11 );
 		add_action( "load-memberships_page_pmpro-memberslist", array( $this, 'screen_option' ), 9999 );
-
-		/*
-		// Unhook old members list functionality (pre v2.0 of PMPro)
-		if ( false == ( $page = remove_submenu_page( $pmpro_menu_slug, 'pmpro-memberslist' ) ) ) {
-
-			$this->utils->log( "Unable to remove the default membership levels page!" );
-			pmpro_setMessage( __( 'Error while attempting to reassign member list menu', E20R_Members_List::plugin_slug ), 'error' );
-
-			return;
-		}
-
-		// Load the (new) WP_Table_List based Members List
-		$hook = add_submenu_page(
-			$pmpro_menu_slug,
-			__( 'Members List', 'paid-memberships-pro' ),
-			__( 'Members List', 'paid-memberships-pro' ),
-			'pmpro_memberslist',
-			'pmpro-memberslist',
-			array( $this, 'memberslist_settings_page' )
-		);
-
-		// Show error if we're unable to update the members list
-		if ( false === $hook ) {
-
-			$this->utils->log( "Unable to load the replacement Members List page!" );
-			pmpro_setMessage( __( "Unable to load Members List menu entry", "e20r-members-list" ), "error" );
-
-			return;
-		}
-
-		// Process the screen option
-		add_action( "load-memberships_page_pmpro-memberslist", array( $this, 'screen_option' ), 9999 );
-        */
 	}
 
 	/**
@@ -254,7 +240,11 @@ class Members_List_Page {
 
 		$page = $this->utils->get_variable( 'page', '' );
 
-		if ( 1 === preg_match( "/{$_SERVER['HTTP_HOST']}\/wp-admin\/admin.php\?page=pmpro-memberslist/i", $url ) ) {
+		if ( 1 === preg_match(
+				"/{$_SERVER['HTTP_HOST']}\/wp-admin\/admin.php\?page=pmpro-memberslist/i",
+				$url
+				)
+		) {
 
 			$arg_list = array();
 
@@ -295,7 +285,7 @@ class Members_List_Page {
 		$options = 'per_page';
 
 		$args = array(
-			'label'   => _x( "Members per page", "members per page (screen options)", "e20r-members-list" ),
+			'label'   => _x( "Members per page", "members per page (screen options)",E20R_Members_List::plugin_slug ),
 			'default' => 15,
 			'option'  => $options,
 		);
@@ -326,12 +316,14 @@ class Members_List_Page {
 
 		echo pmpro_loadTemplate( 'admin_header', 'local', 'adminpages' );
 
-		$search_array = apply_filters( 'e20r_memberslist_exportcsv_search_args', array(
-				'action' => 'memberslist_csv',
-				's'      => esc_attr( $search ),
-				'l'      => esc_attr( $level ),
-                'showDebugTrace' => 'true'
-			)
+		$search_array = apply_filters(
+				'e20r_memberslist_exportcsv_search_args',
+				array(
+						'action' => 'memberslist_csv',
+						's'      => esc_attr( $search ),
+						'l'      => esc_attr( $level ),
+						'showDebugTrace' => 'true'
+				)
 		);
 
 		$csv_url = add_query_arg(
@@ -349,9 +341,9 @@ class Members_List_Page {
 		);
 
 		$bottom_list = array(
-			'cancelled'  => __( 'Cancelled Members', 'paid-membership-pro' ),
-			'expired'    => __( 'Expired Members', 'paid-membership-pro' ),
-			'oldmembers' => __( 'Old Members', 'paid-membership-pro' ),
+			'cancelled'  => __( 'Cancelled Members', E20R_Members_List::plugin_slug ),
+			'expired'    => __( 'Expired Members', E20R_Members_List::plugin_slug ),
+			'oldmembers' => __( 'Old Members', E20R_Members_List::plugin_slug ),
 		);
 
 		$level_list = array();
@@ -372,15 +364,18 @@ class Members_List_Page {
 				<?php esc_attr_e( $pmpro_msg ); ?>
             </div>
 			<?php
-		} else if ( ! empty( $e20r_error_msgs ) || ! empty( $e20r_warning_msgs ) || ! empty( $e20r_info_msgs ) ) {
+		} else if ( ! empty( $e20r_error_msgs ) ||
+					! empty( $e20r_warning_msgs ) ||
+					! empty( $e20r_info_msgs )
+		) {
 			$this->utils->display_messages( 'backend' );
 		}
 		?>
         <div class="wrap e20r-pmpro-memberslist-page">
             <h1>
-				<?php _e( "Members List", "paid-memberships-pro" ); ?>
+				<?php _e( "Members List", E20R_Members_List::plugin_slug ); ?>
                 <a href="<?php echo esc_url_raw( $csv_url ); ?>" class="page-title-action e20r-memberslist-export"
-                   target="_blank"><?php _e( 'Export to CSV', 'paid-memberships-pro' ); ?></a>
+                   target="_blank"><?php _e( 'Export to CSV', E20R_Members_List::plugin_slug ); ?></a>
 				<?php if ( ! empty( $search ) ) {
 					printf(
 						'<span class="e20r-pmpro-memberslist-search-info">%1$s</span>',
@@ -393,7 +388,9 @@ class Members_List_Page {
 				} ?>
             </h1>
             <hr class="e20r-memberslist-hr"/>
-            <h2 class="screen-reader-text"><?php _e( "Filter list of members", "e20r-members-list" ); ?></h2>
+            <h2 class="screen-reader-text">
+				<?php _e( "Filter list of members", E20R_Members_List::plugin_slug ); ?>
+			</h2>
             <form method="post" id="posts-filter">
                 <div class="e20r-search-arguments">
                     <p class="search-box float-left">
@@ -412,25 +409,32 @@ class Members_List_Page {
                     </p>
                     <ul class="subsubsub">
                         <li>
-							<?php _e( 'Show', 'e20r-members-list' ); ?>
+							<?php _e( 'Show', E20R_Members_List::plugin_slug ); ?>
                             <select name="level" id="e20r-pmpro-memberslist-levels">
 								<?php foreach ( $option_list as $option_id => $option_name ) { ?>
-                                    <option value="<?php esc_attr_e( $option_id ); ?>" <?php selected( $level, $option_id ); ?>><?php esc_attr_e( $option_name ); ?></option> <?php
+                                    <option value="<?php esc_attr_e( $option_id ); ?>"
+											<?php selected( $level, $option_id ); ?>>
+										<?php esc_attr_e( $option_name ); ?>
+									</option> <?php
 								} ?>
                             </select>
                         </li>
 						<?php do_action( 'e20r_memberslist_addl_search_options', $search, $level ); ?>
                     </ul>
                     <p class="search-box float-right">
-                        <label class="hidden" for="post-search-input"><?php _e( 'Search', 'paid-memberships-pro' ); ?>
-                            :</label>
+                        <label class="hidden" for="post-search-input">
+							<?php _e( 'Search', E20R_Members_List::plugin_slug ); ?>:
+						</label>
                         <input type="hidden" name="page" value="e20r-memberslist"/>
                         <input id="post-search-input" type="text" value="<?php esc_attr_e( $search ); ?>" name="find"/>
                         <input class="button" type="submit" id="e20r-memberslist-search-data"
-                               value="<?php _e( 'Search Members', 'paid-memberships-pro' ); ?>"/>
+                               value="<?php _e( 'Search Members', E20R_Members_List::plugin_slug ); ?>"/>
                     </p>
                 </div>
-                <h2 class="screen-reader-text"><?php _e( 'Member list', E20R_Members_List::plugin_slug ); ?></h2>
+                <h2 class="screen-reader-text"><?php _e(
+                		'Member list',
+						E20R_Members_List::plugin_slug ); ?>
+				</h2>
                 <hr class="e20r-memberslist-hr"/>
 				<?php
 				$this->member_list->prepare_items();
