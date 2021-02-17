@@ -58,7 +58,24 @@ fi
 
 SVN_URL="http://plugins.svn.wordpress.org/${SLUG}/"
 SVN_DIR="/github/svn-${SLUG}"
-read -r -a RM_LIST <<< "trunk/.git trunk/Dockerfile trunk/remove_update.sh trunk/metadata.json trunk/package.json tags/${VERSION} tags/${VERSION}/.git trunk/class/utilities/.git trunk/class/utilities/.gitignore trunk/class/utilities/.editorconfig trunk/class/utilities/composer.json"
+
+# Should be excluded from the Wordpress.org repo
+read -r -a RM_LIST <<< "trunk/.git \
+	trunk/action.yml \
+	trunk/Dockerfile \
+	trunk/remove_update.sh \
+	trunk/metadata.json \
+	trunk/package.json tags/${VERSION} \
+	trunk/build_env \
+	tags/${VERSION}/.git \
+	trunk/class/utilities/.git \
+	trunk/class/utilities/bin \
+	trunk/class/utilities/.gitignore \
+	trunk/class/utilities/README.txt \
+	trunk/class/utilities/.editorconfig \
+	trunk/class/utilities/metadata.json \
+	trunk/class/utilities/composer.json \
+	trunk/test"
 
 # Checkout just trunk and assets for efficiency
 # Tagging will be handled on the SVN level
@@ -139,7 +156,7 @@ fi
 for remove_file in "${RM_LIST[@]}"; do
 	# Only need to remove the file if it exists
 	if [[ -f "${remove_file}" || -d $"${remove_file}" ]]; then
-		echo "ℹ︎ Removing ${remove_file}. Not included in SVN repo"
+		echo "ℹ︎ Removing ${remove_file}. Not to be included in the SVN repo"
 		rm -rf "${remove_file}"
 	fi
 done
