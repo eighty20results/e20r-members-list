@@ -31,6 +31,11 @@ kit_name="${kit_path}/${short_name}-${version}"
 remote_path="./www/eighty20results.com/public_html/protected-content/"
 echo "Building ${short_name} kit for version ${version}"
 
+if [[ -f "${dst_path}/composer.json" ]]; then
+	echo "Loading all composer packages"
+	composer --no-dev install
+fi
+
 mkdir -p "${kit_path}"
 mkdir -p "${dst_path}"
 
