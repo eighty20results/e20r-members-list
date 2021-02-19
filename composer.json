@@ -1,0 +1,26 @@
+{
+    "config": {
+        "vendor-dir": "inc/"
+    },
+    "name": "eight20results/e20r-members-list",
+    "type": "plugin",
+    "description": "E20R Better Members List for Paid Memberships Pro",
+    "keywords": ["wordpress", "membership", "paid memberships pro", "pmpro", "advanced pmpro members list"],
+    "minimum-stability": "stable",
+    "homepage": "https://eighty20results.com/e20r-members-list",
+    "license": "GPLv2",
+    "version": "7.5",
+    "authors": [{
+        "name": "Thomas Sjolshagen",
+        "email": "thomas@eighty20results.com",
+        "homepage": "https://eighty20results.com/thomas-sjolshagen",
+        "role": "Developer"
+    }],
+    "require": {
+    },
+    "require-dev": {
+        "phpunit/phpunit": ">=9.5.2",
+        "wp-coding-standards/wpcs": "*",
+        "squizlabs/php_codesniffer": "*"
+    }
+}
