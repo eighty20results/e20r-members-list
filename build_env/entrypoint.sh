@@ -67,6 +67,7 @@ read -r -a RM_LIST <<< "trunk/.git \
 	trunk/metadata.json \
 	trunk/package.json tags/${VERSION} \
 	trunk/build_env \
+	trunk/inc \
 	tags/${VERSION}/.git \
 	trunk/class/utilities/.git \
 	trunk/class/utilities/bin \
