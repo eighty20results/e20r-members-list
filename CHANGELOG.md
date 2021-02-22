@@ -17,17 +17,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ENH: Adding new filter to documentation section
 - ENH: Adding composer file for unit testing, CircleCI integration, etc
 
-## [7.6] - 2021-02-22
-- BUG FIX: Implicitly defined variable fixes
-- BUG FIX: Refactored to use Class::plugin_slug for translation strings
-- BUG FIX: Using explicit namespace paths
-- BUG FIX: Refactored e20r-memberslist-page.js
-- BUG FIX: Exclude the inc/ directory from the Wordpress.org repo
-- BUG FIX: Didn't install the composer dependencies
-- ENH: Adding support for filter to set default sort order - e20r_memberslist_default_sort_order
-- ENH: Adding new filter to documentation section
-- ENH: Adding composer file for unit testing, CircleCI integration, etc
-
 ## [7.5] - 2021-02-10
 - BUG FIX: Didn't automatically search for levels only when selected level is changed
 
