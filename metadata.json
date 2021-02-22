@@ -12,6 +12,6 @@
   "sections": {
     "description": "Extensible, sortable & bulk action capable members listing tool for Paid Memberships Pro, fully compatible with the existing filters and hooks for the PMPro Members List functionality. Will also export members to CSV.",
     "changelog": "See the linked <a href=\"CHANGELOG.md\" target=\"_blank\">Change Log</a> for details",
-    "faq": "<h3>I found a bug in the plugin.</h3>Please report your issue to us by using the <a href='https://eighty20results.com/support-forums/forum/support-forums/e20r-members-list/' target='_blank'>Enhanced Members List</a> Support Forum on The Eighty / 20 Website, and we'll normally respond within 1 business day."
+	"faq": "<h3>I found a bug in the plugin.</h3><p>Please report your issue to us by using the <a href='https://github.com/eighty20results/e20r-members-list/issues' target='_blank'>Github Issues page</a>, and we'll try to respond within 1 business day.</p>"
     }
 }
