@@ -2,9 +2,9 @@
 Contributors: eighty20results
 Tags: paid memberships pro, members, memberships, pmpro enhancements, better members list, members list
 Requires at least: 4.9
-Tested up to: 5.7
+Tested up to: 5.6.1
 Requires PHP: 7.1
-Stable tag: 7.5
+Stable tag: 7.6
 License: GPLv2
 License URI: http://www.gnu.org/licenses/gpl
 
