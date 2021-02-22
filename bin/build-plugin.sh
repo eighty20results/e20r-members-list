@@ -9,12 +9,15 @@ declare -a include=( \
 	"class" \
 	"languages" \
 	"${short_name}.php" \
-	"README.txt" )
+	"README.txt" \
+	"CHANGELOG.md"
+	)
 declare -a exclude=( \
 	"*.yml" \
 	"*.phar" \
 	"composer.*" \
 	"vendor" \
+	"test" \
 	)
 declare -a build=( \
 	"plugin-updates/vendor/*.php" \
@@ -31,13 +34,13 @@ kit_name="${kit_path}/${short_name}-${version}"
 remote_path="./www/eighty20results.com/public_html/protected-content/"
 echo "Building ${short_name} kit for version ${version}"
 
+mkdir -p "${kit_path}"
+mkdir -p "${dst_path}"
+
 if [[ -f "${dst_path}/composer.json" ]]; then
 	echo "Loading all composer packages"
 	composer --no-dev install
 fi
-
-mkdir -p "${kit_path}"
-mkdir -p "${dst_path}"
 
 if [[ -f "${kit_name}" ]]
 then
