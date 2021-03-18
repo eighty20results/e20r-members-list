@@ -3,7 +3,7 @@
 Plugin Name: Better Members List for Paid Memberships Pro
 Plugin URI: https://wordpress.org/plugins/e20r-members-list
 Description: Extensible, sortable & bulk action capable members listing + export to CSV tool for Paid Memberships Pro.
-Version: 7.5
+Version: 7.6
 Author: Thomas Sjolshagen @ Eighty / 20 Results by Wicked Strong Chicks, LLC <thomas@eighty20results.com>
 Author URI: https://eighty20results.com/thomas-sjolshagen/
 Text Domain: e20r-members-list
@@ -32,7 +32,7 @@ namespace E20R\Members_List\Controller;
 use E20R\Members_List\Admin\Members_List_Page;
 
 if ( ! defined( 'E20R_MEMBERSLIST_VER' ) ) {
-	define( 'E20R_MEMBERSLIST_VER', '7.5' );
+	define( 'E20R_MEMBERSLIST_VER', '7.6' );
 }
 
 if ( ! class_exists( '\\E20R\Members_List\\Controller\\E20R_Members_List' ) ) {
@@ -76,13 +76,14 @@ if ( ! class_exists( '\\E20R\Members_List\\Controller\\E20R_Members_List' ) ) {
 		 *
 		 * @param string $class_name Name of the class to auto-load
 		 *
+		 * @return false|bool
 		 * @since  1.0
 		 * @access public static
 		 */
 		public static function autoLoader( $class_name ) {
 
 			if ( false === stripos( $class_name, 'e20r' ) ) {
-				return;
+				return false;
 			}
 
 			$parts     = explode( '\\', $class_name );
@@ -95,33 +96,49 @@ if ( ! class_exists( '\\E20R\Members_List\\Controller\\E20R_Members_List' ) ) {
 
 			$filename = "class-{$c_name}.php";
 
-			$iterator = new \RecursiveDirectoryIterator( $base_path, \RecursiveDirectoryIterator::SKIP_DOTS | \RecursiveIteratorIterator::SELF_FIRST | \RecursiveIteratorIterator::CATCH_GET_CHILD | \RecursiveDirectoryIterator::FOLLOW_SYMLINKS );
-
+			try {
+				$iterator = new \RecursiveDirectoryIterator(
+					$base_path,
+					\RecursiveDirectoryIterator::SKIP_DOTS |
+					\RecursiveIteratorIterator::SELF_FIRST |
+					\RecursiveIteratorIterator::CATCH_GET_CHILD |
+					\RecursiveDirectoryIterator::FOLLOW_SYMLINKS
+				);
+			} catch ( \Exception $ri_except ) {
+				error_log("Error instantiating iterator for ${class_name}: " . $ri_except->getMessage() );
+				return false;
+			}
 			/**
-			 * Loate class member files, recursively
+			 * Locate the class files for the plugin, recursively
 			 */
-			$filter = new \RecursiveCallbackFilterIterator( $iterator, function ( $current, $key, $iterator ) use ( $filename ) {
+			try {
+				$filter = new \RecursiveCallbackFilterIterator(
+					$iterator,
+					function ( $current, $key, $iterator ) use ( $filename ) {
+						$file_name = $current->getFilename();
 
-				$file_name = $current->getFilename();
+						// Skip hidden files and directories.
+						if ( $file_name[0] == '.' || $file_name == '..' ) {
+							return false;
+						}
 
-				// Skip hidden files and directories.
-				if ( $file_name[0] == '.' || $file_name == '..' ) {
-					return false;
-				}
-
-				if ( $current->isDir() ) {
-					// Only recurse into intended subdirectories.
-					return $file_name() === $filename;
-				} else {
-					// Only consume files of interest.
-					return strpos( $file_name, $filename ) === 0;
-				}
-			} );
+						if ( $current->isDir() ) {
+							// Only recurse into intended subdirectories.
+							return $file_name() === $filename;
+						} else {
+							// Only consume files of interest.
+							return strpos( $file_name, $filename ) === 0;
+						}
+					} );
+			} catch ( \Exception $fh_except ) {
+				error_log("Error locating ${class_name}: " . $fh_except->getMessage() );
+				return false;
+			}
 
 			try {
 				foreach ( new \ RecursiveIteratorIterator( $iterator ) as $f_filename => $f_file ) {
 
-					$class_path = $f_file->getPath() . "/" . $f_file->getFilename();
+					$class_path = sprintf( '%1$s/%2$s', $f_file->getPath(), $f_file->getFilename() );
 
 					if ( $f_file->isFile() && false !== strpos( $class_path, $filename ) ) {
 						require_once( $class_path );
@@ -131,6 +148,8 @@ if ( ! class_exists( '\\E20R\Members_List\\Controller\\E20R_Members_List' ) ) {
 				error_log("Error loading ${class_name}: " . $e->getMessage() );
 				return false;
 			}
+
+			return true;
 		}
 
 		/**
@@ -197,6 +216,6 @@ try {
 
 add_action( 'plugins_loaded', array( E20R_Members_List::get_instance(), 'load_hooks' ) );
 
-if ( class_exists( '\E20R\Utilities\Utilities' )  ) {
+if ( class_exists( '\E20R\Utilities\Utilities' ) && file_exists( '') ) {
 	\E20R\Utilities\Utilities::configureUpdateServerV4( 'e20r-members-list', plugin_dir_path( __FILE__ ) . 'class.e20r-members-list.php' );
 }
