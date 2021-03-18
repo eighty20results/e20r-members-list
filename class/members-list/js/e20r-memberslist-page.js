@@ -84,6 +84,31 @@
 				self.dataSearchBtn.click();
 			});
 
+			/**
+			 * Search operation initiated (a few other things simulate clicking the button)
+			 */
+
+			self.dataSearchBtn.unbind('click').on('click', function(event) {
+
+				let $search_string = $('#post-search-input').val();
+				let $uri = window.location.toString();
+
+				// If we have a string in the search box we'll append it to the URL
+				if ($search_string) {
+					event.preventDefault();
+
+					// URL Encode the search string and add or replace it for the URI
+					$uri = self.set_search( $uri, 'find', encodeURIComponent( $search_string ) )
+					console.log( 'New URI is: ' + $uri);
+
+					// Now we trigger the search
+					window.location = $uri;
+
+					// Clear the search field - Possible FIXME if user's do not want clearing the search field to happen
+					$('#post-search-input').val(null);
+				}
+			});
+
             self.changed_select.unbind('change').on('change', function() {
 
                 let current_select = $(this);
@@ -204,20 +229,22 @@
 
                 self.prepare_export(self, export_args, inputs);
             });
-
-            /*
-            self.updateBtn.unbind('click').on('click', function (ev) {
-
-                ev.preventDefault();
-                let $link = $(this).attr('href');
-                let url = document.createElement('a');
-
-                url.href = $link;
-
-                window.console.log("requesting cancellation for");
-            });
-            */
         },
+		set_search: function(url, paramName, paramValue) {
+
+			let pattern = new RegExp('\\b('+paramName+'=).*?(&|#|$)');
+
+			if (paramValue == null) {
+				paramValue = '';
+			}
+
+			if (url.search(pattern)>=0) {
+				return url.replace(pattern,'$1' + paramValue + '$2');
+			}
+
+			url = url.replace(/[?#]$/,'');
+			return url + (url.indexOf('?')>0 ? '&' : '?') + paramName + '=' + paramValue;
+		},
 		prepare_export: function( self, export_args, inputs ) {
 
 			export_args.action = "e20rml_export_records";
@@ -253,9 +280,6 @@
 			}
 
 			self.submit_export(this, export_args);
-		},
-		search_submit: function () {
-
 		},
         set_update: function( $element ) {
             let self = this;
