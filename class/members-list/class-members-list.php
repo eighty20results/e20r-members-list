@@ -228,9 +228,17 @@ class Members_List extends \WP_List_Table {
 		 * Should the final column use 'Expired' or 'Expires' as the label
 		 */
 		if ( 'oldmembers' == $level ) {
-			$this->default_columns['last'] = apply_filters( 'e20r-members-list-enddate-col-name', _x( "Expired", E20R_Members_List::plugin_slug ), $level );
+			$this->default_columns['last'] = apply_filters(
+					'e20r-members-list-enddate-col-name',
+					_x( "Expired", E20R_Members_List::plugin_slug ),
+					$level
+			);
 		} else {
-			$this->default_columns['last'] = apply_filters( 'e20r-members-list-enddate-col-name', _x( "Expires", E20R_Members_List::plugin_slug ), $level );
+			$this->default_columns['last'] = apply_filters(
+					'e20r-members-list-enddate-col-name',
+					_x( "Expires", E20R_Members_List::plugin_slug ),
+					$level
+			);
 		}
 
 		$this->total_member_records = $this->get_member_record_count();
@@ -240,6 +248,7 @@ class Members_List extends \WP_List_Table {
 		 */
 		if ( 'e20rml_export_records' === $this->utils->get_variable( 'action', null ) ) {
 			$this->utils->log( "Adding export handler" . ( headers_sent() ? ' Sent' : ' Not sent' ) );
+			$this->prepare_items();
 			add_action( 'e20r_memberslist_process_action', array( $this, 'export_members' ), 10, 3 );
 		}
 	}
