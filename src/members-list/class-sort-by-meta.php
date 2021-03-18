@@ -23,8 +23,18 @@ if ( ! class_exists( '\E20R\Members_List\Support\Sort_By_Meta' ) ) {
 
 	class Sort_By_Meta {
 
+		/**
+		 * The metadata key to sort by
+		 *
+		 * @var string $meta_key
+		 */
 		private $meta_key;
 
+		/**
+		 * Configure/save the sort order for the Metadata search
+		 *
+		 * @var string $order Sort order
+		 */
 		private $order = 'DESC';
 
 		/**
@@ -48,10 +58,6 @@ if ( ! class_exists( '\E20R\Members_List\Support\Sort_By_Meta' ) ) {
 		 */
 		public function sort_records( $a, $b ) {
 
-			// $utils = Utilities::get_instance();
-			// $utils->log( "A: " . print_r( $a, true));
-			// $utils->log("B: " . print_r( $b, true));
-
 			$a_user_id = is_array( $a ) ?
 				$a['user_id'] :
 				( is_a( $a, '\WP_User' ) ? $a->ID : null );
@@ -59,7 +65,7 @@ if ( ! class_exists( '\E20R\Members_List\Support\Sort_By_Meta' ) ) {
 				$b['user_id'] :
 				( is_a( $b, '\WP_User' ) ? $b->ID : null );
 
-			if ( is_null($a_user_id ) || is_null( $b_user_id ) ) {
+			if ( is_null( $a_user_id ) || is_null( $b_user_id ) ) {
 				return false;
 			}
 
@@ -77,15 +83,15 @@ if ( ! class_exists( '\E20R\Members_List\Support\Sort_By_Meta' ) ) {
 				$b_value = $b[ $this->meta_key ];
 			}
 
-			if ( $a_value == $b_value ) {
+			if ( $a_value === $b_value ) {
 				return 0;
 			}
 
-			if ( 'DESC' == $this->order ) {
+			if ( 'DESC' === $this->order ) {
 				return ( $a_value > $b_value ? 1 : - 1 );
 			}
 
-			if ( 'ASC' == $this->order ) {
+			if ( 'ASC' === $this->order ) {
 				return ( $a_value < $b_value ? 1 : - 1 );
 			}
 		}
