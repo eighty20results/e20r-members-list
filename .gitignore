@@ -72,3 +72,4 @@ fabric.properties
 /class/utilities/composer.json
 docker-env/e20r-members-list.sql
 /composer.phar
+/composer.lock
