@@ -209,7 +209,7 @@ if ( ! class_exists( '\\E20R\Members_List\\Controller\\E20R_Members_List' ) ) {
 
 // BUG FIX: Fatal error when e20r-Utilities module is present
 if ( ! file_exists( WP_PLUGIN_DIR . '/00-e20r-utilities/' ) ) {
-	require_once plugin_dir_path( __FILE__ ) . 'class/utilities/class-utility-loader.php';
+	require_once plugin_dir_path( __FILE__ ) . 'src/utilities/class-utility-loader.php';
 }
 
 try {
@@ -221,6 +221,6 @@ try {
 
 add_action( 'plugins_loaded', array( E20R_Members_List::get_instance(), 'load_hooks' ) );
 
-if ( class_exists( '\E20R\Utilities\Utilities' ) && file_exists( '') ) {
+if ( class_exists( '\E20R\Utilities\Utilities' ) && ( file_exists( WP_PLUGIN_DIR . '/00-e20r-utilities/' ) || file_exists( plugin_dir_path( __FILE__ ) . 'src/utilities/class-utility-loader.php' ) ) ) {
 	\E20R\Utilities\Utilities::configureUpdateServerV4( 'e20r-members-list', plugin_dir_path( __FILE__ ) . 'class.e20r-members-list.php' );
 }
