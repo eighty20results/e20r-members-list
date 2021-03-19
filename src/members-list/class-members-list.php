@@ -181,7 +181,7 @@ class Members_List extends \WP_List_Table {
 			)
 		);
 
-		if ( method_exists( 'E20R\Utilities\Utilities', 'get_instance' ) ) {
+		if ( method_exists( '\\E20R\\Utilities\\Utilities', 'get_instance' ) ) {
 			$this->utils = Utilities::get_instance();
 			$this->utils->log( 'Loaded Utilities class for the Members List' );
 		}
@@ -247,7 +247,6 @@ class Members_List extends \WP_List_Table {
 			$this->default_columns['last'],
 			$level
 		);
-		$this->total_member_records    = $this->get_member_record_count();
 
 		/**
 		 * Prepare the Export bulk action
@@ -364,6 +363,7 @@ class Members_List extends \WP_List_Table {
 		$this->utils->log( 'Fetch records from DB' );
 		// Load  & count records
 		$this->items = $this->get_members( $per_page, $current_page, $level );
+		$this->total_member_records = $this->get_member_record_count();
 
 		// BUG FIX: Handle situation(s) where there are no records found
 		if ( null !== $this->items ) {
