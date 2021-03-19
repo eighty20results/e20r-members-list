@@ -21,6 +21,7 @@
 
 namespace E20R\Members_List\Controller\Test;
 
+use E20R\Members_List\Admin\Members_List;
 use E20R\Members_List\Controller\E20R_Members_List;
 use Codeception\Test\Unit;
 use Brain\Monkey;
@@ -48,6 +49,8 @@ class E20R_Members_ListTest extends Unit {
 			->justReturn( sprintf( '/var/www/html/wp-content/plugins/e20r-members-list/' ) );
 		Monkey\Functions\when( 'get_current_blog_id' )
 			->justReturn( 1 );
+
+		$GLOBALS['hook_suffix'] = 'e20r-members-list';
 	}
 
 	/**
@@ -65,5 +68,20 @@ class E20R_Members_ListTest extends Unit {
 	 */
 	public function test_get_instance() {
 		self::assertInstanceOf( '\\E20R\Members_List\\Controller\\E20R_Members_List', E20R_Members_List::get_instance() );
+	}
+
+	/**
+	 * Tests that the expected hooks to run have been loaded
+	 * @test
+	 */
+	public function test_load_hooks() {
+
+		Monkey\Actions\expectAdded( 'init' )
+			->with( array( Members_List::get_instance(), 'load_hooks' ), -1 );
+		Monkey\Actions\expectAdded( 'init' )
+			->with( array( E20R_Members_List::get_instance(), 'load_text_domain' ), 1 );
+
+		// Load the class and hooks (make sure the hooks we expect are loaded
+		E20R_Members_List::get_instance()->load_hooks();
 	}
 }
