@@ -19,7 +19,6 @@
 
 namespace E20R\Members_List\Admin;
 
-
 use E20R\Members_List\Controller\E20R_Members_List;
 use E20R\Utilities\Utilities;
 
@@ -69,7 +68,7 @@ class Bulk_Update {
 	public static function get_instance() {
 
 		if ( is_null( self::$instance ) ) {
-			self::$instance = new self;
+			self::$instance = new self();
 		}
 
 		return self::$instance;
@@ -86,8 +85,8 @@ class Bulk_Update {
 		$update_errors = array();
 		$level_failed  = array();
 
-		$utils->log("User count to update: " . count( $this->members_to_update) );
-		$utils->log("Request: " . print_r( $_REQUEST, true ));
+		$utils->log( 'User count to update: ' . count( $this->members_to_update ) );
+		$utils->log( 'Request: ' . print_r( $_REQUEST, true ) );
 
 		/**
 		 * Process build-in edit fields for the specified members to update
@@ -109,14 +108,14 @@ class Bulk_Update {
 			);
 
 			if ( empty( $user_info['user_id'] ) ) {
-				$utils->log("User ID is NULL. Returning!" );
+				$utils->log( 'User ID is NULL. Returning!' );
 				return false;
 			}
 
-			$utils->log("Have to update level for {$user_info['user_id']}? {$new_user_level}" );
+			$utils->log( "Have to update level for {$user_info['user_id']}? {$new_user_level}" );
 
 			// Update the membership level for the user we're processing
-			if ( !empty( $new_user_level) && $old_user_level !== $new_user_level ) {
+			if ( ! empty( $new_user_level ) && $old_user_level !== $new_user_level ) {
 
 				if ( false === $this->update_membership( $user_info['user_id'], $old_user_level, $new_user_level ) ) {
 
@@ -148,7 +147,7 @@ class Bulk_Update {
 			if ( $old_startdate !== $new_startdate ) {
 
 				if ( empty( $new_startdate ) ) {
-					$utils->log("Error: Start date cannot be empty!, using old start date");
+					$utils->log( 'Error: Start date cannot be empty!, using old start date' );
 					$new_startdate = $old_startdate;
 				}
 
@@ -159,7 +158,8 @@ class Bulk_Update {
 					$new_user_level,
 					$new_startdate,
 					$record_id,
-					$level_changed )
+					$level_changed
+				)
 				) {
 					$startdate_failed[] = array(
 						'user_id'  => $user_info['user_id'],
@@ -171,17 +171,19 @@ class Bulk_Update {
 			}
 
 			$old_enddate = $utils->get_variable(
-				"e20r-members-list-db_enddate_{$user_info['user_id']}", ''
+				"e20r-members-list-db_enddate_{$user_info['user_id']}",
+				''
 			);
 			$new_enddate = $utils->get_variable(
-				"e20r-members-list-new_enddate_{$user_info['user_id']}", ''
+				"e20r-members-list-new_enddate_{$user_info['user_id']}",
+				''
 			);
 
-			$utils->log("Have to update end date for {$user_info['user_id']}? N:{$new_enddate} vs O:{$old_enddate}");
+			$utils->log( "Have to update end date for {$user_info['user_id']}? N:{$new_enddate} vs O:{$old_enddate}" );
 
 			if ( $old_enddate !== $new_enddate ) {
 
-				$utils->log("Updating end date to {$new_enddate}");
+				$utils->log( "Updating end date to {$new_enddate}" );
 
 				if ( false === $this->update_date(
 					'enddate',
@@ -190,7 +192,8 @@ class Bulk_Update {
 					$new_user_level,
 					$new_enddate,
 					$record_id,
-					$level_changed )
+					$level_changed
+				)
 				) {
 					$enddate_failed[] = array(
 						'user_id'  => $user_info['user_id'],
@@ -202,13 +205,15 @@ class Bulk_Update {
 			}
 
 			$old_status = $utils->get_variable(
-				"e20r-members-list-db_status_{$user_info['user_id']}", ''
+				"e20r-members-list-db_status_{$user_info['user_id']}",
+				''
 			);
 			$new_status = $utils->get_variable(
-				"e20r-members-list-new_status_{$user_info['user_id']}", ''
+				"e20r-members-list-new_status_{$user_info['user_id']}",
+				''
 			);
 
-			$utils->log("Have to update status for {$user_info['user_id']}? {$new_status}" );
+			$utils->log( "Have to update status for {$user_info['user_id']}? {$new_status}" );
 
 			if ( $old_status !== $new_status ) {
 
@@ -235,9 +240,10 @@ class Bulk_Update {
 		/**
 		 * Error handling for build-in edit fields
 		 */
+		// translators: %1$s user's email address, %2$d user ID, %3$s type of data, %4$s new value, %5$s new value, %6$s existing level
 		$msg_template = __(
 			'Error updating data for %1$s (ID: %2$d). Could not update %3$s from %4$s to %5$s (current membership level: \'%6$s\')',
-			E20R_Members_List::plugin_slug
+			E20R_Members_List::PLUGIN_SLUG
 		);
 
 		if ( ! empty( $level_failed ) ) {
@@ -253,17 +259,16 @@ class Bulk_Update {
 					$user->ID,
 					__( 'membership level', 'e20r-members-list' ),
 					$old_user_level->name,
-					( !empty( $new_user_level->name ) ?
+					( ! empty( $new_user_level->name ) ?
 						$new_user_level->name :
-						__('Not Applicable', E20R_Members_List::plugin_slug)
+						__( 'Not Applicable', E20R_Members_List::PLUGIN_SLUG )
 					),
-					( !empty( $old_user_level->name ) ?
+					( ! empty( $old_user_level->name ) ?
 						$old_user_level->name :
-						__('Not Applicable', E20R_Members_List::plugin_slug)
+						__( 'Not Applicable', E20R_Members_List::PLUGIN_SLUG )
 					)
 				);
 			}
-
 		}
 
 		if ( ! empty( $enddate_failed ) ) {
@@ -323,10 +328,10 @@ class Bulk_Update {
 		 */
 		if ( ! empty( $update_errors ) ) {
 
-			$utils->log("Generated " . count( $update_errors ) . " errors during bulk update!");
+			$utils->log( 'Generated ' . count( $update_errors ) . ' errors during bulk update!' );
 
 			foreach ( $update_errors as $e_msg ) {
-				$utils->log("Error: {$e_msg}");
+				$utils->log( "Error: {$e_msg}" );
 				$utils->add_message( $e_msg, 'error', 'backend' );
 			}
 
@@ -385,18 +390,21 @@ class Bulk_Update {
 		$use_new = false
 	) {
 
-		$utils = Utilities::get_instance();
-		$date = null;
+		$utils        = Utilities::get_instance();
+		$date         = null;
+		$where        = null;
+		$where_format = null;
 
 		// Make sure we received a valid date
-		if ( !empty($new_date) && false === $this->validate_date_format( $new_date, 'Y-m-d' ) ) {
+		if ( ! empty( $new_date ) && false === $this->validate_date_format( $new_date, 'Y-m-d' ) ) {
 
-			$user = get_user_by('ID', $user_id );
+			$user = get_user_by( 'ID', $user_id );
 
 			$msg = sprintf(
-				__("Invalid date format for %s (record: %d/email: %s)", 'e20r-members-list' ),
+				// translators: %1$s date value, %2$d record ID, %3$s email address
+				__( 'Invalid date format for %1$s (record: %2$d/email: %3$s)', 'e20r-members-list' ),
 				$new_date,
-				( $record_id ? $record_id : __('Unknown', 'e20r-members-list' ) ),
+				( $record_id ? $record_id : __( 'Unknown', 'e20r-members-list' ) ),
 				$user->user_email
 			);
 
@@ -409,26 +417,34 @@ class Bulk_Update {
 		global $wpdb;
 
 		if ( true === $use_new ) {
-			$where        = array( 'membership_id' => $new_level, 'user_id' => $user_id, 'status' => 'active' );
+			$where        = array(
+				'membership_id' => $new_level,
+				'user_id'       => $user_id,
+				'status'        => 'active',
+			);
 			$where_format = array( '%d', '%d', '%s' );
-		} else if ( false === $use_new && ! empty( $record_id ) ) {
+		} elseif ( false === $use_new && ! empty( $record_id ) ) {
 			$where        = array( 'id' => $record_id );
 			$where_format = array( '%d' );
-		} else if ( false === $use_new && empty( $record_id ) && ! empty( $current_level ) ) {
-			$where        = array( 'membership_id' => $current_level, 'user_id' => $user_id, 'status' => 'active' );
+		} elseif ( false === $use_new && empty( $record_id ) && ! empty( $current_level ) ) {
+			$where        = array(
+				'membership_id' => $current_level,
+				'user_id'       => $user_id,
+				'status'        => 'active',
+			);
 			$where_format = array( '%d', '%d', '%s' );
 		}
 
-		if ( !empty( $new_date ) ) {
+		if ( ! empty( $new_date ) ) {
 			if ( true === apply_filters( 'e20r_memberslist_membership_starts_at_midnight', __return_true() ) ) {
-				$date = date(
+				$date = date_i18n(
 					'Y-m-d 00:00:00',
-					strtotime( $new_date, current_time( 'timestamp' ) )
+					strtotime( $new_date, time() )
 				);
 			} else {
-				$date = date(
+				$date = date_i18n(
 					'Y-m-d h:i:s',
-					strtotime( $new_date, current_time( 'timestamp' ) )
+					strtotime( $new_date, time() )
 				);
 			}
 		}
@@ -524,6 +540,6 @@ class Bulk_Update {
 
 		$check_date = \DateTime::createFromFormat( $format, $date );
 
-		return $check_date && $check_date->format( $format ) == $date;
+		return $check_date && $check_date->format( $format ) === $date;
 	}
 }

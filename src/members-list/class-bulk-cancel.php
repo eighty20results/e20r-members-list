@@ -68,12 +68,12 @@ class Bulk_Cancel {
 		$failed = array();
 
 		$utils = Utilities::get_instance();
-		$utils->log("Cancelling " . count( $this->members_to_update ) . " members");
+		$utils->log( 'Cancelling ' . count( $this->members_to_update ) . ' members' );
 
 		// Process all selected records/members
 		foreach ( $this->members_to_update as $key => $cancel_info ) {
 
-			if ( false == $this->cancel_member( $cancel_info['user_id'], $cancel_info['level_id']  ) ) {
+			if ( false === $this->cancel_member( $cancel_info['user_id'], $cancel_info['level_id'] ) ) {
 				$failed[] = $cancel_info['user_id']; // FIXME: Add level info for multiple membership levels
 			}
 		}
@@ -82,15 +82,16 @@ class Bulk_Cancel {
 		if ( ! empty( $failed ) ) {
 
 			$message = sprintf(
+				// translators: %1$s List of User IDs
 				__(
-					"Unable to cancel membership(s) for the following user IDs: %s",
-					E20R_Members_List::plugin_slug
+					'Unable to cancel membership(s) for the following user IDs: %1$s',
+					E20R_Members_List::PLUGIN_SLUG
 				),
 				implode( ', ', $failed )
 			);
 
 			if ( function_exists( 'pmpro_setMessage' ) ) {
-				pmpro_setMessage( $message, "error" );
+				pmpro_setMessage( $message, 'error' );
 			} else {
 				global $msg;
 				global $msgt;
@@ -98,7 +99,6 @@ class Bulk_Cancel {
 				$msg  = $message;
 				$msgt = 'error';
 			}
-
 		}
 	}
 
@@ -128,7 +128,7 @@ class Bulk_Cancel {
 	public static function get_instance() {
 
 		if ( is_null( self::$instance ) ) {
-			self::$instance = new self;
+			self::$instance = new self();
 		}
 
 		return self::$instance;
@@ -139,7 +139,7 @@ class Bulk_Cancel {
 	 *
 	 * @param array $member_info
 	 */
-	public function set_members( $member_info ) {
+	public function set_members( $member_info = array() ) {
 		$this->members_to_update = $member_info;
 	}
 

@@ -19,8 +19,6 @@
 
 namespace E20R\Members_List\Admin;
 
-use E20R\Members_List\Controller\E20R_Members_List;
-use E20R\Utilities\E20R_Background_Process;
 use E20R\Utilities\Utilities;
 
 class Export_Members {
@@ -78,7 +76,7 @@ class Export_Members {
 	/**
 	 * Export_Members constructor.
 	 *
-	 * @param stdClass[] $db_records
+	 * @param \stdClass[] $db_records
 	 */
 	public function __construct( $db_records ) {
 
@@ -87,48 +85,54 @@ class Export_Members {
 		$this->file_name = $this->create_temp_file();
 
 		$this->default_columns = array(
-			array( "wp_user", "ID" ),
-			array( "wp_user", "user_login" ),
-			array( "meta_values", "first_name" ),
-			array( "meta_values", "last_name" ),
-			array( "wp_user", "user_email" ),
-			array( "meta_values", "pmpro_bfirstname" ),
-			array( "meta_values", "pmpro_blastname" ),
-			array( "meta_values", "pmpro_baddress1" ),
-			array( "meta_values", "pmpro_baddress2" ),
-			array( "meta_values", "pmpro_bcity" ),
-			array( "meta_values", "pmpro_bstate" ),
-			array( "meta_values", "pmpro_bzipcode" ),
-			array( "meta_values", "pmpro_bcountry" ),
-			array( "meta_values", "pmpro_bphone" ),
-			array( "member_level", "membership_id" ),
-			array( "pmpro_level", "name" ),
+			array( 'wp_user', 'ID' ),
+			array( 'wp_user', 'user_login' ),
+			array( 'meta_values', 'first_name' ),
+			array( 'meta_values', 'last_name' ),
+			array( 'wp_user', 'user_email' ),
+			array( 'meta_values', 'pmpro_bfirstname' ),
+			array( 'meta_values', 'pmpro_blastname' ),
+			array( 'meta_values', 'pmpro_baddress1' ),
+			array( 'meta_values', 'pmpro_baddress2' ),
+			array( 'meta_values', 'pmpro_bcity' ),
+			array( 'meta_values', 'pmpro_bstate' ),
+			array( 'meta_values', 'pmpro_bzipcode' ),
+			array( 'meta_values', 'pmpro_bcountry' ),
+			array( 'meta_values', 'pmpro_bphone' ),
+			array( 'member_level', 'membership_id' ),
+			array( 'pmpro_level', 'name' ),
 			// array( "member_level", "membership" ),
-			array( "member_level", "initial_payment" ),
-			array( "member_level", "billing_amount" ),
-			array( "member_level", "billing_limit" ),
-			array( "member_level", "trial_amount" ),
-			array( "member_level", "trial_limit" ),
-			array( "member_level", "cycle_number" ),
-			array( "member_level", "cycle_period" ),
-			array( "member_level", "status" ),
-			array( "pmpro_discount_code", "code_id" ),
-			array( "pmpro_discount_code", "code" ),
-			array( "wp_user", 'user_registered' ),
-			array( "member_level", 'startdate' ),
-			array( "member_level", 'enddate' ),
+			array( 'member_level', 'initial_payment' ),
+			array( 'member_level', 'billing_amount' ),
+			array( 'member_level', 'billing_limit' ),
+			array( 'member_level', 'trial_amount' ),
+			array( 'member_level', 'trial_limit' ),
+			array( 'member_level', 'cycle_number' ),
+			array( 'member_level', 'cycle_period' ),
+			array( 'member_level', 'status' ),
+			array( 'pmpro_discount_code', 'code_id' ),
+			array( 'pmpro_discount_code', 'code' ),
+			array( 'wp_user', 'user_registered' ),
+			array( 'member_level', 'startdate' ),
+			array( 'member_level', 'enddate' ),
 		);
 
 		$this->default_columns = apply_filters( 'pmpro_members_list_csv_default_columns', $this->default_columns );
-		$this->default_columns = apply_filters( 'e20r-members-list-default-csv-columns', $this->default_columns );
+		$this->default_columns = apply_filters( 'e20r_members_list_default_csv_columns', $this->default_columns );
 
 		/**
 		 * Map of Database column keys and CSV export column keys
 		 *
-		 * @filter e20r-members-list-db-type-header-map
+		 * @filter e20r_members_list_db_type_header_map
 		 */
-		$this->header_map = apply_filters( 'e20r-members-list-db-type-header-map', array(
-				'user_id'          => array( 'db_key' => 'ID', 'type' => 'wp_user', 'header_key' => 'ID' ),
+		$this->header_map = apply_filters(
+			'e20r_members_list_db_type_header_map',
+			array(
+				'user_id'          => array(
+					'db_key'     => 'ID',
+					'type'       => 'wp_user',
+					'header_key' => 'ID',
+				),
 				'user_login'       => array(
 					'db_key'     => 'user_login',
 					'type'       => 'wp_user',
@@ -277,9 +281,9 @@ class Export_Members {
 		$this->set_upload_headers();
 
 		/**
-		 * Trigger the default 'e20r-members-list-load-export-value' filter handler first
+		 * Trigger the default 'e20r_members_list_load_export_value' filter handler first
 		 */
-		add_filter( 'e20r-members-list-load-export-value', array( $this, 'load_export_value' ), - 1, 3 );
+		add_filter( 'e20r_members_list_load_export_value', array( $this, 'load_export_value' ), - 1, 3 );
 	}
 
 	/**
@@ -290,7 +294,7 @@ class Export_Members {
 	private function create_temp_file() {
 
 		// Generate a temporary file to store the data in.
-		$tmp_dir   = sys_get_temp_dir();
+		$tmp_dir = sys_get_temp_dir();
 
 		return tempnam( $tmp_dir, 'pmpro_ml_' );
 	}
@@ -303,12 +307,11 @@ class Export_Members {
 		$utils = Utilities::get_instance();
 		$level = $utils->get_variable( 'membership_id', '' );
 
-		$extra_cols = apply_filters( "pmpro_members_list_csv_extra_columns", array() );
+		$extra_cols = apply_filters( 'pmpro_members_list_csv_extra_columns', array() );
 
 		if ( ! empty( $extra_cols ) ) {
 
 			foreach ( $extra_cols as $col_header => $callback ) {
-				// $this->header_map[]               = $col_header;
 				$this->header_map[ $col_header ] = array(
 					'db_key'         => $col_header,
 					'type'           => 'callback',
@@ -324,7 +327,7 @@ class Export_Members {
 		);
 		$this->csv_headers = array_map( 'trim', explode( ',', $header_list ) );
 
-		$utils->log( "Using " . count( $this->csv_headers ) . " header columns" );
+		$utils->log( 'Using ' . count( $this->csv_headers ) . ' header columns' );
 	}
 
 	/**
@@ -332,12 +335,12 @@ class Export_Members {
 	 */
 	private function set_upload_headers() {
 
-		$this->headers[] = "Content-Type: text/csv";
-		$this->headers[] = "Cache-Control: max-age=0, no-cache, no-store";
-		$this->headers[] = "Pragma: no-cache";
-		$this->headers[] = "Connection: close";
+		$this->headers[] = 'Content-Type: text/csv';
+		$this->headers[] = 'Cache-Control: max-age=0, no-cache, no-store';
+		$this->headers[] = 'Pragma: no-cache';
+		$this->headers[] = 'Connection: close';
 		$this->headers[] = 'Content-Disposition: attachment; filename="members_list.csv"';
-		$this->headers   = apply_filters( 'e20r-memberslist-http-headers', $this->headers );
+		$this->headers   = apply_filters( 'e20r_memberslist_http_headers', $this->headers );
 	}
 
 	/**
@@ -349,9 +352,9 @@ class Export_Members {
 		$utils         = Utilities::get_instance();
 
 		$files = glob( "{$temp_dir_name}/pmpro_ml_*.csv" );
-		$now   = current_time( 'timestamp' );
+		$now   = time();
 
-		$utils->log( "Notice: Clearing temporary export files (if needed)" );
+		$utils->log( 'Notice: Clearing temporary export files (if needed)' );
 
 		foreach ( $files as $file_name ) {
 
@@ -370,7 +373,7 @@ class Export_Members {
 	public function get_data_list() {
 
 		$utils = Utilities::get_instance();
-		$utils->log( "Headers have been sent already..?!? " . ( headers_sent() ? 'Yes' : 'No' ) );
+		$utils->log( 'Headers have been sent already..?!? ' . ( headers_sent() ? 'Yes' : 'No' ) );
 
 		/**
 		 * Filter to set max number of records to process at a time
@@ -398,7 +401,7 @@ class Export_Members {
 		 */
 		do_action( 'pmpro_before_members_list_csv_export', $this->member_list );
 
-		$extra_columns = apply_filters( "pmpro_members_list_csv_extra_columns", array() );
+		$extra_columns = apply_filters( 'pmpro_members_list_csv_extra_columns', array() );
 
 		$this->add_csv_header_to_file();
 
@@ -410,7 +413,7 @@ class Export_Members {
 			$iterations = ceil( $users_found / $max_users_per_loop );
 		}
 
-		$start      = current_time( 'timestamp' );
+		$start      = time();
 		$end        = 0;
 		$time_limit = (int) get_cfg_var( 'max_execution_time' );
 
@@ -429,13 +432,13 @@ class Export_Members {
 				}
 			}
 
-			$start = current_time( 'timestamp' );
+			$start = time();
 
 			$utils->log( "For iterations: {$i_start} -> " . ( $i_start + $max_users_per_loop ) );
 
 			$member_list = array_slice( $this->member_list, $i_start, $max_users_per_loop );
 
-			$utils->log( "Will process " . count( $member_list ) . " member records in iteration {$ic}" );
+			$utils->log( 'Will process ' . count( $member_list ) . " member records in iteration {$ic}" );
 
 			// Increment starting position
 			if ( 0 < $iterations ) {
@@ -457,11 +460,11 @@ class Export_Members {
 				/**
 				 * Fetch/update the CSV export entry for the $member
 				 *
-				 * @filter e20r-members-list-load-export-value
+				 * @filter e20r_members_list_load_export_value
 				 *
 				 * @param array $csv_entry Current user value(s) for the data to be written to the CSV record
 				 */
-				$csv_record = apply_filters( 'e20r-members-list-load-export-value', $csv_record, $member );
+				$csv_record = apply_filters( 'e20r_members_list_load_export_value', $csv_record, $member );
 
 				// Add data from extra columns
 				if ( ! empty( $extra_columns ) ) {
@@ -475,8 +478,6 @@ class Export_Members {
 					}
 				}
 
-				// $utils->log( "Exportable info : " . print_r( $csv_record, true ) );
-
 				// Add the data to the list of
 				$this->csv_rows[] = $csv_record;
 
@@ -485,7 +486,7 @@ class Export_Members {
 			wp_cache_flush();
 
 			//need to increase max running time?
-			$end = current_time( 'timestamp' );
+			$end = time();
 		}
 
 		do_action( 'pmpro_after_members_list_csv_export' );
@@ -502,17 +503,22 @@ class Export_Members {
 		$file_handle = fopen( $this->file_name, 'a' );
 		$header_type = 'header_key';
 
-		$utils->log( "Adding " . count( $this->csv_headers ) . " header columns to {$this->file_name}" );
+		$utils->log( 'Adding ' . count( $this->csv_headers ) . " header columns to {$this->file_name}" );
 
 		//Add the CSV header to the file
-		fprintf( $file_handle, '%s',
-			implode( ',',
+		fprintf(
+			$file_handle,
+			'%s',
+			implode(
+				',',
 				array_map(
 					function ( $csv_header ) use ( $header_type ) {
 						return $this->map_keys( $csv_header, $header_type );
 					},
-					$this->csv_headers )
-			) . "\n" );
+					$this->csv_headers
+				)
+			) . "\n"
+		);
 
 		// Close the CSV file for now
 		fclose( $file_handle );
@@ -537,13 +543,12 @@ class Export_Members {
 				return $field_def[ $requested ];
 			}
 
-			if ( 'header_key' === $requested && $field_def['header_key'] == $key ) {
+			if ( 'header_key' === $requested && $field_def['header_key'] === $key ) {
 
 				return $map_key;
 			}
 
-			if ( 'db_key' === $requested && $field_def['db_key'] == $key ) {
-
+			if ( 'db_key' === $requested && $field_def['db_key'] === $key ) {
 
 				if ( 'username' === $key ) {
 					return $map_key;
@@ -595,7 +600,7 @@ class Export_Members {
 	 * @return string
 	 */
 	private function enclose( $text ) {
-		return "\"" . str_replace( "\"", "\\\"", $text ) . "\"";
+		return '"' . str_replace( '"', '\\"', $text ) . '"';
 	}
 
 	/**
@@ -625,12 +630,13 @@ class Export_Members {
 			);
 
 			// Process Join/Start dates for membership
-			if ( in_array( $column_name, array( 'user_registered', 'startdate' ) ) ) {
+			if ( in_array( $column_name, array( 'user_registered', 'startdate' ), true ) ) {
 
-				$column_value = date(
+				$column_value = date_i18n(
 					$datetime_format,
-					strtotime( $column_value,
-						current_time( 'timestamp' )
+					strtotime(
+						$column_value,
+						time()
 					)
 				);
 			}
@@ -643,40 +649,45 @@ class Export_Members {
 				if ( ! is_null( $member->membership_id ) && ! empty( $column_value ) ) {
 
 					// Membership is terminated or about to be terminated
-					if ( in_array( $level, array( "oldmembers", "expired", 'cancelled' ) ) &&
-					     ( ! empty( $column_value ) && '0000-00-00 00:00:00' !== $column_value ) ) {
+					if (
+						in_array( $level, array( 'oldmembers', 'expired', 'cancelled' ), true ) &&
+						'0000-00-00 00:00:00' !== $column_value
+					) {
 
 						$enddate_value = apply_filters(
-							"pmpro_memberslist_expires_column",
-							date(
+							'pmpro_memberslist_expires_column',
+							date_i18n(
 								$datetime_format,
-								strtotime( $column_value, current_time( 'timestamp' ) )
+								strtotime( $column_value, time() )
 							),
 							$member
 						);
 
 					}
 
-					if ( ! empty( $member->membership_id ) &&
-					     ( empty( $column_value ) || '0000-00-00 00:00:00' === $column_value )
+					if (
+						! empty( $member->membership_id ) &&
+						( empty( $column_value ) || '0000-00-00 00:00:00' === $column_value )
 					) {
-						$enddate_value = apply_filters( "pmpro_memberslist_expires_column", null, $member );
+						$enddate_value = apply_filters( 'pmpro_memberslist_expires_column', null, $member );
 					}
 
-					if ( ! empty( $member->membership_id ) &&
-					     ( ! empty( $column_value ) && '0000-00-00 00:00:00' !== $column_value )
+					if (
+						! empty( $member->membership_id ) &&
+						( ! empty( $column_value ) && '0000-00-00 00:00:00' !== $column_value )
 					) {
 						$enddate_value = date(
 							$datetime_format,
 							strtotime(
 								$column_value,
-								current_time( 'timestamp' )
+								time()
 							)
 						);
 					}
 
 					// Save record info for the column
-					$column_value = apply_filters( 'e20r-members-list-expires-col-value', $enddate_value, $member );;
+					$column_value = apply_filters( 'e20r_members_list_expires_col_value', $enddate_value, $member );
+
 				}
 			}
 
@@ -697,12 +708,11 @@ class Export_Members {
 			/**
 			 * Fetch the discount code value for the user/member
 			 */
-			if ( $column_type === 'pmpro_discount_code' && ! empty( $this->member_discount_info ) ) {
+			if ( 'pmpro_discount_code' === $column_type && ! empty( $this->member_discount_info ) ) {
 
 				$param        = "pmpro_discount_{$column_name}";
 				$column_value = $this->member_discount_info->{$param};
 			}
-
 
 			if ( empty( $column_value ) ) {
 				$column_value = null;
@@ -730,28 +740,28 @@ class Export_Members {
 		/**
 		 * Filter to the format for the date (default is the WordPress General Setting value for Date)
 		 *
-		 * @filter e20r-members-list-csv-dateformat
+		 * @filter e20r_members_list_csv_dateformat
 		 *
 		 * @param string $date_format
 		 *
 		 * @since  4.0
 		 */
 		$date_format = apply_filters( 'pmpro_memberslist_csv_dateformat', get_option( 'date_format' ) );
-		$date_format = apply_filters( 'e20r-members-list-csv-fateformat', $date_format );
+		$date_format = apply_filters( 'e20r_members_list_csv_dateformat', $date_format );
 
 		/**
 		 * Filter to the format for the time (default is the WordPress General Setting value for Time)
 		 *
-		 * @filter e20r-members-list-csv-timeformat
+		 * @filter e20r_members_list_csv_timeformat
 		 *
 		 * @param string $time_format
 		 *
 		 * @since  4.0
 		 */
-		$time_format = apply_filters( 'e20r-members-list-csv-timeformat', get_option( 'time_format' ) );
+		$time_format = apply_filters( 'e20r_members_list_csv_timeformat', get_option( 'time_format' ) );
 
 		// Assume that we want a valid MySQL DateTime format if date is Y-m-d
-		if ( 'Y-m-d' == $date_format && 'H:i' == $time_format ) {
+		if ( 'Y-m-d' === $date_format && 'H:i' === $time_format ) {
 			$expected_format = "{$date_format} {$time_format}:00";
 		} else {
 			$expected_format = "{$date_format} {$time_format}";
@@ -760,7 +770,7 @@ class Export_Members {
 		/**
 		 * Filter to the format for the time (default is the WordPress General Setting value for Time)
 		 *
-		 * @filter e20r-members-list-csv-datetime-format
+		 * @filter e20r_members_list_csv_datetime_format
 		 *
 		 * @param string $datetime_format
 		 * @param string $date_format
@@ -769,7 +779,7 @@ class Export_Members {
 		 * @since  4.0
 		 */
 		$datetime_format = apply_filters(
-			'e20r-members-list-csv-datetime-format',
+			'e20r_members_list_csv_datetime_format',
 			$expected_format,
 			$date_format,
 			$time_format
@@ -790,7 +800,7 @@ class Export_Members {
 	private function get_column_value( $member, $column_name, $column_type ) {
 
 		$utils       = Utilities::get_instance();
-		$dc_col_name = "pmpro_discount_code_";
+		$dc_col_name = 'pmpro_discount_code_';
 
 		switch ( $column_type ) {
 
@@ -821,7 +831,7 @@ class Export_Members {
 				/**
 				 * Let 3rd party define the value to use for a 3rd party defined default column
 				 *
-				 * @filter e20r-members-list-set-default-column-value
+				 * @filter e20r_members_list_set_default_column_value
 				 *
 				 * @param mixed  $column_value
 				 * @param string $column_name
@@ -831,11 +841,12 @@ class Export_Members {
 				 * @since  v4.0
 				 */
 				$column_value = apply_filters(
-					'e20r-members-list-set-default-column-value',
+					'e20r_members_list_set_default_column_value',
 					$column_value,
 					$column_name,
 					$column_type,
-					$member );
+					$member
+				);
 		}
 
 		return $column_value;
@@ -854,7 +865,8 @@ class Export_Members {
 
 		global $wpdb;
 
-		$disSql = $wpdb->prepare( "
+		$dis_sql = $wpdb->prepare(
+			"
 				SELECT
 					c.id AS pmpro_discount_code_id,
 					c.code AS pmpro_discount_code
@@ -867,7 +879,7 @@ class Export_Members {
 			$user_id
 		);
 
-		$pmpro_discount_code = $wpdb->get_row( $disSql );
+		$pmpro_discount_code = $wpdb->get_row( $dis_sql );
 
 		// Make sure there's data for the discount code info
 		if ( empty( $pmpro_discount_code ) ) {
@@ -886,7 +898,7 @@ class Export_Members {
 	public function save_data_for_export() {
 
 		$utils = Utilities::get_instance();
-		$utils->log( "Saving " . count( $this->csv_rows ) . " records to {$this->file_name}. " );
+		$utils->log( 'Saving ' . count( $this->csv_rows ) . " records to {$this->file_name}. " );
 
 		$fh = fopen( $this->file_name, 'a' );
 
@@ -925,13 +937,13 @@ class Export_Members {
 	public function return_content() {
 
 		$utils = Utilities::get_instance();
-		$utils->log( "Headers have been sent already..?!? " . ( headers_sent() ? 'Yes' : 'No' ) );
+		$utils->log( 'Headers have been sent already..?!? ' . ( headers_sent() ? 'Yes' : 'No' ) );
 		// false === headers_sent() &&
 		// Send the data to the recipient browser
 		if ( ! empty( $this->headers ) && false === headers_sent() && file_exists( $this->file_name ) ) {
 
 			$sent_content = ob_get_clean();
-			$utils->log("Browser received: " . print_r( $sent_content, true) );
+			$utils->log( 'Browser received: ' . print_r( $sent_content, true ) );
 
 			if ( version_compare( phpversion(), '5.3.0', '>' ) ) {
 
@@ -943,7 +955,7 @@ class Export_Members {
 			}
 
 			//Set the download size for the file
-			$this->headers[] = "Content-Length: " . filesize( $this->file_name );
+			$this->headers[] = 'Content-Length: ' . filesize( $this->file_name );
 
 			//Set transmission (PHP) headers
 			foreach ( $this->headers as $header ) {
@@ -970,7 +982,7 @@ class Export_Members {
 			exit();
 
 		} else {
-			$msg = __( "Unable to send the .CSV file to your browser!", 'e20r-members-list' );
+			$msg = __( 'Unable to send the .CSV file to your browser!', 'e20r-members-list' );
 			$utils->log( $msg . print_r( ob_get_contents(), true ) );
 			$utils->add_message( $msg, 'error', 'backend' );
 		}
