@@ -21,7 +21,6 @@
 
 namespace E20R\Utilities\Licensing;
 
-
 use E20R\Utilities\Utilities;
 
 if ( ! class_exists( '\E20R\Utilities\Licensing\License_Settings' ) ) {
@@ -42,7 +41,7 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\License_Settings' ) ) {
 			$utils = Utilities::get_instance();
 
 			if ( ! defined( 'E20R_LICENSE_SERVER_URL' ) ||
-			     ( defined( 'E20R_LICENSE_SERVER_URL' ) && ! E20R_LICENSE_SERVER_URL )
+				 ( defined( 'E20R_LICENSE_SERVER_URL' ) && ! E20R_LICENSE_SERVER_URL )
 			) {
 				$utils->log( "Error: Haven't added the 'E20R_LICENSE_SERVER_URL' constant to the wp-config file!" );
 				$utils->add_message(
@@ -65,20 +64,20 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\License_Settings' ) ) {
 		 *        add_settings_field() functions
 		 * @since 1.6 - BUG FIX: Used wrong label for new licenses
 		 */
-		static public function register_settings() {
+		public static function register_settings() {
 
 			$utils        = Utilities::get_instance();
 			$license_list = array();
 
 			register_setting(
-				"e20r_license_settings", // group, used for settings_fields()
-				"e20r_license_settings",  // option name, used as key in database
+				'e20r_license_settings', // group, used for settings_fields()
+				'e20r_license_settings',  // option name, used as key in database
 				'E20R\Utilities\Licensing\License_Settings::validate_settings'     // validation callback
 			);
 
 			add_settings_section(
 				'e20r_licensing_section',
-				__( "Configure Licenses", 'e20r-licensing-utility' ),
+				__( 'Configure Licenses', 'e20r-licensing-utility' ),
 				'E20R\Utilities\Licensing\License_Page::show_licensing_section',
 				'e20r-licensing'
 			);
@@ -87,7 +86,7 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\License_Settings' ) ) {
 			$license_counter = 0;
 
 			if ( E20R_LICENSING_DEBUG ) {
-				$utils->log( "Found " . count( $settings ) . " potential licenses" );
+				$utils->log( 'Found ' . count( $settings ) . ' potential licenses' );
 			}
 
 			foreach ( $settings as $product_sku => $license ) {
@@ -111,10 +110,13 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\License_Settings' ) ) {
 					$utils->log( "Loading settings fields for '{$product_sku}'?" );
 				}
 
-				if ( ! in_array( $product_sku, array(
+				if ( ! in_array(
+					$product_sku,
+					array(
 						'example_gateway_addon',
 						'new_licenses',
-					) ) && isset( $license['key'] ) && $license['key'] != 'e20r_default_license' && ! empty( $license['key'] ) ) {
+					)
+				) && isset( $license['key'] ) && $license['key'] != 'e20r_default_license' && ! empty( $license['key'] ) ) {
 
 					if ( E20R_LICENSING_DEBUG ) {
 						$utils->log( "Previously activated license: {$product_sku}: adding {$license['fulltext_name']} fields" );
@@ -147,7 +149,8 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\License_Settings' ) ) {
 						$status_class = 'e20r-license-active';
 					}
 
-					$license_name = sprintf( '<span class="%2$s">%1$s (%3$s)</span>',
+					$license_name = sprintf(
+						'<span class="%2$s">%1$s (%3$s)</span>',
 						$license['fulltext_name'],
 						$status_class,
 						ucfirst( $license['status'] )
@@ -160,7 +163,7 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\License_Settings' ) ) {
 						if ( ! empty( $license['expire'] ) ) {
 							$expiration_ts = (int) $license['expire'];
 						} else {
-							$utils->log("License info (new) w/o expiration info: " . print_r( $license, true  ));
+							$utils->log( 'License info (new) w/o expiration info: ' . print_r( $license, true ) );
 							$utils->add_message(
 								sprintf(
 									__(
@@ -177,7 +180,7 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\License_Settings' ) ) {
 						if ( ! empty( $license['expires'] ) ) {
 							$expiration_ts = (int) strtotime( $license['expires'] );
 						} else {
-							$utils->log("License info (old) w/o expiration info: " . print_r( $license, true  ));
+							$utils->log( 'License info (old) w/o expiration info: ' . print_r( $license, true ) );
 							$utils->add_message(
 								sprintf(
 									__(
@@ -192,7 +195,6 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\License_Settings' ) ) {
 						}
 					}
 
-
 					add_settings_field(
 						"{$license['key']}",
 						$license_name,
@@ -205,7 +207,7 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\License_Settings' ) ) {
 								$license['key'] :
 								__( 'Unknown', 'e20r-licensing-utility' ),
 							'product'          => $product_sku,
-							'option_name'      => "e20r_license_settings",
+							'option_name'      => 'e20r_license_settings',
 							'fulltext_name'    => isset( $license['fulltext_name'] ) ?
 								$license['fulltext_name'] :
 								__( 'Unknown', 'e20r-licensing-utility' ),
@@ -215,12 +217,12 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\License_Settings' ) ) {
 							'expiration_ts'    => $expiration_ts,
 							'has_subscription' => ( isset( $license['subscription_status'] ) && 'active' === $license['subscription_status'] ),
 							'value'            => ( Licensing::is_new_version() && isset( $license['the_key'] ) ? $license['the_key'] : isset( $license['key'] ) ) ? $license['key'] : null,
-							'email_field'      => "license_email",
+							'email_field'      => 'license_email',
 							'product_sku'      => Licensing::is_new_version() && isset( $license['product_sku'] ) ?
 								$license['product_sku'] :
 								null,
 							'email_value'      => isset( $license['email'] ) ? $license['email'] : null,
-							'placeholder'      => __( "Paste the purchased key here", 'e20r-licensing-utility' ),
+							'placeholder'      => __( 'Paste the purchased key here', 'e20r-licensing-utility' ),
 						)
 					);
 
@@ -228,7 +230,6 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\License_Settings' ) ) {
 					$license_counter ++;
 				}
 			}
-
 
 			$new_licenses = isset( $settings['new_licenses'] ) ? $settings['new_licenses'] : array();
 
@@ -242,12 +243,12 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\License_Settings' ) ) {
 
 				if ( ! in_array( $new['new_product'], $license_list ) && $new_product_sku !== 'example_gateway_addon' ) {
 					if ( E20R_LICENSING_DEBUG ) {
-						$utils->log( "Adding  license fields for new sku {$new['new_product']} (one of " . count( $new_licenses ) . " unlicensed add-ons)" );
+						$utils->log( "Adding  license fields for new sku {$new['new_product']} (one of " . count( $new_licenses ) . ' unlicensed add-ons)' );
 					}
 
 					add_settings_field(
 						"e20r_license_new_{$new_product_sku}",
-						sprintf( __( "Add %s license", 'e20r-licensing-utility' ), $new['fulltext_name'] ),
+						sprintf( __( 'Add %s license', 'e20r-licensing-utility' ), $new['fulltext_name'] ),
 						'E20R\Utilities\Licensing\License_Page::show_input',
 						'e20r-licensing',
 						'e20r_licensing_section',
@@ -255,13 +256,13 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\License_Settings' ) ) {
 							'index'         => $license_counter,
 							'label_for'     => $new['new_product'],
 							'fulltext_name' => $new['fulltext_name'],
-							'option_name'   => "e20r_license_settings",
+							'option_name'   => 'e20r_license_settings',
 							'new_product'   => $new['new_product'],
-							'name'          => "new_license",
+							'name'          => 'new_license',
 							'input_type'    => 'text',
 							'value'         => null,
 							'is_active'     => $is_active,
-							'email_field'   => "new_email",
+							'email_field'   => 'new_email',
 							'product_sku'   => $new['product_sku'],
 							'email_value'   => null,
 							'placeholder'   => $new['placeholder'],
@@ -291,7 +292,7 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\License_Settings' ) ) {
 
 			if ( is_null( $product_sku ) ) {
 				if ( E20R_LICENSING_DEBUG ) {
-					$utils->log( "No product key provided. Using default key (e20r_default_license)!" );
+					$utils->log( 'No product key provided. Using default key (e20r_default_license)!' );
 				}
 				$product_sku = 'e20r_default_license';
 			}
@@ -347,18 +348,18 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\License_Settings' ) ) {
 			} else {
 				$defaults = array(
 					$product_sku => array(
-						"expire"           => 0, // Timestamp
-						"activation_id"    => null,
-						"expire_date"      => '',
-						"timezone"         => "UTC",
-						"the_key"          => "",
-						"product_sku"      => $product_sku,
-						"url"              => "",
-						"has_expired"      => true,
-						"status"           => "cancelled",
-						"allow_offline"    => false,
-						"offline_interval" => "days",
-						"offline_value"    => 0,
+						'expire'           => 0, // Timestamp
+						'activation_id'    => null,
+						'expire_date'      => '',
+						'timezone'         => 'UTC',
+						'the_key'          => '',
+						'product_sku'      => $product_sku,
+						'url'              => '',
+						'has_expired'      => true,
+						'status'           => 'cancelled',
+						'allow_offline'    => false,
+						'offline_interval' => 'days',
+						'offline_value'    => 0,
 						'fulltext_name'    => null,
 					),
 				);
@@ -381,7 +382,7 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\License_Settings' ) ) {
 
 			if ( empty( $input['new_product'] ) && empty( $input['product'] ) && empty( $input['delete'] ) ) {
 				if ( E20R_LICENSING_DEBUG ) {
-					$utils->log( "Not being called by the E20R License settings page, so returning: " . print_r( $input, true ) );
+					$utils->log( 'Not being called by the E20R License settings page, so returning: ' . print_r( $input, true ) );
 				}
 
 				return $input;
@@ -398,8 +399,8 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\License_Settings' ) ) {
 			if ( isset( $input['new_product'] ) && true === $utils->array_isnt_empty( $input['new_product'] ) ) {
 
 				if ( E20R_LICENSING_DEBUG ) {
-					$utils->log( "New product? " . print_r( $input['new_product'], true ) );
-					$utils->log( "Processing a possible license activation" );
+					$utils->log( 'New product? ' . print_r( $input['new_product'], true ) );
+					$utils->log( 'Processing a possible license activation' );
 				}
 
 				foreach ( $input['new_product'] as $nk => $product ) {
@@ -421,7 +422,7 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\License_Settings' ) ) {
 						if ( ! empty( $license_email ) && ! empty( $license_key ) ) {
 
 							if ( E20R_LICENSING_DEBUG ) {
-								$utils->log( "Have a license key and email, so activate the new license" );
+								$utils->log( 'Have a license key and email, so activate the new license' );
 							}
 
 							$license_settings[ $product ]['email'] = $license_email;
@@ -434,19 +435,19 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\License_Settings' ) ) {
 							$result = Licensing::activate_license( $product, $license_settings[ $product ] );
 
 							if ( E20R_LICENSING_DEBUG ) {
-								$utils->log( "Status from activation {$result['status']} vs " . Licensing::E20R_LICENSE_DOMAIN_ACTIVE . " => " . print_r( $result, true ) );
+								$utils->log( "Status from activation {$result['status']} vs " . Licensing::E20R_LICENSE_DOMAIN_ACTIVE . ' => ' . print_r( $result, true ) );
 							}
 
 							if ( Licensing::E20R_LICENSE_DOMAIN_ACTIVE === intval( $result['status'] ) ) {
 
 								if ( E20R_LICENSING_DEBUG ) {
-									$utils->log( "This license & server combination is already active on the licensing server" );
+									$utils->log( 'This license & server combination is already active on the licensing server' );
 								}
 
 								if ( true === Licensing::deactivate_license( $product, $result['settings'] ) ) {
 
 									if ( E20R_LICENSING_DEBUG ) {
-										$utils->log( "Was able to deactivate this license/host combination" );
+										$utils->log( 'Was able to deactivate this license/host combination' );
 									}
 
 									$result = Licensing::activate_license( $product, $license_settings[ $product ] );
@@ -455,7 +456,7 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\License_Settings' ) ) {
 							}
 
 							if ( E20R_LICENSING_DEBUG ) {
-								$utils->log( "Loading updated settings from server" );
+								$utils->log( 'Loading updated settings from server' );
 							}
 
 							if ( true === License_Server::get_license_status_from_server( $product, $license_settings[ $product ], true ) ) {
@@ -520,19 +521,19 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\License_Settings' ) ) {
 
 				// Save cleared license updates
 				if ( false === self::update_settings( null, $license_settings ) ) {
-					$utils->log( "Unable to save the settings!" );
+					$utils->log( 'Unable to save the settings!' );
 				}
 			}
 
 			if ( E20R_LICENSING_DEBUG ) {
-				$utils->log( "Returning validated settings: " . print_r( $license_settings, true ) );
+				$utils->log( 'Returning validated settings: ' . print_r( $license_settings, true ) );
 			}
 
 			foreach ( $input as $license => $settings ) {
 
 				if ( isset( $license_settings[ $license ] ) && in_array( 'domain', array_keys( $settings ) ) ) {
 					if ( E20R_LICENSING_DEBUG ) {
-						$utils->log( "Grabbing data from input and assigning it to license" );
+						$utils->log( 'Grabbing data from input and assigning it to license' );
 					}
 
 					$license_settings[ $license ] = $input[ $license ];
@@ -571,7 +572,7 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\License_Settings' ) ) {
 			}
 
 			if ( E20R_LICENSING_DEBUG ) {
-				$utils->log( "Updated settings (after merge...) " . print_r( $old_settings, true ) );
+				$utils->log( 'Updated settings (after merge...) ' . print_r( $old_settings, true ) );
 			}
 
 			return $old_settings;
@@ -607,21 +608,26 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\License_Settings' ) ) {
 			}
 
 			// Need to update the settings for a (possibly) pre-existing product
-			if ( ! is_null( $product_sku ) && ! empty( $new_settings ) && ! in_array( $product_sku, array(
+			if ( ! is_null( $product_sku ) && ! empty( $new_settings ) && ! in_array(
+				$product_sku,
+				array(
 					'e20r_default_license',
 					'example_gateway_addon',
-				) ) && ! empty( $product_sku )
+				)
+			) && ! empty( $product_sku )
 			) {
 
 				$license_settings[ $product_sku ] = $new_settings;
 				if ( E20R_LICENSING_DEBUG ) {
 					$utils->log( "Updating license settings for {$product_sku}" );
 				}
-
-			} else if ( ! is_null( $product_sku ) && empty( $new_settings ) && ( ! in_array( $product_sku, array(
-						'e20r_default_license',
-						'example_gateway_addon',
-					) ) && ! empty( $product_sku ) )
+			} elseif ( ! is_null( $product_sku ) && empty( $new_settings ) && ( ! in_array(
+				$product_sku,
+				array(
+					'e20r_default_license',
+					'example_gateway_addon',
+				)
+			) && ! empty( $product_sku ) )
 			) {
 				if ( E20R_LICENSING_DEBUG ) {
 					$utils->log( "Removing license settings for {$product_sku}" );
@@ -630,12 +636,12 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\License_Settings' ) ) {
 
 			} else {
 				if ( E20R_LICENSING_DEBUG ) {
-					$utils->log( "Requested save of everything" );
+					$utils->log( 'Requested save of everything' );
 				}
 			}
 
 			if ( E20R_LICENSING_DEBUG ) {
-				$utils->log( "Saving: " . print_r( $license_settings, true ) );
+				$utils->log( 'Saving: ' . print_r( $license_settings, true ) );
 			}
 
 			update_option( 'e20r_license_settings', $license_settings, 'yes' );
@@ -670,7 +676,7 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\License_Settings' ) ) {
 
 			if ( ! is_admin() || ( defined( 'DOING_AJAX' ) && DOING_AJAX ) ) {
 				if ( E20R_LICENSING_DEBUG ) {
-					$utils->log( "AJAX request or not in wp-admin" );
+					$utils->log( 'AJAX request or not in wp-admin' );
 				}
 
 				return false;
@@ -697,7 +703,7 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\License_Settings' ) ) {
 
 					if ( $subm[2] == $handle ) {
 						if ( E20R_LICENSING_DEBUG ) {
-							$utils->log( "Settings submenu already loaded: " . urldecode( $subm[2] ) );
+							$utils->log( 'Settings submenu already loaded: ' . urldecode( $subm[2] ) );
 						}
 
 						return true;
@@ -707,7 +713,7 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\License_Settings' ) ) {
 
 				if ( $item[2] == $handle ) {
 					if ( E20R_LICENSING_DEBUG ) {
-						$utils->log( "Menu already loaded: " . urldecode( $item[2] ) );
+						$utils->log( 'Menu already loaded: ' . urldecode( $item[2] ) );
 					}
 
 					return true;
@@ -715,7 +721,7 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\License_Settings' ) ) {
 			}
 
 			if ( E20R_LICENSING_DEBUG ) {
-				$utils->log( "Loading licensing page..." );
+				$utils->log( 'Loading licensing page...' );
 			}
 
 			return false;
@@ -729,7 +735,7 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\License_Settings' ) ) {
 		public static function get_instance() {
 
 			if ( null === self::$instance ) {
-				self::$instance = new self;
+				self::$instance = new self();
 			}
 
 			return self::$instance;
@@ -743,12 +749,12 @@ if ( ! class_exists( '\E20R\Utilities\Licensing\License_Settings' ) ) {
 			$utils = Utilities::get_instance();
 
 			if ( E20R_LICENSING_DEBUG ) {
-				$utils->log( "Attempting to add options page for E20R Licenses" );
+				$utils->log( 'Attempting to add options page for E20R Licenses' );
 			}
 
 			$handle = add_options_page(
-				__( "E20R Licenses", 'e20r-licensing-utility' ),
-				__( "E20R Licenses", 'e20r-licensing-utility' ),
+				__( 'E20R Licenses', 'e20r-licensing-utility' ),
+				__( 'E20R Licenses', 'e20r-licensing-utility' ),
 				'manage_options',
 				'e20r-licensing',
 				array( License_Page::get_instance(), 'licensing_page' )

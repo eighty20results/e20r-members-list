@@ -42,7 +42,7 @@ if ( ! class_exists( '\\E20R\Members_List\\Controller\\E20R_Members_List' ) ) {
 	 */
 	class E20R_Members_List {
 
-		const plugin_slug = 'e20r-members-list';
+		const PLUGIN_SLUG = 'e20r-members-list';
 
 		/**
 		 * Instance of the Member List controller
@@ -65,7 +65,7 @@ if ( ! class_exists( '\\E20R\Members_List\\Controller\\E20R_Members_List' ) ) {
 		public static function get_instance() {
 
 			if ( is_null( self::$instance ) ) {
-				self::$instance = new self;
+				self::$instance = new self();
 			}
 
 			return self::$instance;
@@ -80,7 +80,7 @@ if ( ! class_exists( '\\E20R\Members_List\\Controller\\E20R_Members_List' ) ) {
 		 * @since  1.0
 		 * @access public static
 		 */
-		public static function autoLoader( $class_name ) {
+		public static function auto_loader( $class_name ) {
 
 			if ( false === stripos( $class_name, 'e20r' ) ) {
 				return false;
@@ -94,6 +94,10 @@ if ( ! class_exists( '\\E20R\Members_List\\Controller\\E20R_Members_List' ) ) {
 				$base_path = plugin_dir_path( __FILE__ ) . 'class/';
 			}
 
+			if ( file_exists( plugin_dir_path( __FILE__ ) . 'src/' ) ) {
+				$base_path = plugin_dir_path( __FILE__ ) . 'src/';
+			}
+
 			$filename = "class-{$c_name}.php";
 
 			try {
@@ -105,7 +109,7 @@ if ( ! class_exists( '\\E20R\Members_List\\Controller\\E20R_Members_List' ) ) {
 					\RecursiveDirectoryIterator::FOLLOW_SYMLINKS
 				);
 			} catch ( \Exception $ri_except ) {
-				error_log("Error instantiating iterator for ${class_name}: " . $ri_except->getMessage() );
+				error_log( "Error instantiating iterator for ${class_name}: " . $ri_except->getMessage() );
 				return false;
 			}
 			/**
@@ -118,7 +122,7 @@ if ( ! class_exists( '\\E20R\Members_List\\Controller\\E20R_Members_List' ) ) {
 						$file_name = $current->getFilename();
 
 						// Skip hidden files and directories.
-						if ( $file_name[0] == '.' || $file_name == '..' ) {
+						if ( '.' === $file_name[0] || '..' === $file_name ) {
 							return false;
 						}
 
@@ -129,9 +133,10 @@ if ( ! class_exists( '\\E20R\Members_List\\Controller\\E20R_Members_List' ) ) {
 							// Only consume files of interest.
 							return strpos( $file_name, $filename ) === 0;
 						}
-					} );
+					}
+				);
 			} catch ( \Exception $fh_except ) {
-				error_log("Error locating ${class_name}: " . $fh_except->getMessage() );
+				error_log( "Error locating ${class_name}: " . $fh_except->getMessage() );
 				return false;
 			}
 
@@ -141,11 +146,11 @@ if ( ! class_exists( '\\E20R\Members_List\\Controller\\E20R_Members_List' ) ) {
 					$class_path = sprintf( '%1$s/%2$s', $f_file->getPath(), $f_file->getFilename() );
 
 					if ( $f_file->isFile() && false !== strpos( $class_path, $filename ) ) {
-						require_once( $class_path );
+						require_once $class_path;
 					}
 				}
-			} catch( \Exception $e ) {
-				error_log("Error loading ${class_name}: " . $e->getMessage() );
+			} catch ( \Exception $e ) {
+				error_log( "Error loading ${class_name}: " . $e->getMessage() );
 				return false;
 			}
 
@@ -159,7 +164,7 @@ if ( ! class_exists( '\\E20R\Members_List\\Controller\\E20R_Members_List' ) ) {
 		 */
 		public function load_hooks() {
 			add_action( 'init', array( Members_List_Page::get_instance(), 'load_hooks' ), - 1 );
-			add_action( 'init', array( $this, 'loadTextDomain' ), 1 );
+			add_action( 'init', array( $this, 'load_text_domain' ), 1 );
 		}
 
 		/**
@@ -167,10 +172,10 @@ if ( ! class_exists( '\\E20R\Members_List\\Controller\\E20R_Members_List' ) ) {
 		 *
 		 * @since v3.3 - ENHANCEMENT: Added Translations if possible/applicable
 		 */
-		public function loadTextDomain() {
+		public function load_text_domain() {
 
-			$locale = apply_filters( "plugin_locale", get_locale(), self::plugin_slug );
-			$mo_file = self::plugin_slug . "-{$locale}.mo";
+			$locale  = apply_filters( 'plugin_locale', get_locale(), self::PLUGIN_SLUG );
+			$mo_file = self::PLUGIN_SLUG . "-{$locale}.mo";
 
 			// Path(s) to local and global (WP)
 			$mo_file_local  = dirname( __FILE__ ) . "/languages/{$mo_file}";
@@ -180,22 +185,22 @@ if ( ! class_exists( '\\E20R\Members_List\\Controller\\E20R_Members_List' ) ) {
 			if ( file_exists( $mo_file_global ) ) {
 
 				load_textdomain(
-					E20R_Members_List::plugin_slug,
+					self::PLUGIN_SLUG,
 					$mo_file_global
 				);
 			}
 
 			// Load from local next (if applicable)
 			load_textdomain(
-				E20R_Members_List::plugin_slug,
+				self::PLUGIN_SLUG,
 				$mo_file_local
 			);
 
 			// Load with plugin_textdomain or GlotPress
 			load_plugin_textdomain(
-				E20R_Members_List::plugin_slug,
+				self::PLUGIN_SLUG,
 				false,
-				dirname( __FILE__ ) . "/languages/"
+				dirname( __FILE__ ) . '/languages/'
 			);
 		}
 	}
@@ -203,14 +208,14 @@ if ( ! class_exists( '\\E20R\Members_List\\Controller\\E20R_Members_List' ) ) {
 }
 
 // BUG FIX: Fatal error when e20r-Utilities module is present
-if ( ! file_exists( WP_PLUGIN_DIR . "/00-e20r-utilities/" ) ) {
-	require_once plugin_dir_path( __FILE__ ) . "class/utilities/class-utility-loader.php";
+if ( ! file_exists( WP_PLUGIN_DIR . '/00-e20r-utilities/' ) ) {
+	require_once plugin_dir_path( __FILE__ ) . 'class/utilities/class-utility-loader.php';
 }
 
 try {
-	spl_autoload_register( 'E20R\Members_List\Controller\E20R_Members_List::autoLoader' );
+	spl_autoload_register( 'E20R\Members_List\Controller\E20R_Members_List::auto_loader' );
 } catch( \Exception $exception ) {
-	error_log("Unable to register autoloader: " . $exception->getMessage(),E_USER_ERROR );
+	error_log('Unable to register auto_loader: ' . $exception->getMessage(),E_USER_ERROR );
 	return false;
 }
 

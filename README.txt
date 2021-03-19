@@ -37,7 +37,7 @@ To best understand how to extend this plugin, we recommend searching through the
 
 There are also several Paid Memberships Pro specific filters present in this plugin to, as well as possible, maintain compatibility with the PMPro Members List functionality.
 
-=== e20r-memberslist-http-headers ===
+=== e20r_memberslist_http_headers ===
 
 Modifies: HTTP header array to transmit to client before sending the actual .csv file to web client
 
@@ -55,7 +55,7 @@ $headers = array(
 	'Content-Disposition: attachment; filename="members_list.csv"',
 );
 `
-Example: `add_filter( 'e20r-memberslist-http-headers', array(
+Example: `add_filter( 'e20r_memberslist_http_headers', array(
                                                           "Content-Type: text/csv",
                                                           "Cache-Control: max-age=0, no-cache, no-store",
                                                       	"Pragma: no-cache",
@@ -64,7 +64,7 @@ Example: `add_filter( 'e20r-memberslist-http-headers', array(
                                                       )
                   );`
 
-=== e20r-members-list-enddate-col-name ===
+=== e20r_members_list_enddate_col_name ===
 
 Modifies: The header label for the PMPro enddate column on the Members List page or in the CSV export file
 
@@ -72,7 +72,7 @@ Dependencies: N/A
 
 Default: 'Expired' if viewing old/expired members list. 'Expires' if viewing a list of active members
 
-Example: `add_filter( 'e20r-members-list-enddate-col-name', function( $label ) { return 'Terminated'; } ); // Replace enddate header with 'Terminated'`
+Example: `add_filter( 'e20r_members_list_enddate_col_name', function( $label ) { return 'Terminated'; } ); // Replace enddate header with 'Terminated'`
 
 === e20r_memberslist_sql_columns ===
 
@@ -109,7 +109,7 @@ array( 'mu.id'              => 'record_id',
 Example: `add_filter( 'e20r_memberslist_sql_columns', 'e20r_change_memberslist_sql_columns', 10, 1 );`
 
 
-=== e20r-members-list-expires-col-value ===
+=== e20r_members_list_expires_col_value ===
 
 Modifies: Format the date value for the data displayed for the Expires/membership_enddate column
 
@@ -119,7 +119,7 @@ Arguments: string $end_date, \stdClass $member
 
 Default: `pmpro_memberships_users.enddate, $query_result_member_data_from_enddate`
 
-Example: `add_filter( 'e20r-members-list-expires-col-value'', 'e20r_set_expires_date', 10, 2 );`
+Example: `add_filter( 'e20r_members_list_expires_col_value'', 'e20r_set_expires_date', 10, 2 );`
 
 === pmpro_members_list_csv_default_columns ===
 
@@ -132,7 +132,7 @@ Default:
 Example: `add_filter( 'e20r_memberslist_page_prepend_cols', '__return_true' );`
 
 
-=== e20r-members-list-add-to-default-table-columns ===
+=== e20r_members_list_add_to_default_table_columns ===
 
 Modifies: Export to CSV
 
@@ -140,10 +140,10 @@ Purpose:  The filter processes the list of columns to include on the Members Lis
 
 Default: Members_List::$default_columns
 
-Example: `add_filter( 'e20r-members-list-add-to-default-table-columns', 'e20r_set_default_table_columns', 10, 2 );`
+Example: `add_filter( 'e20r_members_list_add_to_default_table_columns', 'e20r_set_default_table_columns', 10, 2 );`
 
 
-=== e20r-members-list-page-prepend-cols ===
+=== e20r_members_list_page_prepend_cols ===
 
 Modifies: Export to CSV
 
@@ -151,9 +151,9 @@ Purpose:  The filter processes a single boolean return value (true/false). The f
 
 Default: false
 
-Example: `add_filter( 'e20r-members-list-page-prepend-cols', '__return_true' );`
+Example: `add_filter( 'e20r_members_list_page_prepend_cols', '__return_true' );`
 
-=== e20r-members-list-csv-datetime-format ===
+=== e20r_members_list_csv_datetime_format ===
 
 Modifies: Format of start/end and registration date/time during Export
 
@@ -161,9 +161,9 @@ Purpose: Allow a programmer to set a custom date/time format for the exported Me
 
 Default: WordPress -> Settings -> General -> "Date Format" and "Time Format" setting
 
-Example: `add_filter( 'e20r-members-list-csv-datetime-format', "function( $datetime_format, $date_format, $time_format ) { return 'Y-m-d\TH:i:s'; }" );`
+Example: `add_filter( 'e20r_members_list_csv_datetime_format', "function( $datetime_format, $date_format, $time_format ) { return 'Y-m-d\TH:i:s'; }" );`
 
-=== e20r-members-list-db-type-header-map ===
+=== e20r_members_list_db_type_header_map ===
 
 Modifies: Extends the DB column -> CSV export file mapping (with table type)
 
@@ -171,9 +171,9 @@ Purpose: Let a programmer add more columns to the CSV export file (with the corr
 
 Default: The default Export to CSV columns
 
-Dependencies: The 'e20r-members-list-default-csv-columns' filter will also need to include/return the columns mapped by this filter ( 'e20r-members-list-db-type-header-map' )
+Dependencies: The 'e20r_members_list_default_csv_columns' filter will also need to include/return the columns mapped by this filter ( 'e20r_members_list_db_type_header_map' )
 
-Example: `add_filter( 'e20r-members-list-db-type-header-map', 'e20r_add_to_db_header_map', 10, 2 );`
+Example: `add_filter( 'e20r_members_list_db_type_header_map', 'e20r_add_to_db_header_map', 10, 2 );`
 
 === e20r_memberslist_search_user_fields ===
 

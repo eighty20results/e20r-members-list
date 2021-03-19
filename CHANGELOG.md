@@ -138,7 +138,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [4.1] - 
 
-- ENHANCEMENT: Added 'e20r-memberslist-http-headers' filter to let programmer extend/modify the HTTP request header(s)
+- ENHANCEMENT: Added 'e20r_memberslist_http_headers' filter to let programmer extend/modify the HTTP request header(s)
 - BUG FIX: Use array, not text, for the CSV header (column names)
 - BUG FIX: Use get_cfg_var() and not ini_get() for max_execution_time
 - BUG FIX: Update copyright notice
@@ -153,7 +153,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - ENHANCEMENT: Added Translations if possible/applicable
 - ENHANCEMENT: For no-fee memberships, use 'Free' as the amount (filterable)
-- ENHANCEMENT: Added the 'e20r-memberslist-column-value-free' filter to let the admin change the 'no fee' text from "Free" to whatever they want
+- ENHANCEMENT: Added the 'e20r_memberslist_column_value_free' filter to let the admin change the 'no fee' text from "Free" to whatever they want
 - BUG FIX: Fix column width for the Fee column
 - BUG FIX: Remove E20R_Members_List::forceTLS12() method
 
@@ -162,7 +162,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ENHANCEMENT: Add 'Search results for ...' text after submitting member search
 - ENHANCEMENT: Added/Updated PHPDoc blocks in Members_List_Page() class
 - ENHANCEMENT: Added custom links to easily resubmit a search when there are no results found when searching the current list of members
-- ENHANCEMENT: Standardize translation domain string with a class constant E20R_Members_List::plugin_slug
+- ENHANCEMENT: Standardize translation domain string with a class constant E20R_Members_List::PLUGIN_SLUG
 - BUG FIX: Don't show a 'Search again' link for the currently selected type when no members are found after a search
 - BUG FIX: Don't allow clone of Members_List_Page() class (singleton)
 - BUG FIX: Don't allow clone of Bulk_Cancel() class (singleton)
@@ -195,8 +195,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.5] - 
 
-- ENHANCEMENT: Let a developer change the 'expiration' ('last') column label with the 'e20r-members-list-enddate-col-name' filter
-- ENHANCEMENT: Let a developer change the enddate value to match the (new?) 'last' column value (expiration date) with the 'e20r-members-list-enddate-col-result' filter
+- ENHANCEMENT: Let a developer change the 'expiration' ('last') column label with the 'e20r_members_list_enddate_col_name' filter
+- ENHANCEMENT: Let a developer change the enddate value to match the (new?) 'last' column value (expiration date) with the 'e20r_members_list-enddate_col_result' filter
 
 ## [2.4] - 
 
@@ -222,7 +222,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.0] - 
 
 - Initial public release
-
-
-
-

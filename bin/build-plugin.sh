@@ -17,7 +17,7 @@ declare -a exclude=( \
 	"*.phar" \
 	"composer.*" \
 	"vendor" \
-	"test" \
+	"tests" \
 	)
 declare -a build=( \
 	"plugin-updates/vendor/*.php" \

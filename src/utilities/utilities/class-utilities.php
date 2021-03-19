@@ -1069,6 +1069,10 @@ if ( ! class_exists( '\E20R\Utilities\Utilities' ) ) {
 			$plugin_updates = null;
 			$plugin = self::get_instance();
 
+			if ( ! file_exists( plugin_dir_path( __FILE__ ) . "inc/yahnis-elsts" ) ) {
+				return $plugin_updates;
+			}
+
 			if ( is_null( $plugin_path ) ) {
 				$plugin_path = plugin_dir_path( $plugin_path ) . '../' . $plugin_slug . '.php';
 			}

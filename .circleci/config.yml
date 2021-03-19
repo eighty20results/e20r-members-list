@@ -1,0 +1,229 @@
+workflows:
+  version: 2
+  unittests:
+    jobs:
+      - build
+      - linter
+      - unittest
+      - php56-env
+#      - php70-env
+#      - php71-env
+#      - php72-env
+      - php73-env
+      - php80-env
+      - php56-build:
+          requires:
+            - build
+      - php80-build:
+          requires:
+            - build
+#            - php70-test
+#            - php71-test
+#            - php72-test
+#            - php73-test
+            - php80-test
+version: 2.1
+
+# Specify working directories for each of the PHP versions we're testing with
+# since CircleCI can't expand environment variables in the value for working_dir
+workdir-56: &workdir-56
+  working-directory: ~/results/5.6
+
+workdir-73: &workdir-73
+  working-directory: ~/results/7.3
+
+workdir-80: &workdir-80
+  working-directory: ~/results/8.0
+
+shared-build: &shared-build
+  working_directory: ~/repo
+  machine:
+    docker_layer_caching: true
+  docker:
+    - image: cimg/php:$PHP_VERSION-browsers
+  steps:
+    - checkout
+
+    - restore_cache:
+        keys:
+          - v1-dependencies-{{ checksum "composer.json" }}-$PHP_VERSION
+
+    - run:
+        name: Update composer
+        command: composer self-update
+
+    - run:
+        name: Install dependencies
+        command: |
+          composer install -o --prefer-dist --no-interaction
+
+    - save_cache:
+        paths:
+          - ./inc
+        key: v1-dependencies-{{ checksum "composer.json" }}-$PHP_VERSION
+
+    - run:
+        name: Prepare log directories
+        command: |
+          mkdir -p build/logs/coverage
+          mkdir -p build/logs/unittests
+          mkdir -p build/logs/phpmetrics
+
+    - persist_to_workspace:
+        root: ~/repo
+        paths:
+          - "*"
+
+shared-linting: &shared-linting
+  docker:
+    - image: cimg/php:$PHP_VERSION-browsers
+  steps:
+    - attach_workspace:
+        at: ~/repo
+
+    - run:
+        name: Check for PHP parse errors
+        command: |
+          find ./ -type -f -name '*.php' -print0 | xargs -0 -n1 -P4 php -l -n | (! grep -v "No syntax errors found" )
+
+shared-unit-tests: &shared-unit-tests
+  docker:
+    - image: cimg/php:$PHP_VERSION-browsers
+  steps:
+    - attach_workspace:
+        at: ~/repo
+
+    - run:
+        name: Execute unit tests
+        command: |
+          inc/bin/phpunit -c build --testsuite Unit --log-junit build/logs/unittests/junit.xml --coverage-html build/logs/coverage --coverage-clover=coverage.xml
+    - run:
+        name: Upload code coverage to codecov.io
+        command: bash <(curl -s https://codecov.io/bash)
+
+    - store_test_results:
+        path: build/logs/unittests
+
+    - store_artifacts:
+        path: build/logs/unittests
+        destination: code-coverage-unittests
+
+    - store_artifacts:
+        path: build/logs/coverage
+        destination: code-coverage-html
+
+shared-integration-tests: &shared-integration-tests
+  docker:
+    - image: cimg/php:$PHP_VERSION-browsers
+  steps:
+    - attach_workspace:
+        at: ~/repo
+    - run:
+        name: Execute Integration tests
+        command: inc/bin/phpunit -c build --testsuite Integration --log-junit build/logs/unittests/junit.xml
+
+    - store_test_results:
+        path: build/logs/unittests
+
+    - store_artifacts:
+        path: build/logs/unittests
+        destination: code-coverage-junit
+
+shared-phpmetrics: &shared-phpmetrics
+  docker:
+    - image: cimg/php:$PHP_VERSION-browsers
+  steps:
+    - attach_workspace:
+        at: ~/repo
+
+    - run:
+        name: Run PHP Metrics
+        command: inc/bin/phpmetrics --report-html=build/logs/phpmetrics ./
+
+    - store_artifacts:
+        paht: build/logs/phpmetrics
+        destination: php-metrics-report
+
+shared-phpstan: &shared-phpstan
+  docker:
+    - image: cimg/php:$PHP_VERSION-browsers
+  steps:
+    - attach_workspace:
+        at: ~/repo
+
+    - run:
+        name: Execute PHPStan
+        command: inc/bin/phpstan analyze --level max ./
+
+shared-github-release: &shared-github-release
+  docker:
+    - image: cibuilds/github
+  steps:
+    - attach_workspace:
+        at: ~/repo
+
+    - run:
+        name: Display GIT tag file
+        command: |
+          VERSION=$(cat ./TAG)
+          echo "${VERSION}"
+
+    - run:
+        name: Create the GitHub release
+        command: build_env/create_release.sh
+
+
+jobs:
+#  bundle-dependencies:
+  php-5.6-build:
+    <<: *shared-build
+
+  php80-env:
+    docker:
+      - image: cimg/php:8.0-browsers
+    steps:
+      - checkout
+      - restore_cache:
+          key: v1-dependencies-{{ checksum "composer.lock" }}
+
+      - run:
+          name: Install all required development/test composer dependencies
+          command: composer --dev install
+
+      - save_cache:
+          key: v1-dependencies-{{ checksum "composer.lock" }}
+          paths:
+            - inc/
+
+      - run:
+          name: Configure PHPCS
+          command: inc/bin/phpcs --config-set installed_paths ./inc/wp-coding-standards/wpcs
+
+      - run:
+          name: Run plugin linter and tests
+          command: composer run-script test
+
+  build:
+    docker:
+      - image: cimg/php:8.0-browsers
+    steps:
+      - checkout
+      - restore_cache:
+          key: v1-dependencies-{{ checksum "composer.lock" }}
+
+      - run:
+          name: Install all required development/test composer dependencies
+          command: composer --dev install
+
+      - save_cache:
+          key: v1-dependencies-{{ checksum "composer.lock" }}
+          paths:
+            - inc/
+
+      - run:
+          name: Configure PHPCS
+          command: inc/bin/phpcs --config-set installed_paths ./inc/wp-coding-standards/wpcs
+
+      - run:
+          name: Run plugin linter and tests
+          command: composer run-script test

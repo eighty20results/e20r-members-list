@@ -1,0 +1,19 @@
+parameters:
+    level: 5
+    paths:
+        - class-loader.php
+        - src/licensing
+        - src/utilities
+        - tests/wpunit
+        - tests/unit
+        - tests/functional
+        - tests/acceptance
+    bootstrapFiles:
+    	- tests/bootstrap.php
+    	- class.class-loader.php
+    excludePaths:
+        - inc/
+        - tests/*/data/*
+        - tests/_*/
+        - tests/docker*
+        - tests/test_env*
