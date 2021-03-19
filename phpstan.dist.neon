@@ -1,16 +1,15 @@
 parameters:
     level: 5
     paths:
-        - class-loader.php
-        - src/licensing
-        - src/utilities
+        - class.e20r-members-list.php
+        - src/members-list
         - tests/wpunit
         - tests/unit
         - tests/functional
         - tests/acceptance
     bootstrapFiles:
     	- tests/bootstrap.php
-    	- class.class-loader.php
+    	- class.e20r-members-list.php
     excludePaths:
         - inc/
         - tests/*/data/*

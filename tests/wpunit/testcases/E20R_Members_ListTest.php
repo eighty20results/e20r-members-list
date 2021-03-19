@@ -24,13 +24,17 @@ namespace E20R\Members_List\Controller\Test;
 use E20R\Members_List\Controller\E20R_Members_List;
 use Codeception\Test\Unit;
 use Brain\Monkey;
+use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
+use Spatie\Snapshots\MatchesSnapshots;
+
 class E20R_Members_ListTest extends Unit {
+	use MatchesSnapshots;
 
 	public function setUp(): void {
 		parent::setUp();
 		Monkey\setUp();
 
-		// A few common passthrough
+		// A few common passthroughs
 		// 1. WordPress i18n functions
 		Monkey\Functions\when( '__' )
 			->returnArg( 1 );
@@ -54,5 +58,12 @@ class E20R_Members_ListTest extends Unit {
 	public function tearDown(): void {
 		Monkey\tearDown();
 		parent::tearDown();
+	}
+
+	/**
+	 * Tests that the get_instance() function returns the expected class
+	 */
+	public function test_get_instance() {
+		self::assertInstanceOf( '\\E20R\Members_List\\Controller\\E20R_Members_List', E20R_Members_List::get_instance() );
 	}
 }

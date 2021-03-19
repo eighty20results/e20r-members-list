@@ -9,9 +9,12 @@ MYSQL_DATABASE ?= wordpress
 MYSQL_USER ?= wordpress
 MYSQL_PASSWORD ?= wordpress
 WORDPRESS_DB_HOST ?= localhost
+WP_CONTAINER_NAME ?= codecep-wp-$(E20R_PLUGIN_NAME)
+DB_CONTAINER_NAME ?= mariadb-wp-$(E20R_PLUGIN_NAME)
 
 # PROJECT := $(shell basename ${PWD}) # This is the default as long as the plugin name matches
 PROJECT := $(E20R_PLUGIN_NAME)
+
 
 # Settings for docker-compose
 DC_CONFIG_FILE ?= $(PWD)/.circleci/docker/docker-compose.yml
@@ -60,7 +63,8 @@ db-shell:
 	@docker-compose -p $(PROJECT) --env-file $(DC_ENV_FILE) --file $(DC_CONFIG_FILE) exec database /bin/bash
 
 db-backup:
-	docker-compose -p $(PROJECT) --env-file $(DC_ENV_FILE) --file $(DC_CONFIG_FILE) exec database /usr/bin/mysqldump -u$(MYSQL_USER) -p'$(MYSQL_PASSWORD)' -h$(WORDPRESS_DB_HOST) $(MYSQL_DATABASE) > $(SQL_BACKUP_FILE)/$(E20R_PLUGIN_NAME).sql
+	docker-compose -p $(PROJECT) --env-file $(DC_ENV_FILE) --file $(DC_CONFIG_FILE) exec database \
+ 		/usr/bin/mysqldump -u$(MYSQL_USER) -p'$(MYSQL_PASSWORD)' -h$(WORDPRESS_DB_HOST) $(MYSQL_DATABASE) > $(SQL_BACKUP_FILE)/$(E20R_PLUGIN_NAME).sql
 
 lint-test:
 	@docker-compose -p ${PROJECT} --env-file ${DC_ENV_FILE} --file ${DC_CONFIG_FILE} exec \

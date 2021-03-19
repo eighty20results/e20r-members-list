@@ -22,7 +22,7 @@
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/7.2/phpunit.xsd" bootstrap="tests/phpunit/bootstrap.php" backupGlobals="true" colors="true" convertErrorsToExceptions="true" convertNoticesToExceptions="true" convertWarningsToExceptions="true" verbose="true" printerClass="PHPUnit\TextUI\ResultPrinter" >
 	<testsuites>
 		<testsuite name="E20R Better Members List for PMPro Test Suite">
-			<directory suffix="Test.php">./test/phpunit</directory>
+			<directory suffix="Test.php">./tests/wpunit/testcases/</directory>
 		</testsuite>
 	</testsuites>
 	<filter>
