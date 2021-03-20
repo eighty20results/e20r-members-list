@@ -6,6 +6,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [] - 2021-03-20
+- BUG FIX: Didn't automatically search for levels only when selected level is changed
+- BUG FIX: Setting the record count in the constructor is silly
+- BUG FIX: Warnings when there are no member records
+- BUG FIX: Implicitly defined variable fixes
+- BUG FIX: Refactored to use Class::plugin_slug for translation strings
+- BUG FIX: Reverted refactoring to use Class::plugin_slug for translation strings
+- BUG FIX: Using explicit namespace paths in Sort_By_Meta
+- BUG FIX: Refactored e20r-memberslist-page.js
+- BUG FIX: Exclude the inc/ directory from the Wordpress.org repo
+- BUG FIX: Didn't install the composer dependencies
+- BUG FIX: Using the github.com Issues page for the plugin
+- BUG FIX: Didn't include the (new) CHANGELOG.md file in the plugin build script
+- BUG FIX: Auto-generate required documentation files (README, CHANGELOG and metadata.json files)
+- BUG FIX: Exclude the .lock file
+- BUG FIX: Catch autoLoader() exceptions
+- BUG FIX: Didn't make sure the data is available before exporting
+- BUG FIX: Added ability to create a release from a commit/action
+- BUG FIX: Initial work on fixing some of issues with the search functionality
+- BUG FIX: WPCS updates
+- BUG FIX: Various refactoring and adding unit test framework
+- BUG FIX: Wrong path to utilities classes after renaming directory from class to src
+- BUG FIX: Not checking if Utilities module is present
+- BUG FIX: Adding and allowing execution of first (local) Unit test
+- BUG FIX: Unit tests for load_hooks() and get_instance()
+- BUG FIX: Various updates to get PHPCS WPCS syntax checking to work as expected and Unit tests to pass
+- BUG FIX: Renamed the plugin source file so updated the .pot header
+- BUG FIX: Added some very basic unit tests for the auto_loader() function
+- BUG FIX: Various bugs in build scripts
+- ENH: Adding support for filter to set default sort order - e20r_memberslist_default_sort_order
+- ENH: Adding new filter to documentation section
+- ENH: Adding composer file for unit testing, CircleCI integration, etc
+- ENH: Added skeleton (tempate) files for documentation, etc.
+
 ## [7.6] - 2021-02-22
 - BUG FIX: Implicitly defined variable fixes
 - BUG FIX: Refactored to use Class::plugin_slug for translation strings
