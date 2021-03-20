@@ -21,9 +21,12 @@ shared-build: &shared-build
         at: ~/repo
     - checkout
 #    - setup_remote_docker
-    - restore_cache:
-        keys:
-          - v1-dependencies-{{ checksum "composer.json" }}-$PHP_VERSION
+
+    - run:
+        name: Install PHP
+        command: |
+        sudo apt update -y
+        sudo apt install php-cli unzip php-fpm php-json php-common php-mysql php-zip php-gd php-mbstring php-curl php-xml php-pear php-bcmath
     - run:
         name: Install Composer
         command: |
@@ -36,6 +39,9 @@ shared-build: &shared-build
         command: |
           php -v
           php composer.phar --version
+    - restore_cache:
+        keys:
+          - v1-dependencies-{{ checksum "composer.json" }}-$PHP_VERSION
     - run:
         name: Update composer
         command: php composer.phar self-update
