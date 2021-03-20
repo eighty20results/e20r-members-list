@@ -1,8 +1,8 @@
 {
-  "name": "E20R Enhanced Members List Paid Memberships Pro",
-  "slug": "e20r-members-list",
-  "download_url": "https://eighty20results.com/protected-content/e20r-members-list/e20r-members-list-.zip",
-  "version": "",
+  "name" : "E20R Enhanced Members List Paid Memberships Pro",
+  "slug" : "e20r-members-list",
+  "download_url" : "https://eighty20results.com/protected-content/e20r-members-list/e20r-members-list-8.0.zip",
+  "version" : "8.0",
   "tested": "5.7",
   "requires": "4.8",
   "author": "Thomas Sjolshagen <thomas@eighty20results.com>",
