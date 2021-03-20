@@ -13,7 +13,7 @@ workdir-80: &workdir-80
   working-directory: ~/results/8.0
 
 shared-build: &shared-build
-  working_directory: ~/repo
+  working_directory: ~/
   machine:
     image: ubuntu-2004:202010-01
   steps:
@@ -40,7 +40,7 @@ shared-build: &shared-build
           mkdir -p build/logs/unittests
           mkdir -p build/logs/phpmetrics
     - persist_to_workspace:
-        root: ~/repo
+        root: ~/
         paths:
           - "*"
 
@@ -49,7 +49,7 @@ shared-linting: &shared-linting
     - image: cimg/php:$PHP_VERSION-browsers
   steps:
     - attach_workspace:
-        at: ~/repo
+        at: ~/
 
     - run:
         name: Check for PHP parse errors
@@ -79,7 +79,7 @@ jobs:
     << : *shared-build
     steps:
       - attach_workspace:
-          at: ~/repo
+          at: ~/
       - checkout
       - run:
           name: Install docker-compose
@@ -88,15 +88,15 @@ jobs:
             chmod +x ~/docker-compose
             sudo mv ~/docker-compose /usr/local/bin/docker-compose
 #      - setup_remote_docker
-      - run:
-          name: Where is the repo..?
-          command: find / -name class-e20r-members-list.php -print
+#      - run:
+#          name: Where is the repo..?
+#          command: find / -name class-e20r-members-list.php -print
 
       - restore_cache:
           key: v1-dependencies-{{ checksum "composer.lock" }}
       - run:
           name: Install all required development/test composer dependencies
-          command: composer --dev install
+          command: inc/bin/composer --dev install
       - save_cache:
           key: v1-dependencies-{{ checksum "composer.lock" }}
           paths:
