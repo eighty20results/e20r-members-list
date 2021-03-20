@@ -24,11 +24,11 @@ shared-build: &shared-build
           - v1-dependencies-{{ checksum "composer.json" }}-$PHP_VERSION
     - run:
         name: Update composer
-        command: composer self-update
+        command: inc/bin/composer self-update
     - run:
         name: Install dependencies
         command: |
-          composer install -o --prefer-dist --no-interaction
+          inc/bin/composer install -o --prefer-dist --no-interaction
     - save_cache:
         paths:
           - ./inc
@@ -88,6 +88,10 @@ jobs:
             chmod +x ~/docker-compose
             sudo mv ~/docker-compose /usr/local/bin/docker-compose
 #      - setup_remote_docker
+      - run:
+          name: Where is the repo..?
+          command: find / -name class-e20r-members-list.php -print
+
       - restore_cache:
           key: v1-dependencies-{{ checksum "composer.lock" }}
       - run:
