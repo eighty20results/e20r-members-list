@@ -25,12 +25,24 @@ shared-build: &shared-build
         keys:
           - v1-dependencies-{{ checksum "composer.json" }}-$PHP_VERSION
     - run:
+        name: Install Composer
+        command: |
+          php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+          php -r "if (hash_file('SHA384', 'composer-setup.php') === trim(file_get_contents('https://composer.github.io/installer.sig'))) { echo 'Installer verified'; } else { echo 'Installer invalid'; unlink('composer-setup.php'); } echo PHP_EOL;"
+          php composer-setup.php
+          php -r "unlink('composer-setup.php');"
+    - run:
+        name: Display PHP information
+        command: |
+          php -v
+          php composer.phar --version
+    - run:
         name: Update composer
-        command: inc/bin/composer self-update
+        command: php composer.phar self-update
     - run:
         name: Install dependencies
         command: |
-          inc/bin/composer install -o --prefer-dist --no-interaction
+          php composer.phar install -o --prefer-dist --no-interaction
     - save_cache:
         paths:
           - inc/
@@ -100,7 +112,7 @@ jobs:
           key: v1-dependencies-{{ checksum "composer.lock" }}
       - run:
           name: Install all required development/test composer dependencies
-          command: inc/bin/composer --dev install
+          command: php composer.phar --dev install
       - save_cache:
           key: v1-dependencies-{{ checksum "composer.lock" }}
           paths:
