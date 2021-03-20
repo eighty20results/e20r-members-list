@@ -21,3 +21,13 @@ params:
 settings:
   lint: true
   colors: true
+coverage:
+  enabled: true
+  include:
+    - src/members-list/*
+    - ./class-e20r-members-list.php
+  exclude:
+    - src/utilities/*
+    - inc/*
+    - languages/*
+    - tests/*

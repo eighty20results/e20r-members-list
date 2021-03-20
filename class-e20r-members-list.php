@@ -144,7 +144,7 @@ if ( ! class_exists( '\\E20R\\Members_List\\Controller\\E20R_Members_List' ) ) {
 			}
 
 			try {
-				foreach ( new \ RecursiveIteratorIterator( $iterator ) as $f_filename => $f_file ) {
+				foreach ( new \RecursiveIteratorIterator( $iterator ) as $f_filename => $f_file ) {
 
 					$class_path = sprintf( '%1$s/%2$s', $f_file->getPath(), $f_file->getFilename() );
 
