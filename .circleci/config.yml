@@ -4,19 +4,21 @@ version: 2.1
 # Specify working directories for each of the PHP versions we're testing with
 # since CircleCI can't expand environment variables in the value for working_dir
 workdir-56: &workdir-56
-  working-directory: ~/results/5.6
+  working-directory: ./reporesults/5.6
 
 workdir-73: &workdir-73
-  working-directory: ~/results/7.3
+  working-directory: ./reporesults/7.3
 
 workdir-80: &workdir-80
-  working-directory: ~/results/8.0
+  working-directory: ./reporesults/8.0
 
 shared-build: &shared-build
-  working_directory: ~/
+  working_directory: ~/repo
   machine:
     image: ubuntu-2004:202010-01
   steps:
+    - attach_workspace:
+        at: ~/repo
     - checkout
 #    - setup_remote_docker
     - restore_cache:
@@ -31,7 +33,7 @@ shared-build: &shared-build
           inc/bin/composer install -o --prefer-dist --no-interaction
     - save_cache:
         paths:
-          - ./inc
+          - inc/
         key: v1-dependencies-{{ checksum "composer.json" }}-$PHP_VERSION
     - run:
         name: Prepare log directories
@@ -40,17 +42,17 @@ shared-build: &shared-build
           mkdir -p build/logs/unittests
           mkdir -p build/logs/phpmetrics
     - persist_to_workspace:
-        root: ~/
+        root: ~/repo
         paths:
           - "*"
 
 shared-linting: &shared-linting
+  working_directory: ~/repo
   docker:
     - image: cimg/php:$PHP_VERSION-browsers
   steps:
     - attach_workspace:
-        at: ~/
-
+        at: ~/repo
     - run:
         name: Check for PHP parse errors
         command: |
@@ -58,6 +60,7 @@ shared-linting: &shared-linting
 
 
 github-release: &github-release
+  working_directory: ~/repo
   docker:
     - image: cibuilds/github
   steps:
@@ -77,16 +80,17 @@ github-release: &github-release
 jobs:
   build:
     << : *shared-build
+    working_directory: ~/repo
     steps:
       - attach_workspace:
-          at: ~/
+          at: ~/repo
       - checkout
       - run:
           name: Install docker-compose
           command: |
-            curl -L https://github.com/docker/compose/releases/download/1.25.4/docker-compose-`uname -s`-`uname -m` > ~/docker-compose
-            chmod +x ~/docker-compose
-            sudo mv ~/docker-compose /usr/local/bin/docker-compose
+            curl -L https://github.com/docker/compose/releases/download/1.25.4/docker-compose-`uname -s`-`uname -m` > ./docker-compose
+            chmod +x ./docker-compose
+            sudo mv ./docker-compose /usr/local/bin/docker-compose
 #      - setup_remote_docker
 #      - run:
 #          name: Where is the repo..?
