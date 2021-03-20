@@ -25,8 +25,8 @@ shared-build: &shared-build
     - run:
         name: Install PHP
         command: |
-        sudo apt update -y
-        sudo apt install php-cli unzip php-fpm php-json php-common php-mysql php-zip php-gd php-mbstring php-curl php-xml php-pear php-bcmath
+          sudo apt update -y
+          sudo apt install php-cli unzip php-fpm php-json php-common php-mysql php-zip php-gd php-mbstring php-curl php-xml php-pear php-bcmath
     - run:
         name: Install Composer
         command: |
