@@ -8,8 +8,8 @@ services:
   wordpress:
     container_name: codecep-wp-${E20R_PLUGIN_NAME}
     build:
-      context: /Users/sjolshag/PhpStormProjects/${LOCAL_PLUGIN_DIR}/tests
-      dockerfile: /Users/sjolshag/PhpStormProjects/${LOCAL_PLUGIN_DIR}/tests/docker/Dockerfile.unittest
+      context: ./tests
+      dockerfile: ./tests/docker/Dockerfile.unittest
       args:
         WP_TAG: wordpress:${WP_RELEASE}
     restart: always
