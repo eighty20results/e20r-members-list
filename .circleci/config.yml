@@ -143,4 +143,7 @@ jobs:
             - inc/
       - run:
           name: Execute plugin tests with coverage
-          command: make tests
+          command: |
+            pwd
+            find ./ -name tests -print
+            make tests
