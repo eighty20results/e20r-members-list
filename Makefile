@@ -29,9 +29,16 @@ DC_ENV_FILE ?= $(PWD)/.circleci/docker/.env
 	shell \
 	lint-test \
 	phpcs-test \
+	phpstan-test \
 	unit-test \
 	acceptance-test \
-	build-test
+	build-test \
+	gitlog \
+	wp-shell \
+	wp-log \
+	db-shell \
+	db-backup \
+	tests
 
 clean:
 #	$(FIND) $(BASE_PATH)/inc -path composer -prune \
@@ -100,3 +107,9 @@ build-test: start
 	 wordpress inc/bin/codecept build -v
 
 tests: start phpcs-test unit-test stop # TODO: phpstan-test between phpcs & unit tests
+
+changelog: build_readmes/current.txt
+	@./bin/changelog.sh
+
+gitlog:
+	@./bin/create_log.sh
