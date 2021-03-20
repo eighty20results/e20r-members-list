@@ -40,7 +40,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ENH: Adding composer file for unit testing, CircleCI integration, etc
 - ENH: Added skeleton (tempate) files for documentation, etc.
 
-
 ## [7.6] - 2021-02-22
 - BUG FIX: Implicitly defined variable fixes
 - BUG FIX: Refactored to use Class::plugin_slug for translation strings
