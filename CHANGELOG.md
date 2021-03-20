@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [] - 2021-03-20
+## [8.0] - 2021-03-20
 - BUG FIX: Didn't automatically search for levels only when selected level is changed
 - BUG FIX: Setting the record count in the constructor is silly
 - BUG FIX: Warnings when there are no member records
@@ -39,6 +39,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ENH: Adding new filter to documentation section
 - ENH: Adding composer file for unit testing, CircleCI integration, etc
 - ENH: Added skeleton (tempate) files for documentation, etc.
+
 
 ## [7.6] - 2021-02-22
 - BUG FIX: Implicitly defined variable fixes
