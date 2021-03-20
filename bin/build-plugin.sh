@@ -6,9 +6,9 @@
 short_name="e20r-members-list"
 remote_server="eighty20results.com"
 declare -a include=( \
-	"class" \
+	"src" \
 	"languages" \
-	"${short_name}.php" \
+	"class-${short_name}.php" \
 	"README.txt" \
 	"CHANGELOG.md"
 	)
@@ -17,13 +17,14 @@ declare -a exclude=( \
 	"*.phar" \
 	"composer.*" \
 	"vendor" \
+	"inc" \
 	"tests" \
 	)
 declare -a build=( \
 	"plugin-updates/vendor/*.php" \
 )
 plugin_path="${short_name}"
-version=$(egrep "^Version:" ../class-utility-loader.php | \
+version=$(egrep "^Version:" "../class-${short_name}.php" | \
 	sed 's/[[:alpha:]|(|[:space:]|\:]//g' | \
 	awk -F- '{printf "%s", $1}')
 metadata="../metadata.json"
@@ -83,19 +84,19 @@ zip -r "${kit_name}.zip" "${plugin_path}"
 ssh "${remote_server}" "cd ${remote_path}; mkdir -p \"${short_name}\""
 
 echo "Copying ${kit_name}.zip to ${remote_server}:${remote_path}/${short_name}/"
-scp "${kit_name}.zip" "${remote_server}:${remote_path}/${short_name}/"
+#scp "${kit_name}.zip" "${remote_server}:${remote_path}/${short_name}/"
 
 echo "Copying ${metadata} to ${remote_server}:${remote_path}/${short_name}/"
-scp "${metadata}" "${remote_server}:${remote_path}/${short_name}/"
+#scp "${metadata}" "${remote_server}:${remote_path}/${short_name}/"
 
 echo "Linking ${short_name}/${short_name}-${version}.zip to ${short_name}.zip on remote server"
 # We _want_ to expand the variables on the client side
 # shellcheck disable=SC2029
-ssh "${remote_server}" \
-	"cd ${remote_path}/ ; ln -sf \"${short_name}\"/\"${short_name}\"-\"${version}\".zip \"${short_name}\".zip"
+#ssh "${remote_server}" \
+#	"cd ${remote_path}/ ; ln -sf \"${short_name}\"/\"${short_name}\"-\"${version}\".zip \"${short_name}\".zip"
 
 # Return to the root directory
 cd "${src_path}" || die 1
 
 # And clean up
-rm -rf "${dst_path}"
+#rm -rf "${dst_path}"

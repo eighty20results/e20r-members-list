@@ -5,7 +5,7 @@
 #
 
 # Remove any wordpress.org prohibited one-click update functionality as necessary
-read -r -a FILE_LIST <<< "class.e20r-members-list.php class-utility-loader.php"
+read -r -a FILE_LIST <<< "class-e20r-members-list.php class-utility-loader.php class-loader.php"
 read -r -a UPDATE_LIST <<< "yahnis-elsts"
 srch_string="Utilities::configureUpdateServer"
 

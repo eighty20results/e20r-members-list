@@ -65,17 +65,30 @@ read -r -a RM_LIST <<< "trunk/.git \
 	trunk/Dockerfile \
 	trunk/remove_update.sh \
 	trunk/metadata.json \
-	trunk/package.json tags/${VERSION} \
+	trunk/.distignore \
+	trunk/.dockerignore \
+	trunk/.env.testing \
+	trunk/codeception.xml.dist \
+	trunk/composer.phar \
+	trunk/Makefile \
+	trunk/patchwork.json \
+	trunk/phpstan.dist.neon \
+	trunk/phpunit.xml \
+	trunk/package.json \
+	trunk/composer.json \
+	tags/${VERSION} \
 	trunk/build_env \
 	trunk/inc \
-	tags/${VERSION}/.git \
-	trunk/class/utilities/.git \
-	trunk/class/utilities/bin \
-	trunk/class/utilities/.gitignore \
-	trunk/class/utilities/README.txt \
-	trunk/class/utilities/.editorconfig \
-	trunk/class/utilities/metadata.json \
-	trunk/class/utilities/composer.json \
+	trunk/.circleci \
+	trunk/.github \
+	trunk/bin \
+	trunk/src/utilities/.git \
+	trunk/src/utilities/bin \
+	trunk/src/utilities/.gitignore \
+	trunk/src/utilities/README.txt \
+	trunk/src/utilities/.editorconfig \
+	trunk/src/utilities/metadata.json \
+	trunk/src/utilities/composer.json \
 	trunk/test"
 
 # Checkout just trunk and assets for efficiency
@@ -149,9 +162,9 @@ else
 	echo "ℹ︎ No assets directory found; skipping asset copy"
 fi
 
-if [[ -f "${SVN_DIR}/class/utilities/class.utilities.php" ]]; then
+if [[ -f "${SVN_DIR}/src/utilities/class.utilities.php" ]]; then
 	echo "ℹ︎ Refreshing the Utilities module from ${SVN_DIR}/class/utilities:"
-	cp -R "${SVN_DIR}/class/utilities/*" "trunk/class/utilities/"
+	cp -R "${SVN_DIR}/src/utilities/*" "trunk/src/utilities/"
 fi
 
 for remove_file in "${RM_LIST[@]}"; do
@@ -190,4 +203,3 @@ if [[ -n "${BRANCH}" && "${BRANCH}" =~ ^v[0-9]+\..*[0-9]$ ]]; then
 else
 	echo "✓ Not in main branch. Nothing to do"
 fi
-
