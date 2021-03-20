@@ -8,8 +8,9 @@ changelog_out="CHANGELOG.md"
 wordpress_version=$(wget -q -O - http://api.wordpress.org/core/stable-check/1.0/  | grep latest | awk '{ print $1 }' | sed -e 's/"//g')
 tmp_changelog=$(mktemp /tmp/chlog-XXXXXX)
 # stripped_log=$(mktemp /tmp/old-info-XXXXXX)
-version=$(egrep "^Version:" ../class.${short_name}.php | sed 's/[[:alpha:]|(|[:space:]|\:]//g' | awk -F- '{printf "%s", $1}')
+version=$(egrep "^Version:" ../class-${short_name}.php | sed 's/[[:alpha:]|(|[:space:]|\:]//g' | awk -F- '{printf "%s", $1}')
 today=$(date "+%Y-%m-%d")
+time=$(date "+%h:%m:00")
 changelog_new_version="## [${version}] - ${today}"
 changelog_header=$(cat <<- __EOF__
 # Changelog
@@ -36,7 +37,7 @@ if [[ -f ../metadata.json ]]; then
 	echo "Updating the metadata.json file"
 	"${sed}" -r -e "s/\"version\": \"([0-9]+\.[0-9].*)\"\,/\"version\": \"${version}\"\,/" \
 					 -e "s/\"tested\"\:\ \"([0-9]+\.[0-9].*)\"\,/\"tested\"\:\ \"${wordpress_version}\"\,/" \
-					 -e "s/\"last_updated\": \"(.*)\",/\"last_updated\": \"${today} $(date \"+%h:%m:00\") CET\",/g" \
+					 -e "s/\"last_updated\": \"(.*)\",/\"last_updated\": \"${today} ${time} CET\",/g" \
 					 -e "s/\"download_url\": \"https:\/\/${server}\/protected-content\/${short_name}\/${short_name}-([0-9]+\.[0-9].*)\.zip\",/\"download_url\": \"https:\/\/${server}\/protected-content\/${short_name}\/${short_name}-${version}\.zip\",/g" \
 					 ../metadata.json > ../new_metadata.json
 		mv ../new_metadata.json ../metadata.json
