@@ -3,7 +3,7 @@
 Plugin Name: Better Members List for Paid Memberships Pro
 Plugin URI: https://wordpress.org/plugins/e20r-members-list
 Description: Extensible, sortable & bulk action capable members listing + export to CSV tool for Paid Memberships Pro.
-Version: 7.6
+Version: 8.0
 Author: Thomas Sjolshagen @ Eighty / 20 Results by Wicked Strong Chicks, LLC <thomas@eighty20results.com>
 Author URI: https://eighty20results.com/thomas-sjolshagen/
 Text Domain: e20r-members-list
@@ -32,17 +32,15 @@ namespace E20R\Members_List\Controller;
 use E20R\Members_List\Admin\Members_List_Page;
 
 if ( ! defined( 'E20R_MEMBERSLIST_VER' ) ) {
-	define( 'E20R_MEMBERSLIST_VER', '7.6' );
+	define( 'E20R_MEMBERSLIST_VER', '8.0' );
 }
 
-if ( ! class_exists( '\\E20R\Members_List\\Controller\\E20R_Members_List' ) ) {
+if ( ! class_exists( '\\E20R\\Members_List\\Controller\\E20R_Members_List' ) ) {
 	/**
 	 * Class E20R_Members_List
 	 * @package E20R\Members_List\Controller
 	 */
 	class E20R_Members_List {
-
-		const PLUGIN_SLUG = 'e20r-members-list';
 
 		/**
 		 * Instance of the Member List controller
@@ -61,6 +59,8 @@ if ( ! class_exists( '\\E20R\Members_List\\Controller\\E20R_Members_List' ) ) {
 		 * Get or instantiate and get the current class
 		 *
 		 * @return E20R_Members_List|null
+		 *
+		 * @test E20R_Members_ListTest::test_get_instance()
 		 */
 		public static function get_instance() {
 
@@ -79,6 +79,9 @@ if ( ! class_exists( '\\E20R\Members_List\\Controller\\E20R_Members_List' ) ) {
 		 * @return false|bool
 		 * @since  1.0
 		 * @access public static
+		 *
+		 * @test E20R_Members_ListTest::test_auto_loader_success
+		 * @test E20R_Members_ListTest::test_auto_loader_error_returns
 		 */
 		public static function auto_loader( $class_name ) {
 
@@ -147,6 +150,7 @@ if ( ! class_exists( '\\E20R\Members_List\\Controller\\E20R_Members_List' ) ) {
 
 					if ( $f_file->isFile() && false !== strpos( $class_path, $filename ) ) {
 						require_once $class_path;
+						return true;
 					}
 				}
 			} catch ( \Exception $e ) {
@@ -154,13 +158,15 @@ if ( ! class_exists( '\\E20R\Members_List\\Controller\\E20R_Members_List' ) ) {
 				return false;
 			}
 
-			return true;
+			return false;
 		}
 
 		/**
 		 * Initialize the Enhanced Members List functionality
 		 *
 		 * @since v3.3 - ENHANCEMENT: Load translation/I18N
+		 *
+		 * @test E20R_Members_ListTest::test_load_hooks()
 		 */
 		public function load_hooks() {
 			add_action( 'init', array( Members_List_Page::get_instance(), 'load_hooks' ), - 1 );
@@ -174,8 +180,8 @@ if ( ! class_exists( '\\E20R\Members_List\\Controller\\E20R_Members_List' ) ) {
 		 */
 		public function load_text_domain() {
 
-			$locale  = apply_filters( 'plugin_locale', get_locale(), self::PLUGIN_SLUG );
-			$mo_file = self::PLUGIN_SLUG . "-{$locale}.mo";
+			$locale  = apply_filters( 'plugin_locale', get_locale(), 'e20r-members-list' );
+			$mo_file = "e20r-members-list-{$locale}.mo";
 
 			// Path(s) to local and global (WP)
 			$mo_file_local  = dirname( __FILE__ ) . "/languages/{$mo_file}";
@@ -185,20 +191,20 @@ if ( ! class_exists( '\\E20R\Members_List\\Controller\\E20R_Members_List' ) ) {
 			if ( file_exists( $mo_file_global ) ) {
 
 				load_textdomain(
-					self::PLUGIN_SLUG,
+					'e20r-members-list',
 					$mo_file_global
 				);
 			}
 
 			// Load from local next (if applicable)
 			load_textdomain(
-				self::PLUGIN_SLUG,
+				'e20r-members-list',
 				$mo_file_local
 			);
 
 			// Load with plugin_textdomain or GlotPress
 			load_plugin_textdomain(
-				self::PLUGIN_SLUG,
+				'e20r-members-list',
 				false,
 				dirname( __FILE__ ) . '/languages/'
 			);
@@ -214,13 +220,13 @@ if ( ! file_exists( WP_PLUGIN_DIR . '/00-e20r-utilities/' ) ) {
 
 try {
 	spl_autoload_register( 'E20R\Members_List\Controller\E20R_Members_List::auto_loader' );
-} catch( \Exception $exception ) {
-	error_log('Unable to register auto_loader: ' . $exception->getMessage(),E_USER_ERROR );
+} catch ( \Exception $exception ) {
+	error_log( 'Unable to register auto_loader: ' . $exception->getMessage(), E_USER_ERROR );
 	return false;
 }
 
 add_action( 'plugins_loaded', array( E20R_Members_List::get_instance(), 'load_hooks' ) );
 
-if ( class_exists( '\E20R\Utilities\Utilities' ) && ( file_exists( WP_PLUGIN_DIR . '/00-e20r-utilities/' ) || file_exists( plugin_dir_path( __FILE__ ) . 'src/utilities/class-utility-loader.php' ) ) ) {
-	\E20R\Utilities\Utilities::configureUpdateServerV4( 'e20r-members-list', plugin_dir_path( __FILE__ ) . 'class.e20r-members-list.php' );
+if ( class_exists( '\E20R\Utilities\Utilities' ) && ( file_exists( WP_PLUGIN_DIR . '/00-e20r-utilities/' ) || file_exists( plugin_dir_path( __FILE__ ) . 'src/utilities/class-loader.php' ) ) ) {
+	\E20R\Utilities\Utilities::configureUpdateServerV4( 'e20r-members-list', plugin_dir_path( __FILE__ ) . 'class-e20r-members-list.php' );
 }

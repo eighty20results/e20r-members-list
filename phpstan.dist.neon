@@ -1,7 +1,7 @@
 parameters:
     level: 5
     paths:
-        - class.e20r-members-list.php
+        - class-e20r-members-list.php
         - src/members-list
         - tests/wpunit
         - tests/unit
@@ -9,7 +9,7 @@ parameters:
         - tests/acceptance
     bootstrapFiles:
     	- tests/bootstrap.php
-    	- class.e20r-members-list.php
+    	- class-e20r-members-list.php
     excludePaths:
         - inc/
         - tests/*/data/*

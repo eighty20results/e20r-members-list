@@ -101,7 +101,6 @@ class Export_Members {
 			array( 'meta_values', 'pmpro_bphone' ),
 			array( 'member_level', 'membership_id' ),
 			array( 'pmpro_level', 'name' ),
-			// array( "member_level", "membership" ),
 			array( 'member_level', 'initial_payment' ),
 			array( 'member_level', 'billing_amount' ),
 			array( 'member_level', 'billing_limit' ),
@@ -407,7 +406,7 @@ class Export_Members {
 
 		$i_start     = 0;
 		$iterations  = 1;
-		$users_found = is_countable($this->member_list ) ? count( $this->member_list ) : 0;
+		$users_found = is_countable( $this->member_list ) ? count( $this->member_list ) : 0;
 
 		if ( $users_found >= $max_users_per_loop ) {
 			$iterations = ceil( $users_found / $max_users_per_loop );
@@ -642,7 +641,7 @@ class Export_Members {
 			}
 
 			// Process End of membership column
-			if ( 'enddate' == $column_name ) {
+			if ( 'enddate' === $column_name ) {
 
 				$enddate_value = $column_value;
 
@@ -676,7 +675,7 @@ class Export_Members {
 						! empty( $member->membership_id ) &&
 						( ! empty( $column_value ) && '0000-00-00 00:00:00' !== $column_value )
 					) {
-						$enddate_value = date(
+						$enddate_value = date_i18n(
 							$datetime_format,
 							strtotime(
 								$column_value,
@@ -717,8 +716,6 @@ class Export_Members {
 			if ( empty( $column_value ) ) {
 				$column_value = null;
 			}
-
-			// $utils->log( "Saving {$column_name} (looked for {$field_def[1]}): " . print_r( $column_value, true ) );
 
 			// Save the entry info
 			$csv_record[ $column_name ] = $this->enclose( $column_value );
@@ -865,8 +862,9 @@ class Export_Members {
 
 		global $wpdb;
 
-		$dis_sql = $wpdb->prepare(
-			"
+		$pmpro_discount_code = $wpdb->get_row(
+			$wpdb->prepare(
+				"
 				SELECT
 					c.id AS pmpro_discount_code_id,
 					c.code AS pmpro_discount_code
@@ -875,11 +873,10 @@ class Export_Members {
 				WHERE c.id = %d AND cu.user_id = %d
 				ORDER BY c.id DESC
 				LIMIT 1",
-			$code_id,
-			$user_id
+				$code_id,
+				$user_id
+			)
 		);
-
-		$pmpro_discount_code = $wpdb->get_row( $dis_sql );
 
 		// Make sure there's data for the discount code info
 		if ( empty( $pmpro_discount_code ) ) {

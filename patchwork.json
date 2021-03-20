@@ -1,6 +1,5 @@
 {
   "redefinable-internals": [
-	"function_exists",
-	"require_once"
+	"function_exists"
   ]
 }

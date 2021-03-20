@@ -243,7 +243,7 @@ class Bulk_Update {
 		// translators: %1$s user's email address, %2$d user ID, %3$s type of data, %4$s new value, %5$s new value, %6$s existing level
 		$msg_template = __(
 			'Error updating data for %1$s (ID: %2$d). Could not update %3$s from %4$s to %5$s (current membership level: \'%6$s\')',
-			E20R_Members_List::PLUGIN_SLUG
+			'e20r-members-list'
 		);
 
 		if ( ! empty( $level_failed ) ) {
@@ -261,11 +261,11 @@ class Bulk_Update {
 					$old_user_level->name,
 					( ! empty( $new_user_level->name ) ?
 						$new_user_level->name :
-						__( 'Not Applicable', E20R_Members_List::PLUGIN_SLUG )
+						__( 'Not Applicable', 'e20r-members-list' )
 					),
 					( ! empty( $old_user_level->name ) ?
 						$old_user_level->name :
-						__( 'Not Applicable', E20R_Members_List::PLUGIN_SLUG )
+						__( 'Not Applicable', 'e20r-members-list' )
 					)
 				);
 			}

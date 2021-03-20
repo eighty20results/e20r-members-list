@@ -78,10 +78,10 @@ class Members_List_Page {
 		global $wp_admin_bar;
 
 		if (
-				! is_admin_bar_showing() ||
-				( ! is_super_admin() && ( ! current_user_can( 'manage_options' ) ) &&
-				  ! current_user_can( 'pmpro_memberslist' ) &&
-				  ! current_user_can( 'e20r_memberslist' )
+				! is_admin_bar_showing() || (
+						! is_super_admin() && ! current_user_can( 'manage_options' ) &&
+						! current_user_can( 'pmpro_memberslist' ) &&
+						! current_user_can( 'e20r_memberslist' )
 				)
 		) {
 			if ( ! is_null( self::$instance ) ) {
@@ -164,7 +164,9 @@ class Members_List_Page {
 
 			wp_enqueue_style(
 				'jquery-ui',
-				'//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css'
+				'//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css',
+				null,
+				'1.12.1'
 			);
 			wp_enqueue_script( 'jquery-ui-datepicker' );
 
@@ -191,11 +193,11 @@ class Members_List_Page {
 					'url'    => add_query_arg( 'page', 'pmpro-memberslist', admin_url( 'admin.php' ) ),
 					'lang'   => array(
 						'save_btn_text'    =>
-								__( 'Save Updates', E20R_Members_List::PLUGIN_SLUG ),
+								__( 'Save Updates', 'e20r-members-list' ),
 						'clearing_enddate' =>
 								__(
 									'This action will clear the current membership end date/expiration date!',
-									E20R_Members_List::PLUGIN_SLUG
+									'e20r-members-list'
 								),
 					),
 				)
@@ -287,7 +289,7 @@ class Members_List_Page {
 		$options = 'per_page';
 
 		$args = array(
-			'label'   => _x( 'Members per page', 'members per page (screen options)', E20R_Members_List::PLUGIN_SLUG ),
+			'label'   => _x( 'Members per page', 'members per page (screen options)', 'e20r-members-list' ),
 			'default' => 15,
 			'option'  => $options,
 		);
@@ -316,6 +318,7 @@ class Members_List_Page {
 		$search = $this->utils->get_variable( 'find', '' );
 		$level  = $this->utils->get_variable( 'level', '' );
 
+		// phpcs:ignore
 		echo pmpro_loadTemplate( 'admin_header', 'local', 'adminpages' );
 
 		$search_array = apply_filters(
@@ -338,14 +341,14 @@ class Members_List_Page {
 		$e20r_info_msgs    = $this->utils->get_message( 'info' );
 
 		$top_list = array(
-			'active' => __( 'Active Members', E20R_Members_List::PLUGIN_SLUG ),
-			'all'    => __( 'All Members', E20R_Members_List::PLUGIN_SLUG ),
+			'active' => __( 'Active Members', 'e20r-members-list' ),
+			'all'    => __( 'All Members', 'e20r-members-list' ),
 		);
 
 		$bottom_list = array(
-			'cancelled'  => __( 'Cancelled Members', E20R_Members_List::PLUGIN_SLUG ),
-			'expired'    => __( 'Expired Members', E20R_Members_List::PLUGIN_SLUG ),
-			'oldmembers' => __( 'Old Members', E20R_Members_List::PLUGIN_SLUG ),
+			'cancelled'  => __( 'Cancelled Members', 'e20r-members-list' ),
+			'expired'    => __( 'Expired Members', 'e20r-members-list' ),
+			'oldmembers' => __( 'Old Members', 'e20r-members-list' ),
 		);
 
 		$level_list = array();
@@ -362,8 +365,8 @@ class Members_List_Page {
 
 		if ( ! empty( $pmpro_msg ) ) { ?>
 
-			<div id="pmpro_message" class="pmpro_message <?php esc_attr_e( $pmpro_msgt ); ?>">
-				<?php esc_attr_e( $pmpro_msg ); ?>
+			<div id="pmpro_message" class="pmpro_message <?php esc_html_e( $pmpro_msgt ); // phpcs:ignore ?>">
+				<?php esc_html_e( $pmpro_msg ); // phpcs:ignore ?>
 			</div>
 			<?php
 		} elseif ( ! empty( $e20r_error_msgs ) ||
@@ -375,9 +378,9 @@ class Members_List_Page {
 		?>
 		<div class="wrap e20r-pmpro-memberslist-page">
 			<h1>
-				<?php esc_attr_e( 'Members List', E20R_Members_List::PLUGIN_SLUG ); ?>
+				<?php esc_attr_e( 'Members List', 'e20r-members-list' ); ?>
 				<a href="<?php echo esc_url_raw( $csv_url ); ?>" class="page-title-action e20r-memberslist-export" target="_blank">
-					<?php _e( 'Export to CSV', E20R_Members_List::PLUGIN_SLUG ); ?>
+					<?php esc_attr_e( 'Export to CSV', 'e20r-members-list' ); ?>
 				</a>
 				<?php
 				if ( ! empty( $search ) ) {
@@ -385,9 +388,9 @@ class Members_List_Page {
 						'<span class="e20r-pmpro-memberslist-search-info">%1$s</span>',
 						sprintf(
 								// translators: %1$s search string
-							__( 'Search results for "%1$s" in %2$s', E20R_Members_List::PLUGIN_SLUG ),
-							$search,
-							$option_list[ $level ]
+							esc_attr__( 'Search results for "%1$s" in %2$s', 'e20r-members-list' ),
+							esc_attr( $search ),
+							esc_attr( $option_list[ $level ] )
 						)
 					);
 				}
@@ -395,32 +398,32 @@ class Members_List_Page {
 			</h1>
 			<hr class="e20r-memberslist-hr"/>
 			<h2 class="screen-reader-text">
-				<?php esc_attr_e( 'Filter list of members', E20R_Members_List::PLUGIN_SLUG ); ?>
+				<?php esc_attr_e( 'Filter list of members', 'e20r-members-list' ); ?>
 			</h2>
 			<form method="post" id="posts-filter">
 				<div class="e20r-search-arguments">
 					<p class="search-box float-left">
 						<?php
-						$label      = __( 'Update List', E20R_Members_List::PLUGIN_SLUG );
+						$label      = __( 'Update List', 'e20r-members-list' );
 						$button_def = 'button';
 
+						// phpcs:ignore
 						if ( isset( $_REQUEST['find'] ) && ! empty( $_REQUEST['find'] ) ) {
 
-							$label       = __( 'Clear Search', E20R_Members_List::PLUGIN_SLUG );
+							$label       = __( 'Clear Search', 'e20r-members-list' );
 							$button_def .= ' button-primary';
 						}
 						?>
 
-						<input id="e20r-update-list" class="<?php esc_attr_e( $button_def ); ?>" type="submit" value="<?php esc_attr_e( $label ); ?>"/>
+						<input id="e20r-update-list" class="<?php esc_attr_e( $button_def ); // phpcs:ignore ?>" type="submit" value="<?php esc_attr_e( $label ); ?>"/>
 					</p>
 					<ul class="subsubsub">
 						<li>
-							<?php _e( 'Show', E20R_Members_List::PLUGIN_SLUG ); ?>
+							<?php esc_attr_e( 'Show', 'e20r-members-list' ); ?>
 							<select name="level" id="e20r-pmpro-memberslist-levels">
 								<?php foreach ( $option_list as $option_id => $option_name ) { ?>
-									<option value="<?php esc_attr_e( $option_id ); ?>"
-											<?php selected( $level, $option_id ); ?>>
-										<?php esc_attr_e( $option_name ); ?>
+									<option value="<?php esc_attr_e( $option_id ); // phpcs:ignore ?>" <?php selected( $level, $option_id ); ?>>
+										<?php esc_attr_e( $option_name ); // phpcs:ignore ?>
 									</option>
 									<?php
 								}
@@ -431,19 +434,18 @@ class Members_List_Page {
 					</ul>
 					<p class="search-box float-right">
 						<label class="hidden" for="post-search-input">
-							<?php _e( 'Search', E20R_Members_List::PLUGIN_SLUG ); ?>:
+							<?php esc_attr_e( 'Search', 'e20r-members-list' ); ?>:
 						</label>
 						<input type="hidden" name="page" value="e20r-memberslist"/>
-						<input id="post-search-input" type="text" value="<?php esc_attr_e( $search ); ?>" name="find"/>
-						<input class="button" type="submit" id="e20r-memberslist-search-data"
-							   value="<?php _e( 'Search Members', E20R_Members_List::PLUGIN_SLUG ); ?>"/>
+						<input id="post-search-input" type="text" value="<?php esc_attr_e( $search ); // phpcs:ignore ?>" name="find"/>
+						<input class="button" type="submit" id="e20r-memberslist-search-data" value="<?php esc_attr_e( 'Search Members', 'e20r-members-list' ); ?>"/>
 					</p>
 				</div>
 				<h2 class="screen-reader-text">
 				<?php
 				esc_attr_e(
 					'Member list',
-					E20R_Members_List::PLUGIN_SLUG
+					'e20r-members-list'
 				);
 				?>
 				</h2>
@@ -456,6 +458,7 @@ class Members_List_Page {
 		</div>
 
 		<?php
+		// phpcs:ignore
 		echo pmpro_loadTemplate( 'admin_footer', 'local', 'adminpages' );
 	}
 

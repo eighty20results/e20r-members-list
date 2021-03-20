@@ -66,39 +66,35 @@ db-backup:
 	docker-compose -p $(PROJECT) --env-file $(DC_ENV_FILE) --file $(DC_CONFIG_FILE) exec database \
  		/usr/bin/mysqldump -u$(MYSQL_USER) -p'$(MYSQL_PASSWORD)' -h$(WORDPRESS_DB_HOST) $(MYSQL_DATABASE) > $(SQL_BACKUP_FILE)/$(E20R_PLUGIN_NAME).sql
 
-lint-test:
-	@docker-compose -p ${PROJECT} --env-file ${DC_ENV_FILE} --file ${DC_CONFIG_FILE} exec \
-		-T -w /var/www/html/wp-content/plugins/$(PROJECT)/ wordpress \
-		./inc/bin/phpcs \
-		--report=full \
-		--colors \
-		-p \
-		--standard=WordPress-Extra \
-		--ignore=*/inc/*,*/node_modules/*,src/utilities/* \
-		--extensions=php \
-		*.php src/*/*.php
-
 phpstan-test: start
 	@docker-compose -p $(PROJECT) --env-file $(DC_ENV_FILE) --file $(DC_CONFIG_FILE) \
         	exec -T -w /var/www/html/wp-content/plugins/$(PROJECT)/ \
         	wordpress php -d display_errors=on inc/bin/phpstan.phar --memory-limit=256M analyse -c ./phpstan.dist.neon
 
 phpcs-test: start
-	@docker-compose -p $(PROJECT) --env-file $(DC_ENV_FILE) --file $(DC_CONFIG_FILE) \
-    	exec -T -w /var/www/html/wp-content/plugins/$(PROJECT)/ \
-    	wordpress inc/bin/phpcs --report=full --colors -p --standard=WordPress-Extra --ignore=*/inc/*,*/node_modules/* --extensions=php *.php src/*/*.php
+	@docker-compose -p ${PROJECT} --env-file ${DC_ENV_FILE} --file ${DC_CONFIG_FILE} exec \
+    		-T -w /var/www/html/wp-content/plugins/$(PROJECT)/ wordpress \
+    		./inc/bin/phpcs \
+    		--runtime-set ignore_warnings_on_exit true \
+    		--report=full \
+    		--colors \
+    		-p \
+    		--standard=WordPress-Extra \
+    		--ignore=*/inc/*,*/node_modules/*,src/utilities/* \
+    		--extensions=php \
+    		*.php src/*/*.php
 
-unit-test: start
+unit-test: start phpcs-test
 	@docker-compose -p $(PROJECT) --env-file $(DC_ENV_FILE) --file $(DC_CONFIG_FILE) \
 	exec -T -w /var/www/html/wp-content/plugins/$(PROJECT)/ \
-	wordpress inc/bin/codecept run wpunit
+	wordpress inc/bin/codecept run -v wpunit
 
 acceptance-test: start
 	@docker-compose $(PROJECT) --env-file $(DC_ENV_FILE) --file $(DC_CONFIG_FILE) \
 	 exec -T -w /var/www/html/wp-content/plugins/${PROJECT}/ \
-	 wordpress inc/bin/codecept run acceptance
+	 wordpress inc/bin/codecept run -v acceptance
 
 build-test: start
 	@docker-compose $(PROJECT) --env-file $(DC_ENV_FILE) --file $(DC_CONFIG_FILE) \
 	 exec -T -w /var/www/html/wp-content/plugins/${PROJECT}/ \
-	 wordpress inc/bin/codecept build
+	 wordpress inc/bin/codecept build -v

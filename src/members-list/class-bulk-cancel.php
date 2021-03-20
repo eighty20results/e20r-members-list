@@ -85,7 +85,7 @@ class Bulk_Cancel {
 				// translators: %1$s List of User IDs
 				__(
 					'Unable to cancel membership(s) for the following user IDs: %1$s',
-					E20R_Members_List::PLUGIN_SLUG
+					'e20r-members-list'
 				),
 				implode( ', ', $failed )
 			);

@@ -162,7 +162,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ENHANCEMENT: Add 'Search results for ...' text after submitting member search
 - ENHANCEMENT: Added/Updated PHPDoc blocks in Members_List_Page() class
 - ENHANCEMENT: Added custom links to easily resubmit a search when there are no results found when searching the current list of members
-- ENHANCEMENT: Standardize translation domain string with a class constant E20R_Members_List::PLUGIN_SLUG
+- ENHANCEMENT: Standardize translation domain string with a class constant 'e20r-members-list'
 - BUG FIX: Don't show a 'Search again' link for the currently selected type when no members are found after a search
 - BUG FIX: Don't allow clone of Members_List_Page() class (singleton)
 - BUG FIX: Don't allow clone of Bulk_Cancel() class (singleton)
@@ -196,7 +196,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.5] - 
 
 - ENHANCEMENT: Let a developer change the 'expiration' ('last') column label with the 'e20r_members_list_enddate_col_name' filter
-- ENHANCEMENT: Let a developer change the enddate value to match the (new?) 'last' column value (expiration date) with the 'e20r_members_list-enddate_col_result' filter
+- ENHANCEMENT: Let a developer change the enddate value to match the (new?) 'last' column value (expiration date) with the 'e20r_members_list_enddate_col_result' filter
 
 ## [2.4] - 
 
