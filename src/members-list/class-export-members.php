@@ -80,7 +80,7 @@ class Export_Members {
 	 */
 	public function __construct( $db_records ) {
 
-		$this->member_list = $db_records;
+		$this->member_list = is_array( $db_records ) ? $db_records : array();
 
 		$this->file_name = $this->create_temp_file();
 
@@ -407,7 +407,7 @@ class Export_Members {
 
 		$i_start     = 0;
 		$iterations  = 1;
-		$users_found = count( $this->member_list );
+		$users_found = is_countable($this->member_list ) ? count( $this->member_list ) : 0;
 
 		if ( $users_found >= $max_users_per_loop ) {
 			$iterations = ceil( $users_found / $max_users_per_loop );
@@ -982,7 +982,7 @@ class Export_Members {
 			exit();
 
 		} else {
-			$msg = __( 'Unable to send the .CSV file to your browser!', 'e20r-members-list' );
+			$msg = __( 'No exported data available to send to your browser!', 'e20r-members-list' );
 			$utils->log( $msg . print_r( ob_get_contents(), true ) );
 			$utils->add_message( $msg, 'error', 'backend' );
 		}
