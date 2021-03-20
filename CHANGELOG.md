@@ -7,97 +7,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ## [8.0] - 2021-03-20
-- Thomas Sjolshagen (50):
--       BUG FIX: Problems updating update module call-out in other plugins embedding 00-e20r-utilities Update change logs & version (v1.0.8)
--       Merge commit 'e5755e7a1af2ae4feef17c2d3011c196c4b875d2' into main
--       Merge branch 'main' of github.com:eighty20results/e20r-members-list into main
--       BUG FIX: Didn't automatically search for levels only when selected level is changed
--       Update change logs & version number (v7.5)
--       BUG FIX: Implicitly defined variable fixes
--       BUG FIX: Refactored to use Class::plugin_slug for translation strings
--       BUG FIX: Refactored to use Class::plugin_slug for translation strings BUG FIX: Refactored for silly max-char (self enforced) limits
--       BUG FIX: Refactored to use Class::plugin_slug for translation strings BUG FIX: Refactored for silly max-char (self enforced) limits BUG FIX: Removed stale commented code
--       BUG FIX: Using explicit namespace paths
--       ENH: Adding support for filter to set default sort order - e20r_memberslist_default_sort_order
--       ENH: Adding new filter to documentation secton
--       BUG FIX: Refactored
--       BUG FIX: Allow IDE to connect to docker hosted DB
--       BUG FIX: Didn't exclude everything
--       BUG FIX: Didn't exclude everything
--       ENH: Adding composer file for unit testing, CircleCI integration, etc
--       BUG FIX: Exclude the inc/ directory from the Wordpress.org repo
--       BUG FIX: Didn't install the composer dependencies
--       Updated version info during build (v7.6 for WP 5.6.1)
--       Updated version info during build (v7.6 for WP 5.6.1)
--       Updated version info during build (v7.6 for WP 5.6.1)
--       Updated version info during build (v7.6 for WP 5.6.1)
--       ENH: Added skeleton (tempate) files for documentation, etc.
--       BUG FIX: Using the github.com Issues page for the plugin
--       BUG FIX: Didn't include the (new) CHANGELOG.md file in the plugin build script
--       BUG FIX: Auto-generate required documentation files (README, CHANGELOG and metadata.json files)
--       BUG FIX: Catch autoLoader() exceptions
--       BUG FIX: Exclude the .lock file
--       BUG FIX: Didn't make sure the data is avilable before exporting
--       BUG FIX: Added ability to create a release from a commit/action
--       BUG FIX: Initial work on fixing some of issues with the search functionality
--       BUG FIX: WPCS updates
--       BUG FIX: WPCS compliance updates
--       BUG FIX: Various refactoring and adding unit test framework
--       BUG FIX: Wrong path to utilities classes after renaming directory from class to src BUG FIX: Not checking if Utilities module is present
--       BUG FIX: Adding and allowing execution of first (local) Unit test
--       BUG FIX: Setting the record count in the constructor is silly
--       BUG FIX: Unit tests for load_hooks() and get_instance()
--       BUG FIX: Warnings when there are no member records
--       BUG FIX: Not allowed to override require_once
--       BUG FIX: Various updates to get PHPCS WPCS syntax checking to work as expected and Unit tests to pass
--       BUG FIX: Renamed the plugin source file so updated the .pot header
--       BUG FIX: Added some very basic unit tests for the auto_loader() function
--       BUG FIX: Various bugs in build scripts
--       Updated version info during build (v for WP 5.7)
--       Updated version info during build (v8.0 for WP 5.7)
--       Updated version info during build (v8.0 for WP 5.7)
--       BUG FIX: Errors generating changelog.md
--       BUG FIX: Didn't have coverage set up correctly
-- 
-- Thomas Sjølshagen (3):
--       Merge pull request #97 from eighty20results/BUG_FIX/Removing_update_module
--       Bug fix/typed search reset (#33)
--       Bug fix/typed search reset (#34)
-- 
-
-## [8.0] - 2021-03-20
-- BUG FIX: Didn't automatically search for levels only when selected level is changed
-- BUG FIX: Setting the record count in the constructor is silly
-- BUG FIX: Warnings when there are no member records
-- BUG FIX: Implicitly defined variable fixes
-- BUG FIX: Refactored to use Class::plugin_slug for translation strings
-- BUG FIX: Reverted refactoring to use Class::plugin_slug for translation strings
-- BUG FIX: Using explicit namespace paths in Sort_By_Meta
-- BUG FIX: Refactored e20r-memberslist-page.js
-- BUG FIX: Exclude the inc/ directory from the Wordpress.org repo
-- BUG FIX: Didn't install the composer dependencies
-- BUG FIX: Using the github.com Issues page for the plugin
-- BUG FIX: Didn't include the (new) CHANGELOG.md file in the plugin build script
-- BUG FIX: Auto-generate required documentation files (README, CHANGELOG and metadata.json files)
-- BUG FIX: Exclude the .lock file
-- BUG FIX: Catch autoLoader() exceptions
-- BUG FIX: Didn't make sure the data is available before exporting
-- BUG FIX: Added ability to create a release from a commit/action
-- BUG FIX: Initial work on fixing some of issues with the search functionality
-- BUG FIX: WPCS updates
-- BUG FIX: Various refactoring and adding unit test framework
-- BUG FIX: Wrong path to utilities classes after renaming directory from class to src
-- BUG FIX: Not checking if Utilities module is present
-- BUG FIX: Adding and allowing execution of first (local) Unit test
-- BUG FIX: Unit tests for load_hooks() and get_instance()
-- BUG FIX: Various updates to get PHPCS WPCS syntax checking to work as expected and Unit tests to pass
-- BUG FIX: Renamed the plugin source file so updated the .pot header
-- BUG FIX: Added some very basic unit tests for the auto_loader() function
-- BUG FIX: Various bugs in build scripts
-- ENH: Adding support for filter to set default sort order - e20r_memberslist_default_sort_order
-- ENH: Adding new filter to documentation section
-- ENH: Adding composer file for unit testing, CircleCI integration, etc
-- ENH: Added skeleton (tempate) files for documentation, etc.
+- BUG FIX: Didn't have coverage set up correctly (Thomas Sjolshagen)
+- BUG FIX: Errors generating changelog.md (Thomas Sjolshagen)
+- BUG FIX: Various bugs in build scripts (Thomas Sjolshagen)
+- BUG FIX: Added some very basic unit tests for the auto_loader() function (Thomas Sjolshagen)
+- BUG FIX: Renamed the plugin source file so updated the .pot header (Thomas Sjolshagen)
+- BUG FIX: Various updates to get WPCS syntax checking to work as expected and Unit tests to pass (Thomas Sjolshagen)
+- BUG FIX: Not allowed to override require_once (Thomas Sjolshagen)
+- BUG FIX: Warnings when there are no member records (Thomas Sjolshagen)
+- BUG FIX: Unit tests for load_hooks() and get_instance() (Thomas Sjolshagen)
+- BUG FIX: Setting the record count in the constructor is silly (Thomas Sjolshagen)
+- BUG FIX: Adding and allowing execution of first (local) Unit test (Thomas Sjolshagen)
+- BUG FIX: Wrong path to utilities classes after renaming directory from class to src (Thomas Sjolshagen)
+- BUG FIX: Not checking if Utilities module is present (Thomas Sjolshagen)
+- BUG FIX: Various refactoring and adding unit test framework (Thomas Sjolshagen)
+- BUG FIX: WPCS compliance updates (Thomas Sjolshagen)
+- BUG FIX: Initial work on fixing some of issues with the search functionality (Thomas Sjolshagen)
+- BUG FIX: Added ability to create a release from a commit/action (Thomas Sjolshagen)
+- BUG FIX: Didn't make sure the data is available before exporting (Thomas Sjolshagen)
+- BUG FIX: Catch autoLoader() exceptions (Thomas Sjolshagen)
+- BUG FIX: Auto-generate required documentation files (README, CHANGELOG and metadata.json files) (Thomas Sjolshagen)
+- BUG FIX: Didn't include the (new) CHANGELOG.md file in the plugin build script (Thomas Sjolshagen)
+- BUG FIX: Using the github.com Issues page for the plugin (Thomas Sjolshagen)
+- BUG FIX: Didn't install the composer dependencies (Thomas Sjolshagen)
+- BUG FIX: Exclude the inc/ directory from the Wordpress.org repo (Thomas Sjolshagen)
+- BUG FIX: Didn't exclude everything (Thomas Sjolshagen)
+- BUG FIX: Didn't exclude everything (Thomas Sjolshagen)
+- BUG FIX: Allow IDE to connect to docker hosted DB (Thomas Sjolshagen)
+- BUG FIX: Refactored (Thomas Sjolshagen)
+- BUG FIX: Using explicit namespace paths (Thomas Sjolshagen)
+- BUG FIX: Removed stale commented code (Thomas Sjolshagen)
+- BUG FIX: Refactored for silly max-char (self enforced) limits (Thomas Sjolshagen)
+- BUG FIX: Refactored to use Class::plugin_slug for translation strings (Thomas Sjolshagen)
+- BUG FIX: Implicitly defined variable fixes (Thomas Sjolshagen)
+- BUG FIX: Didn't automatically search for levels only when selected level is changed (Thomas Sjolshagen)
+- ENH: Adding new filter to documentation section (Thomas Sjolshagen)
+- ENH: Adding support for filter to set default sort order - e20r_memberslist_default_sort_order (Thomas Sjolshagen)
+- ENH: Added skeleton (template) files for documentation, etc. (Thomas Sjolshagen)
+- ENH: Adding composer file for unit testing, CircleCI integration, etc (Thomas Sjolshagen)
 
 ## [7.6] - 2021-02-22
 - BUG FIX: Implicitly defined variable fixes
