@@ -37,6 +37,7 @@ DC_ENV_FILE ?= $(PWD)/.env.testing
 	wp-log \
 	db-shell \
 	db-backup \
+	db-import \
 	tests
 
 clean:
@@ -49,16 +50,20 @@ clean:
 start:
 	@APACHE_RUN_USER=$(APACHE_RUN_USER) APACHE_RUN_GROUP=$(APACHE_RUN_GROUP) \
 		docker-compose -p $(PROJECT) --env-file $(DC_ENV_FILE) --file $(DC_CONFIG_FILE) up --detach
+
+db-import:
 	@bin/wait-for-db.sh '$(MYSQL_USER)' '$(MYSQL_PASSWORD)' '$(WORDPRESS_DB_HOST)' '$(E20R_PLUGIN_NAME)'
-	@echo "Loading the $(E20R_PLUGIN_NAME).sql data. Starting from $(PWD)"
-	@docker-compose -p $(PROJECT) --env-file $(DC_ENV_FILE) --file $(DC_CONFIG_FILE) \
-		exec -T database \
-		/usr/bin/mysql -u$(MYSQL_USER) -p'$(MYSQL_PASSWORD)' -h$(WORDPRESS_DB_HOST) $(MYSQL_DATABASE) < $(SQL_BACKUP_FILE)/$(E20R_PLUGIN_NAME).sql
+	@if [[ -f "$(SQL_BACKUP_FILE)/$(E20R_PLUGIN_NAME).sql" ]]; then \
+  		echo "Loading the $(E20R_PLUGIN_NAME).sql data"; \
+	  	docker-compose -p $(PROJECT) --env-file $(DC_ENV_FILE) --file $(DC_CONFIG_FILE) \
+        	exec -T database \
+        	/usr/bin/mysql -u$(MYSQL_USER) -p'$(MYSQL_PASSWORD)' -h$(WORDPRESS_DB_HOST) $(MYSQL_DATABASE) < $(SQL_BACKUP_FILE)/$(E20R_PLUGIN_NAME).sql; \
+  	fi
 
 stop:
 	@APACHE_RUN_USER=$(APACHE_RUN_USER) APACHE_RUN_GROUP=$(APACHE_RUN_GROUP) docker-compose -p $(PROJECT) --env-file $(DC_ENV_FILE) --file $(DC_CONFIG_FILE) down
 
-restart: stop start
+restart: stop start db-import
 
 wp-shell:
 	@docker-compose -p $(PROJECT) --env-file $(DC_ENV_FILE) --file $(DC_CONFIG_FILE) exec wordpress /bin/bash
@@ -96,12 +101,12 @@ unit-test: start code-standard-test
 	exec -T -w /var/www/html/wp-content/plugins/$(PROJECT)/ \
 	wordpress inc/bin/codecept run -v wpunit --coverage
 
-acceptance-test: start
+acceptance-test: start db-import
 	@docker-compose $(PROJECT) --env-file $(DC_ENV_FILE) --file $(DC_CONFIG_FILE) \
 	 exec -T -w /var/www/html/wp-content/plugins/${PROJECT}/ \
 	 wordpress inc/bin/codecept run -v acceptance
 
-build-test: start
+build-test: start db-import
 	@docker-compose $(PROJECT) --env-file $(DC_ENV_FILE) --file $(DC_CONFIG_FILE) \
 	 exec -T -w /var/www/html/wp-content/plugins/${PROJECT}/ \
 	 wordpress $(PWD)/inc/bin/codecept build -v

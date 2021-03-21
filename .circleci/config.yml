@@ -142,8 +142,11 @@ jobs:
           paths:
             - inc/
       - run:
-          name: Execute plugin tests with coverage
-          command: |
-            pwd
-            find ./ -name tests -print
-            make tests
+          name: Build and start the WordPress Unit Test stack (docker-compose)
+          command: make start
+      - run:
+          name: Import WordPress data for testing purposes
+          command: make db-import
+      - run:
+          name: Run plugin tests (with coverage)
+          command: make tests
