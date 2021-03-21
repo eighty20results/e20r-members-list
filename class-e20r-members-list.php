@@ -226,7 +226,3 @@ try {
 }
 
 add_action( 'plugins_loaded', array( E20R_Members_List::get_instance(), 'load_hooks' ) );
-
-if ( class_exists( '\E20R\Utilities\Utilities' ) && ( file_exists( WP_PLUGIN_DIR . '/00-e20r-utilities/' ) || file_exists( plugin_dir_path( __FILE__ ) . 'src/utilities/class-loader.php' ) ) ) {
-	\E20R\Utilities\Utilities::configureUpdateServerV4( 'e20r-members-list', plugin_dir_path( __FILE__ ) . 'class-e20r-members-list.php' );
-}
