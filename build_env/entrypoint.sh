@@ -65,6 +65,7 @@ read -r -a RM_LIST <<< "trunk/.git \
 	trunk/.github \
 	trunk/bin \
 	trunk/build_env \
+	trunk/docker \
 	trunk/inc \
 	trunk/src/utilities/.git \
 	trunk/src/utilities/bin \
@@ -83,7 +84,7 @@ read -r -a RM_LIST <<< "trunk/.git \
 	trunk/.gitignore \
 	trunk/.phpcs.xml.dist \
 	trunk/action.yml \
-	trunk/codeception.xml.dist \
+	trunk/codeception.dist.yml \
 	trunk/composer.json \
 	trunk/composer.phar \
 	trunk/docker-compose.yml \

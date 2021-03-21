@@ -9,7 +9,7 @@ wordpress_version=$(wget -q -O - http://api.wordpress.org/core/stable-check/1.0/
 tmp_changelog=$(mktemp /tmp/chlog-XXXXXX)
 version=$(egrep "^Version:" class-${short_name}.php | sed 's/[[:alpha:]|(|[:space:]|\:]//g' | awk -F- '{printf "%s", $1}')
 today=$(date "+%Y-%m-%d")
-time=$(date "+%h:%m:00")
+time=$(date "+%H:%M:00")
 changelog_new_version="## [${version}] - ${today}"
 changelog_header=$(cat <<- __EOF__
 # Changelog
@@ -33,12 +33,11 @@ fi
 # Update plugin and wordpress version info in metadata.json
 #
 if [[ -f metadata.json ]]; then
-	echo "Updating the metadata.json file"
-	"${sed}" -r -e "s/\"version\": \"([0-9]+\.[0-9].*)\"\,/\"version\": \"${version}\"\,/" \
-					 -e "s/\"tested\"\:\ \"([0-9]+\.[0-9].*)\"\,/\"tested\"\:\ \"${wordpress_version}\"\,/" \
-					 -e "s/\"last_updated\": \"(.*)\",/\"last_updated\": \"${today} ${time} CET\",/g" \
-					 -e "s/\"download_url\": \"https:\/\/${server}\/protected-content\/${short_name}\/${short_name}-([0-9]+\.[0-9].*)\.zip\",/\"download_url\": \"https:\/\/${server}\/protected-content\/${short_name}\/${short_name}-${version}\.zip\",/g" \
-					 metadata.json > new_metadata.json
+	echo "Updating the metadata.json file for ${version}"
+	"${sed}" -r -e "s/\"version\": \"([0-9]+\.[0-9].*)\",/\"version\": \"${version}\",/g" \
+		-e "s/\"tested\": \"([0-9]+\.[0-9].*)\",/\"tested\": \"${wordpress_version}\",/g" \
+		-e "s/\"last_updated\": \"(.*)\",/\"last_updated\": \"${today} ${time} CET\",/g" \
+		-e "s/\"download_url\": \"https:\/\/${server}\/protected-content\/${short_name}\/${short_name}-([0-9]+\.[0-9].*)\.zip\",/\"download_url\": \"https:\/\/${server}\/protected-content\/${short_name}\/${short_name}-${version}\.zip\",/g" metadata.json > new_metadata.json
 		mv new_metadata.json metadata.json
 fi
 
@@ -74,7 +73,8 @@ if ! grep "${changelog_new_version}" "${changelog_out}"; then
 		echo "${changelog_new_version}" ;
 	} > "${changelog_out}"
 	# Add dash (-) to all entries in the changelog source for the new CHANGELOG.md file
-	"${sed}" -e"s/\"/\'/g" -e"s/.*/-\ &/" "${changelog_source}" >> "${changelog_out}"
+	"${sed}" -e "s/\"/\'/g" -e"s/.*/-\ &/" "${changelog_source}" >> "${changelog_out}"
+	echo "" >> "${changelog_out}"
 	# Append the old change log to the new file
 	cat "${tmp_changelog}" >> "${changelog_out}"
 	# Clean up temp file(s)
@@ -82,7 +82,7 @@ if ! grep "${changelog_new_version}" "${changelog_out}"; then
 fi
 
 git commit \
-	-m "Updated version info during build (v${version} for WP ${wordpress_version})" \
+	-m "BUG FIX: Incorrect version updated during build (v${version} for WP ${wordpress_version})" \
 	CHANGELOG.md \
 	README.txt \
 	metadata.json \
