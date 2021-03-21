@@ -73,7 +73,8 @@ if ! grep "${changelog_new_version}" "${changelog_out}"; then
 		echo "${changelog_new_version}" ;
 	} > "${changelog_out}"
 	# Add dash (-) to all entries in the changelog source for the new CHANGELOG.md file
-	"${sed}" -e"s/\"/\'/g" -e"s/.*/-\ &/" "${changelog_source}" >> "${changelog_out}"
+	"${sed}" -e "s/\"/\'/g" -e"s/.*/-\ &/" "${changelog_source}" >> "${changelog_out}"
+	echo "" >> "${changelog_out}"
 	# Append the old change log to the new file
 	cat "${tmp_changelog}" >> "${changelog_out}"
 	# Clean up temp file(s)
