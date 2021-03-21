@@ -110,7 +110,7 @@ jobs:
             - "*"
 
   wpcs-tests:
-    working_directory: ~/repo
+#    working_directory: ~/repo
     machine:
       image: ubuntu-2004:202010-01
     steps:
@@ -125,7 +125,7 @@ jobs:
           command: make code-style-tests
 
   unittests:
-    working-directory: ~/repo
+#    working-directory: ~/repo
     machine:
       image: ubuntu-2004:202010-01
     steps:
