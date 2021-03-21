@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [8.3] - 2021-03-21
+- BUG FIX: Didn't remove the custom one-click updater properly (Thomas Sjolshagen)
+
 ## [8.2] - 2021-03-21
 - BUG FIX: Incorrect version updated during build (v8.2 for WP 5.7) (Thomas Sjolshagen)
 - BUG FIX: Not enough whitespace in changelog.md (Thomas Sjolshagen)

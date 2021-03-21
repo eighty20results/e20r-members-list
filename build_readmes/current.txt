@@ -1,6 +1,1 @@
-BUG FIX: Incorrect version updated during build (v8.2 for WP 5.7) (Thomas Sjolshagen)
-BUG FIX: Not enough whitespace in changelog.md (Thomas Sjolshagen)
-BUG FIX: metadata.json not being updated correctly (Thomas Sjolshagen)
-BUG FIX: Updated version info (Thomas Sjolshagen)
-BUG FIX: Typo for codeception config file and didn't exclude docker dir from svn (Thomas Sjolshagen)
-BUG FIX: Wrong format for time command (Thomas Sjolshagen)
+BUG FIX: Didn't remove the custom one-click updater properly (Thomas Sjolshagen)
