@@ -15,10 +15,9 @@ DB_CONTAINER_NAME ?= mariadb-wp-$(E20R_PLUGIN_NAME)
 # PROJECT := $(shell basename ${PWD}) # This is the default as long as the plugin name matches
 PROJECT := $(E20R_PLUGIN_NAME)
 
-
 # Settings for docker-compose
-DC_CONFIG_FILE ?= $(PWD)/.circleci/docker/docker-compose.yml
-DC_ENV_FILE ?= $(PWD)/.circleci/docker/.env
+DC_CONFIG_FILE ?= $(PWD)/docker-compose.yml
+DC_ENV_FILE ?= $(PWD)/.env.testing
 
 
 .PHONY: \
@@ -48,9 +47,10 @@ clean:
 #		-exec rm -rf {} \;
 
 start:
-	@APACHE_RUN_USER=$(APACHE_RUN_USER) APACHE_RUN_GROUP=$(APACHE_RUN_GROUP) docker-compose -p $(PROJECT) --env-file $(DC_ENV_FILE) --file $(DC_CONFIG_FILE) up --detach
+	@APACHE_RUN_USER=$(APACHE_RUN_USER) APACHE_RUN_GROUP=$(APACHE_RUN_GROUP) \
+		docker-compose -p $(PROJECT) --env-file $(DC_ENV_FILE) --file $(DC_CONFIG_FILE) up --detach
 	@bin/wait-for-db.sh '$(MYSQL_USER)' '$(MYSQL_PASSWORD)' '$(WORDPRESS_DB_HOST)' '$(E20R_PLUGIN_NAME)'
-	@echo "Loading the $(E20R_PLUGIN_NAME).sql data"
+	@echo "Loading the $(E20R_PLUGIN_NAME).sql data. Starting from $(PWD)"
 	@docker-compose -p $(PROJECT) --env-file $(DC_ENV_FILE) --file $(DC_CONFIG_FILE) \
 		exec -T database \
 		/usr/bin/mysql -u$(MYSQL_USER) -p'$(MYSQL_PASSWORD)' -h$(WORDPRESS_DB_HOST) $(MYSQL_DATABASE) < $(SQL_BACKUP_FILE)/$(E20R_PLUGIN_NAME).sql
@@ -81,7 +81,7 @@ phpstan-test: start
 phpcs-test: start
 	@docker-compose -p ${PROJECT} --env-file ${DC_ENV_FILE} --file ${DC_CONFIG_FILE} exec \
     		-T -w /var/www/html/wp-content/plugins/$(PROJECT)/ wordpress \
-    		./inc/bin/phpcs \
+    		inc/bin/phpcs \
     		--runtime-set ignore_warnings_on_exit true \
     		--report=full \
     		--colors \
@@ -104,7 +104,7 @@ acceptance-test: start
 build-test: start
 	@docker-compose $(PROJECT) --env-file $(DC_ENV_FILE) --file $(DC_CONFIG_FILE) \
 	 exec -T -w /var/www/html/wp-content/plugins/${PROJECT}/ \
-	 wordpress inc/bin/codecept build -v
+	 wordpress $(PWD)/inc/bin/codecept build -v
 
 tests: start phpcs-test unit-test stop # TODO: phpstan-test between phpcs & unit tests
 

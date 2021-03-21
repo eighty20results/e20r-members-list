@@ -8,7 +8,7 @@ services:
   wordpress:
     container_name: codecep-wp-${E20R_PLUGIN_NAME}
     build:
-      context: ./tests
+      context: .circleci/docker/tests
       dockerfile: ./tests/docker/Dockerfile.unittest
       args:
         WP_TAG: wordpress:${WP_RELEASE}
@@ -35,8 +35,9 @@ services:
 #      APACHE_RUN_USER: ${APACHE_RUN_USER}
 #      APACHE_RUN_GROUP: ${APACHE_RUN_GROUP}
     volumes:
-      - ${PLUGIN_DIR}:/var/www/html/wp-content/plugins/${E20R_PLUGIN_NAME}
-      - ${PMPRO_DIR}:/var/www/html/wp-content/plugins/paid-memberships-pro
+      - ${LOCAL_PLUGIN_DIR}:/var/www/html/wp-content/plugins/${E20R_PLUGIN_NAME}
+      - ${LOCAL_PLUGIN_DIR}/inc:/var/www/html/wp-content/plugins/${E20R_PLUGIN_NAME}/inc
+#      - ${PMPRO_DIR}:/var/www/html/wp-content/plugins/paid-memberships-pro
       - ${SQL_BACKUP_FILE}/${E20R_PLUGIN_NAME}.sql:/docker-entrypoint-initdb.d/${E20R_PLUGIN_NAME}.sql
     depends_on:
       - database
