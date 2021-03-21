@@ -51,7 +51,7 @@
             "E20R\\": "",
             "E20R\\Members_List\\Controller\\": "./",
             "E20R\\Members_List\\Admin\\": "src/members-list",
-            "E20R\\Members_List\\Controller\\Test": "tests/wpunit/testcases"
+            "E20R\\Members_List\\Controller\\Test\\": "tests/wpunit/testcases"
         }
     }
 }
