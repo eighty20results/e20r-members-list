@@ -3,7 +3,7 @@ BASE_PATH := $(PWD)
 FIND := $(shell which find)
 APACHE_RUN_USER ?= $(shell id -u)
 APACHE_RUN_GROUP ?= $(shell id -g)
-SQL_BACKUP_FILE ?= $(PWD)/.circleci/docker/test/db_backup
+SQL_BACKUP_FILE ?= $(PWD)/docker/test/db_backup
 E20R_PLUGIN_NAME ?= e20r-members-list
 MYSQL_DATABASE ?= wordpress
 MYSQL_USER ?= wordpress
@@ -27,7 +27,7 @@ DC_ENV_FILE ?= $(PWD)/.env.testing
 	restart \
 	shell \
 	lint-test \
-	phpcs-test \
+	code-standard-test \
 	phpstan-test \
 	unit-test \
 	acceptance-test \
@@ -78,7 +78,7 @@ phpstan-test: start
         	exec -T -w /var/www/html/wp-content/plugins/$(PROJECT)/ \
         	wordpress php -d display_errors=on inc/bin/phpstan.phar analyse -c ./phpstan.dist.neon --memory-limit 128M
 
-phpcs-test: start
+code-standard-test: start
 	@docker-compose -p ${PROJECT} --env-file ${DC_ENV_FILE} --file ${DC_CONFIG_FILE} exec \
     		-T -w /var/www/html/wp-content/plugins/$(PROJECT)/ wordpress \
     		inc/bin/phpcs \
@@ -91,7 +91,7 @@ phpcs-test: start
     		--extensions=php \
     		*.php src/*/*.php
 
-unit-test: start phpcs-test
+unit-test: start code-standard-test
 	@docker-compose -p $(PROJECT) --env-file $(DC_ENV_FILE) --file $(DC_CONFIG_FILE) \
 	exec -T -w /var/www/html/wp-content/plugins/$(PROJECT)/ \
 	wordpress inc/bin/codecept run -v wpunit --coverage
@@ -106,7 +106,7 @@ build-test: start
 	 exec -T -w /var/www/html/wp-content/plugins/${PROJECT}/ \
 	 wordpress $(PWD)/inc/bin/codecept build -v
 
-tests: start phpcs-test unit-test stop # TODO: phpstan-test between phpcs & unit tests
+tests: start code-standard-test unit-test stop # TODO: phpstan-test between phpcs & unit tests
 
 changelog: build_readmes/current.txt
 	@./bin/changelog.sh

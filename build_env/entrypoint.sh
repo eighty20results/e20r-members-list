@@ -68,6 +68,7 @@ read -r -a RM_LIST <<< "trunk/.git \
 	trunk/.distignore \
 	trunk/.dockerignore \
 	trunk/.env.testing \
+	trunk/docker-compose.yml \
 	trunk/codeception.xml.dist \
 	trunk/composer.phar \
 	trunk/Makefile \
