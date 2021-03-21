@@ -142,6 +142,9 @@ jobs:
           paths:
             - inc/
       - run:
+          name: Permission updates
+          command: sudo chmod -R 777 tests/_output/
+      - run:
           name: Build and start the WordPress Unit Test stack (docker-compose)
           command: make start
       - run:
