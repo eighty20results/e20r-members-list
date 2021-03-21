@@ -1,0 +1,155 @@
+
+version: 2.1
+
+# Specify working directories for each of the PHP versions we're testing with
+# since CircleCI can't expand environment variables in the value for working_dir
+workdir-56: &workdir-56
+  working-directory: ./reporesults/5.6
+
+workdir-73: &workdir-73
+  working-directory: ./reporesults/7.3
+
+workdir-80: &workdir-80
+  working-directory: ./reporesults/8.0
+
+shared-build: &shared-build
+  working_directory: ~/repo
+  machine:
+    image: ubuntu-2004:202010-01
+  steps:
+    - attach_workspace:
+        at: ~/repo
+    - checkout
+#    - setup_remote_docker
+
+    - run:
+        name: Install PHP
+        command: |
+          sudo apt update -y
+          sudo apt install php-cli unzip php-fpm php-json php-common php-mysql php-zip php-gd php-mbstring php-curl php-xml php-pear php-bcmath
+    - run:
+        name: Install Composer
+        command: |
+          php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+          php -r "if (hash_file('SHA384', 'composer-setup.php') === trim(file_get_contents('https://composer.github.io/installer.sig'))) { echo 'Installer verified'; } else { echo 'Installer invalid'; unlink('composer-setup.php'); } echo PHP_EOL;"
+          php composer-setup.php
+          php -r "unlink('composer-setup.php');"
+    - run:
+        name: Display PHP information
+        command: |
+          php -v
+          php composer.phar --version
+    - restore_cache:
+        keys:
+          - v1-dependencies-{{ checksum "composer.json" }}-$PHP_VERSION
+    - run:
+        name: Update composer
+        command: php composer.phar self-update
+    - run:
+        name: Install dependencies
+        command: |
+          php composer.phar install -o --prefer-dist --no-interaction
+    - save_cache:
+        paths:
+          - inc/
+        key: v1-dependencies-{{ checksum "composer.json" }}-$PHP_VERSION
+    - run:
+        name: Prepare log directories
+        command: |
+          mkdir -p build/logs/coverage
+          mkdir -p build/logs/unittests
+          mkdir -p build/logs/phpmetrics
+    - persist_to_workspace:
+        root: ~/repo
+        paths:
+          - "*"
+
+shared-linting: &shared-linting
+  working_directory: ~/repo
+  docker:
+    - image: cimg/php:$PHP_VERSION-browsers
+  steps:
+    - attach_workspace:
+        at: ~/repo
+    - run:
+        name: Check for PHP parse errors
+        command: |
+          find ./ -type -f -name '*.php' -print0 | xargs -0 -n1 -P4 php -l -n | (! grep -v "No syntax errors found" )
+
+
+github-release: &github-release
+  working_directory: ~/repo
+  docker:
+    - image: cibuilds/github
+  steps:
+    - attach_workspace:
+        at: ~/repo
+
+    - run:
+        name: Display GIT tag file
+        command: |
+          VERSION=$(cat ./TAG)
+          echo "${VERSION}"
+
+    - run:
+        name: Create the GitHub release
+        command: build_env/create_release.sh
+
+jobs:
+  build:
+    << : *shared-build
+    working_directory: ~/repo
+    steps:
+      - attach_workspace:
+          at: ~/repo
+      - checkout
+      - run:
+          name: Install PHP
+          command: |
+            sudo apt update -y
+            sudo apt install php-cli unzip php-fpm php-json php-common php-mysql php-zip php-gd php-mbstring php-curl php-xml php-pear php-bcmath
+      - run:
+          name: Install Composer
+          command: |
+            php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+            php -r "if (hash_file('SHA384', 'composer-setup.php') === trim(file_get_contents('https://composer.github.io/installer.sig'))) { echo 'Installer verified'; } else { echo 'Installer invalid'; unlink('composer-setup.php'); } echo PHP_EOL;"
+            php composer-setup.php
+            php -r "unlink('composer-setup.php');"
+      - run:
+          name: Display PHP information
+          command: |
+            php -v
+            php composer.phar --version
+
+      - run:
+          name: Install docker-compose
+          command: |
+            curl -L https://github.com/docker/compose/releases/download/1.28.5/docker-compose-`uname -s`-`uname -m` > ./docker-compose
+            chmod +x ./docker-compose
+            sudo mv ./docker-compose /usr/local/bin/docker-compose
+#      - setup_remote_docker
+#      - run:
+#          name: Where is the repo..?
+#          command: find / -name class-e20r-members-list.php -print
+
+      - restore_cache:
+          key: v1-dependencies-{{ checksum "composer.lock" }}
+      - run:
+          name: Install all required development/test composer dependencies
+          command: php composer.phar --dev install
+      - save_cache:
+          key: v1-dependencies-{{ checksum "composer.lock" }}
+          paths:
+            - inc/
+      - run:
+          name: Permission updates
+          command: sudo chmod -R 777 tests/_output/
+      - run:
+          name: Build and start the WordPress Unit Test stack (docker-compose)
+          command: make start
+      - run:
+          name: Import WordPress data for testing purposes
+          command: make db-import
+      - run:
+          name: Run plugin tests (with coverage)
+          command: make tests

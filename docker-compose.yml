@@ -1,0 +1,58 @@
+version: "3.8"
+
+volumes:
+  wordpress:
+  database:
+
+services:
+  wordpress:
+    container_name: codecep-wp-${E20R_PLUGIN_NAME}
+    build:
+      context: .
+      dockerfile: tests/docker/Dockerfile.unittest
+      args:
+        WP_TAG: wordpress:${WP_RELEASE}
+    restart: always
+    ports:
+      - ${WP_PORT}:80
+    command:
+      - /bin/sh
+      - -c
+      - |
+        test $$(getent group docker) || addgroup --gid ${APACHE_RUN_GROUP} docker
+        test $$(id -u docker) || adduser --uid ${APACHE_RUN_USER} --ingroup docker \
+        --home /home/docker --disabled-password --gecos '' docker
+        /usr/local/bin/docker-entrypoint.sh apache2-foreground
+    environment:
+      WORDPRESS_DB_HOST: ${WORDPRESS_DB_HOST}
+      WORDPRESS_DB_NAME: ${WORDPRESS_DB_NAME}
+      WORDPRESS_DB_USER: ${WORDPRESS_DB_USER}
+      WORDPRESS_DB_PASSWORD: ${WORDPRESS_DB_PASSWORD}
+      WORDPRESS_SKIP_INSTALL: 'yes'
+      WORDPRESS_DEBUG: 1
+      WORDPRESS_DEBUG_LOG_FILE: 1
+      WORDPRESS_DEBUG_DISPLAY: 0
+#      APACHE_RUN_USER: ${APACHE_RUN_USER}
+#      APACHE_RUN_GROUP: ${APACHE_RUN_GROUP}
+    volumes:
+      - ${LOCAL_PLUGIN_DIR}:/var/www/html/wp-content/plugins/${E20R_PLUGIN_NAME}
+#      - ${LOCAL_PLUGIN_DIR}/inc:/var/www/html/wp-content/plugins/${E20R_PLUGIN_NAME}/inc
+#      - ${PMPRO_DIR}:/var/www/html/wp-content/plugins/paid-memberships-pro
+      - ${SQL_BACKUP_FILE}/${E20R_PLUGIN_NAME}.sql:/docker-entrypoint-initdb.d/${E20R_PLUGIN_NAME}.sql
+    depends_on:
+      - database
+
+  database:
+    image: mariadb:latest
+    container_name: mariadb-wp-${E20R_PLUGIN_NAME}
+    restart: always
+    ports:
+      - ${DB_PORT}:3306
+    environment:
+      MYSQL_DATABASE: ${WORDPRESS_DB_NAME}
+      MYSQL_USER: ${WORDPRESS_DB_USER}
+      MYSQL_PASSWORD: ${WORDPRESS_DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_RANDOM_ROOT_PASSWORD: ${MYSQL_RANDOM_ROOT_PASSWORD}
+
+# volumes:

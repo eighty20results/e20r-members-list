@@ -1,0 +1,33 @@
+paths:
+    tests: tests
+    output: tests/_output
+    data: tests/_data
+    support: tests/_support
+    envs: tests/_envs
+actor_suffix: Tester
+extensions:
+    enabled:
+        - Codeception\Extension\RunFailed
+    commands:
+        - Codeception\Command\GenerateWPUnit
+        - Codeception\Command\GenerateWPRestApi
+        - Codeception\Command\GenerateWPRestController
+        - Codeception\Command\GenerateWPRestPostTypeController
+        - Codeception\Command\GenerateWPAjax
+        - Codeception\Command\GenerateWPCanonical
+        - Codeception\Command\GenerateWPXMLRPC
+params:
+    - tests/_envs/.env.utilities
+settings:
+  lint: true
+  colors: true
+coverage:
+  enabled: true
+  include:
+    - src/members-list/*
+    - ./class-e20r-members-list.php
+  exclude:
+    - src/utilities/*
+    - inc/*
+    - languages/*
+    - tests/*

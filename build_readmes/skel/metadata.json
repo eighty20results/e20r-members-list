@@ -1,0 +1,17 @@
+{
+  "name": "${description}",
+  "slug": "${short_name}",
+  "download_url": "https://${server}/protected-content/${short_name}/${short_name}-${version}.zip",
+  "version": "1.0",
+  "tested": "1.0",
+  "requires": "5.0",
+  "author": "Thomas Sjolshagen <thomas@eighty20results.com>",
+  "author_homepage": "https://eighty20results.com/thomas-sjolshagen",
+  "last_updated": "2021-02-14 12:45:00 CET",
+  "homepage": "https://eighty20results.com/wordpress-plugins/paid-memberships-pro/${short_name}/",
+  "sections": {
+    "description": "",
+    "changelog": "See the linked <a href=\"CHANGELOG.md\" target=\"_blank\">Change Log</a> for details",
+    "faq": "<h3>I found a bug in the plugin.</h3><p>Please report your issue to us by using the <a href='https://github.com/eighty20results/${short_name}/issues' target='_blank'>Github Issues page</a>, and we'll try to respond within 1 business day.</p>"
+    }
+}
