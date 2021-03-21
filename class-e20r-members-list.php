@@ -3,11 +3,7 @@
 Plugin Name: Better Members List for Paid Memberships Pro
 Plugin URI: https://wordpress.org/plugins/e20r-members-list
 Description: Extensible, sortable & bulk action capable members listing + export to CSV tool for Paid Memberships Pro.
-<<<<<<< HEAD:class-e20r-members-list.php
-Version: 8.0
-=======
-Version: 7.5
->>>>>>> main:class.e20r-members-list.php
+Version: 8.1
 Author: Thomas Sjolshagen @ Eighty / 20 Results by Wicked Strong Chicks, LLC <thomas@eighty20results.com>
 Author URI: https://eighty20results.com/thomas-sjolshagen/
 Text Domain: e20r-members-list
@@ -36,7 +32,7 @@ namespace E20R\Members_List\Controller;
 use E20R\Members_List\Admin\Members_List_Page;
 
 if ( ! defined( 'E20R_MEMBERSLIST_VER' ) ) {
-	define( 'E20R_MEMBERSLIST_VER', '8.0' );
+	define( 'E20R_MEMBERSLIST_VER', '8.1' );
 }
 
 if ( ! class_exists( '\\E20R\\Members_List\\Controller\\E20R_Members_List' ) ) {
