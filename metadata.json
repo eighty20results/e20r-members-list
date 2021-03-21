@@ -7,7 +7,7 @@
   "requires": "4.8",
   "author": "Thomas Sjolshagen <thomas@eighty20results.com>",
   "author_homepage": "https://eighty20results.com/thomas-sjolshagen",
-  "last_updated": "2021-03-20 Mar:03:00 CET",
+  "last_updated": "2021-03-21 Mar:03:00 CET",
   "homepage": "https://eighty20results.com/wordpress-plugins/paid-memberships-pro/e20r-members-list/",
   "sections": {
     "description": "Extensible, sortable & bulk action capable members listing tool for Paid Memberships Pro, fully compatible with the existing filters and hooks for the PMPro Members List functionality. Will also export members to CSV.",
