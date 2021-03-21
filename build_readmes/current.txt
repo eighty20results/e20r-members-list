@@ -1,1 +1,1 @@
-BUG FIX: Didn't remove the custom one-click updater properly (Thomas Sjolshagen)
+BUG FIX: Remove old one-click updater (Thomas Sjolshagen)
