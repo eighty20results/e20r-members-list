@@ -84,19 +84,19 @@ zip -r "${kit_name}.zip" "${plugin_path}"
 ssh "${remote_server}" "cd ${remote_path}; mkdir -p \"${short_name}\""
 
 echo "Copying ${kit_name}.zip to ${remote_server}:${remote_path}/${short_name}/"
-#scp "${kit_name}.zip" "${remote_server}:${remote_path}/${short_name}/"
+scp "${kit_name}.zip" "${remote_server}:${remote_path}/${short_name}/"
 
 echo "Copying ${metadata} to ${remote_server}:${remote_path}/${short_name}/"
-#scp "${metadata}" "${remote_server}:${remote_path}/${short_name}/"
+scp "${metadata}" "${remote_server}:${remote_path}/${short_name}/"
 
 echo "Linking ${short_name}/${short_name}-${version}.zip to ${short_name}.zip on remote server"
 # We _want_ to expand the variables on the client side
 # shellcheck disable=SC2029
-#ssh "${remote_server}" \
-#	"cd ${remote_path}/ ; ln -sf \"${short_name}\"/\"${short_name}\"-\"${version}\".zip \"${short_name}\".zip"
+ssh "${remote_server}" \
+	"cd ${remote_path}/ ; ln -sf \"${short_name}\"/\"${short_name}\"-\"${version}\".zip \"${short_name}\".zip"
 
 # Return to the root directory
 cd "${src_path}" || die 1
 
 # And clean up
-#rm -rf "${dst_path}"
+rm -rf "${dst_path}"
