@@ -61,28 +61,11 @@ SVN_DIR="/github/svn-${SLUG}"
 
 # Should be excluded from the Wordpress.org repo
 read -r -a RM_LIST <<< "trunk/.git \
-	trunk/action.yml \
-	trunk/Dockerfile \
-	trunk/remove_update.sh \
-	trunk/metadata.json \
-	trunk/.distignore \
-	trunk/.dockerignore \
-	trunk/.env.testing \
-	trunk/docker-compose.yml \
-	trunk/codeception.xml.dist \
-	trunk/composer.phar \
-	trunk/Makefile \
-	trunk/patchwork.json \
-	trunk/phpstan.dist.neon \
-	trunk/phpunit.xml \
-	trunk/package.json \
-	trunk/composer.json \
-	tags/${VERSION} \
-	trunk/build_env \
-	trunk/inc \
 	trunk/.circleci \
 	trunk/.github \
 	trunk/bin \
+	trunk/build_env \
+	trunk/inc \
 	trunk/src/utilities/.git \
 	trunk/src/utilities/bin \
 	trunk/src/utilities/.gitignore \
@@ -90,7 +73,30 @@ read -r -a RM_LIST <<< "trunk/.git \
 	trunk/src/utilities/.editorconfig \
 	trunk/src/utilities/metadata.json \
 	trunk/src/utilities/composer.json \
-	trunk/test"
+	trunk/test \
+	trunk/tests \
+	trunk/.distignore \
+	trunk/.dockerignore \
+	trunk/.editorconfig \
+	trunk/.env.testing \
+	trunk/.gitattributes \
+	trunk/.gitignore \
+	trunk/.phpcs.xml.dist \
+	trunk/action.yml \
+	trunk/codeception.xml.dist \
+	trunk/composer.json \
+	trunk/composer.phar \
+	trunk/docker-compose.yml \
+	trunk/Dockerfile \
+	trunk/Makefile \
+	trunk/metadata.json \
+	trunk/package.json \
+	trunk/patchwork.json \
+	trunk/phpstan.dist.neon \
+	trunk/phpunit.xml \
+	trunk/remove_update.sh \
+	tags/${VERSION} \
+	"
 
 # Checkout just trunk and assets for efficiency
 # Tagging will be handled on the SVN level
