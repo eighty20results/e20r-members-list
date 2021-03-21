@@ -9,7 +9,7 @@ wordpress_version=$(wget -q -O - http://api.wordpress.org/core/stable-check/1.0/
 tmp_changelog=$(mktemp /tmp/chlog-XXXXXX)
 version=$(egrep "^Version:" class-${short_name}.php | sed 's/[[:alpha:]|(|[:space:]|\:]//g' | awk -F- '{printf "%s", $1}')
 today=$(date "+%Y-%m-%d")
-time=$(date "+%h:%m:00")
+time=$(date "+%H:%m:00")
 changelog_new_version="## [${version}] - ${today}"
 changelog_header=$(cat <<- __EOF__
 # Changelog
