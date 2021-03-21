@@ -18,7 +18,6 @@
     }],
     "require": {
         "php": ">=7.1",
-        "yahnis-elsts/plugin-update-checker": ">=4.5",
         "10quality/license-keys-php-client": ">=v1.2.2",
         "ext-curl": "*",
         "ext-json": "*"
@@ -50,8 +49,9 @@
     "autoload": {
         "psr-4": {
             "E20R\\": "",
-            "E20R\\Utilities\\": "src/",
-            "E20R\\Test\\": "tests/"
+            "E20R\\Members_List\\Controller\\": "./",
+            "E20R\\Members_List\\Admin\\": "src/members-list",
+            "E20R\\Members_List\\Controller\\Test\\": "tests/wpunit/testcases"
         }
     }
 }

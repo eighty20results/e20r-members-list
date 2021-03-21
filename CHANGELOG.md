@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [8.4] - 2021-03-21
+- BUG FIX: Remove old one-click updater (Thomas Sjolshagen)
+
 ## [8.3] - 2021-03-21
 - BUG FIX: Didn't remove the custom one-click updater properly (Thomas Sjolshagen)
 
