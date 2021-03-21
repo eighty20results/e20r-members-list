@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [8.2] - 2021-03-21
 - BUG FIX: Typo for codeception config file and didn't exclude docker dir from svn (Thomas Sjolshagen)
 - BUG FIX: Wrong format for time command (Thomas Sjolshagen)
+## [8.2] - 2021-03-21
+- BUG FIX: Typo for codeception config file and didn't exclude docker dir from svn (Thomas Sjolshagen)
+- BUG FIX: Wrong format for time command (Thomas Sjolshagen)
 ## [8.1] - 2021-03-21
 - BUG FIX: Updated version to 8.1 (Thomas Sjolshagen)
 - BUG FIX: Didn't remove all of the non-essential files before pushing to the WP SVN (Thomas Sjolshagen)
