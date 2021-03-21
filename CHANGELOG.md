@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [8.1] - 2021-03-21
 - BUG FIX: Updated version to 8.1 (Thomas Sjolshagen)
 - BUG FIX: Didn't remove all of the non-essential files before pushing to the WP SVN (Thomas Sjolshagen)
+
 ## [8.0] - 2021-03-20
 - BUG FIX: Auto-generate the change log from the commit log (Thomas Sjolshagen)
 - BUG FIX: Didn't have coverage set up correctly (Thomas Sjolshagen)
