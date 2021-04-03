@@ -17,9 +17,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace E20R\Members_List\Admin;
+namespace E20R\Members_List\Admin\Bulk;
 
-use E20R\Members_List\Controller\E20R_Members_List;
+use E20R\Members_List\E20R_Members_List;
 use E20R\Utilities\Utilities;
 
 class Bulk_Cancel {

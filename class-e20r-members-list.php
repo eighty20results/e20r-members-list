@@ -27,15 +27,15 @@ License:
 
 */
 
-namespace E20R\Members_List\Controller;
+namespace E20R\Members_List;
 
-use E20R\Members_List\Admin\Members_List_Page;
+use E20R\Members_List\Admin\Pages\Members_List_Page;
 
 if ( ! defined( 'E20R_MEMBERSLIST_VER' ) ) {
 	define( 'E20R_MEMBERSLIST_VER', '8.4' );
 }
 
-if ( ! class_exists( '\\E20R\\Members_List\\Controller\\E20R_Members_List' ) ) {
+if ( ! class_exists( '\E20R\Members_List\E20R_Members_List' ) ) {
 	/**
 	 * Class E20R_Members_List
 	 * @package E20R\Members_List\Controller
@@ -112,6 +112,7 @@ if ( ! class_exists( '\\E20R\\Members_List\\Controller\\E20R_Members_List' ) ) {
 					\RecursiveDirectoryIterator::FOLLOW_SYMLINKS
 				);
 			} catch ( \Exception $ri_except ) {
+				// phpcs:ignore
 				error_log( "Error instantiating iterator for ${class_name}: " . $ri_except->getMessage() );
 				return false;
 			}
@@ -139,6 +140,7 @@ if ( ! class_exists( '\\E20R\\Members_List\\Controller\\E20R_Members_List' ) ) {
 					}
 				);
 			} catch ( \Exception $fh_except ) {
+				// phpcs:ignore
 				error_log( "Error locating ${class_name}: " . $fh_except->getMessage() );
 				return false;
 			}
@@ -154,6 +156,7 @@ if ( ! class_exists( '\\E20R\\Members_List\\Controller\\E20R_Members_List' ) ) {
 					}
 				}
 			} catch ( \Exception $e ) {
+				// phpcs:ignore
 				error_log( "Error loading ${class_name}: " . $e->getMessage() );
 				return false;
 			}
@@ -215,14 +218,15 @@ if ( ! class_exists( '\\E20R\\Members_List\\Controller\\E20R_Members_List' ) ) {
 
 // BUG FIX: Fatal error when e20r-Utilities module is present
 if ( ! file_exists( WP_PLUGIN_DIR . '/00-e20r-utilities/' ) ) {
-	require_once plugin_dir_path( __FILE__ ) . 'src/utilities/class-utility-loader.php';
+	require_once \plugin_dir_path( __FILE__ ) . 'src/utilities/class-utility-loader.php';
 }
 
 try {
-	spl_autoload_register( 'E20R\Members_List\Controller\E20R_Members_List::auto_loader' );
+	spl_autoload_register( 'E20R\Members_List\E20R_Members_List::auto_loader' );
 } catch ( \Exception $exception ) {
-	error_log( 'Unable to register auto_loader: ' . $exception->getMessage(), E_USER_ERROR );
+	// phpcs:ignore
+	\error_log( 'Unable to register auto_loader: ' . $exception->getMessage(), E_USER_ERROR );
 	return false;
 }
 
-add_action( 'plugins_loaded', array( E20R_Members_List::get_instance(), 'load_hooks' ) );
+\add_action( 'plugins_loaded', array( E20R_Members_List::get_instance(), 'load_hooks' ) );

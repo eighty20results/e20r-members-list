@@ -17,9 +17,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace E20R\Members_List\Admin;
+namespace E20R\Members_List\Admin\Pages;
 
-use E20R\Members_List\Controller\E20R_Members_List;
+use E20R\Members_List\Admin\Members_List;
 use E20R\Utilities\Utilities;
 
 class Members_List_Page {
@@ -245,7 +245,10 @@ class Members_List_Page {
 		$page = $this->utils->get_variable( 'page', '' );
 
 		if ( 1 === preg_match(
-			"/{$_SERVER['HTTP_HOST']}\/wp-admin\/admin.php\?page=pmpro-memberslist/i",
+			sprintf(
+				'/%1$s\/wp-admin\/admin.php\?page=pmpro-memberslist/i',
+				sanitize_key( $_SERVER['HTTP_HOST'] )
+			),
 			$url
 		)
 		) {

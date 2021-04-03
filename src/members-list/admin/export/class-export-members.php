@@ -17,7 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace E20R\Members_List\Admin;
+namespace E20R\Members_List\Admin\Export;
 
 use E20R\Utilities\Utilities;
 
@@ -499,12 +499,14 @@ class Export_Members {
 		$utils = Utilities::get_instance();
 
 		// Open our designated temporary file
+		// phpcs:ignore
 		$file_handle = fopen( $this->file_name, 'a' );
 		$header_type = 'header_key';
 
 		$utils->log( 'Adding ' . count( $this->csv_headers ) . " header columns to {$this->file_name}" );
 
 		//Add the CSV header to the file
+		// phpcs:ignore
 		fprintf(
 			$file_handle,
 			'%s',
@@ -520,6 +522,7 @@ class Export_Members {
 		);
 
 		// Close the CSV file for now
+		// phpcs:ignore
 		fclose( $file_handle );
 	}
 
@@ -897,6 +900,7 @@ class Export_Members {
 		$utils = Utilities::get_instance();
 		$utils->log( 'Saving ' . count( $this->csv_rows ) . " records to {$this->file_name}. " );
 
+		// phpcs:ignore
 		$fh = fopen( $this->file_name, 'a' );
 
 		/**
@@ -923,7 +927,7 @@ class Export_Members {
 			$file_line = implode( ',', $data ) . "\r\n";
 			fprintf( $fh, '%s', $file_line );
 		}
-
+		// phpcs:ignore
 		fclose( $fh );
 		$utils->log( "Saved data to {$this->file_name}" );
 	}
@@ -940,6 +944,7 @@ class Export_Members {
 		if ( ! empty( $this->headers ) && false === headers_sent() && file_exists( $this->file_name ) ) {
 
 			$sent_content = ob_get_clean();
+			// phpcs:ignore
 			$utils->log( 'Browser received: ' . print_r( $sent_content, true ) );
 
 			if ( version_compare( phpversion(), '5.3.0', '>' ) ) {
@@ -961,16 +966,20 @@ class Export_Members {
 
 			// Disable compression for the duration of file download
 			if ( ini_get( 'zlib.output_compression' ) ) {
+				// phpcs:ignore
 				ini_set( 'zlib.output_compression', 'Off' );
 			}
 
 			// Bug fix for Flywheel Hosted like hosts where fpassthru() is disabled
 			if ( function_exists( 'fpassthru' ) ) {
 				// Open and send the file contents to the remote location
+				// phpcs:ignore
 				$fh = fopen( $this->file_name, 'rb' );
 				fpassthru( $fh );
+				// phpcs:ignore
 				fclose( $fh );
 			} else {
+				// phpcs:ignore
 				readfile( $this->file_name );
 			}
 
@@ -980,6 +989,7 @@ class Export_Members {
 
 		} else {
 			$msg = __( 'No exported data available to send to your browser!', 'e20r-members-list' );
+			// phpcs:ignore
 			$utils->log( $msg . print_r( ob_get_contents(), true ) );
 			$utils->add_message( $msg, 'error', 'backend' );
 		}

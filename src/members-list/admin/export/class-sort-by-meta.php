@@ -17,9 +17,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace E20R\Members_List\Support;
+namespace E20R\Members_List\Admin\Export;
 
-if ( ! class_exists( '\E20R\Members_List\Support\Sort_By_Meta' ) ) {
+if ( ! class_exists( '\E20R\Members_List\Admin\Export\Sort_By_Meta' ) ) {
 
 	class Sort_By_Meta {
 
