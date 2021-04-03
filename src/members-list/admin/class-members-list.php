@@ -395,7 +395,7 @@ class Members_List extends WP_List_Table {
 		 * @param string[] $sql_cols
 		 */
 		$this->sql_col_list = apply_filters( 'e20r_members_list_default_sql_column_alias_map', $sql_cols );
-		$this->utils->log("Applied the filter: " . print_r( $this->sql_col_list, true ) );
+
 		return $this->sql_col_list;
 	}
 
@@ -739,6 +739,7 @@ class Members_List extends WP_List_Table {
 	 * @param string $status
 	 *
 	 * @return array|null|object
+	 * @throws \Exception
 	 */
 	public function get_members( $per_page = 15, $page_number = 1, $status = 'all' ) {
 
@@ -747,7 +748,24 @@ class Members_List extends WP_List_Table {
 		$this->set_membership_level( $status );
 
 		// Get Pagination SQL
-		$this->sql_query = $this->generate_member_sql( $status, $per_page, $page_number );
+		try {
+			$this->sql_query = $this->generate_member_sql( $status, $per_page, $page_number );
+		} catch ( \Exception $exception ) {
+			$this->utils->log("Error: {$exception->getMessage()}");
+			$this->utils->add_message(
+					sprintf(
+							// translators: %1$s query string
+							__(
+									'Members List database query error: %1$s',
+									'e20r-members-list'
+							),
+							$exception->getMessage(),
+					),
+					'error',
+					'backend'
+			);
+			return null;
+		}
 
 		// Fetch the data
 		// phpcs:ignore
@@ -773,26 +791,25 @@ class Members_List extends WP_List_Table {
 
 			return $result;
 
-		} else {
-
-			$error_msg = $wpdb->print_error();
-			if ( ! empty( $error_msg ) ) {
-				$this->utils->add_message(
-					sprintf(
-								// translators: %2$s query string
-						__(
-							'Error processing Members List database query: %1$s',
-							'e20r-members-list'
-						),
-						$error_msg
-					),
-					'error',
-					'backend'
-				);
-			}
-
-			return null;
 		}
+
+		$error_msg = $wpdb->print_error();
+		if ( ! empty( $error_msg ) ) {
+			$this->utils->add_message(
+				sprintf(
+							// translators: %1$s query string
+					__(
+						'Error processing Members List database query: %1$s',
+						'e20r-members-list'
+					),
+					$error_msg
+				),
+				'error',
+				'backend'
+			);
+		}
+
+		return null;
 	}
 
 	/**
@@ -816,6 +833,8 @@ class Members_List extends WP_List_Table {
 				$this->utils->get_variable( 'order', 'DESC' )
 			)
 		);
+
+		// Get the order_by value (probably the default, but...)
 		$order_by = apply_filters(
 				'e20r_memberslist_order_by',
 				array_map(
@@ -827,6 +846,7 @@ class Members_List extends WP_List_Table {
 				)
 		);
 
+		// Get the group by value (probably the default, but...)
 		$group_by = apply_filters(
 				'e20r_memberslist_group_by',
 				array_map(
@@ -838,7 +858,7 @@ class Members_List extends WP_List_Table {
 				)
 		);
 
-		// handle the 'last' column (which is really the enddate field when sorting/ordering)
+		// Handle the 'last' column (which is really the enddate field when sorting/ordering)
 		if ( in_array( 'last', $order_by ) ) {
 			$order_by = array_map( function( $str ) {
 						str_replace( 'last', 'enddate', $str );
@@ -856,7 +876,7 @@ class Members_List extends WP_List_Table {
 			);
 		}
 
-		// Start the SELECT statement (FIXME: Remove dependency on SQL_CALC_FOUND_ROWS - Fixed?)
+		// Start the SELECT statement
 		$sql = 'SELECT
 		';
 		// The columns to fetch data for
@@ -1021,7 +1041,7 @@ class Members_List extends WP_List_Table {
 			$this->joins
 		);
 
-		$this->group_by = sprintf( 'GROUP BY %1$s', implode( ',', $group_by ) );
+		$this->group_by = sprintf( ' GROUP BY %1$s', implode( ',', $group_by ) );
 		$this->order_by = sprintf( ' ORDER BY %1$s %2$s', implode( ',', $order_by ), $order );
 		$this->group_by = apply_filters( 'e20r_memberslist_group_by_statement', $this->group_by, $group_by );
 		$this->order_by = apply_filters( 'e20r_memberslist_order_by_statement', $this->order_by, $order_by, $order );
@@ -1093,6 +1113,7 @@ class Members_List extends WP_List_Table {
 
 		global $wpdb;
 
+		// The default table and search (joins) definitions we use
 		$this->table_list = array(
 			'from'  => array(
 				'name'  => $wpdb->users,
@@ -1145,33 +1166,141 @@ class Members_List extends WP_List_Table {
 			);
 		}
 
+		/**
+		 * Filter to change/modify the tables and joins list. Will get (partially) validated, so sp
+		 */
 		$this->table_list = apply_filters( 'e20r_memberslist_tables_and_joins', $this->table_list );
 
-		// FIXME: Need to (actually!) validate the table/join array (only one 'from' allowed, etc.)
-		if ( true === $this->is_valid_tnj_list( $this->table_list ) ) {
-			return $this->table_list;
-		} else {
-			pmpro_setMessage(
-				__( 'Error: Invalid database configuration!!!', 'e20r-members-list' ),
-				'error'
+		if ( false === $this->is_valid_tnj_list( $this->table_list ) ) {
+			$this->utils->log('Error: Invalid database configuration!!!' );
+			$this->utils->add_message(
+					__( 'Error: Invalid database configuration!!!', 'e20r-members-list' ),
+					'error',
+					'background'
 			);
+			return null;
 		}
 
-		return null;
+		return $this->table_list;
 	}
 
 	/**
 	 * Test validity of the table & join list.
 	 *
-	 * FIXME: Actually test the validity of the tables and jointed tables list
-	 *
 	 * @param array $list The list of tables to search
 	 *
 	 * @return bool     Successfully validated list of tables & joined tables.
+	 * @filter e20r_memberslist_verify_table_join_array - Allow validation of custom from & join options
 	 */
 	public function is_valid_tnj_list( $list ) {
 
-		return true;
+		$from_n_joins = array_keys( $list );
+
+		// Make sure we will have a "FROM <table>" statement
+		if ( ! in_array( 'from', $from_n_joins ) ) {
+			$this->utils->log('Missing the "FROM" statement');
+			$this->utils->add_message(
+					__( 'Missing the "FROM" statement', 'e20r-members-list' ),
+					'error',
+					'background'
+			);
+			return false;
+		}
+
+		// Make sure there is at least one *JOIN* statement
+		if ( ! in_array( 'joins', $from_n_joins ) ) {
+			$this->utils->log('Missing the minimum expected number of "JOIN" statements');
+			$this->utils->add_message(
+					__( 'Missing the minimum expected number of "JOIN" statements', 'e20r-members-list' ),
+					'error',
+					'background'
+			);
+			return false;
+		}
+
+		// By default, we need at least 3 JOINs to search in user metadata, membership info, and membership level info
+		if ( 3 > count( $list['joins'] ) ) {
+			$this->utils->log(
+					sprintf(
+					'Have %1$d JOIN entries, but need at least 3',
+					count( $list['joins'] )
+					)
+			);
+			$this->utils->add_message(
+					sprintf(
+							// translator: %1$d the number of JOIN entries in the Meembers_List::table_list definition
+							__( 'Have %1$d JOIN entries, but need at least 3!', 'e20r-members-list' ),
+					count( $list['joins'] )
+					),
+					'error',
+					'background'
+			);
+			return false;
+		}
+
+		// If we have the 'level' REQUEST parameter set, we have more checks to run
+		$search_level = $this->utils->get_variable( 'level', null );
+		if (
+				in_array( $search_level, array( 'oldmembers', 'expired', 'cancelled', 'all' ), true )
+				|| is_numeric( $search_level )
+		) {
+
+			// We need 4 JOINs to add the level ID or pre-defined block of levels to the search
+			if ( ! isset( $list['joins'][3] ) ) {
+				$this->utils->log( 'Does not include the "JOIN" to support membership level search, but specified a level' );
+				$this->utils->add_message(
+						__( 'Does not include the "JOIN" to support membership level search, but specified a level', 'e20r-members-list' ),
+						'error',
+						'background'
+				);
+
+				return false;
+			}
+
+			// We expect the 3rd join to represent the membership info
+			if (
+					isset( $list['joins'][3] ) &&
+					$list['joins'][3]['condition'] !== "ON u.ID = mu2.user_id AND mu2.status = 'active'"
+			) {
+				$this->utils->log( 'Unexpected condition value for the 4th "JOIN" element' );
+				$this->utils->add_message(
+						__( 'Unexpected condition value for the 4th "JOIN" element', 'e20r-members-list' ),
+						'error',
+						'background'
+				);
+				return false;
+			}
+
+			global $wpdb;
+
+			// It needs to include the pmpro_memberships_users table
+			if (
+					isset( $list['joins'][3] ) &&
+					$list['joins'][3]['name'] !== $wpdb->pmpro_memberships_users
+			) {
+				$this->utils->add_message(
+						sprintf(
+								// translators: %1$s table name defined by PMPro, %2$s Unexpected table name from user/developer
+								__( 'Unexpected table name value for the 4th "JOIN" element. Want: "%1$s", got: "%2$s"', 'e20r-members-list' ),
+						$wpdb->pmpro_memberships_users,
+								$list['joins'][3]['name']
+						),
+						'error',
+						'background'
+				);
+				return false;
+			}
+		}
+
+		/**
+		 * Return the status after executing custom table/join check(s)
+		 *
+		 * @param bool $status - The default status after we've passed all the default checks
+		 * @param array $list - List of tables & conditions for joins & the FROM table to use
+		 *
+		 * @filter e20r_memberslist_verify_table_join_array
+		 */
+		return apply_filters( 'e20r_memberslist_verify_table_join_array', true, $list );
 	}
 
 	/**
