@@ -23,13 +23,15 @@ DC_ENV_FILE ?= $(PWD)/.env.testing
 .PHONY: \
 	clean \
 	start \
+	start-stack \
 	stop \
+	stop-stack \
 	restart \
 	shell \
 	lint-test \
 	code-standard-test \
 	phpstan-test \
-	unit-test \
+	wp-unit-test \
 	acceptance-test \
 	build-test \
 	gitlog \
@@ -41,6 +43,7 @@ DC_ENV_FILE ?= $(PWD)/.env.testing
 	tests
 
 clean:
+	@inc/bin/codecept clean
 #	$(FIND) $(BASE_PATH)/inc -path composer -prune \
 #		-path yahnis-elsts -prune \
 #		-path 10quality -prune \
@@ -48,8 +51,11 @@ clean:
 #		-exec rm -rf {} \;
 
 start:
+	echo "TODO: Add a standard start"
+
+start-stack: clean
 	@APACHE_RUN_USER=$(APACHE_RUN_USER) APACHE_RUN_GROUP=$(APACHE_RUN_GROUP) \
-		docker-compose -p $(PROJECT) --env-file $(DC_ENV_FILE) --file $(DC_CONFIG_FILE) up --detach
+		docker-compose -p $(PROJECT) --env-file $(DC_ENV_FILE) --file $(DC_CONFIG_FILE) up --build --detach
 
 db-import:
 	@bin/wait-for-db.sh '$(MYSQL_USER)' '$(MYSQL_PASSWORD)' '$(WORDPRESS_DB_HOST)' '$(E20R_PLUGIN_NAME)'
@@ -60,10 +66,10 @@ db-import:
         	/usr/bin/mysql -u$(MYSQL_USER) -p'$(MYSQL_PASSWORD)' -h$(WORDPRESS_DB_HOST) $(MYSQL_DATABASE) < $(SQL_BACKUP_FILE)/$(E20R_PLUGIN_NAME).sql; \
   	fi
 
-stop:
+stop-stack:
 	@APACHE_RUN_USER=$(APACHE_RUN_USER) APACHE_RUN_GROUP=$(APACHE_RUN_GROUP) docker-compose -p $(PROJECT) --env-file $(DC_ENV_FILE) --file $(DC_CONFIG_FILE) down
 
-restart: stop start db-import
+restart: stop-stack start-stack db-import
 
 wp-shell:
 	@docker-compose -p $(PROJECT) --env-file $(DC_ENV_FILE) --file $(DC_CONFIG_FILE) exec wordpress /bin/bash
@@ -78,12 +84,12 @@ db-backup:
 	docker-compose -p $(PROJECT) --env-file $(DC_ENV_FILE) --file $(DC_CONFIG_FILE) exec database \
  		/usr/bin/mysqldump -u$(MYSQL_USER) -p'$(MYSQL_PASSWORD)' -h$(WORDPRESS_DB_HOST) $(MYSQL_DATABASE) > $(SQL_BACKUP_FILE)/$(E20R_PLUGIN_NAME).sql
 
-phpstan-test: start
+phpstan-test: start-stack
 	@docker-compose -p $(PROJECT) --env-file $(DC_ENV_FILE) --file $(DC_CONFIG_FILE) \
         	exec -T -w /var/www/html/wp-content/plugins/$(PROJECT)/ \
         	wordpress php -d display_errors=on inc/bin/phpstan.phar analyse -c ./phpstan.dist.neon --memory-limit 128M
 
-code-standard-test: start
+code-standard-test: start-stack
 	@docker-compose -p ${PROJECT} --env-file ${DC_ENV_FILE} --file ${DC_CONFIG_FILE} exec \
     		-T -w /var/www/html/wp-content/plugins/$(PROJECT)/ wordpress \
     		inc/bin/phpcs \
@@ -96,22 +102,23 @@ code-standard-test: start
     		--extensions=php \
     		*.php src/*/*.php
 
-unit-test: start code-standard-test
+wp-unit-test: start-stack code-standard-test
+#	php composer.phar run unit-test
 	@docker-compose -p $(PROJECT) --env-file $(DC_ENV_FILE) --file $(DC_CONFIG_FILE) \
-	exec -T -w /var/www/html/wp-content/plugins/$(PROJECT)/ \
-	wordpress inc/bin/codecept run -v wpunit --coverage
+		exec -T -w /var/www/html/wp-content/plugins/$(PROJECT)/ \
+		wordpress inc/bin/codecept run -v wpunit --coverage
 
-acceptance-test: start db-import
+acceptance-test: start-stack db-import
 	@docker-compose $(PROJECT) --env-file $(DC_ENV_FILE) --file $(DC_CONFIG_FILE) \
 	 exec -T -w /var/www/html/wp-content/plugins/${PROJECT}/ \
 	 wordpress inc/bin/codecept run -v acceptance
 
-build-test: start db-import
+build-test: start-stack db-import
 	@docker-compose $(PROJECT) --env-file $(DC_ENV_FILE) --file $(DC_CONFIG_FILE) \
 	 exec -T -w /var/www/html/wp-content/plugins/${PROJECT}/ \
 	 wordpress $(PWD)/inc/bin/codecept build -v
 
-tests: start code-standard-test unit-test stop # TODO: phpstan-test between phpcs & unit tests
+tests: start-stack db-import code-standard-test wp-unit-test stop-stack # TODO: phpstan-test between phpcs & unit tests
 
 changelog: build_readmes/current.txt
 	@./bin/changelog.sh
