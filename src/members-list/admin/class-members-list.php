@@ -20,15 +20,14 @@
 
 namespace E20R\Members_List\Admin;
 
-/** Load WP_List_Table if it's not already loaded */
-if ( ! class_exists( '\\WP_List_Table' ) ) {
-	require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';
-}
+use E20R\Members_List\Admin\Bulk\Bulk_Cancel;
+use E20R\Members_List\Admin\Bulk\Bulk_Update;
+use E20R\Members_List\Admin\Export\Export_Members;
 
-use E20R\Members_List\Controller\E20R_Members_List;
 use E20R\Utilities\Utilities;
+use WP_List_Table;
 
-class Members_List extends \WP_List_Table {
+class Members_List extends WP_List_Table {
 
 	/**
 	 * Class instance variable (singleton support).
@@ -76,9 +75,9 @@ class Members_List extends \WP_List_Table {
 	/**
 	 * The total number of records in the PMPro Membership DB
 	 *
-	 * @var int $total_member_records
+	 * @var null|int $total_member_records
 	 */
-	private $total_member_records = 0;
+	private $total_member_records = null;
 
 	/**
 	 * The status of the membership when searching for totals
@@ -129,9 +128,9 @@ class Members_List extends \WP_List_Table {
 	/**
 	 * The PMPro levels specific part of the SQL statement
 	 *
-	 * @var null|string $levels
+	 * @var null|string $levels_sql
 	 */
-	private $levels = null;
+	private $levels_sql = null;
 	/**
 	 * The SQL search string
 	 * @var null|string $find
@@ -187,25 +186,10 @@ class Members_List extends \WP_List_Table {
 		}
 
 		$this->sql_col_list = $this->set_sql_columns();
+		$this->set_membership_level();
 
-		$level        = $this->utils->get_variable( 'level', '' );
 		$this->action = $this->utils->get_variable( 'action', '' );
 
-		if ( ! empty( $level ) ) {
-			switch ( $level ) {
-				case 'cancelled':
-					$this->membership_status = array( 'cancelled' );
-					break;
-				case 'expired':
-					$this->membership_status = array( 'expired' );
-					break;
-				case 'old':
-					$this->membership_status = array( 'cancelled', 'expired' );
-					break;
-				default:
-					$this->membership_status = array( 'active' );
-			}
-		}
 		/**
 		 * The default Members List columns to display (with labels)
 		 */
@@ -225,34 +209,6 @@ class Members_List extends \WP_List_Table {
 		);
 
 		/**
-		 * Should the final column use 'Expired' or 'Expires' as the label
-		 */
-		if ( 'oldmembers' === $level ) {
-			$this->default_columns['last'] = apply_filters(
-				'e20r_members_list_enddate_col_name',
-				_x( 'Expired', 'e20r-members-list' ),
-				$level
-			);
-		} else {
-			$this->default_columns['last'] = apply_filters(
-				'e20r_members_list_enddate_col_name',
-				_x( 'Expires', 'e20r-members-list' ),
-				$level
-			);
-		}
-		// For backwards compatibility
-		/**
-		 * Old: e20r-members-list-enddate-col-name, new: e20r_members_list_enddate_col_name
-		 *
-		 * @deprecated
-		 */
-		$this->default_columns['last'] = apply_filters(
-			'e20r-members-list-enddate-col-name',
-			$this->default_columns['last'],
-			$level
-		);
-
-		/**
 		 * Prepare the Export bulk action
 		 */
 		if ( 'e20rml_export_records' === $this->utils->get_variable( 'action', null ) ) {
@@ -263,19 +219,144 @@ class Members_List extends \WP_List_Table {
 	}
 
 	/**
+	 * Set the Membership level (status) to display records for
+	 *
+	 * @param mixed $level
+	 */
+	public function set_membership_level( $level = '' ) {
+
+		$level = $this->utils->get_variable( 'level', $level );
+
+		if ( ! empty( $level ) ) {
+
+			switch ( $level ) {
+				case 'cancelled':
+					$this->membership_status = array( 'cancelled' );
+					break;
+				case 'expired':
+					$this->membership_status = array( 'expired' );
+					break;
+				case 'old':
+					$this->membership_status = array( 'cancelled', 'expired' );
+					break;
+				default:
+					$this->membership_status = array( 'active' );
+			}
+
+			$this->levels_sql = '';
+
+			if ( ( ' WHERE ' !== $this->where || ! empty( $this->find ) ) && ( ( ! empty( $this->membership_status ) || 'all' === $level ) || ! empty( $user_search ) ) ) {
+				$this->levels_sql = 'AND ';
+			}
+
+			$cancelled_statuses = apply_filters(
+					'e20r_memberslist_cancelled_statuses',
+					array(
+							'cancelled',
+							'admin_cancelled',
+							'admin_change',
+							'admin_changed',
+							'changed',
+							'inactive',
+					)
+			);
+
+			$active_statuses  = apply_filters( 'e20r_memberslist_active_statuses', array( 'active' ) );
+			$expired_statuses = apply_filters( 'e20r_memberslist_expired_statuses', array( 'expired' ) );
+
+			$this->utils->log( "Will return records for membership level: {$level}" );
+
+			switch ( $level ) {
+
+				case 'oldmembers':
+					$statuses      = implode( "','", array_map( 'sanitize_text_field', $active_statuses ) );
+					$this->levels_sql .= " mu.status NOT IN ('{$statuses}') AND mu2.status IS NULL ";
+					break;
+
+				case 'expired':
+					$statuses      = implode( "','", array_map( 'sanitize_text_field', $expired_statuses ) );
+					$this->levels_sql .= " mu.status IN ('{$statuses}') AND mu2.status IS NULL ";
+					break;
+
+				case 'cancelled':
+					$statuses      = implode( "','", array_map( 'sanitize_text_field', $cancelled_statuses ) );
+					$this->levels_sql .= " mu.status IN ('{$statuses}') AND mu2.status IS NULL ";
+					break;
+
+				case 'all':
+					$any_status = array_merge( $cancelled_statuses, $active_statuses, $expired_statuses );
+
+					$statuses      = implode( "','", array_map( 'sanitize_text_field', $any_status ) );
+					$this->levels_sql .= " mu.status IN ('{$statuses}') ";
+					break;
+				case 'active':
+					$statuses      = implode( "','", array_map( 'sanitize_text_field', $active_statuses ) );
+					$this->levels_sql .= " mu.status IN ('{$statuses}') ";
+					break;
+
+				default:
+					$statuses      = implode( "','", array_map( 'sanitize_text_field', $active_statuses ) );
+					$this->levels_sql .= " mu.status IN ('{$statuses}') ";
+
+					if ( ! in_array( $level, array( 'active', 'all' ), true ) ) {
+						$this->levels_sql .= ' AND mu.membership_id = ' . esc_sql( $level ) . ' ';
+					}
+			}
+		}
+
+		if ( ! empty( $this->default_columns ) ) {
+
+			/**
+			 * Should the final column use 'Expired' or 'Expires' as the label
+			 */
+			if ( 'oldmembers' === $level ) {
+				$this->default_columns['last'] = apply_filters(
+						'e20r_members_list_enddate_col_name',
+						_x( 'Expired', 'e20r-members-list' ),
+						$level
+				);
+			} else {
+				$this->default_columns['last'] = apply_filters(
+						'e20r_members_list_enddate_col_name',
+						_x( 'Expires', 'e20r-members-list' ),
+						$level
+				);
+			}
+
+			// For backwards compatibility
+			/**
+			 * Old: e20r-members-list-enddate-col-name, new: e20r_members_list_enddate_col_name
+			 *
+			 * @deprecated
+			 */
+			$this->default_columns['last'] = apply_filters(
+			// phpcs:ignore
+					'e20r-members-list-enddate-col-name',
+					$this->default_columns['last'],
+					$level
+			);
+		}
+	}
+
+	/**
 	 * Private function to capture the count of records in the membership database
 	 *
 	 * @return int|null
 	 */
-	private function get_member_record_count() {
+	public function get_member_record_count() {
 
-		$status = $this->utils->get_variable( 'level', 'active' );
+		if ( null === $this->total_member_records ) {
 
-		// Get SQL for all records in the paginated data
-		$this->generate_member_sql( $status );
-		$records = $this->get_members( -1, -1, $status );
+			$this->set_membership_level();
 
-		return is_countable( $records ) ? count( $records ) : 0;
+			// Get SQL for all records in the paginated data
+			$this->generate_member_sql( $this->membership_status );
+			$this->items = $this->get_members( -1, -1, $this->membership_status );
+
+			$this->total_member_records = is_countable( $this->items ) ? count( $this->items ) : null;
+		}
+
+		return (int) $this->total_member_records;
 	}
 
 	/**
@@ -283,7 +364,7 @@ class Members_List extends \WP_List_Table {
 	 *
 	 * @return array - Array of SQL table columns/aliases to use when selecting data for membership list.
 	 */
-	private function set_sql_columns() {
+	public function set_sql_columns() {
 
 		// Note: Format for the record array 'name' => 'alias'
 		$sql_cols = array(
@@ -311,8 +392,11 @@ class Members_List extends \WP_List_Table {
 		 * The default mapping of DB columns (<table alias>.<column name>) to their respective alias(s)
 		 *
 		 * @filter e20r_members_list_default_sql_column_alias_map
+		 * @param string[] $sql_cols
 		 */
-		return apply_filters( 'e20r_members_list_default_sql_column_alias_map', $sql_cols );
+		$this->sql_col_list = apply_filters( 'e20r_members_list_default_sql_column_alias_map', $sql_cols );
+		$this->utils->log("Applied the filter: " . print_r( $this->sql_col_list, true ) );
+		return $this->sql_col_list;
 	}
 
 	/**
@@ -336,7 +420,6 @@ class Members_List extends \WP_List_Table {
 	public function prepare_items() {
 
 		$this->utils->log( 'Loading column headers' );
-		$total_items = 0;
 
 		// Configure the column headers
 		$this->_column_headers = array(
@@ -374,7 +457,7 @@ class Members_List extends \WP_List_Table {
 			$this->utils->log(
 				sprintf(
 					'Configure pagination for %d total records and %d counted (returned) records',
-					$this->total_member_records,
+						(int) $this->total_member_records,
 					( is_countable( $this->items ) ? count( $this->items ) : 0 )
 				)
 			);
@@ -383,9 +466,9 @@ class Members_List extends \WP_List_Table {
 		// Configure pagination
 		$this->set_pagination_args(
 			array(
-				'total_items' => $this->total_member_records,
+				'total_items' => (int) $this->total_member_records,
 				'per_page'    => $per_page,
-				'total_pages' => ceil( $this->total_member_records / $per_page ),
+				'total_pages' => ceil( (int) $this->total_member_records / $per_page ),
 			)
 		);
 
@@ -396,7 +479,7 @@ class Members_List extends \WP_List_Table {
 	 *
 	 * @return array
 	 */
-	private function all_columns() {
+	public function all_columns() {
 
 		$columns = $this->default_columns;
 
@@ -661,8 +744,10 @@ class Members_List extends \WP_List_Table {
 
 		global $wpdb;
 
+		$this->set_membership_level( $status );
+
 		// Get Pagination SQL
-		$this->sql_query = $this->generate_member_sql( $status, $per_page, $page_number, );
+		$this->sql_query = $this->generate_member_sql( $status, $per_page, $page_number );
 
 		// Fetch the data
 		// phpcs:ignore
@@ -670,7 +755,7 @@ class Members_List extends \WP_List_Table {
 
 		if ( ! empty( $result ) ) {
 			$this->utils->log( 'Found records in DB...' );
-			$this->total_members_found = $wpdb->num_rows;
+			$this->total_members_found = empty( $wpdb->num_rows ) ? null : $wpdb->num_rows;
 		}
 
 		// Return the result set unless an error occurred.
@@ -718,8 +803,9 @@ class Members_List extends \WP_List_Table {
 	 * @param string $status
 	 *
 	 * @return string - Returns the SQL statement
+	 * @throws \Exception
 	 */
-	private function generate_member_sql( $status = 'active', $per_page = -1, $page_number = -1 ) {
+	public function generate_member_sql( $status = 'active', $per_page = -1, $page_number = -1 ) {
 
 		$this->utils->log( 'Called by: ' . $this->utils->_who_called_me() );
 
@@ -730,16 +816,44 @@ class Members_List extends \WP_List_Table {
 				$this->utils->get_variable( 'order', 'DESC' )
 			)
 		);
-		$order_by = esc_sql(
-			apply_filters(
+		$order_by = apply_filters(
 				'e20r_memberslist_order_by',
-				$this->utils->get_variable( 'orderby', 'ml.id' )
-			)
+				array_map(
+						'trim',
+						explode(
+								',',
+								$this->utils->get_variable( 'orderby', 'u.id, ml.id' )
+						)
+				)
+		);
+
+		$group_by = apply_filters(
+				'e20r_memberslist_group_by',
+				array_map(
+						'trim',
+						explode(
+								',',
+								$this->utils->get_variable( 'groupby', 'ml.id, u.id' )
+						)
+				)
 		);
 
 		// handle the 'last' column (which is really the enddate field when sorting/ordering)
-		if ( 'last' === $order_by ) {
-			$order_by = 'enddate';
+		if ( in_array( 'last', $order_by ) ) {
+			$order_by = array_map( function( $str ) {
+						str_replace( 'last', 'enddate', $str );
+					},
+					$order_by
+			);
+		}
+
+		// Handle the 'last' column if used as a group_by value
+		if ( in_array( 'last', $group_by ) ) {
+			$group_by = array_map( function( $str ) {
+				str_replace( 'last', 'enddate', $str );
+				},
+					$group_by
+			);
 		}
 
 		// Start the SELECT statement (FIXME: Remove dependency on SQL_CALC_FOUND_ROWS - Fixed?)
@@ -761,7 +875,7 @@ class Members_List extends \WP_List_Table {
 
 		// Error out if something is wrong here.
 		if ( false === $this->table_list ) {
-			wp_die(
+			throw new \Exception(
 				esc_attr__( 'Error: Invalid list of tables & joins for member list!', 'e20r-members-list' )
 			);
 		}
@@ -772,8 +886,8 @@ class Members_List extends \WP_List_Table {
 			$this->from .= ( empty( $this->table_list['from']['alias'] ) ? null : " AS {$this->table_list['from']['alias']}" );
 		} else {
 
-			wp_die(
-				esc_attr__( 'Error: No FROM table specified for member list!', 'e20r-members-list' )
+			throw new \Exception(
+				__( 'Error: No FROM table specified for member list!', 'e20r-members-list' )
 			);
 		}
 
@@ -887,79 +1001,15 @@ class Members_List extends \WP_List_Table {
 			$this->find .= ') ';
 		}
 
-		// Are they only looking for a specific membership level.
-		if ( ! empty( $status ) ) {
-
-			$this->levels = '';
-
-			if ( ( ' WHERE ' !== $this->where || ! empty( $this->find ) ) && ( ( ! empty( $status ) || 'all' === $status ) || ! empty( $user_search ) ) ) {
-				$this->levels = 'AND ';
-			}
-
-			$cancelled_statuses = apply_filters(
-				'e20r_memberslist_cancelled_statuses',
-				array(
-					'cancelled',
-					'admin_cancelled',
-					'admin_change',
-					'admin_changed',
-					'changed',
-					'inactive',
-				)
-			);
-
-			$active_statuses  = apply_filters( 'e20r_memberslist_active_statuses', array( 'active' ) );
-			$expired_statuses = apply_filters( 'e20r_memberslist_expired_statuses', array( 'expired' ) );
-
-			$this->utils->log( "Only returning records for membership level: {$status}" );
-
-			switch ( $status ) {
-
-				case 'oldmembers':
-					$statuses      = implode( "','", array_map( 'sanitize_text_field', $active_statuses ) );
-					$this->levels .= " mu.status NOT IN ('{$statuses}') AND mu2.status IS NULL ";
-					break;
-
-				case 'expired':
-					$statuses      = implode( "','", array_map( 'sanitize_text_field', $expired_statuses ) );
-					$this->levels .= " mu.status IN ('{$statuses}') AND mu2.status IS NULL ";
-					break;
-
-				case 'cancelled':
-					$statuses      = implode( "','", array_map( 'sanitize_text_field', $cancelled_statuses ) );
-					$this->levels .= " mu.status IN ('{$statuses}') AND mu2.status IS NULL ";
-					break;
-
-				case 'all':
-					$any_status = array_merge( $cancelled_statuses, $active_statuses, $expired_statuses );
-
-					$statuses      = implode( "','", array_map( 'sanitize_text_field', $any_status ) );
-					$this->levels .= " mu.status IN ('{$statuses}') ";
-					break;
-				case 'active':
-					$statuses      = implode( "','", array_map( 'sanitize_text_field', $active_statuses ) );
-					$this->levels .= " mu.status IN ('{$statuses}') ";
-					break;
-
-				default:
-					$statuses      = implode( "','", array_map( 'sanitize_text_field', $active_statuses ) );
-					$this->levels .= " mu.status IN ('{$statuses}') ";
-
-					if ( ! in_array( $status, array( 'active', 'all' ), true ) ) {
-						$this->levels .= ' AND mu.membership_id = ' . esc_sql( $status ) . ' ';
-					}
-			}
-		}
-
 		// Append any search & level info to the WHERE statement
-		if ( ! empty( $this->find ) || ! empty( $this->levels ) ) {
+		if ( ! empty( $this->find ) || ! empty( $this->levels_sql ) ) {
 
 			if ( ! empty( $this->find ) ) {
 				$this->where .= $this->find;
 			}
 
-			if ( ! empty( $this->levels ) ) {
-				$this->where .= $this->levels;
+			if ( ! empty( $this->levels_sql ) ) {
+				$this->where .= $this->levels_sql;
 			}
 		}
 
@@ -967,16 +1017,30 @@ class Members_List extends \WP_List_Table {
 			'e20r_memberslist_sql_where_statement',
 			$this->where,
 			$this->find,
-			$this->levels,
+			$this->levels_sql,
 			$this->joins
 		);
-		$this->group_by = ' GROUP BY u.ID ';
-		$this->order_by = apply_filters( 'e20r_memberslist_order_by_statement', " ORDER BY {$order_by} {$order}", $order_by, $order );
+
+		$this->group_by = sprintf( 'GROUP BY %1$s', implode( ',', $group_by ) );
+		$this->order_by = sprintf( ' ORDER BY %1$s %2$s', implode( ',', $order_by ), $order );
+		$this->group_by = apply_filters( 'e20r_memberslist_group_by_statement', $this->group_by, $group_by );
+		$this->order_by = apply_filters( 'e20r_memberslist_order_by_statement', $this->order_by, $order_by, $order );
 		$per_page       = apply_filters( 'e20r_memberslist_per_page', $per_page );
+
+		if ( ! is_numeric( $per_page ) ) {
+			throw new \Exception(
+					sprintf(
+							// translators: %1$s is the per-page value supplied by the e20r_memberslist_per_page filter
+							__( 'Error: Invalid \'per_page\' value (need an integer): %1$s', 'e20r-members-list' ),
+							$per_page
+					)
+			);
+		}
+
 		$this->offset   = ( $page_number - 1 ) * $per_page;
 
-		if ( - 1 !== $per_page ) {
-			$this->limit = " LIMIT {$per_page} OFFSET {$this->offset} ";
+		if ( -1 !== $per_page ) {
+			$this->limit = sprintf( ' LIMIT %1$d OFFSET %2$d ', $per_page, $this->offset );
 		}
 
 		// Construct the tail end of the SQL statement.
@@ -990,10 +1054,34 @@ class Members_List extends \WP_List_Table {
 		";
 
 		// Created the SQL statement
-		$sql_query = $sql . self::$sql_from;
+		$this->sql_query = $sql . self::$sql_from;
 
-		$this->utils->log( "SQL for fetching membership records:\n {$sql_query}" );
-		return $sql_query;
+		$this->utils->log( "SQL for fetching membership records:\n {$this->sql_query}" );
+		return $this->sql_query;
+	}
+
+	/**
+	 * Getter for class variables
+	 *
+	 * @param null|string $member_var
+	 *
+	 * @return Members_List
+	 * @throws \Exception
+	 */
+	public function get( $member_var = null ) {
+
+		// Make sure we let the caller know there's a problem if the variable doesn't exist
+		if ( !isset( $this->{$member_var} ) ) {
+			throw new \Exception(
+					sprintf(
+							__( '%1$s is not a member variable in %2$s', 'e20r-members-list' ),
+							$member_var,
+							class_basename( $this )
+					)
+			);
+		}
+
+		return $this->{$member_var};
 	}
 
 	/**
@@ -1001,7 +1089,7 @@ class Members_List extends \WP_List_Table {
 	 *
 	 * @return array|mixed
 	 */
-	private function set_tables_and_joins() {
+	public function set_tables_and_joins() {
 
 		global $wpdb;
 
@@ -1064,10 +1152,12 @@ class Members_List extends \WP_List_Table {
 			return $this->table_list;
 		} else {
 			pmpro_setMessage(
-				__( 'Error: Invalid configuration!!!', 'e20r-members-list' ),
+				__( 'Error: Invalid database configuration!!!', 'e20r-members-list' ),
 				'error'
 			);
 		}
+
+		return null;
 	}
 
 	/**
@@ -1100,7 +1190,6 @@ class Members_List extends \WP_List_Table {
 		}
 
 		global $wpdb;
-
 		return $wpdb->get_var( 'SELECT FOUND_ROWS() AS found_rows' );
 	}
 
