@@ -44,14 +44,19 @@
     "scripts": {
         "post-install-cmd": "./inc/bin/phpcs --config-set installed_paths inc/wp-coding-standards/wpcs",
         "post-update-cmd" : "./inc/bin/phpcs --config-set installed_paths inc/wp-coding-standards/wpcs",
-        "lint": "docker-compose -p ${PROJECT} --env-file ${DC_ENV_FILE} --file ${DC_CONFIG_FILE} exec -T -w /var/www/html/wp-content/plugins/e20r-members-list/ wordpress ./inc/bin/phpcs --report=full --colors -p --standard=WordPress-Extra --ignore=*/inc/*,*/node_modules/* --extensions=php *.php src/*/*.php"
+        "lint": "docker-compose -p ${PROJECT} --env-file ${DC_ENV_FILE} --file ${DC_CONFIG_FILE} exec -T -w /var/www/html/wp-content/plugins/e20r-members-list/ wordpress ./inc/bin/phpcs --report=full --colors -p --standard=WordPress-Extra --ignore=*/inc/*,*/node_modules/* --extensions=php *.php src/*/*.php",
+        "unit-test": "inc/bin/codecept -v run unit # --coverage"
     },
     "autoload": {
         "psr-4": {
-            "E20R\\": "",
-            "E20R\\Members_List\\Controller\\": "./",
-            "E20R\\Members_List\\Admin\\": "src/members-list",
-            "E20R\\Members_List\\Controller\\Test\\": "tests/wpunit/testcases"
+            "E20R\\Members_List\\": "",
+            "E20R\\Members_List\\Admin\\": "src/members-list/admin",
+            "E20R\\Members_List\\Admin\\Export\\": "src/members-list/admin/export",
+            "E20R\\Members_List\\Admin\\Pages\\": "src/members-list/admin/pages",
+            "E20R\\Members_List\\Admin\\Bulk\\": "src/members-list/admin/bulk",
+            "E20R\\Members_List\\Unit\\": "tests/unit",
+            "E20R\\Members_List\\WPUnitTest\\": "tests/wpunit/testcases",
+            "E20R\\Members_List\\AcceptanceTest\\": "tests/acceptance/testcases"
         }
     }
 }
