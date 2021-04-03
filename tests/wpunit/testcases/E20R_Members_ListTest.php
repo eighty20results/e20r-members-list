@@ -19,8 +19,9 @@
  *  You can contact us at mailto:info@eighty20results.com
  */
 
-namespace E20R\Members_List\Controller;
+namespace E20R\Members_List\WPUnitTest;
 
+use E20R\Members_List\E20R_Members_List;
 use E20R\Members_List\Admin\Members_List;
 use Codeception\Test\Unit;
 use Brain\Monkey;
@@ -28,10 +29,22 @@ use Spatie\Snapshots\MatchesSnapshots;
 
 class E20R_Members_ListTest extends Unit {
 	use MatchesSnapshots;
+//	use MockeryPHPUnitIntegration;
+
+	private $list_table_class;
+	private $mc_class;
 
 	public function setUp(): void {
 		parent::setUp();
 		Monkey\setUp();
+
+		if ( ! defined( 'WP_PLUGIN_DIR' ) ) {
+			define( 'WP_PLUGIN_DIR', '../../' );
+		}
+
+		if ( ! defined( 'ABSPATH' ) ) {
+			define( 'ABSPATH', '../../' );
+		}
 
 		// A few common passthroughs
 		// 1. WordPress i18n functions
@@ -41,14 +54,21 @@ class E20R_Members_ListTest extends Unit {
 			->returnArg( 1 );
 		Monkey\Functions\when( '_n' )
 			->returnArg( 1 );
+		Monkey\Functions\when( '_x' )
+			->returnArg( 1 );
+		Monkey\Functions\when( 'esc_attr__' )
+			->returnArg( 1 );
+
+		$GLOBALS['hook_suffix'] = 'pmpro_membership';
+
 		Monkey\Functions\when( 'plugins_url' )
 			->justReturn( sprintf( 'https://development.local/wp-content/plugins/' ) );
 		Monkey\Functions\when( 'plugin_dir_path' )
-			->justReturn( sprintf( '/var/www/html/wp-content/plugins/e20r-members-list/' ) );
+			->justReturn( sprintf( '%1$s/', getcwd() ) );
 		Monkey\Functions\when( 'get_current_blog_id' )
 			->justReturn( 1 );
 
-		$GLOBALS['hook_suffix'] = 'page';
+		$this->mc_class = new Members_List();
 	}
 
 	/**
@@ -65,7 +85,7 @@ class E20R_Members_ListTest extends Unit {
 	 * Tests that the get_instance() function returns the expected class
 	 */
 	public function test_get_instance() {
-		self::assertInstanceOf( '\\E20R\Members_List\\Controller\\E20R_Members_List', E20R_Members_List::get_instance() );
+		self::assertInstanceOf( '\\E20R\\Members_List\\E20R_Members_List', \E20R\Members_List\E20R_Members_List::get_instance() );
 	}
 
 	/**
@@ -74,15 +94,11 @@ class E20R_Members_ListTest extends Unit {
 	 */
 	public function test_load_hooks() {
 
-		Monkey\Actions\expectAdded( 'init' )
-			->with( array( Members_List::get_instance(), 'load_hooks' ), -1 );
-		Monkey\Actions\expectAdded( 'init' )
-			->with( array( E20R_Members_List::get_instance(), 'load_text_domain' ), 1 );
-		Monkey\Actions\expectAdded( 'e20r_memberslist_process_action' )
-			->with( array( Members_List::get_instance(), 'export_members' ), 10, 3 );
-
 		// Load the class and hooks (make sure the hooks we expect are loaded
 		E20R_Members_List::get_instance()->load_hooks();
+		Monkey\Actions\has( 'init', array( $this->mc_class, 'load_hooks' ) );
+		Monkey\Actions\has( 'init', array( E20R_Members_List::get_instance(), 'load_text_domain' ) );
+		Monkey\Actions\has( 'e20r_memberslist_process_action', array( $this->mc_class, 'export_members' ) );
 	}
 
 	/**
@@ -106,9 +122,9 @@ class E20R_Members_ListTest extends Unit {
 	 */
 	public function fixture_good_class_list() {
 		return array(
-			array( 'E20R\Members_List\Admin\Export_Members', true, 'The Export_Members class is NOT present in the plugin directory?!?' ),
-			array( 'E20R\Members_List\Admin\Members_List_Page', true, 'The Members_List_Page class is NOT present in the plugin directory?!?' ),
-			array( 'E20R\Members_List\Support\Sort_By_Meta', true, 'The Sort_By_Meta class is NOT present in the plugin directory?!?' ),
+			array( 'E20R\Members_List\Admin\Export\Export_Members', true, 'The Export_Members class is NOT present in the plugin directory?!?' ),
+			array( 'E20R\Members_List\Admin\Pages\Members_List_Page', true, 'The Members_List_Page class is NOT present in the plugin directory?!?' ),
+			array( 'E20R\Members_List\Admin\Export\Sort_By_Meta', true, 'The Sort_By_Meta class is NOT present in the plugin directory?!?' ),
 		);
 	}
 
@@ -133,11 +149,11 @@ class E20R_Members_ListTest extends Unit {
 	 */
 	public function fixture_missing_class_list() {
 		return array(
-			array( 'E20R\Members_List\Controller\E20R_Members_List', false, 'Valid class, but was unexpectedly allowed to load though trying to (re)load' ),
-			array( 'TLS\Members_List\Controller\E20R_Members_List', false, 'Valid class, and unexpectedly in the right namespace (Should be: TLS\\...)' ),
+			array( 'E20R\Members_List\E20R_Members_List', false, 'Valid class, but was unexpectedly allowed to load though trying to (re)load' ),
+			array( 'TLS\Members_List\E20R_Members_List', false, 'Valid class, and unexpectedly in the right namespace (Should be: TLS\\...)' ),
 			array( 'TLS_Does_Not_Exists', false, 'Had the expected namespace prefix ("E20R" - No prefix was specified!)' ),
 			array( 'E20R\\Members_List\\Admin\\My_E20R_Members_List', false, 'My_E20R_Members_List is _NOT_ a valid class in this plugin!' ),
-			array( 'E20\Members_List\Admin\Members_List_Page', false, 'For some reason the typo in the E20R prefix was ignored' ), // Typo
+			array( 'E20\Members_List\Admin\Pages\Members_List_Page', false, 'For some reason the typo in the E20R prefix was ignored' ), // Typo
 		);
 	}
 }
