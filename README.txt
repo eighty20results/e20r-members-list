@@ -210,6 +210,18 @@ Dependencies: N/A
 
 Example: `add_filter( 'e20r_memberslist_search_usermeta_fields', "function() { return 'DESC'; }", 10, 1 );`
 
+=== e20r_memberslist_group_by_statement ===
+
+Modifies: The GROUP BY statement for the search/SQL
+Purpose: Allow a developer to change the default grouping of data
+
+Default: 'GROUP BY u.id, ml.id'
+
+Dependencies: Needs to align with proper SQL for ORDER BY fields and GROUPing of data
+
+Example: `add_filter( 'e20r_memberslist_group_by_statement', "function() { return 'GROUP BY u.id, ml.id'; }", 10, 1 );`
+
+
 == Actions ==
 
 To Be Announced...
