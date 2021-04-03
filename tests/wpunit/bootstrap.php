@@ -47,8 +47,8 @@ if ( file_exists( __DIR__ . '/inc/fixtures.php' ) ) {
 	require_once __DIR__ . '/inc/fixtures.php';
 }
 
-# Load the class autoloader
-require_once __DIR__ . '/../../class-e20r-members-list.php';
+// Load the class autoloader
+// require_once __DIR__ . '/../../class-e20r-members-list.php';
 
 // Include the class for PluginTestCase
-require_once __DIR__ . '/inc/PluginTestCase.php';
+// require_once __DIR__ . '/inc/PluginTestCase.php';
