@@ -36,9 +36,9 @@ services:
 #      APACHE_RUN_GROUP: ${APACHE_RUN_GROUP}
     volumes:
       - ${LOCAL_PLUGIN_DIR}:/var/www/html/wp-content/plugins/${E20R_PLUGIN_NAME}
-#      - ${LOCAL_PLUGIN_DIR}/inc:/var/www/html/wp-content/plugins/${E20R_PLUGIN_NAME}/inc
-#      - ${PMPRO_DIR}:/var/www/html/wp-content/plugins/paid-memberships-pro
+      - ${PMPRO_DIR}:/var/www/html/wp-content/plugins/paid-memberships-pro
       - ${SQL_BACKUP_FILE}/${E20R_PLUGIN_NAME}.sql:/docker-entrypoint-initdb.d/${E20R_PLUGIN_NAME}.sql
+#      - ${LOCAL_PLUGIN_DIR}/inc:/var/www/html/wp-content/plugins/${E20R_PLUGIN_NAME}/inc
     depends_on:
       - database
 

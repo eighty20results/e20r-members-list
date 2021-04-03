@@ -1,6 +1,8 @@
 SHELL := /bin/bash
 BASE_PATH := $(PWD)
 FIND := $(shell which find)
+CURL := $(shell which curl)
+UNZIP := $(shell which unzip)
 APACHE_RUN_USER ?= $(shell id -u)
 APACHE_RUN_GROUP ?= $(shell id -g)
 SQL_BACKUP_FILE ?= $(PWD)/docker/test/db_backup
@@ -9,6 +11,8 @@ MYSQL_DATABASE ?= wordpress
 MYSQL_USER ?= wordpress
 MYSQL_PASSWORD ?= wordpress
 WORDPRESS_DB_HOST ?= localhost
+WP_DEPENDENCIES ?= paid-memberships-pro
+WP_PLUGIN_URL ?= "https://downloads.wordpress.org/plugin/"
 WP_CONTAINER_NAME ?= codecep-wp-$(E20R_PLUGIN_NAME)
 DB_CONTAINER_NAME ?= mariadb-wp-$(E20R_PLUGIN_NAME)
 
@@ -24,6 +28,7 @@ DC_ENV_FILE ?= $(PWD)/.env.testing
 	clean \
 	start \
 	start-stack \
+	dependencies \
 	stop \
 	stop-stack \
 	restart \
@@ -42,8 +47,19 @@ DC_ENV_FILE ?= $(PWD)/.env.testing
 	db-import \
 	tests
 
+dependencies:
+	@for plugin in $(WP_DEPENDENCIES) ; do \
+  		if [[ ! -d inc/wp_plugins/$$plugin ]]; then \
+  		  mkdir -p inc/wp_plugins/$$plugin && \
+  		  $(CURL) -L $(WP_PLUGIN_URL)/$$plugin.zip -o inc/wp_plugins/$$plugin.zip -s && \
+  		  $(UNZIP) -o inc/wp_plugins/$$plugin.zip -d inc/wp_plugins/ 2>&1 > /dev/null && \
+  		  rm -f inc/wp_plugins/$$plugin.zip ; \
+  		fi ; \
+  	done
+
 clean:
 	@inc/bin/codecept clean
+	@rm -rf inc/wp_plugins
 #	$(FIND) $(BASE_PATH)/inc -path composer -prune \
 #		-path yahnis-elsts -prune \
 #		-path 10quality -prune \
@@ -53,7 +69,7 @@ clean:
 start:
 	echo "TODO: Add a standard start"
 
-start-stack: clean
+start-stack: clean dependencies
 	@APACHE_RUN_USER=$(APACHE_RUN_USER) APACHE_RUN_GROUP=$(APACHE_RUN_GROUP) \
 		docker-compose -p $(PROJECT) --env-file $(DC_ENV_FILE) --file $(DC_CONFIG_FILE) up --build --detach
 

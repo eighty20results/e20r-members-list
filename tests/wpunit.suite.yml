@@ -19,5 +19,7 @@ modules:
             domain: "%TEST_SITE_WP_DOMAIN%"
             adminEmail: "%TEST_SITE_ADMIN_EMAIL%"
             title: "Test"
-            plugins: ['e20r-members-list/class-e20r-members-list.php']
-            activatePlugins: ['e20r-members-list/class-e20r-members-list.php']
+            plugins: ['paid-memberships-pro/paid-memberships-pro.php', 'e20r-members-list/class-e20r-members-list.php']
+            activatePlugins: ['paid-memberships-pro/paid-memberships-pro.php', 'e20r-members-list/class-e20r-members-list.php']
+#            plugins: [ 'e20r-members-list/class-e20r-members-list.php' ]
+#            activatePlugins: ['e20r-members-list/class-e20r-members-list.php' ]
