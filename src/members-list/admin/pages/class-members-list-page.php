@@ -69,9 +69,11 @@ class Members_List_Page {
 	 */
 	public static function admin_bar_menu() {
 
-		$is_pmpro_v2 = version_compare( PMPRO_VERSION, '2.0', 'ge' );
+		// Set this to true if PMPro isn't active (the constand doesn't exist) so we can exit quickly
+		$is_pmpro_v2 = self::get_instance()->is_pmpro_v2();
 
-		if ( true === $is_pmpro_v2 ) {
+		// Exit if PMPro is inactive _or_ we're running a version of PMPro prior to v2.0
+		if ( true === $is_pmpro_v2 || null === $is_pmpro_v2 ) {
 			return;
 		}
 
@@ -146,7 +148,7 @@ class Members_List_Page {
 
 		// Actions
 		add_action( 'admin_menu', array( $this, 'plugin_menu' ), 9999 );
-		add_action( 'admin_init', 'E20R\Members_List\Admin\Export_Members::clear_temp_files' );
+		add_action( 'admin_init', 'E20R\Members_List\Admin\Export\Export_Members::clear_temp_files' );
 		// add_action( 'admin_bar_menu', array( $this, 'admin_bar_menu' ), 9999 );
 		add_action( 'admin_enqueue_scripts', array( $this, 'load_scripts_styles' ) );
 
@@ -208,6 +210,16 @@ class Members_List_Page {
 	}
 
 	/**
+	 * Tests whether Paid Memberships Pro v2.x or later is installed
+	 *
+	 * @return bool|int|null
+	 */
+	private function is_pmpro_v2() {
+		return defined('PMPRO_VERSION' ) ?
+				version_compare( PMPRO_VERSION, '2.0', 'ge' ) :
+				null;
+	}
+	/**
 	 * Point Members List menu handler(s) to this plugin
 	 */
 	public function plugin_menu() {
@@ -215,9 +227,12 @@ class Members_List_Page {
 		$this->utils->log( 'Headers sent? ' . ( headers_sent() ? 'Yes' : 'No' ) );
 
 		$pmpro_menu_slug = 'pmpro-membershiplevels';
-		$is_pmpro_v2     = version_compare( PMPRO_VERSION, '2.0', 'ge' );
 
-		if ( defined( 'PMPRO_VERSION' ) && $is_pmpro_v2 ) {
+		if ( null === $this->is_pmpro_v2() ) {
+			return false;
+		}
+
+		if ( true === $this->is_pmpro_v2() ) {
 			$pmpro_menu_slug = 'pmpro-dashboard';
 		}
 
