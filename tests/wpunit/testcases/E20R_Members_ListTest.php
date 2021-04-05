@@ -25,8 +25,6 @@ use Codeception\TestCase\WPTestCase;
 use E20R\Members_List\E20R_Members_List;
 use E20R\Members_List\Admin\Members_List;
 use Spatie\Snapshots\MatchesSnapshots;
-//use Codeception\Test\Unit;
-//use Brain\Monkey;
 
 class E20R_Members_ListTest extends WPTestCase {
 	use MatchesSnapshots;
