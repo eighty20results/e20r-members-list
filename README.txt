@@ -221,6 +221,18 @@ Dependencies: Needs to align with proper SQL for ORDER BY fields and GROUPing of
 
 Example: `add_filter( 'e20r_memberslist_group_by_statement', "function() { return 'GROUP BY u.id, ml.id'; }", 10, 1 );`
 
+=== e20r_members_list_default_column_map ===
+
+Modifies: The default Members List table columns and their SQL alias (column name) values
+
+Purpose: Let a developer add more default table.column to alias pairs
+
+Default: (example) array( 'u.ID' => 'user_id', 'mu.id' => 'memberhip_user_id' )
+
+Dependencies: The left hand side of the pairs need to match the table alias(es) and table field(s) in the SQL statement.
+I.e. `u.ID` implies there's a `wp_users` table alias'ed as `u`; `wp_users AS u` somewhere in the SQL statement
+
+Example: `add_filter( 'e20r_members_list_default_column_map', 'tls_default_column_pair_override', 10, 1 );`
 
 == Actions ==
 
