@@ -21,19 +21,28 @@
 
 namespace E20R\Members_List\WPUnitTest;
 
-use Codeception\Test\Unit;
-use Brain\Monkey;
+// use Codeception\Test\Unit;
+// use Brain\Monkey;
+use Codeception\TestCase\WPTestCase;
 use E20R\Members_List\Admin\Members_List;
 use Spatie\Snapshots\MatchesSnapshots;
 
-class Members_ListTest extends Unit {
+class Members_ListTest extends WPTestCase {
 	use MatchesSnapshots;
 
+	/**
+	 * Class instance for Members_List()
+	 *
+	 * @var Members_List $mc_class
+	 */
 	private $mc_class;
 
+	/**
+	 * Set up for the test class
+	 */
 	public function setUp(): void {
 		parent::setUp();
-		Monkey\setUp();
+		// Monkey\setUp();
 
 		if ( ! defined( 'WP_PLUGIN_DIR' ) ) {
 			define( 'WP_PLUGIN_DIR', '../../' );
@@ -43,39 +52,8 @@ class Members_ListTest extends Unit {
 			define( 'ABSPATH', '../../' );
 		}
 
-		// A few common passthroughs
-		// 1. WordPress i18n functions
-		Monkey\Functions\when( '__' )
-			->returnArg( 1 );
-		Monkey\Functions\when( '_e' )
-			->returnArg( 1 );
-		Monkey\Functions\when( '_n' )
-			->returnArg( 1 );
-		Monkey\Functions\when( '_x' )
-			->returnArg( 1 );
-		Monkey\Functions\when( 'esc_attr__' )
-			->returnArg( 1 );
-		Monkey\Functions\when( 'esc_sql' )
-			->returnArg( 1 );
-
-		Monkey\Functions\when( 'sanitize_text_field' )
-			->returnArg( 1 );
-
-		Monkey\Functions\when( 'plugins_url' )
-			->justReturn( '/var/www/html/wp-content/plugins/e20r-members-list/' );
-		( sprintf( 'https://development.local/wp-content/plugins/' ) );
-		Monkey\Functions\when( 'plugin_dir_path' )
-			->justReturn( sprintf( '%1$s/', getcwd() ) );
-		Monkey\Functions\when( 'get_current_blog_id' )
-			->justReturn( 1 );
-
 		$GLOBALS['hook_suffix'] = 'pmpro_membership';
-
-		// Not assuming that the PMPro plugin is active for unit tests
-		global $wpdb;
-		$wpdb->pmpro_memberships_users = "{$wpdb->prefix}pmpro_memberships_users";
-		$wpdb->pmpro_membership_levels = "{$wpdb->prefix}pmpro_membership_levels";
-		$this->mc_class = new Members_List();
+		$this->mc_class         = new Members_List();
 	}
 
 	/**
@@ -84,25 +62,21 @@ class Members_ListTest extends Unit {
 	 * @return void
 	 */
 	public function tearDown(): void {
-		global $wpdb;
-		@$wpdb->check_connection();
-
-		Monkey\tearDown();
+		// Monkey\tearDown();
 		parent::tearDown();
-		// Mockery::close();
 	}
 
 	/**
 	 * Test the set_tables_and_joins() function with a filter
 	 *
-	 * @param array $expected_list
+	 * @param array      $expected_list
 	 * @param string|int $level_setting
-	 * @param int $table_list_count
+	 * @param int        $table_list_count
 	 *
 	 * @throws \Exception
 	 * @dataProvider fixture_table_join_list
 	 */
-	public function test_set_tables_and_joins( $expected_list, $level_setting, $table_list_count  ) {
+	public function test_set_tables_and_joins( array $expected_list, $level_setting, int $table_list_count ) {
 
 		if ( ! is_null( $level_setting ) ) {
 			$_REQUEST['level'] = $level_setting;
@@ -110,13 +84,13 @@ class Members_ListTest extends Unit {
 
 		$table_list = $this->mc_class->set_tables_and_joins();
 
-		$this->assertIsArray( $table_list );
-		$this->assertEquals( $table_list_count, count( $table_list['joins'] ) );
+		// Monkey\Filters\applied( 'e20r_memberslist_tables_and_joins' );
+
+		$this->assertEquals( $expected_list, $table_list );
 		$this->assertArrayHasKey( 'joins', $table_list );
 		$this->assertArrayHasKey( 'from', $table_list );
-		$this->assertEquals( $expected_list, $table_list );
+		$this->assertEquals( $table_list_count, count( $table_list['joins'] ) );
 
-		Monkey\Filters\applied( 'e20r_memberslist_tables_and_joins' );
 	}
 
 	/**
@@ -124,30 +98,31 @@ class Members_ListTest extends Unit {
 	 *
 	 * @return \array[][]
 	 */
-	public function fixture_table_join_list() {
+	public function fixture_table_join_list(): array {
+		global $wpdb;
 		return array(
 			array(
 				array(
 					'from'  => array(
-						'name'  => 'wp_users',
+						'name'  => "{$wpdb->prefix}users",
 						'alias' => 'u',
 					),
 					'joins' => array(
 						0 => array(
-							'name'      => 'wp_pmpro_memberships_users',
+							'name'      => "{$wpdb->prefix}pmpro_memberships_users",
 							'join_type' => 'LEFT JOIN',
 							'alias'     => 'mu',
-							'condition' => "ON u.ID = mu.user_id AND mu.id = (SELECT mu3.id FROM wp_pmpro_memberships_users AS mu3 WHERE mu3.user_id = u.id ORDER BY mu3.id DESC LIMIT 1)",
+							'condition' => "ON u.ID = mu.user_id AND mu.id = (SELECT mu3.id FROM {$wpdb->prefix}pmpro_memberships_users AS mu3 WHERE mu3.user_id = u.ID ORDER BY mu3.id DESC LIMIT 1)",
 						),
 						1 => array(
-							'name'      => 'wp_pmpro_membership_levels',
+							'name'      => "{$wpdb->prefix}pmpro_membership_levels",
 							'join_type' => 'LEFT JOIN',
 							'alias'     => 'ml',
 							'condition' => 'ON mu.membership_id = ml.id',
 						),
 						2 => array(
-							'name'      => 'wp_usermeta',
-							'join_type' => 'LEFT JOIN ',
+							'name'      => "{$wpdb->prefix}usermeta",
+							'join_type' => 'LEFT JOIN',
 							'alias'     => 'um',
 							'condition' => 'ON u.ID = um.user_id',
 						),
@@ -159,32 +134,38 @@ class Members_ListTest extends Unit {
 			array(
 				array(
 					'from'  => array(
-						'name'  => 'wp_users',
+						'name'  => "{$wpdb->prefix}users",
 						'alias' => 'u',
 					),
 					'joins' => array(
 						0 => array(
-							'name'      => 'wp_pmpro_memberships_users',
+							'name'      => "{$wpdb->prefix}pmpro_memberships_users",
 							'join_type' => 'LEFT JOIN',
 							'alias'     => 'mu',
-							'condition' => "ON u.ID = mu.user_id AND mu.id = (SELECT mu3.id FROM wp_pmpro_memberships_users AS mu3 WHERE mu3.user_id = u.id ORDER BY mu3.id DESC LIMIT 1)",
+							'condition' => "ON u.ID = mu.user_id AND mu.id = (SELECT mu3.id FROM {$wpdb->prefix}pmpro_memberships_users AS mu3 WHERE mu3.user_id = u.ID ORDER BY mu3.id DESC LIMIT 1)",
 						),
 						1 => array(
-							'name'      => 'wp_pmpro_membership_levels',
+							'name'      => "{$wpdb->prefix}pmpro_membership_levels",
 							'join_type' => 'LEFT JOIN',
 							'alias'     => 'ml',
 							'condition' => 'ON mu.membership_id = ml.id',
 						),
 						2 => array(
-							'name'      => 'wp_usermeta',
-							'join_type' => 'LEFT JOIN ',
+							'name'      => "{$wpdb->prefix}usermeta",
+							'join_type' => 'LEFT JOIN',
 							'alias'     => 'um',
 							'condition' => 'ON u.ID = um.user_id',
 						),
+						3 => array(
+							'name'      => "{$wpdb->prefix}pmpro_memberships_users",
+							'join_type' => 'LEFT JOIN',
+							'alias'     => 'mu2',
+							'condition' => "ON u.ID = mu2.user_id AND mu2.status = 'active'",
+						)
 					),
 				),
 				'all',
-				3
+				4
 			)
 		);
 	}
@@ -192,24 +173,23 @@ class Members_ListTest extends Unit {
 	/**
 	 * Test for the set_sql_columns() member function with filter check(s)
 	 *
-	 * @param array $expected
-	 * @param string $filter_func
+	 * @param array       $expected
+	 * @param string|null $filter_func
 	 *
 	 * @dataProvider fixture_sql_columns
+	 * @throws \Exception
 	 */
-	public function test_set_sql_columns( $expected, $filter_func ) {
+	public function test_set_sql_columns( array $expected, $filter_func ) {
 
 		if ( null !== $filter_func ) {
-			error_log("Adding column alias map filter handler: {$filter_func}");
-			add_filter( 'e20r_members_list_default_sql_column_alias_map', array( $this->mc_class, $filter_func ) );
+			$this->mc_class->get( 'utils' )->log("Adding column map handler: {$filter_func}");
+			add_filter( 'e20r_members_list_default_column_map', array( $this->mc_class, $filter_func ), 10, 1 );
 		}
 
 		$result = $this->mc_class->set_sql_columns();
-		// error_log("SQL Columns: " . print_r( $result, true ));
 
-		$this->assertIsArray( $result );
+		// $this->assertIsArray( $result );
 		$this->assertEquals( $expected, $result );
-		Monkey\Filters\applied( 'e20r_members_list_default_sql_column_alias_map' );
 	}
 
 	/**
@@ -219,7 +199,7 @@ class Members_ListTest extends Unit {
 	 *
 	 * @return string[]
 	 */
-	public function fixture_added_surname( $received ) {
+	public function fixture_added_surname( array $received ) : array {
 		error_log("Adding surname column");
 		$received['u.user_lastname'] = 'surname';
 		return $received;
@@ -232,7 +212,7 @@ class Members_ListTest extends Unit {
 	 *
 	 * @return string[]
 	 */
-	public function fixture_added_firstname( $received ) {
+	public function fixture_added_firstname( array $received ) : array {
 		error_log("Adding first_name column with array_merge()");
 		$firstname = array( 'u.user_firstname' => 'first_name' );
 		return array_merge( $received, $firstname );
@@ -245,7 +225,7 @@ class Members_ListTest extends Unit {
 	 *
 	 * @return string[]
 	 */
-	public function fixture_adding_multiple( $received ) {
+	public function fixture_adding_multiple( array $received ) : array {
 		error_log("Adding 2 columns with array_merge()");
 		$to_add = array(
 			'u.user_something' => 'something',
@@ -259,7 +239,7 @@ class Members_ListTest extends Unit {
 	 *
 	 * @return array[]
 	 */
-	public function fixture_sql_columns() {
+	public function fixture_sql_columns(): array {
 
 		$base = array(
 			'mu.id'              => 'record_id',
@@ -302,10 +282,10 @@ class Members_ListTest extends Unit {
 	 * @param bool   $is_email
 	 * @param string $expected_sql
 	 *
-	 * @dataProvider fixture_member_sql_params
 	 * @throws \Exception
+	 * @dataProvider fixture_member_sql_params_levels
 	 */
-	public function test_generate_member_sql( $status, $per_page, $page_number, $sort_order, $order_by, $find, $is_email, $expected_sql ) {
+	public function test_generate_member_sql_levels( string $status, int $per_page, int $page_number, string $sort_order, string $order_by, string $find, bool $is_email, string $expected_sql ) {
 
 		if ( ! is_null( $sort_order ) ) {
 			$_REQUEST['order'] = $sort_order;
@@ -315,20 +295,14 @@ class Members_ListTest extends Unit {
 			$_REQUEST['find'] = $find;
 		}
 
-		Monkey\Functions\when( 'is_email' )
-			->justReturn( $is_email );
+		if ( ! is_null( $status ) ) {
+			$_REQUEST['level'] = $status;
+		}
 
-		Monkey\Functions\when( 'sanitize_email' )
-			->returnArg( 1 );
-
-		$this->mc_class->get_members( $per_page, $page_number, $status );
+		$this->mc_class->generate_member_sql( $status, $per_page, $page_number );
 		$resulting_sql = $this->mc_class->get( 'sql_query' );
 
-		$this->assertEquals( $expected_sql, $resulting_sql );
-		Monkey\Filters\applied( 'e20r_memberslist_sort_order' );
-		Monkey\Filters\applied( 'e20r_memberslist_order_by' );
-		Monkey\Filters\applied( 'e20r_members_list_default_sql_column_alias_map' );
-		Monkey\Filters\applied( 'e20r_memberslist_tables_and_joins' );
+		$this->assertDiscardWhitespace( $expected_sql, $resulting_sql);
 	}
 
 	/**
@@ -336,57 +310,92 @@ class Members_ListTest extends Unit {
 	 *
 	 * @return array[]
 	 */
-	public function fixture_member_sql_params() {
+	public function fixture_member_sql_params_levels(): array {
 		return array(
 			// phpcs:ignore
 			// $status, $per_page, $page_number, $sort_order, $order_by, find, $is_email, $expected_sql
-			array( 'active', -1, -1, 'DESC', 'ml.id', '', true, $this->fixture_sql_statement( 0 )
-			),
+			array( 'all', -1, -1, 'DESC', 'ml.id', '', true, $this->fixture_sql_statement_levels( 0 ) ),
+			array( 'all', -1, -1, 'ASC', 'mu.membership_id', '', true, $this->fixture_sql_statement_levels( 1 ) ),
+			array( 'active', -1, -1, 'DESC', 'ml.id', '', true, $this->fixture_sql_statement_levels( 2 ) ),
+			array( 'oldmembers', -1, -1, 'DESC', 'ml.id', '', true, $this->fixture_sql_statement_levels( 3 ) ),
 		);
 	}
 
-	public function fixture_sql_statement( $counter ) {
-		return array(
-			0 => "
- SELECT
-		mu.id AS record_id, u.ID AS ID, u.user_login AS user_login, u.user_email AS user_email, u.user_registered AS user_registered, mu.membership_id AS membership_id, mu.initial_payment AS initial_payment, mu.billing_amount AS billing_amount, mu.cycle_period AS cycle_period, mu.cycle_number AS cycle_number, mu.billing_limit AS billing_limit, mu.code_id AS code_id, mu.status AS status, mu.trial_amount AS trial_amount, mu.trial_limit AS trial_limit, mu.startdate AS startdate, mu.enddate AS enddate, ml.name AS name
-			 FROM wp_users AS u
-				LEFT JOIN wp_pmpro_memberships_users AS mu ON u.ID = mu.user_id AND mu.id = (SELECT mu3.id FROM wp_pmpro_memberships_users AS mu3 WHERE mu3.user_id = u.id ORDER BY mu3.id DESC LIMIT 1)
-	LEFT JOIN wp_pmpro_membership_levels AS ml ON mu.membership_id = ml.id
-	LEFT JOIN  wp_usermeta AS um ON u.ID = um.user_id
-
-			 WHERE (mu.membership_id IS NOT NULL OR mu.membership_id > 0) AND  mu.status IN ('active')
-			 GROUP BY u.ID, ml.id
-			 ORDER BY ml.id DESC
-
-",
-			1 => "
- SELECT
-		mu.id AS record_id, u.ID AS ID, u.user_login AS user_login, u.user_email AS user_email, u.user_registered AS user_registered, mu.membership_id AS membership_id, mu.initial_payment AS initial_payment, mu.billing_amount AS billing_amount, mu.cycle_period AS cycle_period, mu.cycle_number AS cycle_number, mu.billing_limit AS billing_limit, mu.code_id AS code_id, mu.status AS status, mu.trial_amount AS trial_amount, mu.trial_limit AS trial_limit, mu.startdate AS startdate, mu.enddate AS enddate, ml.name AS name
-			 FROM wp_users AS u
-				LEFT JOIN wp_pmpro_memberships_users AS mu ON u.ID = mu.user_id AND mu.id = (SELECT mu3.id FROM wp_pmpro_memberships_users AS mu3 WHERE mu3.user_id = u.id ORDER BY mu3.id DESC LIMIT 1)
-	LEFT JOIN wp_pmpro_membership_levels AS ml ON mu.membership_id = ml.id
-	LEFT JOIN  wp_usermeta AS um ON u.ID = um.user_id
-
-			 WHERE (mu.membership_id IS NOT NULL OR mu.membership_id > 0) AND  mu.status IN ('active')
-			 GROUP BY u.ID, ml.id
-			 ORDER BY ml.id DESC
-
-"
-		);
-	}
 	/**
-	 * @param $per_page
-	 * @param $page_number
-	 * @param $status
-	 * @param $sort_order
-	 * @param $order_by
-	 * @param $find
-	 * @param $is_email
+	 * Fixture: Final version of SQL statements being tested
 	 *
-	 * @dataProvider fixture_get_members
+	 * @param int $counter - Array entry counter
+	 *
+	 * @return string
 	 */
-	public function test_get_members( $per_page, $page_number, $status, $sort_order, $order_by, $find, $is_email, $record_list ) {
+	public function fixture_sql_statement_levels( $counter = 0 ): string {
+		global $wpdb;
+
+		$statements = array(
+			0 => "SELECT
+		mu.id AS record_id, u.ID AS ID, u.user_login AS user_login, u.user_email AS user_email, u.user_registered AS user_registered, mu.membership_id AS membership_id, mu.initial_payment AS initial_payment, mu.billing_amount AS billing_amount, mu.cycle_period AS cycle_period, mu.cycle_number AS cycle_number, mu.billing_limit AS billing_limit, mu.code_id AS code_id, mu.status AS status, mu.trial_amount AS trial_amount, mu.trial_limit AS trial_limit, mu.startdate AS startdate, mu.enddate AS enddate, ml.name AS name
+			 FROM {$wpdb->prefix}users AS u
+				LEFT JOIN {$wpdb->prefix}pmpro_memberships_users AS mu ON u.ID = mu.user_id AND mu.id = (SELECT mu3.id FROM {$wpdb->prefix}pmpro_memberships_users AS mu3 WHERE mu3.user_id = u.ID ORDER BY mu3.id DESC LIMIT 1)
+				LEFT JOIN {$wpdb->prefix}pmpro_membership_levels AS ml ON mu.membership_id = ml.id
+				LEFT JOIN {$wpdb->prefix}usermeta AS um ON u.ID = um.user_id
+				LEFT JOIN {$wpdb->prefix}pmpro_memberships_users AS mu2 ON u.ID = mu2.user_id AND mu2.status = 'active'
+			 WHERE (mu.membership_id IS NOT NULL OR mu.membership_id > 0) AND  mu.status IN ('active','cancelled','admin_cancelled','admin_change','admin_changed','changed','inactive','expired')
+			 GROUP BY ml.id, u.ID
+			 ORDER BY u.ID, ml.id DESC
+",
+			1 => "SELECT
+		mu.id AS record_id, u.ID AS ID, u.user_login AS user_login, u.user_email AS user_email, u.user_registered AS user_registered, mu.membership_id AS membership_id, mu.initial_payment AS initial_payment, mu.billing_amount AS billing_amount, mu.cycle_period AS cycle_period, mu.cycle_number AS cycle_number, mu.billing_limit AS billing_limit, mu.code_id AS code_id, mu.status AS status, mu.trial_amount AS trial_amount, mu.trial_limit AS trial_limit, mu.startdate AS startdate, mu.enddate AS enddate, ml.name AS name
+			 FROM {$wpdb->prefix}users AS u
+				LEFT JOIN {$wpdb->prefix}pmpro_memberships_users AS mu ON u.ID = mu.user_id AND mu.id = (SELECT mu3.id FROM {$wpdb->prefix}pmpro_memberships_users AS mu3 WHERE mu3.user_id = u.ID ORDER BY mu3.id DESC LIMIT 1)
+				LEFT JOIN {$wpdb->prefix}pmpro_membership_levels AS ml ON mu.membership_id = ml.id
+				LEFT JOIN {$wpdb->prefix}usermeta AS um ON u.ID = um.user_id
+				LEFT JOIN {$wpdb->prefix}pmpro_memberships_users AS mu2 ON u.ID = mu2.user_id AND mu2.status = 'active'
+			 WHERE (mu.membership_id IS NOT NULL OR mu.membership_id > 0) AND  mu.status IN ('active','cancelled','admin_cancelled','admin_change','admin_changed','changed','inactive','expired')
+			 GROUP BY ml.id, u.ID
+			 ORDER BY u.ID, ml.id ASC
+",
+			2 => "SELECT
+		mu.id AS record_id, u.ID AS ID, u.user_login AS user_login, u.user_email AS user_email, u.user_registered AS user_registered, mu.membership_id AS membership_id, mu.initial_payment AS initial_payment, mu.billing_amount AS billing_amount, mu.cycle_period AS cycle_period, mu.cycle_number AS cycle_number, mu.billing_limit AS billing_limit, mu.code_id AS code_id, mu.status AS status, mu.trial_amount AS trial_amount, mu.trial_limit AS trial_limit, mu.startdate AS startdate, mu.enddate AS enddate, ml.name AS name
+			 FROM {$wpdb->prefix}users AS u
+				LEFT JOIN {$wpdb->prefix}pmpro_memberships_users AS mu ON u.ID = mu.user_id AND mu.id = (SELECT mu3.id FROM {$wpdb->prefix}pmpro_memberships_users AS mu3 WHERE mu3.user_id = u.ID ORDER BY mu3.id DESC LIMIT 1)
+				LEFT JOIN {$wpdb->prefix}pmpro_membership_levels AS ml ON mu.membership_id = ml.id
+				LEFT JOIN {$wpdb->prefix}usermeta AS um ON u.ID = um.user_id
+			 WHERE (mu.membership_id IS NOT NULL OR mu.membership_id > 0) AND  mu.status IN ('active')
+			 GROUP BY ml.id, u.ID
+			 ORDER BY u.ID, ml.id DESC
+",
+			3 => "SELECT
+		mu.id AS record_id, u.ID AS ID, u.user_login AS user_login, u.user_email AS user_email, u.user_registered AS user_registered, mu.membership_id AS membership_id, mu.initial_payment AS initial_payment, mu.billing_amount AS billing_amount, mu.cycle_period AS cycle_period, mu.cycle_number AS cycle_number, mu.billing_limit AS billing_limit, mu.code_id AS code_id, mu.status AS status, mu.trial_amount AS trial_amount, mu.trial_limit AS trial_limit, mu.startdate AS startdate, mu.enddate AS enddate, ml.name AS name
+			 FROM {$wpdb->prefix}users AS u
+				LEFT JOIN {$wpdb->prefix}pmpro_memberships_users AS mu ON u.ID = mu.user_id AND mu.id = (SELECT mu3.id FROM {$wpdb->prefix}pmpro_memberships_users AS mu3 WHERE mu3.user_id = u.ID ORDER BY mu3.id DESC LIMIT 1)
+				LEFT JOIN {$wpdb->prefix}pmpro_membership_levels AS ml ON mu.membership_id = ml.id
+				LEFT JOIN {$wpdb->prefix}usermeta AS um ON u.ID = um.user_id
+				LEFT JOIN {$wpdb->prefix}pmpro_memberships_users AS mu2 ON u.ID = mu2.user_id AND mu2.status = 'active'
+			 WHERE mu.status IN ('expired', 'cancelled') AND mu2.status IS NULL
+			 GROUP BY ml.id, u.ID
+			 ORDER BY u.ID, ml.id DESC
+"
+			);
+
+		return ( $statements[ $counter ] ?? "" );
+	}
+
+	/**
+	 * Happy-path for the Members_List::get_members() method
+	 *
+	 * @param int        $per_page
+	 * @param int        $page_number
+	 * @param string     $status
+	 * @param string     $sort_order
+	 * @param string     $order_by
+	 * @param string     $find
+	 * @param bool       $is_email
+	 * @param array|null $record_list
+	 *
+	 * @dataProvider fixture_get_members_happy
+	 * @throws \Exception
+	 */
+	public function test_get_members_happy_path( int $per_page, int $page_number, string $status, string $sort_order, string $order_by, string $find, bool $is_email, $record_list ) {
 
 		if ( ! is_null( $sort_order ) ) {
 			$_REQUEST['order'] = $sort_order;
@@ -396,36 +405,32 @@ class Members_ListTest extends Unit {
 			$_REQUEST['find']  = $find;
 		}
 
-		Monkey\Functions\when( 'is_email' )
-			->justReturn( $is_email );
+		try {
+			$this->mc_class->get_members( $per_page, $page_number, $status );
+		} catch( \Exception $exp ) {
+			$this->mc_class->get('utils')->log("Error: {$exp->getMessage()}" );
+		}
 
-		Monkey\Functions\when( 'sanitize_email' )
-			->returnArg( 1 );
-
-		$this->mc_class->get_members( $per_page, $page_number, $status );
-
-		Monkey\Filters\applied( 'e20r_memberslist_sort_order' );
-		Monkey\Filters\applied( 'e20r_memberslist_order_by' );
-		Monkey\Filters\applied( 'e20r_members_list_default_sql_column_alias_map' );
-		Monkey\Filters\applied( 'e20r_memberslist_tables_and_joins' );
-
+		$this->assertEquals( $record_list, $this->mc_class->get( 'items' ) );
 	}
 
 	/**
 	 * The SQL parameter fixture for the generate_member_sql() unit test
 	 *
-	 * @return array[]
+	 * @return array[][]
 	 */
-	public function fixture_get_members() {
+	public function fixture_get_members_happy(): array {
 		return array(
 			// phpcs:ignore
 			// $per_page, $page_number, $status, $sort_order, $order_by, find, $is_email, $record_list
-			array( -1, -1, 'active', 'DESC', 'ml.id', '', true, array() ),
+			array( -1, -1, 'active', 'DESC', 'ml.id', '', true, null ),
 		);
 	}
 
 	/**
-	 * @param $level_id
+	 * Testing the Members_List::get_member_record_count() method
+	 *
+	 * @param string|int $level_id
 	 *
 	 * @dataProvider fixture_record_count_params
 	 */
@@ -443,7 +448,7 @@ class Members_ListTest extends Unit {
 	 *
 	 * @return \int[][]
 	 */
-	public function fixture_record_count_params() {
+	public function fixture_record_count_params(): array {
 		return array(
 			array( 1 ),
 		);
