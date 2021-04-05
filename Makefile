@@ -68,7 +68,7 @@ clean:
 
 real-clean: stop-stack clean
 	@echo "Make sure docker-compose stack for $(PROJECT) isn't running"
-	@if [[ -n "$(STACK_RUNNING)" ]]; then \
+	@if [[ -z "$(STACK_RUNNING)" ]]; then \
 		echo "Removing docker-compose stack" ; \
 		docker-compose -p $(PROJECT) --env-file $(DC_ENV_FILE) --file $(DC_CONFIG_FILE) rm --stop --force -v ; \
 	fi ; \
@@ -91,7 +91,7 @@ deps: stop-stack clean
   	done
 
 start-stack: clean deps
-	@if [[ -n "$(STACK_RUNNING)" ]]; then \
+	@if [[ -z "$(STACK_RUNNING)" ]]; then \
 		APACHE_RUN_USER=$(APACHE_RUN_USER) APACHE_RUN_GROUP=$(APACHE_RUN_GROUP) \
 			DB_IMAGE=$(DB_IMAGE) DB_VERSION=$(DB_VERSION) WP_VERSION=$(WP_VERSION) \
 			docker-compose -p $(PROJECT) --env-file $(DC_ENV_FILE) --file $(DC_CONFIG_FILE) up --build --detach ; \
