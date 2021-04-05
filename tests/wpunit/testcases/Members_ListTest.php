@@ -21,8 +21,6 @@
 
 namespace E20R\Members_List\WPUnitTest;
 
-// use Codeception\Test\Unit;
-// use Brain\Monkey;
 use Codeception\TestCase\WPTestCase;
 use E20R\Members_List\Admin\Members_List;
 use Spatie\Snapshots\MatchesSnapshots;
@@ -42,7 +40,6 @@ class Members_ListTest extends WPTestCase {
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		// Monkey\setUp();
 
 		if ( ! defined( 'WP_PLUGIN_DIR' ) ) {
 			define( 'WP_PLUGIN_DIR', '../../' );
@@ -62,7 +59,6 @@ class Members_ListTest extends WPTestCase {
 	 * @return void
 	 */
 	public function tearDown(): void {
-		// Monkey\tearDown();
 		parent::tearDown();
 	}
 
@@ -83,8 +79,6 @@ class Members_ListTest extends WPTestCase {
 		}
 
 		$table_list = $this->mc_class->set_tables_and_joins();
-
-		// Monkey\Filters\applied( 'e20r_memberslist_tables_and_joins' );
 
 		$this->assertEquals( $expected_list, $table_list );
 		$this->assertArrayHasKey( 'joins', $table_list );
