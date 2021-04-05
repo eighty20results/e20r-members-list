@@ -1,0 +1,67 @@
+version: 2.1
+
+orbs:
+  php: circleci/php@1.1.0
+
+new-shared-build: &new-shared-build
+  working_directory: ~/repo
+  docker:
+    - image: 'cimg/base:edge'
+  steps:
+    - attach_workspace:
+        at: ~/repo
+    - checkout
+    - php/install-php:
+        - version: '7.2'
+    - run:
+        name: Check PHP version
+        command: php --version
+    - php-install-composer:
+        install-version: "2.0.9"
+    - php/install-packages:
+        with-cache: true
+
+jobs:
+  install_php:
+    <<: *new-shared-build
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - php/install-php:
+          version: "7.3"
+
+  install_composer_packages:
+    <<: *new-shared-build
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - php/install-composer:
+          install-version: "2.0.9"
+      - php/install-packages:
+          install-flags: '--no-interaction'
+          vendor-dir: inc/
+          with-cache: true
+
+  unit_tests:
+    <<: *new-shared-build
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - php/install-php:
+          version: "7.3"
+      - php/install-composer:
+          install-version: ">=2.0.9"
+      - php/install-packages:
+          install-flags: '--no-interaction'
+          vendor-dir: inc/
+          with-cache: true
+      - run:
+          name: Run Unit Tests
+          command: php composer.phar run unit-test
+
+workflows:
+  install:
+    jobs:
+      - install_php
+      - install_composer_packages
+      - unit_tests
