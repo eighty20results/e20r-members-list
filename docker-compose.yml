@@ -36,15 +36,14 @@ services:
 #      APACHE_RUN_GROUP: ${APACHE_RUN_GROUP}
     volumes:
       - ${LOCAL_PLUGIN_DIR}:/var/www/html/wp-content/plugins/${E20R_PLUGIN_NAME}
-      - ${PMPRO_DIR}:/var/www/html/wp-content/plugins/paid-memberships-pro
-      - ${SQL_BACKUP_FILE}/${E20R_PLUGIN_NAME}.sql:/docker-entrypoint-initdb.d/${E20R_PLUGIN_NAME}.sql
+      - ${LOCAL_PMPRO_DIR}:/var/www/html/wp-content/plugins/paid-memberships-pro:ro
 #      - ${LOCAL_PLUGIN_DIR}/inc:/var/www/html/wp-content/plugins/${E20R_PLUGIN_NAME}/inc
     depends_on:
       - database
 
   database:
-    image: mariadb:latest
-    container_name: mariadb-wp-${E20R_PLUGIN_NAME}
+    image: ${DB_IMAGE}:${DB_VERSION}
+    container_name: ${DB_IMAGE}-wp-${E20R_PLUGIN_NAME}
     restart: always
     ports:
       - ${DB_PORT}:3306
@@ -54,5 +53,7 @@ services:
       MYSQL_PASSWORD: ${WORDPRESS_DB_PASSWORD}
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_RANDOM_ROOT_PASSWORD: ${MYSQL_RANDOM_ROOT_PASSWORD}
+    volumes:
+      - ${SQL_BACKUP_FILE}/${E20R_PLUGIN_NAME}.sql:/docker-entrypoint-initdb.d/${E20R_PLUGIN_NAME}.sql:ro
 
 # volumes:
