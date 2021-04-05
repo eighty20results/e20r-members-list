@@ -5,9 +5,21 @@
 actor: WpunitTester
 modules:
     enabled:
+        - WPDb
         - WPLoader
         - \Helper\Wpunit
     config:
+        WPDb:
+          dsn: 'mysql:host=%TEST_DB_HOST%;db_name=%TEST_DB_NAME%'
+          tablePrefix: "%TEST_TABLE_PREFIX%"
+          user: %TEST_SITE_DB_USER%
+          password: %TEST_SITE_DB_PASSWORD%
+          cleanup: false
+          waitlock: true
+          populate: true
+          dump: "%TEST_SITE_DB_DUMP%"
+          urlReplacement: true
+          url: '%TEST_SITE_WP_URL%'
         WPLoader:
             multisite: false
             wpRootFolder: "%WP_ROOT_FOLDER%"
@@ -19,7 +31,11 @@ modules:
             domain: "%TEST_SITE_WP_DOMAIN%"
             adminEmail: "%TEST_SITE_ADMIN_EMAIL%"
             title: "Test"
-            plugins: ['paid-memberships-pro/paid-memberships-pro.php', 'e20r-members-list/class-e20r-members-list.php']
-            activatePlugins: ['paid-memberships-pro/paid-memberships-pro.php', 'e20r-members-list/class-e20r-members-list.php']
+            plugins:
+              - 'paid-memberships-pro/paid-memberships-pro.php'
+              - 'e20r-members-list/class-e20r-members-list.php'
+            activatePlugins:
+              - 'paid-memberships-pro/paid-memberships-pro.php'
+              - 'e20r-members-list/class-e20r-members-list.php'
 #            plugins: [ 'e20r-members-list/class-e20r-members-list.php' ]
 #            activatePlugins: ['e20r-members-list/class-e20r-members-list.php' ]
