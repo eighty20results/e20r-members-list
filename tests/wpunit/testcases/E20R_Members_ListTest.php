@@ -21,22 +21,26 @@
 
 namespace E20R\Members_List\WPUnitTest;
 
+use Codeception\TestCase\WPTestCase;
 use E20R\Members_List\E20R_Members_List;
 use E20R\Members_List\Admin\Members_List;
-use Codeception\Test\Unit;
-use Brain\Monkey;
 use Spatie\Snapshots\MatchesSnapshots;
+//use Codeception\Test\Unit;
+//use Brain\Monkey;
 
-class E20R_Members_ListTest extends Unit {
+class E20R_Members_ListTest extends WPTestCase {
 	use MatchesSnapshots;
-//	use MockeryPHPUnitIntegration;
 
-	private $list_table_class;
+	/**
+	 * Class instance for Members_List()
+	 *
+	 * @var Members_List $mc_class
+	 */
 	private $mc_class;
 
 	public function setUp(): void {
 		parent::setUp();
-		Monkey\setUp();
+		// Monkey\setUp();
 
 		if ( ! defined( 'WP_PLUGIN_DIR' ) ) {
 			define( 'WP_PLUGIN_DIR', '../../' );
@@ -46,28 +50,7 @@ class E20R_Members_ListTest extends Unit {
 			define( 'ABSPATH', '../../' );
 		}
 
-		// A few common passthroughs
-		// 1. WordPress i18n functions
-		Monkey\Functions\when( '__' )
-			->returnArg( 1 );
-		Monkey\Functions\when( '_e' )
-			->returnArg( 1 );
-		Monkey\Functions\when( '_n' )
-			->returnArg( 1 );
-		Monkey\Functions\when( '_x' )
-			->returnArg( 1 );
-		Monkey\Functions\when( 'esc_attr__' )
-			->returnArg( 1 );
-
 		$GLOBALS['hook_suffix'] = 'pmpro_membership';
-
-		Monkey\Functions\when( 'plugins_url' )
-			->justReturn( sprintf( 'https://development.local/wp-content/plugins/' ) );
-		Monkey\Functions\when( 'plugin_dir_path' )
-			->justReturn( sprintf( '%1$s/', getcwd() ) );
-		Monkey\Functions\when( 'get_current_blog_id' )
-			->justReturn( 1 );
-
 		$this->mc_class = new Members_List();
 	}
 
@@ -77,7 +60,7 @@ class E20R_Members_ListTest extends Unit {
 	 * @return void
 	 */
 	public function tearDown(): void {
-		Monkey\tearDown();
+		// Monkey\tearDown();
 		parent::tearDown();
 	}
 
@@ -96,9 +79,9 @@ class E20R_Members_ListTest extends Unit {
 
 		// Load the class and hooks (make sure the hooks we expect are loaded
 		E20R_Members_List::get_instance()->load_hooks();
-		Monkey\Actions\has( 'init', array( $this->mc_class, 'load_hooks' ) );
-		Monkey\Actions\has( 'init', array( E20R_Members_List::get_instance(), 'load_text_domain' ) );
-		Monkey\Actions\has( 'e20r_memberslist_process_action', array( $this->mc_class, 'export_members' ) );
+//		Monkey\Actions\has( 'init', array( $this->mc_class, 'load_hooks' ) );
+//		Monkey\Actions\has( 'init', array( E20R_Members_List::get_instance(), 'load_text_domain' ) );
+//		Monkey\Actions\has( 'e20r_memberslist_process_action', array( $this->mc_class, 'export_members' ) );
 	}
 
 	/**
