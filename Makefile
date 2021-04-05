@@ -3,6 +3,7 @@ BASE_PATH := $(PWD)
 FIND := $(shell which find)
 CURL := $(shell which curl)
 UNZIP := $(shell which unzip)
+PHP_BIN := $(shell which php)
 APACHE_RUN_USER ?= $(shell id -u)
 APACHE_RUN_GROUP ?= $(shell id -g)
 SQL_BACKUP_FILE ?= $(PWD)/docker/test/db_backup
@@ -10,11 +11,14 @@ E20R_PLUGIN_NAME ?= e20r-members-list
 MYSQL_DATABASE ?= wordpress
 MYSQL_USER ?= wordpress
 MYSQL_PASSWORD ?= wordpress
+DB_IMAGE ?= mariadb
+DB_VERSION ?= latest
 WORDPRESS_DB_HOST ?= localhost
+WP_VERSION ?= latest
 WP_DEPENDENCIES ?= paid-memberships-pro
 WP_PLUGIN_URL ?= "https://downloads.wordpress.org/plugin/"
 WP_CONTAINER_NAME ?= codecep-wp-$(E20R_PLUGIN_NAME)
-DB_CONTAINER_NAME ?= mariadb-wp-$(E20R_PLUGIN_NAME)
+DB_CONTAINER_NAME ?= $(DB_IMAGE)-wp-$(E20R_PLUGIN_NAME)
 
 # PROJECT := $(shell basename ${PWD}) # This is the default as long as the plugin name matches
 PROJECT := $(E20R_PLUGIN_NAME)
@@ -23,13 +27,15 @@ PROJECT := $(E20R_PLUGIN_NAME)
 DC_CONFIG_FILE ?= $(PWD)/docker-compose.yml
 DC_ENV_FILE ?= $(PWD)/.env.testing
 
+STACK_RUNNING := $(shell APACHE_RUN_USER=$(APACHE_RUN_USER) APACHE_RUN_GROUP=$(APACHE_RUN_GROUP) \
+    		DB_IMAGE=$(DB_IMAGE) DB_VERSION=$(DB_VERSION) WP_VERSION=$(WP_VERSION) \
+    		docker-compose -p $(PROJECT) --env-file $(DC_ENV_FILE) --file $(DC_CONFIG_FILE) ps -q)
 
 .PHONY: \
 	clean \
-	start \
+	real-clean \
+	deps \
 	start-stack \
-	dependencies \
-	stop \
 	stop-stack \
 	restart \
 	shell \
@@ -45,35 +51,53 @@ DC_ENV_FILE ?= $(PWD)/.env.testing
 	db-shell \
 	db-backup \
 	db-import \
-	tests
-
-dependencies:
-	@for plugin in $(WP_DEPENDENCIES) ; do \
-  		if [[ ! -d inc/wp_plugins/$$plugin ]]; then \
-  		  mkdir -p inc/wp_plugins/$$plugin && \
-  		  $(CURL) -L $(WP_PLUGIN_URL)/$$plugin.zip -o inc/wp_plugins/$$plugin.zip -s && \
-  		  $(UNZIP) -o inc/wp_plugins/$$plugin.zip -d inc/wp_plugins/ 2>&1 > /dev/null && \
-  		  rm -f inc/wp_plugins/$$plugin.zip ; \
-  		fi ; \
-  	done
+	test
 
 clean:
-	@inc/bin/codecept clean
-	@rm -rf inc/wp_plugins
+	@if [[ -n "$(STACK_RUNNING)" ]]; then \
+		if [[ -f inc/bin/codecept ]]; then \
+			inc/bin/codecept clean ; \
+		fi ; \
+		rm -rf inc/wp_plugins ; \
+	fi
 #	$(FIND) $(BASE_PATH)/inc -path composer -prune \
 #		-path yahnis-elsts -prune \
 #		-path 10quality -prune \
 #		-type d -print
 #		-exec rm -rf {} \;
 
-start:
-	echo "TODO: Add a standard start"
+real-clean: stop-stack clean
+	@echo "Make sure docker-compose stack for $(PROJECT) isn't running"
+	@if [[ -n "$(STACK_RUNNING)" ]]; then \
+		echo "Removing docker-compose stack" ; \
+		docker-compose -p $(PROJECT) --env-file $(DC_ENV_FILE) --file $(DC_CONFIG_FILE) rm --stop --force -v ; \
+	fi ; \
+	echo "Removing docker images" ; \
+	docker image remove $(PROJECT)_wordpress --force && \
+	docker image remove $(DB_IMAGE) --force && \
+	rm -rf ./inc/*
 
-start-stack: clean dependencies
-	@APACHE_RUN_USER=$(APACHE_RUN_USER) APACHE_RUN_GROUP=$(APACHE_RUN_GROUP) \
-		docker-compose -p $(PROJECT) --env-file $(DC_ENV_FILE) --file $(DC_CONFIG_FILE) up --build --detach
+deps: stop-stack clean
+	@$(PHP_BIN) composer.phar update --prefer-stable
+	@echo "Loading WordPress plugin dependencies"
+	@for dep_plugin in $(WP_DEPENDENCIES) ; do \
+  		if [[ ! -d "inc/wp_plugins/$${dep_plugin}" ]]; then \
+  		  echo "Download and install $${dep_plugin} to inc/wp_plugins/$${dep_plugin}" && \
+  		  mkdir -p "inc/wp_plugins/$${dep_plugin}" && \
+  		  $(CURL) -L "$(WP_PLUGIN_URL)/$${dep_plugin}.zip" -o i"nc/wp_plugins/$${dep_plugin}.zip" -s && \
+  		  $(UNZIP) -o "inc/wp_plugins/$${dep_plugin}.zip" -d inc/wp_plugins/ 2>&1 > /dev/null && \
+  		  rm -f "inc/wp_plugins/$${dep_plugin}.zip" ; \
+  		fi ; \
+  	done
 
-db-import:
+start-stack: clean deps
+	@if [[ -n "$(STACK_RUNNING)" ]]; then \
+		APACHE_RUN_USER=$(APACHE_RUN_USER) APACHE_RUN_GROUP=$(APACHE_RUN_GROUP) \
+			DB_IMAGE=$(DB_IMAGE) DB_VERSION=$(DB_VERSION) WP_VERSION=$(WP_VERSION) \
+			docker-compose -p $(PROJECT) --env-file $(DC_ENV_FILE) --file $(DC_CONFIG_FILE) up --build --detach ; \
+	fi
+
+db-import: clean deps start-stack
 	@bin/wait-for-db.sh '$(MYSQL_USER)' '$(MYSQL_PASSWORD)' '$(WORDPRESS_DB_HOST)' '$(E20R_PLUGIN_NAME)'
 	@if [[ -f "$(SQL_BACKUP_FILE)/$(E20R_PLUGIN_NAME).sql" ]]; then \
   		echo "Loading the $(E20R_PLUGIN_NAME).sql data"; \
@@ -83,7 +107,9 @@ db-import:
   	fi
 
 stop-stack:
-	@APACHE_RUN_USER=$(APACHE_RUN_USER) APACHE_RUN_GROUP=$(APACHE_RUN_GROUP) docker-compose -p $(PROJECT) --env-file $(DC_ENV_FILE) --file $(DC_CONFIG_FILE) down
+	@APACHE_RUN_USER=$(APACHE_RUN_USER) APACHE_RUN_GROUP=$(APACHE_RUN_GROUP) \
+		DB_IMAGE=$(DB_IMAGE) DB_VERSION=$(DB_VERSION) WP_VERSION=$(WP_VERSION) \
+		docker-compose -p $(PROJECT) --env-file $(DC_ENV_FILE) --file $(DC_CONFIG_FILE) down 2>/dev/null
 
 restart: stop-stack start-stack db-import
 
@@ -118,11 +144,11 @@ code-standard-test: start-stack
     		--extensions=php \
     		*.php src/*/*.php
 
-wp-unit-test: start-stack code-standard-test
-#	php composer.phar run unit-test
+wp-unit-test: start-stack db-import code-standard-test
+	#inc/bin/codeception run wpunit
 	@docker-compose -p $(PROJECT) --env-file $(DC_ENV_FILE) --file $(DC_CONFIG_FILE) \
 		exec -T -w /var/www/html/wp-content/plugins/$(PROJECT)/ \
-		wordpress inc/bin/codecept run -v wpunit --coverage
+		wordpress inc/bin/codecept run -v wpunit --coverage --coverage-html
 
 acceptance-test: start-stack db-import
 	@docker-compose $(PROJECT) --env-file $(DC_ENV_FILE) --file $(DC_CONFIG_FILE) \
@@ -134,7 +160,7 @@ build-test: start-stack db-import
 	 exec -T -w /var/www/html/wp-content/plugins/${PROJECT}/ \
 	 wordpress $(PWD)/inc/bin/codecept build -v
 
-tests: start-stack db-import code-standard-test wp-unit-test stop-stack # TODO: phpstan-test between phpcs & unit tests
+test: clean deps start-stack db-import code-standard-test wp-unit-test real-clean # TODO: phpstan-test between phpcs & unit tests
 
 changelog: build_readmes/current.txt
 	@./bin/changelog.sh
