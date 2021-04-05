@@ -399,6 +399,10 @@ class Members_ListTest extends WPTestCase {
 			$_REQUEST['find']  = $find;
 		}
 
+		if ( ! is_null( $status ) ) {
+			$_REQUEST['level'] = $status;
+		}
+
 		try {
 			$this->mc_class->get_members( $per_page, $page_number, $status );
 		} catch( \Exception $exp ) {
