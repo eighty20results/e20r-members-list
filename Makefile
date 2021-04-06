@@ -126,7 +126,7 @@ db-backup:
 	docker-compose -p $(PROJECT) --env-file $(DC_ENV_FILE) --file $(DC_CONFIG_FILE) exec database \
  		/usr/bin/mysqldump -u$(MYSQL_USER) -p'$(MYSQL_PASSWORD)' -h$(WORDPRESS_DB_HOST) $(MYSQL_DATABASE) > $(SQL_BACKUP_FILE)/$(E20R_PLUGIN_NAME).sql
 
-phpstan-test: start-stack
+phpstan-test: start-stack db-import
 	@docker-compose -p $(PROJECT) --env-file $(DC_ENV_FILE) --file $(DC_CONFIG_FILE) \
         	exec -T -w /var/www/html/wp-content/plugins/$(PROJECT)/ \
         	wordpress php -d display_errors=on inc/bin/phpstan.phar analyse -c ./phpstan.dist.neon --memory-limit 128M
@@ -138,12 +138,11 @@ code-standard-test:
 		--colors \
 		-p \
 		--standard=WordPress-Extra \
-		--ignore=inc/\*,node_modules/\*,src/utilities/\* \
+		--ignore='inc/*,node_modules/*,src/utilities/*' \
 		--extensions=php \
 		*.php src/members-list/admin/*/*.php
 
 wp-unit-test: start-stack db-import
-	#inc/bin/codeception run wpunit
 	@docker-compose -p $(PROJECT) --env-file $(DC_ENV_FILE) --file $(DC_CONFIG_FILE) \
 		exec -T -w /var/www/html/wp-content/plugins/$(PROJECT)/ \
 		wordpress inc/bin/codecept run -v wpunit --coverage --coverage-html

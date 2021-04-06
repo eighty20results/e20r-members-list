@@ -8,7 +8,7 @@ parameters:
         - tests/functional
         - tests/acceptance
     bootstrapFiles:
-    	- tests/bootstrap.php
+    	- tests/wpunit/bootstrap.php
     	- class-e20r-members-list.php
     excludePaths:
         - inc/
