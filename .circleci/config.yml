@@ -10,8 +10,12 @@ shared-settings: &shared-settings
 
 commands:
   # Standard install steps for the plugin tests
-  shared-test-build: shared-test-build
-    <<: *shared-settings
+  shared-test-build:
+    description: "Configure the build environment for the WordPress based testing"
+    parameters:
+      php_version:
+        type: string
+        default: "7.3"
     steps:
       - attach_workspace:
           at: ~/repo
@@ -19,7 +23,7 @@ commands:
       - php/install-php:
           - version: << parameter.php_version >>
       - run:
-          name: Add the CURL extension for PHP
+          name: Add the CURL extension for PHP/Composer
           command: sudo apt install -y php-curl php-mbstring
       - run:
           name: Verify PHP version
@@ -35,9 +39,6 @@ commands:
 
 jobs:
   unit_tests:
-    parameters:
-      php_version:
-        type: string
     <<: *shared-settings
     steps:
       - shared-test-build
