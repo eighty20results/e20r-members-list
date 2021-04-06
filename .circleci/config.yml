@@ -54,6 +54,12 @@ jobs:
     steps:
     - build-environment
     - run:
+        name: Create & start the WordPress container stack
+        command: make start-stack
+    - run:
+        name: Load the DB if it exists
+        command: make db-import
+    - run:
         name: Run Unit Tests (WP & PMPro Integration tests)
         command: make wp-unit-test
 
