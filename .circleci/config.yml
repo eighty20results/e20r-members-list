@@ -3,64 +3,73 @@ version: 2.1
 orbs:
   php: circleci/php@1.1.0
 
-new-shared-build: &new-shared-build
+shared-settings: &shared-settings
   working_directory: ~/repo
   docker:
     - image: 'cimg/base:edge'
-  steps:
-    - attach_workspace:
-        at: ~/project
-    - checkout
-    - php/install-php:
-        - version: '7.2'
-    - run:
-        name: Check PHP version
-        command: php --version
-    - php-install-composer:
-        install-version: "2.0.9"
-    - php/install-packages:
-        with-cache: true
+
+commands:
+  # Standard install steps for the plugin tests
+  shared-test-build: shared-test-build
+    <<: *shared-settings
+    steps:
+      - attach_workspace:
+          at: ~/repo
+      - checkout
+      - php/install-php:
+          - version: << parameter.php_version >>
+      - run:
+          name: Add the CURL extension for PHP
+          command: sudo apt install -y php-curl php-mbstring
+      - run:
+          name: Verify PHP version
+          command: php --version
+      - php-install-composer:
+          install-version: "2.0.9"
+      - php/install-packages:
+          app-dir: ~/repo
+          install-flags: '--no-interaction'
+          vendor-dir: inc/
+          with-cache: true
+      - setup_remote_docker
 
 jobs:
   unit_tests:
-    <<: *new-shared-build
-    working_directory: ~/project
+    parameters:
+      php_version:
+        type: string
+    <<: *shared-settings
     steps:
-      - checkout
-      - php/install-php:
-          version: "7.3"
-      - php/install-composer:
-          install-version: "2.0.9"
-      - php/install-packages:
-          install-flags: '--no-interaction'
-          vendor-dir: inc/
-          with-cache: true
-      - setup_remote_docker
+      - shared-test-build
       - run:
           name: Run Unit Tests (WP & PMPro Integration tests)
           command: make wp-unit-test
+
   syntax_test:
-    <<: *new-shared-build
-    working_directory: ~/project
+    <<: *shared-settings
     steps:
-      - checkout
-      - php/install-php:
-          version: "7.3"
-      - php/install-composer:
-          install-version: "2.0.9"
-      - php/install-packages:
-          install-flags: '--no-interaction'
-          vendor-dir: inc/
-          with-cache: true
-      - setup_remote_docker
+      - shared-test-build
       - run:
           name: Run WPCS Code Standard Tests
           command: make code-standard-test
+
 workflows:
   version: 2
   run_tests:
     jobs:
-      - syntax_test
+      - syntax_test:
+          matrix:
+            parameters:
+              php_version:
+                - "7.1"
+                - "7.4"
+                - "8.0"
       - unit_tests:
+          matrix:
+            parameters:
+              php_version:
+                - "7.1"
+                - "7.4"
+                - "8.0"
           requires:
             - syntax_test
