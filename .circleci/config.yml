@@ -14,6 +14,7 @@ defaults: &defaults
 
 commands:
   build-environment:
+    working_directory: ~/repo
     description: "Standard install steps for the plugin tests"
     parameters:
       p_version:
@@ -36,7 +37,7 @@ commands:
           command: php --version
       - php/install-composer:
           install-version: "2.0.9"
-          install-dir: ~/repo/
+          install-dir: ./
       - php/install-packages:
           app-dir: ~/repo
           install-flags: '--no-interaction'
