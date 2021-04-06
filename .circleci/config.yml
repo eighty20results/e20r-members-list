@@ -5,8 +5,12 @@ orbs:
 
 defaults: &defaults
   working_directory: ~/repo
+  parameters:
+    p_version:
+      default: "7.4"
+      type: string
   docker:
-    - image: 'cimg/base:edge'
+    - image: cimg/php:<< parameters.p_version >>
 
 commands:
   build-environment:
@@ -14,14 +18,13 @@ commands:
     parameters:
       p_version:
         default: "7.4"
-        type: enum
-        enum: ['7.4', '8.0']
+        type: string
     steps:
       - attach_workspace:
           at: ~/repo
       - checkout
-      - php/install-php:
-          version: << parameters.p_version >>
+#      - php/install-php:
+#          version: << parameters.p_version >>
       - run:
           name: Add curl and mbstring modules
           command: |
