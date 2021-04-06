@@ -3,32 +3,32 @@ version: 2.1
 orbs:
   php: circleci/php@1.1.0
 
-shared-settings: &shared-settings
+defaults: &defaults
   working_directory: ~/repo
   docker:
-    - image: 'cimg/base:edge'
+    - image: 'cimg/php'
 
 commands:
-  # Standard install steps for the plugin tests
-  shared-test-build:
-    description: "Configure the build environment for the WordPress based testing"
+  build-environment:
+    description: "Standard install steps for the plugin tests"
     parameters:
-      php_version:
-        type: string
-        default: "7.3"
+      p_version:
+        default: "7.4"
+        type: enum
+        enum: ['7.4', '8.0']
     steps:
       - attach_workspace:
           at: ~/repo
       - checkout
       - php/install-php:
-          - version: << parameter.php_version >>
+          version: << parameters.p_version >>
       - run:
-          name: Add the CURL extension for PHP/Composer
+          name: Add curl and mbstring modules
           command: sudo apt install -y php-curl php-mbstring
       - run:
           name: Verify PHP version
           command: php --version
-      - php-install-composer:
+      - php/install-composer:
           install-version: "2.0.9"
       - php/install-packages:
           app-dir: ~/repo
@@ -38,18 +38,18 @@ commands:
       - setup_remote_docker
 
 jobs:
-  unit_tests:
-    <<: *shared-settings
+  unit-test:
+    <<: *defaults
     steps:
-      - shared-test-build
-      - run:
-          name: Run Unit Tests (WP & PMPro Integration tests)
-          command: make wp-unit-test
+    - build-environment
+    - run:
+        name: Run Unit Tests (WP & PMPro Integration tests)
+        command: make wp-unit-test
 
-  syntax_test:
-    <<: *shared-settings
+  syntax-test:
+    <<: *defaults
     steps:
-      - shared-test-build
+      - build-environment
       - run:
           name: Run WPCS Code Standard Tests
           command: make code-standard-test
@@ -58,19 +58,7 @@ workflows:
   version: 2
   run_tests:
     jobs:
-      - syntax_test:
-          matrix:
-            parameters:
-              php_version:
-                - "7.1"
-                - "7.4"
-                - "8.0"
-      - unit_tests:
-          matrix:
-            parameters:
-              php_version:
-                - "7.1"
-                - "7.4"
-                - "8.0"
+      - syntax-test
+      - unit-test:
           requires:
-            - syntax_test
+            - syntax-test
