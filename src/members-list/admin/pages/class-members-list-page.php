@@ -215,7 +215,7 @@ class Members_List_Page {
 	 * @return bool|int|null
 	 */
 	private function is_pmpro_v2() {
-		return defined('PMPRO_VERSION' ) ?
+		return defined( 'PMPRO_VERSION' ) ?
 				version_compare( PMPRO_VERSION, '2.0', 'ge' ) :
 				null;
 	}

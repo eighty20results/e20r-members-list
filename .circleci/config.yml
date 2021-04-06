@@ -46,7 +46,7 @@ commands:
       - setup_remote_docker
 
 jobs:
-  unit-test:
+  wp-unit-test:
     <<: *defaults
     steps:
     - build-environment
@@ -54,7 +54,7 @@ jobs:
         name: Run Unit Tests (WP & PMPro Integration tests)
         command: make wp-unit-test
 
-  syntax-test:
+  code-standards-test:
     <<: *defaults
     steps:
       - build-environment
@@ -66,7 +66,7 @@ workflows:
   version: 2
   run_tests:
     jobs:
-      - syntax-test
-      - unit-test:
+      - code-standards-test
+      - wp-unit-test:
           requires:
-            - syntax-test
+            - code-standards-test
