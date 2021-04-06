@@ -14,7 +14,6 @@ defaults: &defaults
 
 commands:
   build-environment:
-    working_directory: ~/repo
     description: "Standard install steps for the plugin tests"
     parameters:
       p_version:
