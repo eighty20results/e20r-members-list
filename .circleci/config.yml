@@ -9,7 +9,7 @@ new-shared-build: &new-shared-build
     - image: 'cimg/base:edge'
   steps:
     - attach_workspace:
-        at: ~/repo
+        at: ~/project
     - checkout
     - php/install-php:
         - version: '7.2'
@@ -24,7 +24,7 @@ new-shared-build: &new-shared-build
 jobs:
   install_php:
     <<: *new-shared-build
-    working_directory: ~/repo
+    working_directory: ~/project
     steps:
       - checkout
       - php/install-php:
@@ -32,7 +32,7 @@ jobs:
 
   install_composer_packages:
     <<: *new-shared-build
-    working_directory: ~/repo
+    working_directory: ~/project
     steps:
       - checkout
       - php/install-composer:
@@ -44,7 +44,7 @@ jobs:
 
   unit_tests:
     <<: *new-shared-build
-    working_directory: ~/repo
+    working_directory: ~/project
     steps:
       - checkout
       - php/install-php:
@@ -55,9 +55,10 @@ jobs:
           install-flags: '--no-interaction'
           vendor-dir: inc/
           with-cache: true
+      - setup_remote_docker
       - run:
-          name: Run Unit Tests
-          command: php composer.phar run unit-test
+          name: Run Unit Tests (WP & PMPro Integration tests)
+          command: make wp-unit-test
 
 workflows:
   install:
