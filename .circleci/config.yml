@@ -22,26 +22,6 @@ new-shared-build: &new-shared-build
         with-cache: true
 
 jobs:
-  install_php:
-    <<: *new-shared-build
-    working_directory: ~/project
-    steps:
-      - checkout
-      - php/install-php:
-          version: "7.3"
-
-  install_composer_packages:
-    <<: *new-shared-build
-    working_directory: ~/project
-    steps:
-      - checkout
-      - php/install-composer:
-          install-version: "2.0.9"
-      - php/install-packages:
-          install-flags: '--no-interaction'
-          vendor-dir: inc/
-          with-cache: true
-
   unit_tests:
     <<: *new-shared-build
     working_directory: ~/project
@@ -59,10 +39,28 @@ jobs:
       - run:
           name: Run Unit Tests (WP & PMPro Integration tests)
           command: make wp-unit-test
-
+  syntax_test:
+    <<: *new-shared-build
+    working_directory: ~/project
+    steps:
+      - checkout
+      - php/install-php:
+          version: "7.3"
+      - php/install-composer:
+          install-version: "2.0.9"
+      - php/install-packages:
+          install-flags: '--no-interaction'
+          vendor-dir: inc/
+          with-cache: true
+      - setup_remote_docker
+      - run:
+          name: Run WPCS Code Standard Tests
+          command: make code-standard-test
 workflows:
-  install:
+  version: 2
+  run_tests:
     jobs:
-      - install_php
-      - install_composer_packages
-      - unit_tests
+      - syntax_test
+      - unit_tests:
+          requires:
+            - syntax_test
