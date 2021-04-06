@@ -28,8 +28,7 @@ commands:
       - run:
           name: Add curl and mbstring modules
           command: |
-            sudo apt install -y php-curl php-mbstring libzip-dev
-            sudo docker-php-ext-enable zip
+            sudo apt install -y php-curl php-mbstring
             sudo docker-php-ext-enable curl
             sudo docker-php-ext-enable mbstring
       - run:
