@@ -131,20 +131,18 @@ phpstan-test: start-stack
         	exec -T -w /var/www/html/wp-content/plugins/$(PROJECT)/ \
         	wordpress php -d display_errors=on inc/bin/phpstan.phar analyse -c ./phpstan.dist.neon --memory-limit 128M
 
-code-standard-test: start-stack
-	@docker-compose -p ${PROJECT} --env-file ${DC_ENV_FILE} --file ${DC_CONFIG_FILE} exec \
-    		-T -w /var/www/html/wp-content/plugins/$(PROJECT)/ wordpress \
-    		inc/bin/phpcs \
-    		--runtime-set ignore_warnings_on_exit true \
-    		--report=full \
-    		--colors \
-    		-p \
-    		--standard=WordPress-Extra \
-    		--ignore=*/inc/*,*/node_modules/*,src/utilities/* \
-    		--extensions=php \
-    		*.php src/*/*.php
+code-standard-test:
+	@inc/bin/phpcs \
+		--runtime-set ignore_warnings_on_exit true \
+		--report=full \
+		--colors \
+		-p \
+		--standard=WordPress-Extra \
+		--ignore=inc/\*,node_modules/\*,src/utilities/\* \
+		--extensions=php \
+		*.php src/members-list/admin/*/*.php
 
-wp-unit-test: start-stack db-import code-standard-test
+wp-unit-test: start-stack db-import
 	#inc/bin/codeception run wpunit
 	@docker-compose -p $(PROJECT) --env-file $(DC_ENV_FILE) --file $(DC_CONFIG_FILE) \
 		exec -T -w /var/www/html/wp-content/plugins/$(PROJECT)/ \
@@ -160,7 +158,7 @@ build-test: start-stack db-import
 	 exec -T -w /var/www/html/wp-content/plugins/${PROJECT}/ \
 	 wordpress $(PWD)/inc/bin/codecept build -v
 
-test: clean deps start-stack db-import code-standard-test wp-unit-test real-clean # TODO: phpstan-test between phpcs & unit tests
+test: clean deps code-standard-test start-stack db-import wp-unit-test real-clean # TODO: phpstan-test between phpcs & unit tests
 
 changelog: build_readmes/current.txt
 	@./bin/changelog.sh
