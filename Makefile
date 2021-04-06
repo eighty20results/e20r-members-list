@@ -92,6 +92,7 @@ deps: stop-stack clean
 
 start-stack: clean deps
 	@if [[ -z "$(STACK_RUNNING)" ]]; then \
+  		echo "Building and starting the WordPress stack for testing purposes" ; \
 		APACHE_RUN_USER=$(APACHE_RUN_USER) APACHE_RUN_GROUP=$(APACHE_RUN_GROUP) \
 			DB_IMAGE=$(DB_IMAGE) DB_VERSION=$(DB_VERSION) WP_VERSION=$(WP_VERSION) \
 			docker-compose -p $(PROJECT) --env-file $(DC_ENV_FILE) --file $(DC_CONFIG_FILE) up --build --detach ; \
@@ -107,6 +108,7 @@ db-import: clean deps start-stack
   	fi
 
 stop-stack:
+	@echo "Shutting down the WordPress test stack"
 	@APACHE_RUN_USER=$(APACHE_RUN_USER) APACHE_RUN_GROUP=$(APACHE_RUN_GROUP) \
 		DB_IMAGE=$(DB_IMAGE) DB_VERSION=$(DB_VERSION) WP_VERSION=$(WP_VERSION) \
 		docker-compose -p $(PROJECT) --env-file $(DC_ENV_FILE) --file $(DC_CONFIG_FILE) down 2>/dev/null
@@ -127,11 +129,13 @@ db-backup:
  		/usr/bin/mysqldump -u$(MYSQL_USER) -p'$(MYSQL_PASSWORD)' -h$(WORDPRESS_DB_HOST) $(MYSQL_DATABASE) > $(SQL_BACKUP_FILE)/$(E20R_PLUGIN_NAME).sql
 
 phpstan-test: start-stack db-import
+	@echo "Loading the WordPress test stack"
 	@docker-compose -p $(PROJECT) --env-file $(DC_ENV_FILE) --file $(DC_CONFIG_FILE) \
         	exec -T -w /var/www/html/wp-content/plugins/$(PROJECT)/ \
         	wordpress php -d display_errors=on inc/bin/phpstan.phar analyse -c ./phpstan.dist.neon --memory-limit 128M
 
 code-standard-test:
+	@echo "Running WP Code Standards testing"
 	@inc/bin/phpcs \
 		--runtime-set ignore_warnings_on_exit true \
 		--report=full \
