@@ -36,6 +36,7 @@ commands:
           command: php --version
       - php/install-composer:
           install-version: "2.0.9"
+          install-dir: ~/repo/
       - php/install-packages:
           app-dir: ~/repo
           install-flags: '--no-interaction'

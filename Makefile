@@ -78,7 +78,7 @@ real-clean: stop-stack clean
 	rm -rf ./inc/*
 
 deps: stop-stack clean
-	@$(PHP_BIN) composer.phar update --prefer-stable
+	@$(PHP_BIN) composer update --prefer-stable
 	@echo "Loading WordPress plugin dependencies"
 	@for dep_plugin in $(WP_DEPENDENCIES) ; do \
   		if [[ ! -d "inc/wp_plugins/$${dep_plugin}" ]]; then \

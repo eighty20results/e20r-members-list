@@ -72,6 +72,7 @@ fabric.properties
 /src/utilities/composer.json
 docker-env/e20r-members-list.sql
 /.circleci/docker/test/db_backup/e20r-members-list.sql
+/composer
 /composer.phar
 /composer.lock
 /build/e20r-members-list
