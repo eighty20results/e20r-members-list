@@ -62,6 +62,10 @@ jobs:
     - run:
         name: Run Unit Tests (WP & PMPro Integration tests)
         command: make wp-unit-test
+    - run:
+        name: Stop the container stack
+        command: make real-clean
+
 
   code-standards-test:
     <<: *defaults
