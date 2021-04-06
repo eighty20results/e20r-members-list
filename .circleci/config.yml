@@ -43,6 +43,9 @@ commands:
           install-flags: '--no-interaction'
           vendor-dir: inc/
           with-cache: true
+      - run:
+          name: Remove no longer needed composer setup script
+          command: sudo rm -f composer-setup.php
       - setup_remote_docker
 
 jobs:
