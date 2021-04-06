@@ -19,18 +19,19 @@ commands:
       p_version:
         default: "7.4"
         type: string
+      composer_version:
+        default: '1.28.6'
+        type: string
     steps:
       - attach_workspace:
           at: ~/repo
       - checkout
-#      - php/install-php:
-#          version: << parameters.p_version >>
-#      - run:
-#          name: Add curl and mbstring modules
-#          command: |
-#            sudo apt install -y php-curl php-mbstring
-#            sudo docker-php-ext-enable curl
-#            sudo docker-php-ext-enable mbstring
+      - run:
+          name: Install v<< parameters.composer_version >> Docker Compose
+          command: |
+            curl -L https://github.com/docker/compose/releases/download/<< parameters.composer_version >>/docker-compose-`uname -s`-`uname -m` > ~/docker-compose
+            chmod +x ~/docker-compose
+            sudo mv ~/docker-compose /usr/local/bin/docker-compose
       - run:
           name: Verify PHP version
           command: php --version
