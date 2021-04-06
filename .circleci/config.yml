@@ -25,12 +25,12 @@ commands:
       - checkout
 #      - php/install-php:
 #          version: << parameters.p_version >>
-      - run:
-          name: Add curl and mbstring modules
-          command: |
-            sudo apt install -y php-curl php-mbstring
-            sudo docker-php-ext-enable curl
-            sudo docker-php-ext-enable mbstring
+#      - run:
+#          name: Add curl and mbstring modules
+#          command: |
+#            sudo apt install -y php-curl php-mbstring
+#            sudo docker-php-ext-enable curl
+#            sudo docker-php-ext-enable mbstring
       - run:
           name: Verify PHP version
           command: php --version
