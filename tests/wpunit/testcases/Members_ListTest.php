@@ -409,7 +409,7 @@ class Members_ListTest extends WPTestCase {
 			$this->mc_class->get('utils')->log("Error: {$exp->getMessage()}" );
 		}
 
-		$this->assertEquals( $record_list, $this->mc_class->get( 'items' ) );
+		$this->assertEquals( $record_list, $this->mc_class->items );
 	}
 
 	/**
