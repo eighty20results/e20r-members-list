@@ -46,6 +46,7 @@ STACK_RUNNING := $(shell APACHE_RUN_USER=$(APACHE_RUN_USER) APACHE_RUN_GROUP=$(A
 	acceptance-test \
 	build-test \
 	gitlog \
+	new-release \
 	wp-shell \
 	wp-log \
 	db-shell \
@@ -60,11 +61,6 @@ clean:
 		fi ; \
 		rm -rf inc/wp_plugins ; \
 	fi
-#	$(FIND) $(BASE_PATH)/inc -path composer -prune \
-#		-path yahnis-elsts -prune \
-#		-path 10quality -prune \
-#		-type d -print
-#		-exec rm -rf {} \;
 
 real-clean: stop-stack clean
 	@echo "Make sure docker-compose stack for $(PROJECT) isn't running"
@@ -75,10 +71,15 @@ real-clean: stop-stack clean
 	echo "Removing docker images" ; \
 	docker image remove $(PROJECT)_wordpress --force && \
 	docker image remove $(DB_IMAGE) --force && \
-	rm -rf ./inc/*
+	echo "Removing the composer dependencies" && \
+	rm -rf inc/*
+
+composer-prod: real-clean
+	@echo "Install/Update the Production composer dependencies"
+	@rm -rf inc/*
+	@$(PHP_BIN) composer update --prefer-stable --no-dev
 
 deps: stop-stack clean
-	@$(PHP_BIN) composer update --prefer-stable
 	@echo "Loading WordPress plugin dependencies"
 	@for dep_plugin in $(WP_DEPENDENCIES) ; do \
   		if [[ ! -d "inc/wp_plugins/$${dep_plugin}" ]]; then \
@@ -161,10 +162,15 @@ build-test: start-stack db-import
 	 exec -T -w /var/www/html/wp-content/plugins/${PROJECT}/ \
 	 wordpress $(PWD)/inc/bin/codecept build -v
 
-test: clean deps code-standard-test start-stack db-import wp-unit-test real-clean # TODO: phpstan-test between phpcs & unit tests
+test: clean deps code-standard-test start-stack db-import wp-unit-test # TODO: phpstan-test between phpcs & unit tests
 
 changelog: build_readmes/current.txt
 	@./bin/changelog.sh
 
 gitlog:
 	@./bin/create_log.sh
+
+new-release: test composer-prod
+	@./bin/get_version.sh && \
+		git tag $${VERSION} && \
+		./build_env/create_release.sh
