@@ -36,9 +36,15 @@ class E20R_Members_ListTest extends WPTestCase {
 	 */
 	private $mc_class;
 
+	/**
+	 * Class instance for E20R_Members_List()
+	 *
+	 * @var E20R_Members_List $e20r_mc_class
+	 */
+	private $e20r_mc_class;
+
 	public function setUp(): void {
 		parent::setUp();
-		// Monkey\setUp();
 
 		if ( ! defined( 'WP_PLUGIN_DIR' ) ) {
 			define( 'WP_PLUGIN_DIR', '../../' );
@@ -50,6 +56,7 @@ class E20R_Members_ListTest extends WPTestCase {
 
 		$GLOBALS['hook_suffix'] = 'pmpro_membership';
 		$this->mc_class = new Members_List();
+		$this->e20r_mc_class = E20R_Members_List::get_instance();
 	}
 
 	/**
@@ -58,7 +65,6 @@ class E20R_Members_ListTest extends WPTestCase {
 	 * @return void
 	 */
 	public function tearDown(): void {
-		// Monkey\tearDown();
 		parent::tearDown();
 	}
 
@@ -76,10 +82,8 @@ class E20R_Members_ListTest extends WPTestCase {
 	public function test_load_hooks() {
 
 		// Load the class and hooks (make sure the hooks we expect are loaded
-		E20R_Members_List::get_instance()->load_hooks();
-//		Monkey\Actions\has( 'init', array( $this->mc_class, 'load_hooks' ) );
-//		Monkey\Actions\has( 'init', array( E20R_Members_List::get_instance(), 'load_text_domain' ) );
-//		Monkey\Actions\has( 'e20r_memberslist_process_action', array( $this->mc_class, 'export_members' ) );
+		\E20R\Members_List\E20R_Members_List::get_instance()->load_hooks();
+		// TODO: Figure out how to test that actions have been set, etc.
 	}
 
 	/**
