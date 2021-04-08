@@ -13,7 +13,7 @@ defaults: &defaults
     - image: cimg/php:<< parameters.p_version >>
 
 commands:
-  build-environment:
+  build-test-environment:
     description: "Standard install steps for the plugin tests"
     parameters:
       p_version:
@@ -48,11 +48,46 @@ commands:
           command: sudo rm -f composer-setup.php
       - setup_remote_docker
 
+  build-prod-environment:
+    description: "Standard install steps for the plugin tests"
+    parameters:
+      p_version:
+        default: "7.4"
+        type: string
+      composer_version:
+        default: '1.28.6'
+        type: string
+    steps:
+      - attach_workspace:
+          at: ~/repo
+      - checkout
+      - run:
+          name: Install v<< parameters.composer_version >> Docker Compose
+          command: |
+            curl -L https://github.com/docker/compose/releases/download/<< parameters.composer_version >>/docker-compose-`uname -s`-`uname -m` > ~/docker-compose
+            chmod +x ~/docker-compose
+            sudo mv ~/docker-compose /usr/local/bin/docker-compose
+      - run:
+          name: Verify PHP version
+          command: php --version
+      - php/install-composer:
+          install-version: "2.0.9"
+          install-dir: ./
+      - php/install-packages:
+          app-dir: ~/repo
+          install-flags: '--no-interaction --prefer-stable'
+          vendor-dir: inc/
+          with-cache: true
+      - run:
+          name: Remove no longer needed composer setup script
+          command: sudo rm -f composer-setup.php
+      - setup_remote_docker
+
 jobs:
   wp-unit-test:
     <<: *defaults
     steps:
-    - build-environment
+    - build-test-environment
     - run:
         name: Create & start the WordPress container stack
         command: make start-stack
@@ -70,10 +105,21 @@ jobs:
   code-standards-test:
     <<: *defaults
     steps:
-      - build-environment
+      - build-test-environment
       - run:
           name: Run WPCS Code Standard Tests
           command: make code-standard-test
+
+  build-plugin:
+    <<: *defaults
+    steps:
+      - build-prod-environment
+      - run:
+          name: Create changelog source from GIT repository
+          command: make gitlog
+      - run:
+          name: Update changelogs and set version information
+          command: make new-release
 
 workflows:
   version: 2
@@ -83,3 +129,7 @@ workflows:
       - wp-unit-test:
           requires:
             - code-standards-test
+      - build-plugin:
+          requires:
+            - code-standards-test
+            - wp-unit-test
