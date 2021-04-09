@@ -79,7 +79,7 @@ composer-prod: real-clean
 	@rm -rf inc/*
 	@$(PHP_BIN) composer update --prefer-stable --no-dev
 
-deps: stop-stack clean
+deps: clean
 	@echo "Loading WordPress plugin dependencies"
 	@for dep_plugin in $(WP_DEPENDENCIES) ; do \
   		if [[ ! -d "inc/wp_plugins/$${dep_plugin}" ]]; then \
