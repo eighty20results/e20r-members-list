@@ -29,7 +29,7 @@ DC_ENV_FILE ?= $(PWD)/.env.testing
 
 STACK_RUNNING := $(shell APACHE_RUN_USER=$(APACHE_RUN_USER) APACHE_RUN_GROUP=$(APACHE_RUN_GROUP) \
     		DB_IMAGE=$(DB_IMAGE) DB_VERSION=$(DB_VERSION) WP_VERSION=$(WP_VERSION) \
-    		docker-compose -p $(PROJECT) --env-file $(DC_ENV_FILE) --file $(DC_CONFIG_FILE) ps -q)
+    		docker-compose -p $(PROJECT) --env-file $(DC_ENV_FILE) --file $(DC_CONFIG_FILE) ps -q | wc -l)
 
 .PHONY: \
 	clean \
@@ -64,9 +64,10 @@ clean:
 
 real-clean: stop-stack clean
 	@echo "Make sure docker-compose stack for $(PROJECT) isn't running"
-	@if [[ -z "$(STACK_RUNNING)" ]]; then \
-		echo "Removing docker-compose stack" ; \
-		docker-compose -p $(PROJECT) --env-file $(DC_ENV_FILE) --file $(DC_CONFIG_FILE) rm --stop --force -v ; \
+	@echo "Stack is running: $(STACK_RUNNING)"
+	@if [[ 2 -ne "$(STACK_RUNNING)" ]]; then \
+		echo "Stopping docker-compose stack" ; \
+		docker compose -p $(PROJECT) --env-file $(DC_ENV_FILE) --file $(DC_CONFIG_FILE) rm --stop --force -v ; \
 	fi ; \
 	echo "Removing docker images" ; \
 	docker image remove $(PROJECT)_wordpress --force && \
@@ -77,9 +78,13 @@ real-clean: stop-stack clean
 composer-prod: real-clean
 	@echo "Install/Update the Production composer dependencies"
 	@rm -rf inc/*
-	@$(PHP_BIN) composer update --prefer-stable --no-dev
+	@$(PHP_BIN) composer update --ansi --prefer-stable --no-dev
 
-deps: clean
+composer-dev:
+	@echo "Install/Update the Test dependencies"
+	@$(PHP_BIN) composer update --ansi --prefer-stable
+
+deps: clean composer-dev
 	@echo "Loading WordPress plugin dependencies"
 	@for dep_plugin in $(WP_DEPENDENCIES) ; do \
   		if [[ ! -d "inc/wp_plugins/$${dep_plugin}" ]]; then \
@@ -91,28 +96,33 @@ deps: clean
   		fi ; \
   	done
 
-start-stack: clean deps
-	@if [[ -z "$(STACK_RUNNING)" ]]; then \
+start-stack: deps
+	@echo "Number of running containers for $(PROJECT): $(STACK_RUNNING)"
+	@if [[ 2 -ne "$(STACK_RUNNING)" ]]; then \
   		echo "Building and starting the WordPress stack for testing purposes" ; \
 		APACHE_RUN_USER=$(APACHE_RUN_USER) APACHE_RUN_GROUP=$(APACHE_RUN_GROUP) \
 			DB_IMAGE=$(DB_IMAGE) DB_VERSION=$(DB_VERSION) WP_VERSION=$(WP_VERSION) \
-			docker-compose -p $(PROJECT) --env-file $(DC_ENV_FILE) --file $(DC_CONFIG_FILE) up --build --detach ; \
+			docker compose -p $(PROJECT) --env-file $(DC_ENV_FILE) --file $(DC_CONFIG_FILE) up --build --detach ; \
 	fi
 
-db-import: clean deps start-stack
+db-import: deps start-stack
 	@bin/wait-for-db.sh '$(MYSQL_USER)' '$(MYSQL_PASSWORD)' '$(WORDPRESS_DB_HOST)' '$(E20R_PLUGIN_NAME)'
 	@if [[ -f "$(SQL_BACKUP_FILE)/$(E20R_PLUGIN_NAME).sql" ]]; then \
   		echo "Loading the $(E20R_PLUGIN_NAME).sql data"; \
-	  	docker-compose -p $(PROJECT) --env-file $(DC_ENV_FILE) --file $(DC_CONFIG_FILE) \
+	  	docker compose -p $(PROJECT) --env-file $(DC_ENV_FILE) --file $(DC_CONFIG_FILE) \
         	exec -T database \
         	/usr/bin/mysql -u$(MYSQL_USER) -p'$(MYSQL_PASSWORD)' -h$(WORDPRESS_DB_HOST) $(MYSQL_DATABASE) < $(SQL_BACKUP_FILE)/$(E20R_PLUGIN_NAME).sql; \
   	fi
 
 stop-stack:
-	@echo "Shutting down the WordPress test stack"
-	@APACHE_RUN_USER=$(APACHE_RUN_USER) APACHE_RUN_GROUP=$(APACHE_RUN_GROUP) \
-		DB_IMAGE=$(DB_IMAGE) DB_VERSION=$(DB_VERSION) WP_VERSION=$(WP_VERSION) \
-		docker-compose -p $(PROJECT) --env-file $(DC_ENV_FILE) --file $(DC_CONFIG_FILE) down 2>/dev/null
+	@echo "Number of running containers for $(PROJECT): $(STACK_RUNNING)"
+	@if [[ 0 -lt "$(STACK_RUNNING)" ]]; then \
+  		echo "Stopping the $(PROJECT) WordPress stack" ; \
+		APACHE_RUN_USER=$(APACHE_RUN_USER) APACHE_RUN_GROUP=$(APACHE_RUN_GROUP) \
+        		DB_IMAGE=$(DB_IMAGE) DB_VERSION=$(DB_VERSION) WP_VERSION=$(WP_VERSION) \
+        		docker-compose -p $(PROJECT) --env-file $(DC_ENV_FILE) --file $(DC_CONFIG_FILE) down 2>/dev/null ; \
+	fi
+
 
 restart: stop-stack start-stack db-import
 
