@@ -29,13 +29,6 @@ class Members_ListTest extends WPTestCase {
 	use MatchesSnapshots;
 
 	/**
-	 * Class instance for Members_List()
-	 *
-	 * @var Members_List $mc_class
-	 */
-	private $mc_class;
-
-	/**
 	 * Set up for the test class
 	 */
 	public function setUp(): void {
@@ -50,7 +43,6 @@ class Members_ListTest extends WPTestCase {
 		}
 
 		$GLOBALS['hook_suffix'] = 'pmpro_membership';
-		$this->mc_class         = new Members_List();
 	}
 
 	/**
@@ -77,8 +69,8 @@ class Members_ListTest extends WPTestCase {
 		if ( ! is_null( $level_setting ) ) {
 			$_REQUEST['level'] = $level_setting;
 		}
-
-		$table_list = $this->mc_class->set_tables_and_joins();
+		$mc_class = new Members_List();
+		$table_list = $mc_class->set_tables_and_joins();
 
 		$this->assertEquals( $expected_list, $table_list );
 		$this->assertArrayHasKey( 'joins', $table_list );
@@ -173,14 +165,17 @@ class Members_ListTest extends WPTestCase {
 	 * @dataProvider fixture_sql_columns
 	 * @throws \Exception
 	 */
-	public function test_set_sql_columns( array $expected, $filter_func ) {
+	public function test_set_sql_columns( array $expected, ?string $filter_func ) {
+
+		// Init the class we're testing
+		$mc_class         = new Members_List();
 
 		if ( null !== $filter_func ) {
-			$this->mc_class->get( 'utils' )->log("Adding column map handler: {$filter_func}");
-			add_filter( 'e20r_members_list_default_column_map', array( $this->mc_class, $filter_func ), 10, 1 );
+			$mc_class->get( 'utils' )->log("Adding column map handler: {$filter_func}");
+			add_filter( 'e20r_members_list_default_sql_column_alias_map', array( $mc_class, $filter_func ), 10, 1 );
 		}
 
-		$result = $this->mc_class->set_sql_columns();
+		$result = $mc_class->set_sql_columns();
 
 		// $this->assertIsArray( $result );
 		$this->assertEquals( $expected, $result );
@@ -267,36 +262,37 @@ class Members_ListTest extends WPTestCase {
 	/**
 	 * Test the generate_member_sql() function
 	 *
-	 * @param string $status
-	 * @param int    $per_page
-	 * @param int    $page_number
-	 * @param string $sort_order
-	 * @param string $order_by
-	 * @param string $find
-	 * @param bool   $is_email
-	 * @param string $expected_sql
+	 * @param string|int  $status
+	 * @param int         $per_page
+	 * @param int         $page_number
+	 * @param string      $sort_order
+	 * @param string      $order_by
+	 * @param string      $find
+	 * @param bool        $is_email
+	 * @param string      $expected_sql
 	 *
 	 * @throws \Exception
 	 * @dataProvider fixture_member_sql_params_levels
 	 */
-	public function test_generate_member_sql_levels( string $status, int $per_page, int $page_number, string $sort_order, string $order_by, string $find, bool $is_email, string $expected_sql ) {
+	public function test_generate_member_sql_levels( $status, int $per_page, int $page_number, string $sort_order, string $order_by, string $find, bool $is_email, string $expected_sql ) {
 
-		if ( ! is_null( $sort_order ) ) {
+		if ( ! empty( $sort_order ) ) {
 			$_REQUEST['order'] = $sort_order;
 		}
 
-		if ( ! is_null( $find ) ) {
+		if ( ! empty( $find ) ) {
 			$_REQUEST['find'] = $find;
 		}
 
-		if ( ! is_null( $status ) ) {
+		if ( ! empty( $status ) ) {
 			$_REQUEST['level'] = $status;
 		}
-
-		$this->mc_class->generate_member_sql( $status, $per_page, $page_number );
-		$resulting_sql = $this->mc_class->get( 'sql_query' );
+		$mc_class = new Members_List();
+		$mc_class->generate_member_sql( $per_page, $page_number );
+		$resulting_sql = $mc_class->get( 'sql_query' );
 
 		$this->assertDiscardWhitespace( $expected_sql, $resulting_sql);
+		// $this->assertEquals( $expected_sql, $resulting_sql );
 	}
 
 	/**
@@ -308,10 +304,13 @@ class Members_ListTest extends WPTestCase {
 		return array(
 			// phpcs:ignore
 			// $status, $per_page, $page_number, $sort_order, $order_by, find, $is_email, $expected_sql
-			array( 'all', -1, -1, 'DESC', 'ml.id', '', true, $this->fixture_sql_statement_levels( 0 ) ),
-			array( 'all', -1, -1, 'ASC', 'mu.membership_id', '', true, $this->fixture_sql_statement_levels( 1 ) ),
-			array( 'active', -1, -1, 'DESC', 'ml.id', '', true, $this->fixture_sql_statement_levels( 2 ) ),
-			array( 'oldmembers', -1, -1, 'DESC', 'ml.id', '', true, $this->fixture_sql_statement_levels( 3 ) ),
+			array( 'all', -1, -1, 'DESC', 'ml.id', '', true, $this->fixture_sql_statement_levels( 0 ) ), // OK
+			array( 'all', -1, -1, 'ASC', 'mu.membership_id', '', true, $this->fixture_sql_statement_levels( 1 ) ), // OK
+			array( 'active', -1, -1, 'DESC', 'ml.id', '', true, $this->fixture_sql_statement_levels( 2 ) ), // OK
+			array( 'oldmembers', -1, -1, 'DESC', 'ml.id', '', true, $this->fixture_sql_statement_levels( 3 ) ), // OK
+			array( 1, -1, -1, 'DESC', 'ml.id', '', true, $this->fixture_sql_statement_levels( 4 ) ), // OK
+			array( 2, 15, 10, 'ASC', 'ml.id', '', true, $this->fixture_sql_statement_levels( 5 ) ), // OK
+			array( 2, 15, 10, 'ASC', 'ml.id', 'Thomas', true, $this->fixture_sql_statement_levels( 6 ) ),
 		);
 	}
 
@@ -333,7 +332,7 @@ class Members_ListTest extends WPTestCase {
 				LEFT JOIN {$wpdb->prefix}pmpro_membership_levels AS ml ON mu.membership_id = ml.id
 				LEFT JOIN {$wpdb->prefix}usermeta AS um ON u.ID = um.user_id
 				LEFT JOIN {$wpdb->prefix}pmpro_memberships_users AS mu2 ON u.ID = mu2.user_id AND mu2.status = 'active'
-			 WHERE (mu.membership_id IS NOT NULL OR mu.membership_id > 0) AND  mu.status IN ('active','cancelled','admin_cancelled','admin_change','admin_changed','changed','inactive','expired')
+			 WHERE mu.status IN ('cancelled','admin_cancelled','admin_change','admin_changed','changed','inactive','active','expired')
 			 GROUP BY ml.id, u.ID
 			 ORDER BY u.ID, ml.id DESC
 ",
@@ -344,7 +343,7 @@ class Members_ListTest extends WPTestCase {
 				LEFT JOIN {$wpdb->prefix}pmpro_membership_levels AS ml ON mu.membership_id = ml.id
 				LEFT JOIN {$wpdb->prefix}usermeta AS um ON u.ID = um.user_id
 				LEFT JOIN {$wpdb->prefix}pmpro_memberships_users AS mu2 ON u.ID = mu2.user_id AND mu2.status = 'active'
-			 WHERE (mu.membership_id IS NOT NULL OR mu.membership_id > 0) AND  mu.status IN ('active','cancelled','admin_cancelled','admin_change','admin_changed','changed','inactive','expired')
+			 WHERE mu.status IN ('cancelled','admin_cancelled','admin_change','admin_changed','changed','inactive','active','expired')
 			 GROUP BY ml.id, u.ID
 			 ORDER BY u.ID, ml.id ASC
 ",
@@ -354,7 +353,7 @@ class Members_ListTest extends WPTestCase {
 				LEFT JOIN {$wpdb->prefix}pmpro_memberships_users AS mu ON u.ID = mu.user_id AND mu.id = (SELECT mu3.id FROM {$wpdb->prefix}pmpro_memberships_users AS mu3 WHERE mu3.user_id = u.ID ORDER BY mu3.id DESC LIMIT 1)
 				LEFT JOIN {$wpdb->prefix}pmpro_membership_levels AS ml ON mu.membership_id = ml.id
 				LEFT JOIN {$wpdb->prefix}usermeta AS um ON u.ID = um.user_id
-			 WHERE (mu.membership_id IS NOT NULL OR mu.membership_id > 0) AND  mu.status IN ('active')
+			 WHERE (mu.membership_id IS NOT NULL OR mu.membership_id > 0) AND mu.status IN ('active')
 			 GROUP BY ml.id, u.ID
 			 ORDER BY u.ID, ml.id DESC
 ",
@@ -368,6 +367,41 @@ class Members_ListTest extends WPTestCase {
 			 WHERE mu.status IN ('expired', 'cancelled') AND mu2.status IS NULL
 			 GROUP BY ml.id, u.ID
 			 ORDER BY u.ID, ml.id DESC
+",
+			4 => "SELECT
+		mu.id AS record_id, u.ID AS ID, u.user_login AS user_login, u.user_email AS user_email, u.user_registered AS user_registered, mu.membership_id AS membership_id, mu.initial_payment AS initial_payment, mu.billing_amount AS billing_amount, mu.cycle_period AS cycle_period, mu.cycle_number AS cycle_number, mu.billing_limit AS billing_limit, mu.code_id AS code_id, mu.status AS status, mu.trial_amount AS trial_amount, mu.trial_limit AS trial_limit, mu.startdate AS startdate, mu.enddate AS enddate, ml.name AS name
+			 FROM {$wpdb->prefix}users AS u
+				LEFT JOIN {$wpdb->prefix}pmpro_memberships_users AS mu ON u.ID = mu.user_id AND mu.id = (SELECT mu3.id FROM {$wpdb->prefix}pmpro_memberships_users AS mu3 WHERE mu3.user_id = u.ID ORDER BY mu3.id DESC LIMIT 1)
+				LEFT JOIN {$wpdb->prefix}pmpro_membership_levels AS ml ON mu.membership_id = ml.id
+				LEFT JOIN {$wpdb->prefix}usermeta AS um ON u.ID = um.user_id
+				LEFT JOIN {$wpdb->prefix}pmpro_memberships_users AS mu2 ON u.ID = mu2.user_id AND mu2.status = 'active'
+			 WHERE (mu.membership_id IS NOT NULL OR mu.membership_id > 0) AND mu.status IN ('active') AND mu.membership_id = 1
+			 GROUP BY ml.id, u.ID
+			 ORDER BY u.ID, ml.id DESC
+",
+			5 => "SELECT
+		mu.id AS record_id, u.ID AS ID, u.user_login AS user_login, u.user_email AS user_email, u.user_registered AS user_registered, mu.membership_id AS membership_id, mu.initial_payment AS initial_payment, mu.billing_amount AS billing_amount, mu.cycle_period AS cycle_period, mu.cycle_number AS cycle_number, mu.billing_limit AS billing_limit, mu.code_id AS code_id, mu.status AS status, mu.trial_amount AS trial_amount, mu.trial_limit AS trial_limit, mu.startdate AS startdate, mu.enddate AS enddate, ml.name AS name
+			 FROM {$wpdb->prefix}users AS u
+				LEFT JOIN {$wpdb->prefix}pmpro_memberships_users AS mu ON u.ID = mu.user_id AND mu.id = (SELECT mu3.id FROM {$wpdb->prefix}pmpro_memberships_users AS mu3 WHERE mu3.user_id = u.ID ORDER BY mu3.id DESC LIMIT 1)
+				LEFT JOIN {$wpdb->prefix}pmpro_membership_levels AS ml ON mu.membership_id = ml.id
+				LEFT JOIN {$wpdb->prefix}usermeta AS um ON u.ID = um.user_id
+				LEFT JOIN {$wpdb->prefix}pmpro_memberships_users AS mu2 ON u.ID = mu2.user_id AND mu2.status = 'active'
+			 WHERE (mu.membership_id IS NOT NULL OR mu.membership_id > 0) AND mu.status IN ('active') AND mu.membership_id = 2
+			 GROUP BY ml.id, u.ID
+			 ORDER BY u.ID, ml.id ASC
+			LIMIT 15 OFFSET 135
+",
+			6 => "SELECT
+		mu.id AS record_id, u.ID AS ID, u.user_login AS user_login, u.user_email AS user_email, u.user_registered AS user_registered, mu.membership_id AS membership_id, mu.initial_payment AS initial_payment, mu.billing_amount AS billing_amount, mu.cycle_period AS cycle_period, mu.cycle_number AS cycle_number, mu.billing_limit AS billing_limit, mu.code_id AS code_id, mu.status AS status, mu.trial_amount AS trial_amount, mu.trial_limit AS trial_limit, mu.startdate AS startdate, mu.enddate AS enddate, ml.name AS name
+			 FROM {$wpdb->prefix}users AS u
+				LEFT JOIN {$wpdb->prefix}pmpro_memberships_users AS mu ON u.ID = mu.user_id AND mu.id = (SELECT mu3.id FROM {$wpdb->prefix}pmpro_memberships_users AS mu3 WHERE mu3.user_id = u.ID ORDER BY mu3.id DESC LIMIT 1)
+				LEFT JOIN {$wpdb->prefix}pmpro_membership_levels AS ml ON mu.membership_id = ml.id
+				LEFT JOIN {$wpdb->prefix}usermeta AS um ON u.ID = um.user_id
+				LEFT JOIN {$wpdb->prefix}pmpro_memberships_users AS mu2 ON u.ID = mu2.user_id AND mu2.status = 'active'
+			 WHERE ( u.user_login LIKE '%Thomas%' OR u.user_nicename LIKE '%Thomas%' OR u.display_name LIKE '%Thomas%' OR u.user_email LIKE '%Thomas%' OR um.meta_value LIKE '%Thomas%' ) AND mu.status IN ('active') AND mu.membership_id = 2
+			 GROUP BY ml.id, u.ID
+			 ORDER BY u.ID, ml.id ASC
+			LIMIT 15 OFFSET 135
 "
 			);
 
@@ -403,13 +437,15 @@ class Members_ListTest extends WPTestCase {
 			$_REQUEST['level'] = $status;
 		}
 
+		$mc_class = new Members_List();
+
 		try {
-			$this->mc_class->get_members( $per_page, $page_number, $status );
+			$mc_class->get_members( $per_page, $page_number, $status );
 		} catch( \Exception $exp ) {
-			$this->mc_class->get('utils')->log("Error: {$exp->getMessage()}" );
+			$mc_class->get('utils')->log("Error: {$exp->getMessage()}" );
 		}
 
-		$this->assertEquals( $record_list, $this->mc_class->items );
+		$this->assertEquals( $record_list, $mc_class->items );
 	}
 
 	/**
@@ -422,6 +458,7 @@ class Members_ListTest extends WPTestCase {
 			// phpcs:ignore
 			// $per_page, $page_number, $status, $sort_order, $order_by, find, $is_email, $record_list
 			array( -1, -1, 'active', 'DESC', 'ml.id', '', true, null ),
+			array( 15, 10, 'active', 'DESC', 'ml.id', '', true, null ),
 		);
 	}
 
