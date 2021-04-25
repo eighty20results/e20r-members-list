@@ -23,6 +23,7 @@ namespace E20R\Members_List\WPUnitTest;
 
 use Codeception\TestCase\WPTestCase;
 use E20R\Members_List\Admin\Members_List;
+use E20R\Utilities\Utilities;
 use Spatie\Snapshots\MatchesSnapshots;
 
 class Members_ListTest extends WPTestCase {
@@ -166,19 +167,35 @@ class Members_ListTest extends WPTestCase {
 	 * @throws \Exception
 	 */
 	public function test_set_sql_columns( array $expected, ?string $filter_func ) {
+		// Init the Members_List() class
+		$mc_class = new Members_List();
 
-		// Init the class we're testing
-		$mc_class         = new Members_List();
-
-		if ( null !== $filter_func ) {
-			$mc_class->get( 'utils' )->log("Adding column map handler: {$filter_func}");
-			add_filter( 'e20r_members_list_default_sql_column_alias_map', array( $mc_class, $filter_func ), 10, 1 );
+		if ( !empty( $filter_func ) ) {
+			// $mc_class->get( 'utils' )->log("Adding column map handler: {$filter_func}");
+			add_filter( 'e20r_sql_column_alias_map', array( $this, $filter_func ), 10, 1 );
 		}
 
-		$result = $mc_class->set_sql_columns();
+		if ( null !== $filter_func ) {
+			$this->assertEquals(
+				10, // Filter priority from above
+				has_filter(
+					'e20r_sql_column_alias_map',
+					array( $this, $filter_func )
+				)
+			);
+		} else {
+			$this->assertFalse(
+				has_filter(
+					'e20r_sql_column_alias_map',
+					array( $this, $filter_func )
+				)
+			);
+		}
+		$actual = $mc_class->set_sql_columns();
 
-		// $this->assertIsArray( $result );
-		$this->assertEquals( $expected, $result );
+		$this->assertNotEmpty( $actual );
+		$this->assertContainsEquals( 'record_id', $actual );
+		$this->assertEquals( $expected, $actual );
 	}
 
 	/**
@@ -189,7 +206,6 @@ class Members_ListTest extends WPTestCase {
 	 * @return string[]
 	 */
 	public function fixture_added_surname( array $received ) : array {
-		error_log("Adding surname column");
 		$received['u.user_lastname'] = 'surname';
 		return $received;
 	}
@@ -202,9 +218,8 @@ class Members_ListTest extends WPTestCase {
 	 * @return string[]
 	 */
 	public function fixture_added_firstname( array $received ) : array {
-		error_log("Adding first_name column with array_merge()");
 		$firstname = array( 'u.user_firstname' => 'first_name' );
-		return array_merge( $received, $firstname );
+		return $received + $firstname;
 	}
 
 	/**
@@ -215,11 +230,11 @@ class Members_ListTest extends WPTestCase {
 	 * @return string[]
 	 */
 	public function fixture_adding_multiple( array $received ) : array {
-		error_log("Adding 2 columns with array_merge()");
 		$to_add = array(
 			'u.user_something' => 'something',
 			'mu.level_meta' => 'level_name'
 		);
+
 		return array_merge( $received, $to_add );
 	}
 

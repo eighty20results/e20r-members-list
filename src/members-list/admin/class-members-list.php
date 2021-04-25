@@ -206,7 +206,7 @@ class Members_List extends WP_List_Table {
 		}
 
 		$this->action       = $this->utils->get_variable( 'action', '' );
-		$this->sql_col_list = $this->set_sql_columns();
+		$this->set_sql_columns();
 
 		/**
 		 * The default Members List columns to display (with labels)
@@ -306,12 +306,11 @@ class Members_List extends WP_List_Table {
 		// Start the SELECT statement
 		$sql = 'SELECT
 		';
-		// The columns to fetch data for
-		$columns = $this->set_sql_columns();
+
 		$this->set_lastcolumn_name();
 
 		// Add to the SQL statement
-		foreach ( $columns as $name => $alias ) {
+		foreach ( $this->sql_col_list as $name => $alias ) {
 			$sql .= "{$name} AS {$alias}, ";
 		}
 
@@ -671,7 +670,7 @@ class Members_List extends WP_List_Table {
 	public function set_sql_columns() {
 
 		// Note: Format for the record array 'name' => 'alias'
-		$sql_cols = array(
+		$this->sql_col_list = array(
 			'mu.id'              => 'record_id',
 			'u.ID'               => 'ID',
 			'u.user_login'       => 'user_login',
@@ -696,10 +695,9 @@ class Members_List extends WP_List_Table {
 		 * The default mapping of DB columns (<table alias>.<column name>) to their respective alias(s)
 		 *
 		 * @filter e20r_members_list_default_sql_column_alias_map
-		 * @param string[] $sql_cols
+		 * @param string[] $sql_col_list
 		 */
-		$this->sql_col_list = apply_filters( 'e20r_members_list_default_sql_column_alias_map', $sql_cols );
-
+		$this->sql_col_list = apply_filters( 'e20r_sql_column_alias_map', $this->sql_col_list );
 		return $this->sql_col_list;
 	}
 
