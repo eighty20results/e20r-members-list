@@ -5,7 +5,8 @@ CURL := $(shell which curl)
 UNZIP := $(shell which unzip)
 PHP_BIN := $(shell which php)
 APACHE_RUN_USER ?= $(shell id -u)
-APACHE_RUN_GROUP ?= $(shell id -g)
+# APACHE_RUN_GROUP ?= $(shell id -g)
+APACHE_RUN_GROUP ?= $(shell id -u)
 SQL_BACKUP_FILE ?= $(PWD)/docker/test/db_backup
 E20R_PLUGIN_NAME ?= e20r-members-list
 MYSQL_DATABASE ?= wordpress
@@ -19,6 +20,10 @@ WP_DEPENDENCIES ?= paid-memberships-pro
 WP_PLUGIN_URL ?= "https://downloads.wordpress.org/plugin/"
 WP_CONTAINER_NAME ?= codecep-wp-$(E20R_PLUGIN_NAME)
 DB_CONTAINER_NAME ?= $(DB_IMAGE)-wp-$(E20R_PLUGIN_NAME)
+DOCKER_USER ?= eighty20results
+CONTAINER_ACCESS_TOKEN ?= $(shell [[ -f ./docker.hub.key ]] && cat ./docker.hub.key)
+CONTAINER_REPO ?= 'docker.io/eighty20results'
+WP_IMAGE_VERSION ?= 1.0
 
 # PROJECT := $(shell basename ${PWD}) # This is the default as long as the plugin name matches
 PROJECT := $(E20R_PLUGIN_NAME)
@@ -52,7 +57,12 @@ STACK_RUNNING := $(shell APACHE_RUN_USER=$(APACHE_RUN_USER) APACHE_RUN_GROUP=$(A
 	db-shell \
 	db-backup \
 	db-import \
-	test
+	test \
+	image-build \
+	image-pull \
+	image-push \
+	image-scan \
+	repo-login
 
 clean:
 	@if [[ -n "$(STACK_RUNNING)" ]]; then \
@@ -61,6 +71,36 @@ clean:
 		fi ; \
 		rm -rf inc/wp_plugins ; \
 	fi
+
+repo-login:
+	@APACHE_RUN_USER=$(APACHE_RUN_USER) APACHE_RUN_GROUP=$(APACHE_RUN_GROUP) \
+		DB_IMAGE=$(DB_IMAGE) DB_VERSION=$(DB_VERSION) WP_VERSION=$(WP_VERSION) \
+		docker login --username $(DOCKER_USER) --password $(CONTAINER_ACCESS_TOKEN)
+
+image-build: clean composer-dev deps image-pull
+	@echo "Building the docker container stack for $(PROJECT)"
+	@APACHE_RUN_USER=$(APACHE_RUN_USER) APACHE_RUN_GROUP=$(APACHE_RUN_GROUP) \
+  		DB_IMAGE=$(DB_IMAGE) DB_VERSION=$(DB_VERSION) WP_VERSION=$(WP_VERSION) \
+    	docker-compose -p $(PROJECT) --env-file $(DC_ENV_FILE) --file $(DC_CONFIG_FILE) build --pull --progress tty
+
+image-scan: image-build
+	@APACHE_RUN_USER=$(APACHE_RUN_USER) APACHE_RUN_GROUP=$(APACHE_RUN_GROUP) \
+  		DB_IMAGE=$(DB_IMAGE) DB_VERSION=$(DB_VERSION) WP_VERSION=$(WP_VERSION) \
+    	docker scan --accept-license $(CONTAINER_REPO)/$(PROJECT)_wordpress:$(WP_IMAGE_VERSION)
+
+image-push: repo-login image-build # image-scan - TODO: Enable image-scan if we can get the issues fixed
+	@APACHE_RUN_USER=$(APACHE_RUN_USER) APACHE_RUN_GROUP=$(APACHE_RUN_GROUP) \
+		DB_IMAGE=$(DB_IMAGE) DB_VERSION=$(DB_VERSION) WP_VERSION=$(WP_VERSION) \
+		docker tag $(PROJECT)_wordpress $(CONTAINER_REPO)/$(PROJECT)_wordpress:$(WP_IMAGE_VERSION)
+	@APACHE_RUN_USER=$(APACHE_RUN_USER) APACHE_RUN_GROUP=$(APACHE_RUN_GROUP) \
+  		DB_IMAGE=$(DB_IMAGE) DB_VERSION=$(DB_VERSION) WP_VERSION=$(WP_VERSION) \
+    	docker push $(CONTAINER_REPO)/$(PROJECT)_wordpress:$(WP_IMAGE_VERSION)
+
+image-pull: repo-login
+	@echo "Pulling image from Docker repo"
+	@APACHE_RUN_USER=$(APACHE_RUN_USER) APACHE_RUN_GROUP=$(APACHE_RUN_GROUP) \
+      		DB_IMAGE=$(DB_IMAGE) DB_VERSION=$(DB_VERSION) WP_VERSION=$(WP_VERSION) \
+        	docker pull $(CONTAINER_REPO)/$(PROJECT)_wordpress:$(WP_IMAGE_VERSION)
 
 real-clean: stop-stack clean
 	@echo "Make sure docker-compose stack for $(PROJECT) isn't running"
@@ -96,7 +136,7 @@ deps: clean composer-dev
   		fi ; \
   	done
 
-start-stack: deps
+start-stack: image-pull deps
 	@echo "Number of running containers for $(PROJECT): $(STACK_RUNNING)"
 	@if [[ 2 -ne "$(STACK_RUNNING)" ]]; then \
   		echo "Building and starting the WordPress stack for testing purposes" ; \

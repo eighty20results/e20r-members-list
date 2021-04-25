@@ -6,7 +6,7 @@ volumes:
 
 services:
   wordpress:
-    container_name: codecep-wp-${E20R_PLUGIN_NAME}
+    container_name: ${E20R_PLUGIN_NAME}_wordpress
     build:
       context: .
       dockerfile: tests/docker/Dockerfile.unittest

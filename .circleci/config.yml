@@ -11,6 +11,7 @@ defaults: &defaults
       type: string
   docker:
     - image: cimg/php:<< parameters.p_version >>
+      user: root
 
 commands:
   build-test-environment:
@@ -83,29 +84,58 @@ commands:
           command: sudo rm -f composer-setup.php
       - setup_remote_docker
 
+  build-wordpress-container:
+    description: "Standard install steps for the plugin tests"
+    parameters:
+      p_version:
+        default: "7.4"
+        type: string
+      composer_version:
+        default: '1.28.6'
+        type: string
+    steps:
+      - attach_workspace:
+          at: ~/repo
+      - checkout
+      - run:
+          name: Pull WordPress/Codeception container
+          command: make image-pull
+      - run:
+          name: Create WordPress/Codeception container (if needed)
+          command: make image-push
+
+
 jobs:
+  build-container:
+    <<: *defaults
+    steps:
+      - build-test-environment
+      - build-wordpress-container
+
   wp-unit-test:
     <<: *defaults
     steps:
-    - build-test-environment
-    - run:
-        name: Create & start the WordPress container stack
-        command: make start-stack
-    - run:
-        name: Load the DB if it exists
-        command: make db-import
-    - run:
-        name: Run Unit Tests (WP & PMPro Integration tests)
-        command: make wp-unit-test
-    - run:
-        name: Stop the container stack
-        command: make real-clean
+      - build-test-environment
+      - build-wordpress-container
+      - run:
+          name: Create & start the WordPress container stack
+          command: make start-stack
+      - run:
+          name: Load the DB if it exists
+          command: make db-import
+      - run:
+          name: Run Unit Tests (WP & PMPro Integration tests)
+          command: make wp-unit-test
+      - run:
+          name: Stop the container stack
+          command: make real-clean
 
 
   code-standards-test:
     <<: *defaults
     steps:
       - build-test-environment
+      - build-wordpress-container
       - run:
           name: Run WPCS Code Standard Tests
           command: make code-standard-test
@@ -114,6 +144,7 @@ jobs:
     <<: *defaults
     steps:
       - build-prod-environment
+      - build-wordpress-container
       - run:
           name: Create changelog source from GIT repository
           command: make gitlog
@@ -125,11 +156,16 @@ workflows:
   version: 2
   run_tests:
     jobs:
-      - code-standards-test
+      - build-container
+      - code-standards-test:
+          requires:
+            - build-container
       - wp-unit-test:
           requires:
+            - build-container
             - code-standards-test
       - build-plugin:
           requires:
+            - build-container
             - code-standards-test
             - wp-unit-test

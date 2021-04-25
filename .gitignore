@@ -77,3 +77,5 @@ docker-env/e20r-members-list.sql
 /composer.lock
 /build/e20r-members-list
 /docker.hub.key
+/.circleci/backup.yml
+/.circleci/old-config.yml
