@@ -795,11 +795,12 @@ class Members_List extends WP_List_Table {
 		 */
 		$new_columns = apply_filters( 'e20r_memberslist_columnlist', array(), $columns );
 		$new_columns = apply_filters( 'e20r_members_list_add_to_default_table_columns', $new_columns, $columns );
+		$prepend     = apply_filters( 'e20r_members_list_page_prepend_cols', false );
 
-		if ( apply_filters( 'e20r_members_list_page_prepend_cols', false ) && ! empty( $new_columns ) ) {
+		$columns = $this->default_columns + $new_columns;
+
+		if ( true === $prepend ) {
 			$columns = $new_columns + $this->default_columns;
-		} elseif ( ! empty( $new_columns ) ) {
-			$columns = $this->default_columns + $new_columns;
 		}
 
 		return $columns;
