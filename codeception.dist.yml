@@ -25,6 +25,12 @@ settings:
 coverage:
   enabled: true
   colors: true
+  remote_context_options:
+    http:
+      timeout: 60
+    ssl:
+      verify_peer: false
+  low_limit: 16
   include:
     - ./src/members-list/*
     - ./class-e20r-members-list.php
