@@ -75,7 +75,7 @@ clean:
 repo-login:
 	@APACHE_RUN_USER=$(APACHE_RUN_USER) APACHE_RUN_GROUP=$(APACHE_RUN_GROUP) \
 		DB_IMAGE=$(DB_IMAGE) DB_VERSION=$(DB_VERSION) WP_VERSION=$(WP_VERSION) \
-		docker login --username $(DOCKER_USER) --password $(CONTAINER_ACCESS_TOKEN)
+		docker login --username $(DOCKER_USER) --password-stdin <<< $(CONTAINER_ACCESS_TOKEN)
 
 image-build: clean composer-dev deps image-pull
 	@echo "Building the docker container stack for $(PROJECT)"
