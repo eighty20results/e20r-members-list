@@ -73,4 +73,4 @@ fabric.properties
 .idea/caches/build_file_checksums.ser
 
 # No need to include the Dockerfile we're building the WordPress container from, etc
-test/docker
+# test/docker
