@@ -291,17 +291,12 @@ class Members_ListTest extends WPTestCase {
 	 */
 	public function test_generate_member_sql_levels( $status, int $per_page, int $page_number, string $sort_order, string $order_by, string $find, bool $is_email, string $expected_sql ) {
 
-		if ( ! empty( $sort_order ) ) {
-			$_REQUEST['order'] = $sort_order;
-		}
+		// Configure the request
+		$_REQUEST['order'] = $sort_order;
+		$_REQUEST['orderby'] = $order_by;
+		$_REQUEST['find'] = $find;
+		$_REQUEST['level'] = $status;
 
-		if ( ! empty( $find ) ) {
-			$_REQUEST['find'] = $find;
-		}
-
-		if ( ! empty( $status ) ) {
-			$_REQUEST['level'] = $status;
-		}
 		$mc_class = new Members_List();
 		$mc_class->generate_member_sql( $per_page, $page_number );
 		$resulting_sql = $mc_class->get( 'sql_query' );
@@ -319,13 +314,16 @@ class Members_ListTest extends WPTestCase {
 		return array(
 			// phpcs:ignore
 			// $status, $per_page, $page_number, $sort_order, $order_by, find, $is_email, $expected_sql
-			array( 'all', -1, -1, 'DESC', 'ml.id', '', true, $this->fixture_sql_statement_levels( 0 ) ), // OK
-			array( 'all', -1, -1, 'ASC', 'mu.membership_id', '', true, $this->fixture_sql_statement_levels( 1 ) ), // OK
-			array( 'active', -1, -1, 'DESC', 'ml.id', '', true, $this->fixture_sql_statement_levels( 2 ) ), // OK
-			array( 'oldmembers', -1, -1, 'DESC', 'ml.id', '', true, $this->fixture_sql_statement_levels( 3 ) ), // OK
-			array( 1, -1, -1, 'DESC', 'ml.id', '', true, $this->fixture_sql_statement_levels( 4 ) ), // OK
-			array( 2, 15, 10, 'ASC', 'ml.id', '', true, $this->fixture_sql_statement_levels( 5 ) ), // OK
-			array( 2, 15, 10, 'ASC', 'ml.id', 'Thomas', true, $this->fixture_sql_statement_levels( 6 ) ),
+			array( 'all', -1, -1, 'DESC', 'ml.id, u.ID', '', true, $this->fixture_sql_statement_levels( 0 ) ), // OK
+			array( 'all', -1, -1, 'ASC', 'u.ID', '', true, $this->fixture_sql_statement_levels( 1 ) ), // OK
+			array( 'active', -1, -1, 'DESC', 'ml.id, u.ID', '', true, $this->fixture_sql_statement_levels( 2 ) ), // OK
+			array( 'oldmembers', -1, -1, 'DESC', 'ml.id, u.ID', '', true, $this->fixture_sql_statement_levels( 3 ) ), // OK
+			array( 1, -1, -1, 'DESC', 'ml.id, u.ID', '', true, $this->fixture_sql_statement_levels( 4 ) ), // OK
+			array( 2, 15, 10, 'ASC', 'ml.id, u.ID', '', true, $this->fixture_sql_statement_levels( 5 ) ), // OK
+			array( 2, 15, 11, 'ASC', 'ml.id, u.ID', 'Thomas', true, $this->fixture_sql_statement_levels( 6 ) ),
+			array( 'expired', -1, -1, 'DESC', 'ml.id, u.ID', '', true, $this->fixture_sql_statement_levels( 7 ) ), // OK
+			array( 'cancelled', -1, -1, 'DESC', 'ml.id, u.ID', '', true, $this->fixture_sql_statement_levels( 8 ) ), // OK
+			array( 'all', -1, -1, '', 'mu.membership_id', '', true, $this->fixture_sql_statement_levels( 9 ) ), // OK
 		);
 	}
 
@@ -349,7 +347,7 @@ class Members_ListTest extends WPTestCase {
 				LEFT JOIN {$wpdb->prefix}pmpro_memberships_users AS mu2 ON u.ID = mu2.user_id AND mu2.status = 'active'
 			 WHERE mu.status IN ('cancelled','admin_cancelled','admin_change','admin_changed','changed','inactive','active','expired')
 			 GROUP BY ml.id, u.ID
-			 ORDER BY u.ID, ml.id DESC
+			 ORDER BY ml.id, u.ID DESC
 ",
 			1 => "SELECT
 		mu.id AS record_id, u.ID AS ID, u.user_login AS user_login, u.user_email AS user_email, u.user_registered AS user_registered, mu.membership_id AS membership_id, mu.initial_payment AS initial_payment, mu.billing_amount AS billing_amount, mu.cycle_period AS cycle_period, mu.cycle_number AS cycle_number, mu.billing_limit AS billing_limit, mu.code_id AS code_id, mu.status AS status, mu.trial_amount AS trial_amount, mu.trial_limit AS trial_limit, mu.startdate AS startdate, mu.enddate AS enddate, ml.name AS name
@@ -360,7 +358,7 @@ class Members_ListTest extends WPTestCase {
 				LEFT JOIN {$wpdb->prefix}pmpro_memberships_users AS mu2 ON u.ID = mu2.user_id AND mu2.status = 'active'
 			 WHERE mu.status IN ('cancelled','admin_cancelled','admin_change','admin_changed','changed','inactive','active','expired')
 			 GROUP BY ml.id, u.ID
-			 ORDER BY u.ID, ml.id ASC
+			 ORDER BY u.ID ASC
 ",
 			2 => "SELECT
 		mu.id AS record_id, u.ID AS ID, u.user_login AS user_login, u.user_email AS user_email, u.user_registered AS user_registered, mu.membership_id AS membership_id, mu.initial_payment AS initial_payment, mu.billing_amount AS billing_amount, mu.cycle_period AS cycle_period, mu.cycle_number AS cycle_number, mu.billing_limit AS billing_limit, mu.code_id AS code_id, mu.status AS status, mu.trial_amount AS trial_amount, mu.trial_limit AS trial_limit, mu.startdate AS startdate, mu.enddate AS enddate, ml.name AS name
@@ -370,7 +368,7 @@ class Members_ListTest extends WPTestCase {
 				LEFT JOIN {$wpdb->prefix}usermeta AS um ON u.ID = um.user_id
 			 WHERE (mu.membership_id IS NOT NULL OR mu.membership_id > 0) AND mu.status IN ('active')
 			 GROUP BY ml.id, u.ID
-			 ORDER BY u.ID, ml.id DESC
+			 ORDER BY ml.id, u.ID DESC
 ",
 			3 => "SELECT
 		mu.id AS record_id, u.ID AS ID, u.user_login AS user_login, u.user_email AS user_email, u.user_registered AS user_registered, mu.membership_id AS membership_id, mu.initial_payment AS initial_payment, mu.billing_amount AS billing_amount, mu.cycle_period AS cycle_period, mu.cycle_number AS cycle_number, mu.billing_limit AS billing_limit, mu.code_id AS code_id, mu.status AS status, mu.trial_amount AS trial_amount, mu.trial_limit AS trial_limit, mu.startdate AS startdate, mu.enddate AS enddate, ml.name AS name
@@ -381,7 +379,7 @@ class Members_ListTest extends WPTestCase {
 				LEFT JOIN {$wpdb->prefix}pmpro_memberships_users AS mu2 ON u.ID = mu2.user_id AND mu2.status = 'active'
 			 WHERE mu.status IN ('expired', 'cancelled') AND mu2.status IS NULL
 			 GROUP BY ml.id, u.ID
-			 ORDER BY u.ID, ml.id DESC
+			 ORDER BY ml.id, u.ID DESC
 ",
 			4 => "SELECT
 		mu.id AS record_id, u.ID AS ID, u.user_login AS user_login, u.user_email AS user_email, u.user_registered AS user_registered, mu.membership_id AS membership_id, mu.initial_payment AS initial_payment, mu.billing_amount AS billing_amount, mu.cycle_period AS cycle_period, mu.cycle_number AS cycle_number, mu.billing_limit AS billing_limit, mu.code_id AS code_id, mu.status AS status, mu.trial_amount AS trial_amount, mu.trial_limit AS trial_limit, mu.startdate AS startdate, mu.enddate AS enddate, ml.name AS name
@@ -392,7 +390,7 @@ class Members_ListTest extends WPTestCase {
 				LEFT JOIN {$wpdb->prefix}pmpro_memberships_users AS mu2 ON u.ID = mu2.user_id AND mu2.status = 'active'
 			 WHERE (mu.membership_id IS NOT NULL OR mu.membership_id > 0) AND mu.status IN ('active') AND mu.membership_id = 1
 			 GROUP BY ml.id, u.ID
-			 ORDER BY u.ID, ml.id DESC
+			 ORDER BY ml.id, u.ID DESC
 ",
 			5 => "SELECT
 		mu.id AS record_id, u.ID AS ID, u.user_login AS user_login, u.user_email AS user_email, u.user_registered AS user_registered, mu.membership_id AS membership_id, mu.initial_payment AS initial_payment, mu.billing_amount AS billing_amount, mu.cycle_period AS cycle_period, mu.cycle_number AS cycle_number, mu.billing_limit AS billing_limit, mu.code_id AS code_id, mu.status AS status, mu.trial_amount AS trial_amount, mu.trial_limit AS trial_limit, mu.startdate AS startdate, mu.enddate AS enddate, ml.name AS name
@@ -403,7 +401,7 @@ class Members_ListTest extends WPTestCase {
 				LEFT JOIN {$wpdb->prefix}pmpro_memberships_users AS mu2 ON u.ID = mu2.user_id AND mu2.status = 'active'
 			 WHERE (mu.membership_id IS NOT NULL OR mu.membership_id > 0) AND mu.status IN ('active') AND mu.membership_id = 2
 			 GROUP BY ml.id, u.ID
-			 ORDER BY u.ID, ml.id ASC
+			 ORDER BY ml.id, u.ID ASC
 			LIMIT 15 OFFSET 135
 ",
 			6 => "SELECT
@@ -415,8 +413,41 @@ class Members_ListTest extends WPTestCase {
 				LEFT JOIN {$wpdb->prefix}pmpro_memberships_users AS mu2 ON u.ID = mu2.user_id AND mu2.status = 'active'
 			 WHERE ( u.user_login LIKE '%Thomas%' OR u.user_nicename LIKE '%Thomas%' OR u.display_name LIKE '%Thomas%' OR u.user_email LIKE '%Thomas%' OR um.meta_value LIKE '%Thomas%' ) AND mu.status IN ('active') AND mu.membership_id = 2
 			 GROUP BY ml.id, u.ID
-			 ORDER BY u.ID, ml.id ASC
-			LIMIT 15 OFFSET 135
+			 ORDER BY ml.id, u.ID ASC
+			LIMIT 15 OFFSET 150
+",
+			7 => "SELECT
+		mu.id AS record_id, u.ID AS ID, u.user_login AS user_login, u.user_email AS user_email, u.user_registered AS user_registered, mu.membership_id AS membership_id, mu.initial_payment AS initial_payment, mu.billing_amount AS billing_amount, mu.cycle_period AS cycle_period, mu.cycle_number AS cycle_number, mu.billing_limit AS billing_limit, mu.code_id AS code_id, mu.status AS status, mu.trial_amount AS trial_amount, mu.trial_limit AS trial_limit, mu.startdate AS startdate, mu.enddate AS enddate, ml.name AS name
+			 FROM {$wpdb->prefix}users AS u
+				LEFT JOIN {$wpdb->prefix}pmpro_memberships_users AS mu ON u.ID = mu.user_id AND mu.id = (SELECT mu3.id FROM {$wpdb->prefix}pmpro_memberships_users AS mu3 WHERE mu3.user_id = u.ID ORDER BY mu3.id DESC LIMIT 1)
+				LEFT JOIN {$wpdb->prefix}pmpro_membership_levels AS ml ON mu.membership_id = ml.id
+				LEFT JOIN {$wpdb->prefix}usermeta AS um ON u.ID = um.user_id
+				LEFT JOIN {$wpdb->prefix}pmpro_memberships_users AS mu2 ON u.ID = mu2.user_id AND mu2.status = 'active'
+			 WHERE mu.status IN ('expired') AND mu2.status IS NULL
+			 GROUP BY ml.id, u.ID
+			 ORDER BY ml.id, u.ID DESC
+",
+			8 => "SELECT
+		mu.id AS record_id, u.ID AS ID, u.user_login AS user_login, u.user_email AS user_email, u.user_registered AS user_registered, mu.membership_id AS membership_id, mu.initial_payment AS initial_payment, mu.billing_amount AS billing_amount, mu.cycle_period AS cycle_period, mu.cycle_number AS cycle_number, mu.billing_limit AS billing_limit, mu.code_id AS code_id, mu.status AS status, mu.trial_amount AS trial_amount, mu.trial_limit AS trial_limit, mu.startdate AS startdate, mu.enddate AS enddate, ml.name AS name
+			 FROM {$wpdb->prefix}users AS u
+				LEFT JOIN {$wpdb->prefix}pmpro_memberships_users AS mu ON u.ID = mu.user_id AND mu.id = (SELECT mu3.id FROM {$wpdb->prefix}pmpro_memberships_users AS mu3 WHERE mu3.user_id = u.ID ORDER BY mu3.id DESC LIMIT 1)
+				LEFT JOIN {$wpdb->prefix}pmpro_membership_levels AS ml ON mu.membership_id = ml.id
+				LEFT JOIN {$wpdb->prefix}usermeta AS um ON u.ID = um.user_id
+				LEFT JOIN {$wpdb->prefix}pmpro_memberships_users AS mu2 ON u.ID = mu2.user_id AND mu2.status = 'active'
+			 WHERE mu.status IN ('cancelled','admin_cancelled','admin_change','admin_changed','changed','inactive') AND mu2.status IS NULL
+			 GROUP BY ml.id, u.ID
+			 ORDER BY ml.id, u.ID DESC
+",
+			9 => "SELECT
+		mu.id AS record_id, u.ID AS ID, u.user_login AS user_login, u.user_email AS user_email, u.user_registered AS user_registered, mu.membership_id AS membership_id, mu.initial_payment AS initial_payment, mu.billing_amount AS billing_amount, mu.cycle_period AS cycle_period, mu.cycle_number AS cycle_number, mu.billing_limit AS billing_limit, mu.code_id AS code_id, mu.status AS status, mu.trial_amount AS trial_amount, mu.trial_limit AS trial_limit, mu.startdate AS startdate, mu.enddate AS enddate, ml.name AS name
+			 FROM {$wpdb->prefix}users AS u
+				LEFT JOIN {$wpdb->prefix}pmpro_memberships_users AS mu ON u.ID = mu.user_id AND mu.id = (SELECT mu3.id FROM {$wpdb->prefix}pmpro_memberships_users AS mu3 WHERE mu3.user_id = u.ID ORDER BY mu3.id DESC LIMIT 1)
+				LEFT JOIN {$wpdb->prefix}pmpro_membership_levels AS ml ON mu.membership_id = ml.id
+				LEFT JOIN {$wpdb->prefix}usermeta AS um ON u.ID = um.user_id
+				LEFT JOIN {$wpdb->prefix}pmpro_memberships_users AS mu2 ON u.ID = mu2.user_id AND mu2.status = 'active'
+			 WHERE mu.status IN ('cancelled','admin_cancelled','admin_change','admin_changed','changed','inactive','active','expired')
+			 GROUP BY ml.id, u.ID
+			 ORDER BY mu.membership_id DESC
 "
 			);
 
@@ -455,7 +486,7 @@ class Members_ListTest extends WPTestCase {
 		$mc_class = new Members_List();
 
 		try {
-			$mc_class->get_members( $per_page, $page_number, $status );
+			$mc_class->get_members( $per_page, $page_number );
 		} catch( \Exception $exp ) {
 			$mc_class->get('utils')->log("Error: {$exp->getMessage()}" );
 		}
@@ -504,13 +535,81 @@ class Members_ListTest extends WPTestCase {
 		);
 	}
 
+	/**
+	 * Test the columns to display (and their order)
+	 *
+	 * @param string   $filter_name
+	 * @param string   $filter_method
+	 * @param string[] $expected
+	 *
+	 * @dataProvider fixture_table_columns
+	 * @throws \Exception
+	 */
+	public function test_all_columns( string $filter_name, string $filter_method,  array $expected ) {
+
+		// Configure & set the last column name we should have
+		$mlist = new Members_List();
+
+		// Add a filter(s) to update the columns
+		if ( $filter_name ) {
+			$mlist->get('utils')->log("Adding '{$filter_method}' to '${filter_name}'");
+			add_filter( $filter_name, array( $this, $filter_method) );
+		}
+
+		$actual = $mlist->all_columns();
+		$this->assertEquals( $expected, $actual );
+	}
+
+	/**
+	 * Fixture: Filters for the all_columns() tests
+	 *
+	 * @return array[]
+	 */
+	public function fixture_table_columns() {
+		return array(
+			// $filter_name, $filter_method, $expected
+			array(
+				'e20r_memberslist_columnlist',
+				'pfixture_last_column',
+				$this->fixture_default_columns() + array( 'last' => 'Ends on' )
+			),
+		);
+	}
+
+	public function pfixture_last_column( $columns ) {
+		$columns['last'] = 'Ends on';
+		return $columns;
+	}
+	/**
+	 * Default set of columns we should expect
+	 *
+	 * @return string[]
+	 */
+	public function fixture_default_columns() {
+
+		$default = array(
+			'cb'              => '<input type="checkbox" />',
+			'user_login'      => _x( 'Login', 'e20r-members-list' ),
+			'first_name'      => _x( 'First Name', 'e20r-members-list' ),
+			'last_name'       => _x( 'Last Name', 'e20r-members-list' ),
+			'user_email'      => _x( 'Email', 'e20r-members-list' ),
+			'baddress'        => _x( 'Billing Info', 'e20r-members-list' ),
+			'name'            => _x( 'Level', 'e20r-members-list' ),
+			'fee'             => _x( 'Fee', 'e20r-members-list' ),
+			'code'            => _x( 'Discount Code', 'e20r-members-list' ),
+			'status'          => _x( 'Status', 'e20r-members-list' ),
+			'user_registered' => _x( 'Joined', 'e20r-members-list' ),
+			'startdate'       => _x( 'Start', 'e20r-members-list' ),
+			// 'last'            => _x( 'Expires', 'e20r-members-list' ),
+		);
+
+		return $default;
+	}
+
 	public function test_process_bulk_action() {
 
 	}
 
-	public function test_get_columns() {
-
-	}
 
 	public function test_export_members() {
 
