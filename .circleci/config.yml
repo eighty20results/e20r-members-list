@@ -4,7 +4,7 @@ orbs:
   php: circleci/php@1.1.0
 
 defaults: &defaults
-  working_directory: ~/repo
+  working_directory: /root/repo
   parameters:
     p_version:
       default: "7.4"
@@ -25,7 +25,7 @@ commands:
         type: string
     steps:
       - attach_workspace:
-          at: ~/repo
+          at: /root/repo
       - checkout
       - run:
           name: Install v<< parameters.composer_version >> Docker Compose
@@ -40,7 +40,7 @@ commands:
           install-version: "2.0.9"
           install-dir: ./
       - php/install-packages:
-          app-dir: ~/repo
+          app-dir: /root/repo
           install-flags: '--no-interaction'
           vendor-dir: inc/
           with-cache: true
@@ -95,7 +95,7 @@ commands:
         type: string
     steps:
       - attach_workspace:
-          at: ~/repo
+          at: /root/repo
       - checkout
       - run:
           name: Pull WordPress/Codeception container
@@ -126,6 +126,8 @@ jobs:
       - run:
           name: Run Unit Tests (WP & PMPro Integration tests)
           command: make wp-unit-test
+      - store_artifacts:
+          path: /root/repo/tests/_output/coverage
       - run:
           name: Stop the container stack
           command: make real-clean
@@ -139,6 +141,8 @@ jobs:
       - run:
           name: Run WPCS Code Standard Tests
           command: make code-standard-test
+      - store_artifacts:
+          path: /root/repo/tests/_output/coverage
 
   build-plugin:
     <<: *defaults
