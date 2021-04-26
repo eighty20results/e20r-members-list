@@ -146,9 +146,10 @@ start-stack: image-pull deps
 	fi
 
 db-import: deps start-stack
+	@echo "Maybe load WordPress data...?"
 	@bin/wait-for-db.sh '$(MYSQL_USER)' '$(MYSQL_PASSWORD)' '$(WORDPRESS_DB_HOST)' '$(E20R_PLUGIN_NAME)'
 	@if [[ -f "$(SQL_BACKUP_FILE)/$(E20R_PLUGIN_NAME).sql" ]]; then \
-  		echo "Loading the $(E20R_PLUGIN_NAME).sql data"; \
+  		echo "Loading WordPress data to use for testing $(E20R_PLUGIN_NAME)"; \
 	  	docker compose -p $(PROJECT) --env-file $(DC_ENV_FILE) --file $(DC_CONFIG_FILE) \
         	exec -T database \
         	/usr/bin/mysql -u$(MYSQL_USER) -p'$(MYSQL_PASSWORD)' -h$(WORDPRESS_DB_HOST) $(MYSQL_DATABASE) < $(SQL_BACKUP_FILE)/$(E20R_PLUGIN_NAME).sql; \
