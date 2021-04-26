@@ -26,7 +26,6 @@ services:
         adduser --uid ${APACHE_RUN_USER} --gid ${APACHE_RUN_GROUP} --home /home/docker --disabled-password --gecos '' docker
         sudo chown -R docker:docker /var/www/html/wp-content/plugins/*
         /usr/local/bin/docker-entrypoint.sh apache2-foreground
-
     environment:
       WORDPRESS_DB_HOST: ${WORDPRESS_DB_HOST}
       WORDPRESS_DB_NAME: ${WORDPRESS_DB_NAME}
