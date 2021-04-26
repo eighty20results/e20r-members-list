@@ -1,6 +1,6 @@
 # Created by .ignore support plugin (hsz.mobi)
 # Ignore everything in this directory
-.gitignore
+*
 # Except this file
 !.gitignore
 !.gitkeep
