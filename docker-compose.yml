@@ -56,10 +56,3 @@ services:
       MYSQL_PASSWORD: ${WORDPRESS_DB_PASSWORD}
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_RANDOM_ROOT_PASSWORD: ${MYSQL_RANDOM_ROOT_PASSWORD}
-    volumes:
-      - type: bind
-        source: ${SQL_BACKUP_FILE}/${E20R_PLUGIN_NAME}.sql
-        target: /docker-entrypoint-initdb.d/${E20R_PLUGIN_NAME}.sql
-        read_only: true
-
-# volumes:
