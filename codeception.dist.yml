@@ -17,8 +17,7 @@ extensions:
         - Codeception\Command\GenerateWPCanonical
         - Codeception\Command\GenerateWPXMLRPC
 params:
-    - tests/_envs/.env.testing
-#    - .env.testing
+    - ./tests/_envs/.env.testing
 settings:
   lint: true
   colors: true
