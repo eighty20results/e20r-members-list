@@ -4,7 +4,7 @@ orbs:
   php: circleci/php@1.1.0
 
 defaults: &defaults
-  working_directory: /root/repo
+  working_directory: ~/repo
   parameters:
     p_version:
       default: "7.4"
@@ -25,8 +25,11 @@ commands:
         type: string
     steps:
       - attach_workspace:
-          at: /root/repo
+          at: ~/repo
       - checkout
+      - run:
+          name: Pull the WordPress container image
+          command: make image-pull
       - run:
           name: Install v<< parameters.composer_version >> Docker Compose
           command: |
@@ -40,14 +43,15 @@ commands:
           install-version: "2.0.9"
           install-dir: ./
       - php/install-packages:
-          app-dir: /root/repo
+          app-dir: ~/repo
           install-flags: '--no-interaction'
           vendor-dir: inc/
           with-cache: true
       - run:
           name: Remove no longer needed composer setup script
           command: sudo rm -f composer-setup.php
-      - setup_remote_docker
+      - setup_remote_docker:
+          version: 20.10.2
 
   build-prod-environment:
     description: "Standard install steps for the plugin tests"
@@ -62,6 +66,9 @@ commands:
       - attach_workspace:
           at: ~/repo
       - checkout
+      - run:
+          name: Pull the WordPress container image
+          command: make image-pull
       - run:
           name: Install v<< parameters.composer_version >> Docker Compose
           command: |
@@ -82,10 +89,11 @@ commands:
       - run:
           name: Remove no longer needed composer setup script
           command: sudo rm -f composer-setup.php
-      - setup_remote_docker
+      - setup_remote_docker:
+          version: 20.10.2
 
   build-wordpress-container:
-    description: "Standard install steps for the plugin tests"
+    description: "Configure the WordPress Stack test environment"
     parameters:
       p_version:
         default: "7.4"
@@ -95,28 +103,44 @@ commands:
         type: string
     steps:
       - attach_workspace:
-          at: /root/repo
+          at: ~/repo
       - checkout
       - run:
           name: Pull WordPress/Codeception container
           command: make image-pull
       - run:
+          name: Refresh the WordPress/Codeception container
+          command: make image-build
+      - run:
           name: Create WordPress/Codeception container (if needed)
           command: make image-push
 
+  build-plugin-source-container:
+    description: "Container for the plugin sources"
+    steps:
+      - attach_workspace:
+          at: ~/repo
+      - checkout
+      - run:
+          name: Create container volume to host plugin & test sources
+          command: |
+            # create a dummy container which will hold a volume with config
+            docker create -v /root/repo --name ${VOLUME_CONTAINER} alpine:3.4 /bin/true
+            # copy a config file into this volume
+            # docker cp ./* ${VOLUME_CONTAINER}:/root/repo/
 
 jobs:
   build-container:
     <<: *defaults
     steps:
-      - build-test-environment
       - build-wordpress-container
+      - build-test-environment
 
   wp-unit-test:
     <<: *defaults
     steps:
-      - build-test-environment
       - build-wordpress-container
+      - build-test-environment
       - run:
           name: Create & start the WordPress container stack
           command: make start-stack
@@ -127,7 +151,7 @@ jobs:
           name: Run Unit Tests (WP & PMPro Integration tests)
           command: make wp-unit-test
       - store_artifacts:
-          path: /root/repo/tests/_output/coverage
+          path: ~/tests/_output/coverage/
       - run:
           name: Stop the container stack
           command: make real-clean
@@ -136,19 +160,19 @@ jobs:
   code-standards-test:
     <<: *defaults
     steps:
-      - build-test-environment
       - build-wordpress-container
+      - build-test-environment
       - run:
           name: Run WPCS Code Standard Tests
           command: make code-standard-test
       - store_artifacts:
-          path: /root/repo/tests/_output/coverage
+          path: ~/tests/_output/coverage/
 
   build-plugin:
     <<: *defaults
     steps:
-      - build-prod-environment
       - build-wordpress-container
+      - build-prod-environment
       - run:
           name: Create changelog source from GIT repository
           command: make gitlog

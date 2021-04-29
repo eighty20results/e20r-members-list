@@ -4,6 +4,7 @@ ARG APACHE_RUN_GROUP
 FROM ${WP_TAG}
 
 COPY inc/wp_plugins /var/www/html/wp-content/plugins/
+# COPY
 RUN apt-get -y update && rm -rf /var/lib/at/lists
 RUN docker-php-ext-install pdo_mysql && \
 	pecl install pcov && \

@@ -1,5 +1,6 @@
 version: "3.8"
 
+#  ${LOCAL_PLUGIN_DIR}:/var/www/html/wp-content/plugins/${E20R_PLUGIN_NAME}
 volumes:
   wordpress:
   database:
@@ -38,9 +39,7 @@ services:
       APACHE_RUN_USER: docker
       APACHE_RUN_GROUP: docker
     volumes:
-      - type: bind
-        source: ${LOCAL_PLUGIN_DIR}
-        target: /var/www/html/wp-content/plugins/${E20R_PLUGIN_NAME}
+      - ${LOCAL_PLUGIN_DIR}:/var/www/html/wp-content/plugins/${E20R_PLUGIN_NAME}
     depends_on:
       - database
 
@@ -56,3 +55,5 @@ services:
       MYSQL_PASSWORD: ${WORDPRESS_DB_PASSWORD}
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_RANDOM_ROOT_PASSWORD: ${MYSQL_RANDOM_ROOT_PASSWORD}
+    volumes:
+      - ${LOCAL_PLUGIN_DIR}:/docker-entrypoint-initdb.d
