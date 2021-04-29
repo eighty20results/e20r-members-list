@@ -36,19 +36,14 @@ commands:
             chmod +x ~/docker-compose
             sudo mv ~/docker-compose /usr/local/bin/docker-compose
       - run:
-          name: Pull the WordPress container image
-          command: make image-pull
-      - run:
           name: Verify PHP version
           command: php --version
       - php/install-composer:
           install-version: "2.0.9"
           install-dir: ./
-      - php/install-packages:
-          app-dir: ~/repo
-          install-flags: '--no-interaction'
-          vendor-dir: inc/
-          with-cache: true
+      - run:
+          name: Pull the WordPress container image
+          command: make image-pull
       - run:
           name: Remove no longer needed composer setup script
           command: sudo rm -f composer-setup.php
