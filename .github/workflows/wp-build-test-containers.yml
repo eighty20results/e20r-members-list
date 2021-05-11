@@ -1,4 +1,4 @@
-name: Test of "Release to wordpress.org" workflows
+name: Build WP plugin unit-test container
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
 jobs:
   # To push the release (sources) to the WordPress.org SVN instance for this plugin
   build-containers:
-    name: Test of "Push to wordpress.org" workflow
+    name: Build the plugin unit-test container for ${{ github.repository }}
     runs-on: ubuntu-latest
     steps:
       # All steps after this one will have env variable `E20R_PLUGIN_NAME` passed to them.
