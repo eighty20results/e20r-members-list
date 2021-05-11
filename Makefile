@@ -1,6 +1,7 @@
 DOCKER_USER ?= eighty20results
 E20R_PLUGIN_NAME ?= e20r-members-list
 WP_IMAGE_VERSION ?= 1.0
+COMPOSER_VERSION ?= 1.29.2
 
 ###
 # Standard settings for Makefile - Probably won't need to change anything here
@@ -11,6 +12,7 @@ FIND := $(shell which find)
 CURL := $(shell which curl)
 UNZIP := $(shell which unzip)
 PHP_BIN := $(shell which php)
+DC_BIN := $(shell which docker-compose)
 APACHE_RUN_USER ?= $(shell id -u)
 # APACHE_RUN_GROUP ?= $(shell id -g)
 APACHE_RUN_GROUP ?= $(shell id -u)
@@ -45,6 +47,7 @@ STACK_RUNNING := $(shell APACHE_RUN_USER=$(APACHE_RUN_USER) APACHE_RUN_GROUP=$(A
 	clean \
 	real-clean \
 	deps \
+	docker-compose-deps \
 	start-stack \
 	stop-stack \
 	restart \
@@ -120,16 +123,30 @@ real-clean: stop-stack clean
 	echo "Removing the composer dependencies" && \
 	rm -rf inc/*
 
-composer-prod: real-clean
+composer:
+	@echo "Install the PHP Composer component"
+	@curl -s https://getcomposer.org/installer | $(PHP_BIN)
+	@sudo mv composer.phar composer
+	@./composer about
+
+composer-prod: real-clean composer
 	@echo "Install/Update the Production composer dependencies"
 	@rm -rf inc/*
 	@$(PHP_BIN) composer update --ansi --prefer-stable --no-dev
 
-composer-dev:
-	@echo "Install/Update the Test dependencies"
+composer-dev: composer
+	@echo "Use composer to install/update the PHP test dependencies"
 	@$(PHP_BIN) composer update --ansi --prefer-stable
 
-deps: clean composer-dev
+docker-compose-deps:
+	@if [[ -z "$(DC_BIN)" && ! -f /usr/local/bin/docker-compose ]]; then \
+		echo "Installing docker-compose" && \
+		sudo curl -L https://github.com/docker/compose/releases/download/$(COMPOSER_VERSION)/docker-compose-`uname -s`-`uname -m` \
+			-o /usr/local/bin/docker-compose && \
+		sudo chmod +x /usr/local/bin/docker-compose ; \
+	fi
+
+deps: clean docker-compose-deps composer-dev
 	@echo "Loading WordPress plugin dependencies"
 	@for dep_plugin in $(WP_DEPENDENCIES) ; do \
   		if [[ ! -d "inc/wp_plugins/$${dep_plugin}" ]]; then \

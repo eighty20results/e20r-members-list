@@ -14,8 +14,8 @@ jobs:
       # All steps after this one will have env variable `E20R_PLUGIN_NAME` passed to them.
       - run: echo E20R_PLUGIN_NAME=$(echo ${{ github.repository }} | awk -F / '{print $2}') >> $GITHUB_ENV
 
-      - run: echo ${{ env.E20R_PLUGIN_NAME }}
-        shell: bash
+      - name: Install dependencies for ${{ env.E20R_PLUGIN_NAME }} unit-test container
+        run: make docker-compose-deps
 
 #      - uses: actions/checkout@v2
 #        with:
