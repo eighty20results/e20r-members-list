@@ -1,3 +1,10 @@
+DOCKER_USER ?= eighty20results
+E20R_PLUGIN_NAME ?= e20r-members-list
+WP_IMAGE_VERSION ?= 1.0
+
+###
+# Standard settings for Makefile - Probably won't need to change anything here
+###
 SHELL := /bin/bash
 BASE_PATH := $(PWD)
 FIND := $(shell which find)
@@ -8,7 +15,6 @@ APACHE_RUN_USER ?= $(shell id -u)
 # APACHE_RUN_GROUP ?= $(shell id -g)
 APACHE_RUN_GROUP ?= $(shell id -u)
 SQL_BACKUP_FILE ?= $(PWD)/docker/test/db_backup
-E20R_PLUGIN_NAME ?= e20r-members-list
 MYSQL_DATABASE ?= wordpress
 MYSQL_USER ?= wordpress
 MYSQL_PASSWORD ?= wordpress
@@ -20,10 +26,8 @@ WP_DEPENDENCIES ?= paid-memberships-pro
 WP_PLUGIN_URL ?= "https://downloads.wordpress.org/plugin/"
 WP_CONTAINER_NAME ?= codecep-wp-$(E20R_PLUGIN_NAME)
 DB_CONTAINER_NAME ?= $(DB_IMAGE)-wp-$(E20R_PLUGIN_NAME)
-DOCKER_USER ?= eighty20results
 CONTAINER_ACCESS_TOKEN ?= $(shell [[ -f ./docker.hub.key ]] && cat ./docker.hub.key)
-CONTAINER_REPO ?= 'docker.io/eighty20results'
-WP_IMAGE_VERSION ?= 1.0
+CONTAINER_REPO ?= 'docker.io/$(DOCKER_USER)'
 
 # PROJECT := $(shell basename ${PWD}) # This is the default as long as the plugin name matches
 PROJECT := $(E20R_PLUGIN_NAME)

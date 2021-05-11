@@ -72,5 +72,11 @@ fabric.properties
 # Android studio 3.1+ serialized cache file
 .idea/caches/build_file_checksums.ser
 
-# No need to include the Dockerfile we're building the WordPress container from, etc
-# test/docker
+# No need to include in the WordPress container
+docker-env
+.wordpress-org
+.circleci
+.github
+build
+build_env
+build_readmes

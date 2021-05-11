@@ -1,0 +1,37 @@
+name: Test of "Release to wordpress.org" workflows
+
+on:
+  push:
+    tags:
+      - test_workflow*
+
+jobs:
+  # To push the release (sources) to the WordPress.org SVN instance for this plugin
+  build-containers:
+    name: Test of "Push to wordpress.org" workflow
+    runs-on: ubuntu-latest
+    steps:
+      # All steps after this one will have env variable `E20R_PLUGIN_NAME` passed to them.
+      - run: echo E20R_PLUGIN_NAME=$(echo ${{ github.repository }} | awk -F / '{print $2}') >> $GITHUB_ENV
+
+      - run: echo ${{ env.E20R_PLUGIN_NAME }}
+        shell: bash
+
+#      - uses: actions/checkout@v2
+#        with:
+#          repository: eighty20results/${{ env.E20R_PLUGIN_NAME }}
+#          ssh_key: ${{ env.E20R_SSH_KEY }}
+##          ref: test_workflow_updates
+#          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Pull the container from the Docker HUB
+        run: make image-pull
+        shell: bash
+        env:
+          E20R_PLUGIN_NAME: ${{ env.E20R_PLUGIN_NAME }}
+
+      - name: Update the container (build if necessary)
+        run: make image-build
+        shell: bash
+        env:
+          E20R_PLUGIN_NAME: ${{ env.E20R_PLUGIN_NAME }}
