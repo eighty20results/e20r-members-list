@@ -125,7 +125,7 @@ real-clean: stop-stack clean
 
 composer:
 	@echo "Install the PHP Composer component"
-	@curl -s https://getcomposer.org/installer | $(PHP_BIN)
+	@curl -Ss https://getcomposer.org/installer | $(PHP_BIN)
 	@sudo mv composer.phar composer
 	@./composer about
 
