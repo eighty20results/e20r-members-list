@@ -80,3 +80,4 @@ docker-env/e20r-members-list.sql
 /.circleci/backup.yml
 /.circleci/old-config.yml
 /workflow/
+/_actions/
