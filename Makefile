@@ -143,7 +143,7 @@ composer-dev: php-composer
 	@echo "Use composer to install/update the PHP test dependencies"
 	@$(PHP_BIN) composer update --ansi --prefer-stable
 
-docker-compose-deps:
+docker-compose:
 	@if [[ -z "$(DC_BIN)" && ! -f /usr/local/bin/docker-compose ]]; then \
 		echo "Installing docker-compose" && \
 		sudo curl -L https://github.com/docker/compose/releases/download/$(COMPOSER_VERSION)/docker-compose-`uname -s`-`uname -m` \
@@ -151,7 +151,7 @@ docker-compose-deps:
 		sudo chmod +x /usr/local/bin/docker-compose ; \
 	fi
 
-deps: clean docker-compose-deps composer-dev
+deps: clean docker-compose composer-dev
 	@echo "Loading WordPress plugin dependencies"
 	@for dep_plugin in $(WP_DEPENDENCIES) ; do \
   		if [[ ! -d "inc/wp_plugins/$${dep_plugin}" ]]; then \

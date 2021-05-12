@@ -28,7 +28,7 @@ jobs:
         run: echo E20R_PLUGIN_NAME=$(echo ${{ github.repository }} | awk -F / '{print $2}') >> $GITHUB_ENV
 
       - name: Install the bc utility - needed in order to install/configure php
-        run: sudo apt-get update -y && sudo apt-get install -y bc docker-compose
+        run: sudo apt-get update -y && sudo apt-get install -y bc
 
       - name: Install required PHP versions & tools
         uses: shivammathur/setup-php@v2
@@ -38,8 +38,17 @@ jobs:
           tools: composer:v2, phpunit, pecl, php-cs-fixer, phpcs, phplint, phpmd, phpstan
           coverage: pcov
 
+      - name: Install docker-compose tool
+        run: make docker-compose
+        shell: bash
+        env:
+          E20R_PLUGIN_NAME: ${{ env.E20R_PLUGIN_NAME }}
+          DOCKER_USER: ${{ secrets.DOCKER_USER }}
+          CONTAINER_ACCESS_TOKEN: ${{ secrets.CONTAINER_ACCESS_TOKEN }}
+
       - name: Pull the container from the Docker HUB
-        run: make image-pull
+        run: echo ${DOCKER_USER} && make image-pull
+        shell: bash
         env:
           E20R_PLUGIN_NAME: ${{ env.E20R_PLUGIN_NAME }}
           DOCKER_USER: ${{ secrets.DOCKER_USER }}
@@ -47,6 +56,7 @@ jobs:
 
       - name: Update the container (build if necessary)
         run: make image-build
+        shell: bash
         env:
           E20R_PLUGIN_NAME: ${{ env.E20R_PLUGIN_NAME }}
           DOCKER_USER: ${{ secrets.DOCKER_USER }}
