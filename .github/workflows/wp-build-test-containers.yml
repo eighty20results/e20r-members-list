@@ -28,7 +28,7 @@ jobs:
         run: echo E20R_PLUGIN_NAME=$(echo ${{ github.repository }} | awk -F / '{print $2}') >> $GITHUB_ENV
 
       - name: Install the bc utility - needed in order to install/configure php
-        run: sudo apt-get update -y && sudo apt-get install -y bc
+        run: sudo apt-get update -y && sudo apt-get install -y bc docker-compose
 
       - name: Install required PHP versions & tools
         uses: shivammathur/setup-php@v2
