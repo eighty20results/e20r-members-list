@@ -28,7 +28,7 @@ WP_DEPENDENCIES ?= paid-memberships-pro
 WP_PLUGIN_URL ?= "https://downloads.wordpress.org/plugin/"
 WP_CONTAINER_NAME ?= codecep-wp-$(E20R_PLUGIN_NAME)
 DB_CONTAINER_NAME ?= $(DB_IMAGE)-wp-$(E20R_PLUGIN_NAME)
-CONTAINER_ACCESS_TOKEN ?= $(shell [[ -f ./docker.hub.key ]] && cat ./docker.hub.key)
+CONTAINER_ACCESS_TOKEN := $(shell [[ -f ./docker.hub.key ]] && cat ./docker.hub.key)
 CONTAINER_REPO ?= 'docker.io/$(DOCKER_USER)'
 
 # PROJECT := $(shell basename ${PWD}) # This is the default as long as the plugin name matches
@@ -146,7 +146,7 @@ composer-dev: php-composer
 docker-compose:
 	@if [[ -z "$(DC_BIN)" && ! -f /usr/local/bin/docker-compose ]]; then \
 		echo "Installing docker-compose" && \
-		sudo curl --quiet -L https://github.com/docker/compose/releases/download/$(COMPOSER_VERSION)/docker-compose-`uname -s`-`uname -m` \
+		sudo curl --silent -L https://github.com/docker/compose/releases/download/$(COMPOSER_VERSION)/docker-compose-`uname -s`-`uname -m` \
 			-o /usr/local/bin/docker-compose && \
 		sudo chmod +x /usr/local/bin/docker-compose ; \
 	fi

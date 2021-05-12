@@ -39,7 +39,7 @@ jobs:
           coverage: pcov
 
       - name: Install docker-compose tool
-        run: make docker-compose
+        run: make CONTAINER_ACCESS_TOKEN=${{ secrets.CONTAINER_ACCESS_TOKEN }} DOCKER_USER=${{ secrets.DOCKER_USER }} docker-compose
         shell: bash
         env:
           E20R_PLUGIN_NAME: ${{ env.E20R_PLUGIN_NAME }}
@@ -47,7 +47,7 @@ jobs:
           CONTAINER_ACCESS_TOKEN: ${{ secrets.CONTAINER_ACCESS_TOKEN }}
 
       - name: Pull the container from the Docker HUB
-        run: echo ${DOCKER_USER} && make image-pull
+        run: echo ${DOCKER_USER} && make CONTAINER_ACCESS_TOKEN=${{ secrets.CONTAINER_ACCESS_TOKEN }} DOCKER_USER=${{ secrets.DOCKER_USER }} image-pull
         shell: bash
         env:
           E20R_PLUGIN_NAME: ${{ env.E20R_PLUGIN_NAME }}
@@ -55,7 +55,7 @@ jobs:
           CONTAINER_ACCESS_TOKEN: ${{ secrets.CONTAINER_ACCESS_TOKEN }}
 
       - name: Update the container (build if necessary)
-        run: make image-build
+        run: make CONTAINER_ACCESS_TOKEN=${{ secrets.CONTAINER_ACCESS_TOKEN }} DOCKER_USER=${{ secrets.DOCKER_USER }} image-build
         shell: bash
         env:
           E20R_PLUGIN_NAME: ${{ env.E20R_PLUGIN_NAME }}
