@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        php: [ '7.3', '7.4', '8.0' ]
+        php: ['7.4']
     steps:
       # All steps after this one will have env variable `E20R_PLUGIN_NAME` passed to them.
       - name: Checkout code
@@ -42,12 +42,12 @@ jobs:
         run: make image-pull
         env:
           E20R_PLUGIN_NAME: ${{ env.E20R_PLUGIN_NAME }}
-          DOCKER_USER: ${{ security.DOCKER_USER }}
-          CONTAINER_ACCESS_TOKEN: ${{ security.CONTAINER_ACCESS_TOKEN }}
+          DOCKER_USER: ${{ secrets.DOCKER_USER }}
+          CONTAINER_ACCESS_TOKEN: ${{ secrets.CONTAINER_ACCESS_TOKEN }}
 
       - name: Update the container (build if necessary)
         run: make image-build
         env:
           E20R_PLUGIN_NAME: ${{ env.E20R_PLUGIN_NAME }}
-          DOCKER_USER: ${{ security.DOCKER_USER }}
-          CONTAINER_ACCESS_TOKEN: ${{ security.CONTAINER_ACCESS_TOKEN }}
+          DOCKER_USER: ${{ secrets.DOCKER_USER }}
+          CONTAINER_ACCESS_TOKEN: ${{ secrets.CONTAINER_ACCESS_TOKEN }}
