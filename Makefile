@@ -80,7 +80,7 @@ clean:
 		rm -rf inc/wp_plugins ; \
 	fi
 	@rm -rf _actions/
-	@rm -rf work
+	@rm -rf workflow
 
 repo-login:
 	@APACHE_RUN_USER=$(APACHE_RUN_USER) APACHE_RUN_GROUP=$(APACHE_RUN_GROUP) \
