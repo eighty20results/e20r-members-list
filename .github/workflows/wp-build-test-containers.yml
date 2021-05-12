@@ -39,11 +39,15 @@ jobs:
           coverage: pcov
 
       - name: Pull the container from the Docker HUB
-        run: ls -l && make image-pull
+        run: make image-pull
         env:
           E20R_PLUGIN_NAME: ${{ env.E20R_PLUGIN_NAME }}
+          DOCKER_USER: ${{ security.DOCKER_USER }}
+          CONTAINER_ACCESS_TOKEN: ${{ security.CONTAINER_ACCESS_TOKEN }}
 
       - name: Update the container (build if necessary)
         run: make image-build
         env:
           E20R_PLUGIN_NAME: ${{ env.E20R_PLUGIN_NAME }}
+          DOCKER_USER: ${{ security.DOCKER_USER }}
+          CONTAINER_ACCESS_TOKEN: ${{ security.CONTAINER_ACCESS_TOKEN }}
