@@ -28,8 +28,10 @@ WP_DEPENDENCIES ?= paid-memberships-pro
 WP_PLUGIN_URL ?= "https://downloads.wordpress.org/plugin/"
 WP_CONTAINER_NAME ?= codecep-wp-$(E20R_PLUGIN_NAME)
 DB_CONTAINER_NAME ?= $(DB_IMAGE)-wp-$(E20R_PLUGIN_NAME)
-CONTAINER_ACCESS_TOKEN := $(shell [[ -f ./docker.hub.key ]] && cat ./docker.hub.key)
+# CONTAINER_ACCESS_TOKEN := $(shell [[ -f ./docker.hub.key ]] && cat ./docker.hub.key)
+CONTAINER_ACCESS_TOKEN := $(if $${CONTAINER_ACCESS_TOKEN},$${CONTAINER_ACCESS_TOKEN},$(shell [[ -f ./docker.hub.key ]] && cat ./docker.hub.key))
 CONTAINER_REPO ?= 'docker.io/$(DOCKER_USER)'
+
 
 # PROJECT := $(shell basename ${PWD}) # This is the default as long as the plugin name matches
 PROJECT := $(E20R_PLUGIN_NAME)
@@ -84,9 +86,8 @@ clean:
 
 repo-login:
 	@APACHE_RUN_USER=$(APACHE_RUN_USER) APACHE_RUN_GROUP=$(APACHE_RUN_GROUP) \
-		DB_IMAGE=$(DB_IMAGE) DB_VERSION=$(DB_VERSION) WP_VERSION=$(WP_VERSION) VOLUME_CONTAINER=$(VOLUME_CONTAINER)
-		DOCKER_USER=$(DOCKER_USER) DOCKER_PASSWORD=$(CONTAINER_ACCESS_TOKEN)\
-		docker login --username $${DOCKER_USER} --password-stdin <<< $${DOCKER_PASSWORD}
+		DB_IMAGE=$(DB_IMAGE) DB_VERSION=$(DB_VERSION) WP_VERSION=$(WP_VERSION) VOLUME_CONTAINER=$(VOLUME_CONTAINER) \
+		docker login --username $(DOCKER_USER) --password-stdin <<< $(CONTAINER_ACCESS_TOKEN)
 
 image-build: deps
 	@echo "Building the docker container stack for $(PROJECT)"
