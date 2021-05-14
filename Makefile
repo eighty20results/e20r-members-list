@@ -13,6 +13,7 @@ CURL := $(shell which curl)
 UNZIP := $(shell which unzip)
 PHP_BIN := $(shell which php)
 DC_BIN := $(shell which docker-compose)
+COMPOSER_BIN := $(shell which composer)
 APACHE_RUN_USER ?= $(shell id -u)
 # APACHE_RUN_GROUP ?= $(shell id -g)
 APACHE_RUN_GROUP ?= $(shell id -u)
@@ -147,11 +148,11 @@ php-composer:
 composer-prod: real-clean php-composer
 	@echo "Install/Update the Production composer dependencies"
 	@rm -rf inc/*
-	@php composer update --ansi --prefer-stable --no-dev
+	@$(PHP_BIN) $(COMPOSER_BIN) update --ansi --prefer-stable --no-dev
 
 composer-dev: php-composer
 	@echo "Use composer to install/update the PHP test dependencies"
-	@$(PHP_BIN) composer update --ansi --prefer-stable
+	@$(PHP_BIN) $(COMPOSER_BIN) update --ansi --prefer-stable
 
 docker-compose:
 	@if [[ -z "$(DC_BIN)" && ! -f /usr/local/bin/docker-compose ]]; then \
