@@ -36,7 +36,7 @@ ifeq ($(CONTAINER_ACCESS_TOKEN),)
 CONTAINER_ACCESS_TOKEN := $(shell echo "$${CONTAINER_ACCESS_TOKEN}" )
 endif
 
-ifeq $($(CONTAINER_ACCESS_TOKEN),)
+ifeq ($(CONTAINER_ACCESS_TOKEN),)
 	@echo "Error: CONTAINER_ACCEES_TOKEN is empty!"
 	exit 1
 endif
