@@ -6,8 +6,8 @@ on:
       - test_workflow*
 
 jobs:
-  # To push the release (sources) to the WordPress.org SVN instance for this plugin
-  build-containers:
+  # Pull the WP Unit Test container(s) and run the test stack
+  wp-unit-test:
     name: Build the plugin unit-test container for ${{ github.repository }}
     runs-on: ubuntu-latest
     strategy:
