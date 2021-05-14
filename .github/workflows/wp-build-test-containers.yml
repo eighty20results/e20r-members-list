@@ -32,6 +32,8 @@ jobs:
 
       - name: Install required PHP versions & tools
         uses: shivammathur/setup-php@v2
+        env:
+          update: true # specify true or false
         with:
           php-version: ${{ matrix.php }}
           extensions: mbstring
