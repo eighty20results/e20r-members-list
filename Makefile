@@ -28,10 +28,18 @@ WP_DEPENDENCIES ?= paid-memberships-pro
 WP_PLUGIN_URL ?= "https://downloads.wordpress.org/plugin/"
 WP_CONTAINER_NAME ?= codecep-wp-$(E20R_PLUGIN_NAME)
 DB_CONTAINER_NAME ?= $(DB_IMAGE)-wp-$(E20R_PLUGIN_NAME)
-# CONTAINER_ACCESS_TOKEN := $(shell [[ -f ./docker.hub.key ]] && cat ./docker.hub.key)
-CONTAINER_ACCESS_TOKEN := $(if $${CONTAINER_ACCESS_TOKEN},$${CONTAINER_ACCESS_TOKEN},$(shell [[ -f ./docker.hub.key ]] && cat ./docker.hub.key))
+CONTAINER_ACCESS_TOKEN := $(shell [[ -f ./docker.hub.key ]] && cat ./docker.hub.key)
+
 CONTAINER_REPO ?= 'docker.io/$(DOCKER_USER)'
 
+ifeq ($(CONTAINER_ACCESS_TOKEN),)
+CONTAINER_ACCESS_TOKEN := $(shell echo "$${CONTAINER_ACCESS_TOKEN}" )
+endif
+
+ifeq $($(CONTAINER_ACCESS_TOKEN),)
+	@echo "Error: CONTAINER_ACCEES_TOKEN is empty!"
+	exit 1
+endif
 
 # PROJECT := $(shell basename ${PWD}) # This is the default as long as the plugin name matches
 PROJECT := $(E20R_PLUGIN_NAME)
