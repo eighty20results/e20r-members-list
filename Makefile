@@ -36,10 +36,10 @@ ifeq ($(CONTAINER_ACCESS_TOKEN),)
 CONTAINER_ACCESS_TOKEN := $(shell echo "$${CONTAINER_ACCESS_TOKEN}" )
 endif
 
-ifeq ($(CONTAINER_ACCESS_TOKEN),)
-	echo "Error: Docker login token is not defined!"
-	exit 1
-endif
+#ifeq ($(CONTAINER_ACCESS_TOKEN),)
+#	echo "Error: Docker login token is not defined!"
+#	exit 1
+#endif
 
 # PROJECT := $(shell basename ${PWD}) # This is the default as long as the plugin name matches
 PROJECT := $(E20R_PLUGIN_NAME)
