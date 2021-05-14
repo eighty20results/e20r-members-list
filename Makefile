@@ -37,7 +37,7 @@ CONTAINER_ACCESS_TOKEN := $(shell echo "$${CONTAINER_ACCESS_TOKEN}" )
 endif
 
 ifeq ($(CONTAINER_ACCESS_TOKEN),)
-	@echo "Error: CONTAINER_ACCEES_TOKEN is empty!"
+	echo "Error: Docker login token is not defined!"
 	exit 1
 endif
 
