@@ -240,7 +240,7 @@ code-standard-test:
 wp-unit-test: deps start-stack db-import
 	@docker-compose --project-name $(PROJECT) --env-file $(DC_ENV_FILE) --file $(DC_CONFIG_FILE) \
 		exec -T -w /var/www/html/wp-content/plugins/$(PROJECT)/ \
-		wordpress inc/bin/codecept run -v wpunit --coverage --coverage-html
+		wordpress "pwd && inc/bin/codecept run -v wpunit --coverage --coverage-html"
 
 acceptance-test: deps start-stack db-import
 	@docker-compose $(PROJECT) --env-file $(DC_ENV_FILE) --file $(DC_CONFIG_FILE) \
