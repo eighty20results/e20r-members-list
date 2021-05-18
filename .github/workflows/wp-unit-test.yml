@@ -45,7 +45,7 @@ jobs:
           CONTAINER_ACCESS_TOKEN: ${{ secrets.CONTAINER_ACCESS_TOKEN }}
 
       - name: Pull the container from the Docker HUB
-        run: make -e wp-unit-test
+        run: pwd && ls -l && make -e wp-unit-test
         shell: bash
         env:
           E20R_PLUGIN_NAME: ${{ env.E20R_PLUGIN_NAME }}
