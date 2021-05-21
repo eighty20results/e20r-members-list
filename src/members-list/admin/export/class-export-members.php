@@ -586,7 +586,7 @@ class Export_Members {
 
 			foreach ( $um_values as $key => $value ) {
 
-				$meta_values->{$key} = isset( $value[0] ) ? $value[0] : null;
+				$meta_values->{$key} = $value[0] ?? null;
 			}
 		}
 
@@ -778,14 +778,12 @@ class Export_Members {
 		 *
 		 * @since  4.0
 		 */
-		$datetime_format = apply_filters(
+		return apply_filters(
 			'e20r_members_list_csv_datetime_format',
 			$expected_format,
 			$date_format,
 			$time_format
 		);
-
-		return $datetime_format;
 	}
 
 	/**
@@ -808,25 +806,21 @@ class Export_Members {
 			case 'member_level':
 			case 'pmpro_level':
 			case 'callback':
-				$column_value = isset( $member->{$column_name} ) ? $member->{$column_name} : null;
+				$column_value = $member->{$column_name} ?? null;
 				break;
 
 			case 'pmpro_discount_code':
 				$dc_col_name  = "{$dc_col_name}{$column_name}";
-				$column_value = isset( $member->{$column_name} ) ? $member->{$column_name} : null;
+				$column_value = $member->{$column_name} ?? null;
 				break;
 
 			case 'meta_values':
-				$column_value = isset( $member->meta_values->{$column_name} ) ?
-					$member->meta_values->{$column_name} :
-					null;
+				$column_value = $member->meta_values->{$column_name} ?? null;
 				break;
 
 			default:
 				$utils->log( "Using default type (type = {$column_type}) for {$column_name}" );
-				$column_value = isset( $member->{$column_type}->{$column_name} ) ?
-					$member->{$column_type}->{$column_name} :
-					null;
+				$column_value = $member->{$column_type}->{$column_name} ?? null;
 
 				/**
 				 * Let 3rd party define the value to use for a 3rd party defined default column
@@ -920,7 +914,7 @@ class Export_Members {
 
 				$col_name = $this->map_keys( $col_key, 'db_key' );
 
-				$value  = isset( $row_data[ $col_name ] ) ? $row_data[ $col_name ] : $this->enclose( null );
+				$value  = $row_data[ $col_name ] ?? $this->enclose( null );
 				$data[] = $value;
 			}
 
@@ -939,60 +933,79 @@ class Export_Members {
 
 		$utils = Utilities::get_instance();
 		$utils->log( 'Headers have been sent already..?!? ' . ( headers_sent() ? 'Yes' : 'No' ) );
-		// false === headers_sent() &&
-		// Send the data to the recipient browser
-		if ( ! empty( $this->headers ) && false === headers_sent() && file_exists( $this->file_name ) ) {
 
-			$sent_content = ob_get_clean();
-			// phpcs:ignore
-			$utils->log( 'Browser received: ' . print_r( $sent_content, true ) );
-
-			if ( version_compare( phpversion(), '5.3.0', '>' ) ) {
-
-				//Clear the file cache for the export file
-				clearstatcache( true, $this->file_name );
-			} else {
-				// for any PHP version prior to v5.3.0
-				clearstatcache();
-			}
-
-			//Set the download size for the file
-			$this->headers[] = 'Content-Length: ' . filesize( $this->file_name );
-
-			//Set transmission (PHP) headers
-			foreach ( $this->headers as $header ) {
-				header( $header . "\r\n" );
-			}
-
-			// Disable compression for the duration of file download
-			if ( ini_get( 'zlib.output_compression' ) ) {
-				// phpcs:ignore
-				ini_set( 'zlib.output_compression', 'Off' );
-			}
-
-			// Bug fix for Flywheel Hosted like hosts where fpassthru() is disabled
-			if ( function_exists( 'fpassthru' ) ) {
-				// Open and send the file contents to the remote location
-				// phpcs:ignore
-				$fh = fopen( $this->file_name, 'rb' );
-				fpassthru( $fh );
-				// phpcs:ignore
-				fclose( $fh );
-			} else {
-				// phpcs:ignore
-				readfile( $this->file_name );
-			}
-
-			// Remove the temp file
-			unlink( $this->file_name );
-			exit();
-
-		} else {
-			$msg = __( 'No exported data available to send to your browser!', 'e20r-members-list' );
-			// phpcs:ignore
+		// Problem with the HTTP headers we need to use to send a file?
+		if ( empty( $this->headers ) ) {
+			$msg = __( 'Error - Undefined HTTP headers. Exiting!', 'e20r-members-list' );
 			$utils->log( $msg . print_r( ob_get_contents(), true ) );
 			$utils->add_message( $msg, 'error', 'backend' );
+			exit();
 		}
+
+		// Problem: The browser already received headers so it can't receive this file
+		if ( true === headers_sent() ) {
+			$msg = __(
+				'Cannot transmit export file. Review web server error logs for notices/warnings/errors. Exiting!',
+				'e20r-members-list'
+			);
+			$utils->log( $msg . print_r( ob_get_contents(), true ) );
+			$utils->add_message( $msg, 'error', 'backend' );
+			exit();
+		}
+
+		// The temporary export file we'll use to send data to the browser is gone?!?
+		if ( ! file_exists( $this->file_name ) ) {
+			$msg = __( 'Error: No export data found to transmit...', 'e20r-members-list' );
+			$utils->log( $msg . print_r( ob_get_contents(), true ) );
+			$utils->add_message( $msg, 'error', 'backend' );
+			exit();
+		}
+
+		// Actually send the data to the browser
+		$sent_content = ob_get_clean();
+
+		// phpcs:ignore
+		$utils->log( 'DEBUG: Browser received: ' . print_r( $sent_content, true ) );
+
+		if ( version_compare( phpversion(), '5.3.0', '>' ) ) {
+
+			//Clear the file cache for the export file
+			clearstatcache( true, $this->file_name );
+		} else {
+			// for any PHP version prior to v5.3.0
+			clearstatcache();
+		}
+
+		//Set the download size for the file
+		$this->headers[] = sprintf( 'Content-Length: %1$s', filesize( $this->file_name ) );
+
+		//Set transmission (PHP) headers
+		foreach ( $this->headers as $header ) {
+			header( $header . "\r\n" );
+		}
+
+		// Disable compression for the duration of file download
+		if ( ini_get( 'zlib.output_compression' ) ) {
+			// phpcs:ignore
+			ini_set( 'zlib.output_compression', 'Off' );
+		}
+
+		// Bug fix for Flywheel Hosted like hosts where fpassthru() is disabled
+		if ( function_exists( 'fpassthru' ) ) {
+			// Open and send the file contents to the remote location
+			// phpcs:ignore
+			$fh = fopen( $this->file_name, 'rb' );
+			fpassthru( $fh );
+			// phpcs:ignore
+			fclose( $fh );
+		} else {
+			// phpcs:ignore
+			readfile( $this->file_name );
+		}
+
+		// Remove the temp file
+		unlink( $this->file_name );
+		exit();
 	}
 
 	/**
@@ -1004,8 +1017,6 @@ class Export_Members {
 	 */
 	private function map_header_to_column( $header_name ) {
 
-		return isset( $this->header_map[ $header_name ]['header_key'] ) ?
-			$this->header_map[ $header_name ]['header_key'] :
-			null;
+		return $this->header_map[ $header_name ]['header_key'] ?? null;
 	}
 }
