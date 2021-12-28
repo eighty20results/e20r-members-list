@@ -1,0 +1,73 @@
+#!/usr/bin/env bash
+#
+# Configure/set plugin specific variables (used by all Make helper scripts)
+# Copyright 2021 Eighty/20 Results by Wicked Strong Chicks, LLC (Thomas Sjolshagen <thomas@eighty20results.com>)
+#
+
+# Local command
+declare sed
+sed="$(which sed)"
+
+if [[ -z "${sed}" ]]; then
+    echo "Error: The sed utility is not installed. Exiting!"
+    exit 1;
+fi
+
+# Plugin specific variables (declared global)
+declare -x github_url
+declare -x plugin_description_text
+declare -x plugin_homepage
+declare -x short_description
+declare -x short_name
+declare -x version
+declare -x remote_server
+declare -x wordpress_version
+
+short_description="Better Members List for Paid Memberships Pro"
+plugin_description_text="Extensible, sortable & bulk action capable members listing + export to CSV tool for Paid Memberships Pro."
+remote_server="${2}"
+
+short_name="e20r-members-list"
+plugin_homepage="https://${remote_server}/plugins/${short_name}/"
+version="$(./bin/get_plugin_version.sh "${1}")"
+github_url="https://github.com/eighty20results/${short_name}/"
+
+# Plugin specific files to include/exclude and move if necessary during build
+declare -x -a include=( \
+	"docs" \
+	"inc/composer" \
+	"inc/yahnis-elsts" \
+	"inc/10quality"
+	"inc/autoload.php" \
+	"src" \
+	"class-loader.php" \
+	"composer.json" \
+	"composer.phar" \
+	"README.txt" \
+	"CHANGELOG.md"
+	)
+declare -x -a exclude=( \
+	".git" \
+	"docker" \
+	"bin" \
+	"Dockerfile" \
+	"tests" \
+	"Makefile" \
+	"metadata.json" \
+	"package.json" \
+	".github" \
+	".circleci" \
+	"docker-compose.yml" \
+	"build_readmes" \
+	"build_config" \
+	"build" \
+	".idea" \
+	"*.yml" \
+	"composer.lock" \
+	"docker.hub.key" \
+	"vendor" \
+	)
+declare -x -a build=()
+
+# Not a plugin specific variable, but expensive to populate
+wordpress_version=$(wget -q -O - http://api.wordpress.org/core/stable-check/1.0/  | grep latest | awk '{ print $1 }' | sed -e 's/"//g')
