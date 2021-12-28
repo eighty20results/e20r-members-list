@@ -149,7 +149,7 @@ clean-inc:
 # Log in to your Docker HUB account before performing pull/push operations
 #
 docker-hub-login:
-	@if [[ "inactive" -ne "$(LOCAL_NETWORK_STATUS)" ]]; then \
+	@if [[ "inactive" != "$(LOCAL_NETWORK_STATUS)" ]]; then \
 		echo "Login for Docker Hub" ; \
 		docker login --username ${DOCKER_USER} --password ${CONTAINER_ACCESS_TOKEN} ; \
 	fi
@@ -159,7 +159,7 @@ docker-hub-login:
 # (re)Build the Docker images for this development/test environment
 #
 image-build: docker-deps
-	@if [[ "$(LOCAL_NETWORK_STATUS)" -ne "inactive" ]]; then \
+	@if [[ "$(LOCAL_NETWORK_STATUS)" != "inactive" ]]; then \
 		echo "Building the docker container stack for $(PROJECT)" ; \
 		APACHE_RUN_USER=$(APACHE_RUN_USER) APACHE_RUN_GROUP=$(APACHE_RUN_GROUP) \
   		DB_IMAGE=$(DB_IMAGE) DB_VERSION=$(DB_VERSION) WP_VERSION=$(WP_VERSION) VOLUME_CONTAINER=$(VOLUME_CONTAINER) \
@@ -190,7 +190,7 @@ image-push: docker-hub-login # image-scan
 # Attempt to pull (download) the plugin specific Docker images for the test/development environment
 #
 image-pull: docker-hub-login
-	@if docker manifest inspect $(CONTAINER_REPO)/$(PROJECT)_wordpress:$(WP_IMAGE_VERSION) > /dev/null && "$(LOCAL_NETWORK_STATUS)" -ne "inactive"; then \
+	@if docker manifest inspect $(CONTAINER_REPO)/$(PROJECT)_wordpress:$(WP_IMAGE_VERSION) > /dev/null && "$(LOCAL_NETWORK_STATUS)" != "inactive"; then \
 		echo "Pulling image from Docker repo" ; \
 		APACHE_RUN_USER=$(APACHE_RUN_USER) APACHE_RUN_GROUP=$(APACHE_RUN_GROUP) \
       		DB_IMAGE=$(DB_IMAGE) DB_VERSION=$(DB_VERSION) WP_VERSION=$(WP_VERSION) VOLUME_CONTAINER=$(VOLUME_CONTAINER) \
@@ -208,7 +208,7 @@ real-clean: stop-stack clean clean-inc clean-wp-deps
 # Install the composer.phar file to the local directory
 #
 php-composer:
-	@if [[ -n "$(PHP_BIN)" && "inactive" -ne "$(LOCAL)" ]]; then \
+	@if [[ ! -z "$(PHP_BIN)" && "Xinactive" != "X$(LOCAL_NETWORK_STATUS)" ]]; then \
 	    echo "Install the PHP Composer component" && \
 	    $(PHP_BIN) -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" && \
 	    $(PHP_BIN) -r "if (hash_file('sha384', 'composer-setup.php') === '906a84df04cea2aa72f40b5f787e49f22d4c2f19492ac310e8cba5b96ac8b64115ac402c8cd292b8a03482574915d1a8') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;" && \
