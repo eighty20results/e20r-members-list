@@ -4,7 +4,7 @@ services:
   mariadb:
     image: wodby/mariadb:$MARIADB_TAG
     volumes:
-      - /Volumes/Development/www/docker-images/docker4wordpress/mariadb-init:/docker-entrypoint-initdb.d # Place init .sql file(s) here.
+      - ./mariadb-init:/docker-entrypoint-initdb.d # Place init .sql file(s) here.
     ports:
       - target: 3306 # MariaDB server
         published: 3306
