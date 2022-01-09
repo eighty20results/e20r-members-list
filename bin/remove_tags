@@ -5,7 +5,9 @@
 for t_item in $(git tag -l); do
 	echo "Removing ${t_item}?"
 	if [[ "${t_item}" == *"${1}"* ]]; then
-		echo "Yes. ${t_item} is being removed"
-		git tag -d "${t_item}"; git push origin ":refs/tags/${t_item}"
+		echo "Yes. ${t_item} is being removed locally"
+		git tag -d "${t_item}"
+		echo "Yes. ${t_item} is being removed remotely"
+		git push origin ":${t_item}"
 	fi
 done
