@@ -1,0 +1,11 @@
+ARG WP_RELEASE=latest
+ARG APACHE_RUN_GROUP=$APACHE_RUN_GROUP
+ARG APACHE_RUN_USER=$APACHE_RUN_USER
+FROM wordpress:$WP_RELEASE
+
+RUN docker-php-ext-install pdo_mysql && \
+    pecl install pcov && docker-php-ext-enable pcov && \
+    pecl install xdebug && docker-php-ext-enable xdebug
+COPY tests/_docker/docker-phpstorm.ini /usr/local/etc/php/conf.d
+
+# RUN pecl install runkit && docker-php-ext-enable runkit

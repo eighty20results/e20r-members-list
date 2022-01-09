@@ -67,6 +67,45 @@ declare -x -a exclude=( \
 	"docker.hub.key" \
 	"vendor" \
 	)
+declare -x -a excluded_for_svn=(
+		"trunk/.git" \
+		"trunk/.circleci" \
+		"trunk/.github" \
+		"trunk/bin" \
+		"trunk/build_env" \
+		"trunk/docker" \
+		"trunk/inc" \
+		"trunk/src/utilities/.git" \
+		"trunk/src/utilities/bin" \
+		"trunk/src/utilities/.gitignore" \
+		"trunk/src/utilities/README.txt" \
+		"trunk/src/utilities/.editorconfig" \
+		"trunk/src/utilities/metadata.json" \
+		"trunk/src/utilities/composer.json" \
+		"trunk/test" \
+		"trunk/tests" \
+		"trunk/.distignore" \
+		"trunk/.dockerignore" \
+		"trunk/.editorconfig" \
+		"trunk/.env.testing" \
+		"trunk/.gitattributes" \
+		"trunk/.gitignore" \
+		"trunk/.phpcs.xml.dist" \
+		"trunk/action.yml" \
+		"trunk/codeception.dist.yml" \
+		"trunk/composer.json" \
+		"trunk/composer.phar" \
+		"trunk/docker-compose.yml" \
+		"trunk/Dockerfile" \
+		"trunk/Makefile" \
+		"trunk/metadata.json" \
+		"trunk/package.json" \
+		"trunk/patchwork.json" \
+		"trunk/phpstan.dist.neon" \
+		"trunk/phpunit.xml" \
+		"trunk/remove_update.sh" \
+		"tags/${version}" \
+)
 declare -x -a build=()
 
 # Not a plugin specific variable, but expensive to populate

@@ -21,6 +21,7 @@
 /metadata.json
 /package.json
 /remove_updates.sh
+/CODEOWNERS
 /class/utilities/composer.json
 /class/utilities/.gitignore
 /class/utilities/.editorconfig

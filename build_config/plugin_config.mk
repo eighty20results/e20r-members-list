@@ -1,9 +1,9 @@
-E20R_PLUGIN_NAME ?= e20r-members-list
+E20R_PLUGIN_NAME ?= default-plugin-name
 E20R_PLUGIN_BASE_FILE ?= class-e20r-members-list.php
 LOCAL_NETWORK_IF ?= en0
 
 ifeq ($(E20R_DEPLOYMENT_SERVER),"")
-E20R_DEPLOYMENT_SERVER ?= eighty20results.com
+E20R_DEPLOYMENT_SERVER ?= wordpress.org
 endif
 
 ifneq ($(LOCAL_NETWORK_IF), "")
@@ -16,7 +16,7 @@ LOCAL_NETWORK_STATUS ?= ""
 endif
 
 WP_DEPENDENCIES ?= paid-memberships-pro woocommerce
-E20R_DEPENDENCIES ?=
+E20R_DEPENDENCIES ?= 00-e20r-utilities
 
 DOCKER_HUB_USER ?= eighty20results
 DOCKER_ENV ?= Docker.app
