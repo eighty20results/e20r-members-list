@@ -10,7 +10,7 @@ Text Domain: e20r-members-list
 Domain Path: /languages
 License:
 
-	Copyright 2016 - 2021 (c) Eighty / 20 Results by Wicked Strong Chicks, LLC (thomas@eighty20results.com)
+	Copyright 2016 - 2022 (c) Eighty / 20 Results by Wicked Strong Chicks, LLC (thomas@eighty20results.com)
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License, version 2, as
@@ -31,14 +31,16 @@ namespace E20R\Members_List;
 
 use E20R\Members_List\Admin\Pages\Members_List_Page;
 
+require_once __DIR__ . '/inc/autoload.php';
+require_once __DIR__ . '/ActivateUtilitiesPlugin.php';
+
 if ( ! defined( 'E20R_MEMBERSLIST_VER' ) ) {
-	define( 'E20R_MEMBERSLIST_VER', '8.4' );
+	define( 'E20R_MEMBERSLIST_VER', '8.5' );
 }
 
 if ( ! class_exists( '\E20R\Members_List\E20R_Members_List' ) ) {
 	/**
 	 * Class E20R_Members_List
-	 * @package E20R\Members_List\Controller
 	 */
 	class E20R_Members_List {
 
@@ -74,7 +76,7 @@ if ( ! class_exists( '\E20R\Members_List\E20R_Members_List' ) ) {
 		/**
 		 * Class auto-loader for the Enhanced Members List plugin
 		 *
-		 * @param string $class_name Name of the class to auto-load
+		 * @param string $class_name Name of the class to auto-load.
 		 *
 		 * @return false|bool
 		 * @since  1.0
@@ -186,11 +188,11 @@ if ( ! class_exists( '\E20R\Members_List\E20R_Members_List' ) ) {
 			$locale  = apply_filters( 'plugin_locale', get_locale(), 'e20r-members-list' );
 			$mo_file = "e20r-members-list-{$locale}.mo";
 
-			// Path(s) to local and global (WP)
+			// Path(s) to local and global (WP).
 			$mo_file_local  = dirname( __FILE__ ) . "/languages/{$mo_file}";
 			$mo_file_global = WP_LANG_DIR . "/e20r-members-list/{$mo_file}";
 
-			// Start with the global file
+			// Start with the global file.
 			if ( file_exists( $mo_file_global ) ) {
 
 				load_textdomain(
@@ -199,13 +201,13 @@ if ( ! class_exists( '\E20R\Members_List\E20R_Members_List' ) ) {
 				);
 			}
 
-			// Load from local next (if applicable)
+			// Load from local next (if applicable).
 			load_textdomain(
 				'e20r-members-list',
 				$mo_file_local
 			);
 
-			// Load with plugin_textdomain or GlotPress
+			// Load with plugin_textdomain or GlotPress.
 			load_plugin_textdomain(
 				'e20r-members-list',
 				false,
@@ -216,11 +218,8 @@ if ( ! class_exists( '\E20R\Members_List\E20R_Members_List' ) ) {
 
 }
 
-// BUG FIX: Fatal error when e20r-Utilities module is present
-if ( ! file_exists( WP_PLUGIN_DIR . '/00-e20r-utilities/' ) ) {
-	require_once \plugin_dir_path( __FILE__ ) . 'src/utilities/class-utility-loader.php';
-}
 
+/**
 try {
 	spl_autoload_register( 'E20R\Members_List\E20R_Members_List::auto_loader' );
 } catch ( \Exception $exception ) {
@@ -228,5 +227,6 @@ try {
 	\error_log( 'Unable to register auto_loader: ' . $exception->getMessage(), E_USER_ERROR );
 	return false;
 }
+*/
 
 \add_action( 'plugins_loaded', array( E20R_Members_List::get_instance(), 'load_hooks' ) );
