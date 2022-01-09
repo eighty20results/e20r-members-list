@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @package \FunctionalTester
+ * @package \APITester
  */
 
 use Codeception\Actor;
@@ -37,9 +37,9 @@ use Codeception\Actor;
  *
  * @SuppressWarnings(PHPMD)
  */
-class FunctionalTester extends Actor {
+class ApiTester extends Actor {
 
-	use _generated\FunctionalTesterActions;
+	use _generated\ApiTesterActions;
 
 	/**
 	 * Define custom actions here

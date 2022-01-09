@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (c) 2016 - 2022 - Eighty / 20 Results by Wicked Strong Chicks.
+ * Copyright (c) 2016 - 2021 - Eighty / 20 Results by Wicked Strong Chicks.
  * ALL RIGHTS RESERVED
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,32 +16,5 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @package \FunctionalTester
+ * @package \
  */
-
-use Codeception\Actor;
-
-/**
- * Inherited Methods
- *
- * @method void wantToTest($text)
- * @method void wantTo($text)
- * @method void execute($callable)
- * @method void expectTo($prediction)
- * @method void expect($prediction)
- * @method void amGoingTo($argumentation)
- * @method void am($role)
- * @method void lookForwardTo($achieveValue)
- * @method void comment($description)
- * @method void pause()
- *
- * @SuppressWarnings(PHPMD)
- */
-class FunctionalTester extends Actor {
-
-	use _generated\FunctionalTesterActions;
-
-	/**
-	 * Define custom actions here
-	 */
-}

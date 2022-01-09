@@ -16,32 +16,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @package \FunctionalTester
+ * @package \
  */
 
-use Codeception\Actor;
+use Codeception\Util\Autoload;
+
+Autoload::addNamespace( 'E20R\\Utilities', __DIR__ . '/../src' );
 
 /**
- * Inherited Methods
- *
- * @method void wantToTest($text)
- * @method void wantTo($text)
- * @method void execute($callable)
- * @method void expectTo($prediction)
- * @method void expect($prediction)
- * @method void amGoingTo($argumentation)
- * @method void am($role)
- * @method void lookForwardTo($achieveValue)
- * @method void comment($description)
- * @method void pause()
- *
- * @SuppressWarnings(PHPMD)
+ * The following snippets uses `PLUGIN` to prefix
+ * the constants and class names. You should replace
+ * it with something that matches your plugin name.
  */
-class FunctionalTester extends Actor {
+// define test environment.
+const PLUGIN_PHPUNIT = true;
 
-	use _generated\FunctionalTesterActions;
-
-	/**
-	 * Define custom actions here
-	 */
+if ( ! defined( 'PLUGIN_PATH' ) ) {
+	define( 'PLUGIN_PATH', __DIR__ . '/../src/' );
 }
+
+require_once __DIR__ . '/../inc/autoload.php';
+
+// Load the class autoloader.
+require_once __DIR__ . '/../class-e20r-members-list.php';

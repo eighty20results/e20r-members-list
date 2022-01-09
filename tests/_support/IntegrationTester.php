@@ -16,10 +16,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @package \FunctionalTester
+ * @package \IntegrationTester
  */
 
 use Codeception\Actor;
+use Codeception\Lib\Friend;
+
 
 /**
  * Inherited Methods
@@ -33,13 +35,12 @@ use Codeception\Actor;
  * @method void am($role)
  * @method void lookForwardTo($achieveValue)
  * @method void comment($description)
- * @method void pause()
+ * @method Friend haveFriend($name, $actorClass = NULL)
  *
  * @SuppressWarnings(PHPMD)
  */
-class FunctionalTester extends Actor {
-
-	use _generated\FunctionalTesterActions;
+class IntegrationTester extends Actor {
+	use _generated\IntegrationTesterActions;
 
 	/**
 	 * Define custom actions here

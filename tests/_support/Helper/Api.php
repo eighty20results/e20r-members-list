@@ -16,32 +16,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @package \FunctionalTester
+ * @package Helper\API
  */
 
-use Codeception\Actor;
+namespace Helper;
+
+// here you can define custom actions
+// all public methods declared in helper class will be available in $I
+use Codeception\Module;
 
 /**
- * Inherited Methods
- *
- * @method void wantToTest($text)
- * @method void wantTo($text)
- * @method void execute($callable)
- * @method void expectTo($prediction)
- * @method void expect($prediction)
- * @method void amGoingTo($argumentation)
- * @method void am($role)
- * @method void lookForwardTo($achieveValue)
- * @method void comment($description)
- * @method void pause()
- *
- * @SuppressWarnings(PHPMD)
+ * API Test Helper
  */
-class FunctionalTester extends Actor {
+class Api extends Module {
 
-	use _generated\FunctionalTesterActions;
-
-	/**
-	 * Define custom actions here
-	 */
 }

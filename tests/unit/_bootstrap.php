@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (c) 2017-2018 - Eighty / 20 Results by Wicked Strong Chicks.
+ * Copyright (c) 2016 - 2022 - Eighty / 20 Results by Wicked Strong Chicks.
  * ALL RIGHTS RESERVED
  *
  * This program is free software: you can redistribute it and/or modify
@@ -15,18 +15,11 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * @package \
  */
 
-namespace E20R\Utilities;
-
-
-if ( ! class_exists( '\E20R\Utilities\Support' ) ) {
-	
-	/**
-	 * Class Support
-	 * @package E20R\Utilities
-	 */
-	class Support {
-	
-	}
+// Load fixtures for UNIT testing
+if ( file_exists( __DIR__ . '/inc/unittest_stubs.php' ) ) {
+	require_once __DIR__ . '/inc/unittest_stubs.php';
 }
