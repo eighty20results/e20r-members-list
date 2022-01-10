@@ -151,10 +151,12 @@ clean: prerequisite
 # Remove all installed composer, WordPress and E20R plugins/components from the $(COMPOSER_DIR) - /inc - directory
 #
 clean-inc: prerequisite
-	@if [[ -d $(COMPOSER_DIR) ]]; then \
+	if [[ -d $(COMPOSER_DIR) ]]; then \
   	  echo "Removing existing composer packages from $(COMPOSER_DIR)" ; \
-  	  find $(COMPOSER_DIR)/ -type d -maxdepth 0 -exec rm -rf {} \; ; \
-  	  [[ -f $(COMPOSER_DIR)/*.php ]] && rm $(COMPOSER_DIR)/*.php ; \
+  	  find $(COMPOSER_DIR)/ -type d -maxdepth 1 ! -name inc -exec rm -rf {} \; ; \
+  	  if [[ -f "$(COMPOSER_DIR)/autoload.php" ]]; then \
+  	    rm $(COMPOSER_DIR)/*.php ; \
+	  fi ; \
   	else \
   	  echo "No existing composer packages to remove from $(COMPOSER_DIR)" ; \
   	  mkdir -p $(COMPOSER_DIR) ; \
