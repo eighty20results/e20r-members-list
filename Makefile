@@ -68,7 +68,8 @@ endif
 $(info Download the E20R Utilities module: $(DOWNLOAD_MODULE))
 
 # PROJECT := $(shell basename ${PWD}) # This is the default as long as the plugin name matches
-PROJECT := $(E20R_PLUGIN_NAME)
+
+PROJECT ?= $(E20R_PLUGIN_NAME)
 VOLUME_CONTAINER ?= $(PROJECT)_volume
 
 # Settings for docker-compose
@@ -128,7 +129,11 @@ $(info Number of running docker images:$(STACK_RUNNING))
 # Make sure the plugin name is set to something
 #
 prerequisite:
-	@[ "default-plugin-name" != "$${E20R_PLUGIN_NAME}" ] || { echo "The E20R_PLUGIN_NAME variable must be configured before running this command!"; exit 1; }
+	@echo "Testing prerequisite variable settings"
+	@if [[ "$(E20R_PLUGIN_NAME)" =~ "default-plugin-name" ]]; then \
+		echo "The E20R_PLUGIN_NAME environment variable must be configured before running this command!"; \
+		exit 1; \
+	fi
 
 #
 # Clean up Codeception and GitHub action artifacts
@@ -148,7 +153,8 @@ clean: prerequisite
 clean-inc: prerequisite
 	@if [[ -d $(COMPOSER_DIR) ]]; then \
   	  echo "Removing existing composer packages from $(COMPOSER_DIR)" ; \
-  	  find $(COMPOSER_DIR)/* -type d -maxdepth 0 -exec rm -rf {} \; && rm $(COMPOSER_DIR)/*.php ; \
+  	  find $(COMPOSER_DIR)/ -type d -maxdepth 0 -exec rm -rf {} \; ; \
+  	  [[ -f $(COMPOSER_DIR)/*.php ]] && rm $(COMPOSER_DIR)/*.php ; \
   	else \
   	  echo "No existing composer packages to remove from $(COMPOSER_DIR)" ; \
   	  mkdir -p $(COMPOSER_DIR) ; \
