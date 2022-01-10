@@ -65,11 +65,6 @@ fabric.properties
 .idea/vcs.xml
 /build_readmes/readme_changelog.txt
 /build_readmes/json_changelog.txt
-/build/kits/
-/src/utilities/.git
-/src/utilities/.gitignore
-/src/utilities/.editorconfig
-/src/utilities/composer.json
 docker-env/e20r-members-list.sql
 /.circleci/docker/test/db_backup/e20r-members-list.sql
 /composer
@@ -81,3 +76,7 @@ docker-env/e20r-members-list.sql
 /.circleci/old-config.yml
 /workflow/
 /_actions/
+inc/
+build/
+!build/kits/.gitignore
+!build/kits/.gitkeep
