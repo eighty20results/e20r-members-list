@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (c) 2018-2021 - Eighty / 20 Results by Wicked Strong Chicks.
+ * Copyright (c) 2018 - 2022 - Eighty / 20 Results by Wicked Strong Chicks.
  * ALL RIGHTS RESERVED
  *
  * This program is free software: you can redistribute it and/or modify
@@ -15,40 +15,58 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * @package E20R\Members_List\Admin\Export\Export_Members
  */
 
 namespace E20R\Members_List\Admin\Export;
 
 use E20R\Utilities\Utilities;
+use stdClass;
 
+/**
+ * Handles exporting member data to CSV file.
+ */
 class Export_Members {
 
 	/**
+	 * The list of members to export data for.
+	 *
 	 * @var array $member_list
 	 */
 	private $member_list = array();
 
 	/**
+	 * The SQL statement used to fetch data to export.
+	 *
 	 * @var string|null $sql
 	 */
 	private $sql = null;
 
 	/**
+	 * The HTTP headers we'll use for the export operation.
+	 *
 	 * @var array $headers
 	 */
 	private $headers = array();
 
 	/**
+	 * The headers we're going to use for the CSV file.
+	 *
 	 * @var array $csv_headers
 	 */
 	private $csv_headers = array();
 
 	/**
+	 * The rows of CSV data we're processing.
+	 *
 	 * @var array $csv_rows
 	 */
 	private $csv_rows = array();
 
 	/**
+	 * The file name we use to save the CSV data.
+	 *
 	 * @var bool|null|string
 	 */
 	private $file_name = null;
@@ -56,7 +74,7 @@ class Export_Members {
 	/**
 	 * Cached $member discount information
 	 *
-	 * @var null|\stdClass $member_discount_info
+	 * @var null|stdClass $member_discount_info
 	 */
 	private $member_discount_info = null;
 
@@ -76,7 +94,7 @@ class Export_Members {
 	/**
 	 * Export_Members constructor.
 	 *
-	 * @param \stdClass[] $db_records
+	 * @param stdClass[] $db_records The array of records to export.
 	 */
 	public function __construct( $db_records ) {
 
@@ -275,7 +293,7 @@ class Export_Members {
 			)
 		);
 
-		// Generate the header for the .csv file
+		// Generate the header for the .csv file.
 		$this->csv_header();
 		$this->set_upload_headers();
 
@@ -359,7 +377,7 @@ class Export_Members {
 
 			if ( is_file( $file_name ) ) {
 
-				if ( $now - filemtime( $file_name ) >= DAY_IN_SECONDS ) { // Delete after 1 day
+				if ( $now - filemtime( $file_name ) >= DAY_IN_SECONDS ) { // Delete after 1 day.
 					unlink( $file_name );
 				}
 			}
@@ -416,10 +434,10 @@ class Export_Members {
 		$end        = 0;
 		$time_limit = (int) get_cfg_var( 'max_execution_time' );
 
-		// Split up the export operation in multiple rounds/iterations
+		// Split up the export operation in multiple rounds/iterations.
 		for ( $ic = 1; $ic <= $iterations; $ic ++ ) {
 
-			// Try to avoid timing out during the export operation
+			// Try to avoid timing out during the export operation.
 			if ( 0 !== $end ) {
 
 				$iteration_diff = $end - $start;
@@ -439,7 +457,7 @@ class Export_Members {
 
 			$utils->log( 'Will process ' . count( $member_list ) . " member records in iteration {$ic}" );
 
-			// Increment starting position
+			// Increment starting position.
 			if ( 0 < $iterations ) {
 				$i_start += $max_users_per_loop;
 			}
@@ -448,7 +466,7 @@ class Export_Members {
 
 				$csv_record = array();
 
-				// Cast the Member array to an object
+				// Cast the Member array to an object.
 				$member = (object) $member;
 
 				/**
@@ -465,7 +483,7 @@ class Export_Members {
 				 */
 				$csv_record = apply_filters( 'e20r_members_list_load_export_value', $csv_record, $member );
 
-				// Add data from extra columns
+				// Add data from extra columns.
 				if ( ! empty( $extra_columns ) ) {
 
 					foreach ( $extra_columns as $col_heading => $callback ) {
@@ -477,14 +495,14 @@ class Export_Members {
 					}
 				}
 
-				// Add the data to the list of
+				// Add the data to the list of.
 				$this->csv_rows[] = $csv_record;
 
 			}
 
 			wp_cache_flush();
 
-			//need to increase max running time?
+			// need to increase max running time?
 			$end = time();
 		}
 
@@ -498,14 +516,14 @@ class Export_Members {
 
 		$utils = Utilities::get_instance();
 
-		// Open our designated temporary file
+		// Open our designated temporary file.
 		// phpcs:ignore
 		$file_handle = fopen( $this->file_name, 'a' );
 		$header_type = 'header_key';
 
 		$utils->log( 'Adding ' . count( $this->csv_headers ) . " header columns to {$this->file_name}" );
 
-		//Add the CSV header to the file
+		// Add the CSV header to the file.
 		// phpcs:ignore
 		fprintf(
 			$file_handle,
@@ -521,7 +539,7 @@ class Export_Members {
 			) . "\n"
 		);
 
-		// Close the CSV file for now
+		// Close the CSV file for now.
 		// phpcs:ignore
 		fclose( $file_handle );
 	}
@@ -529,9 +547,9 @@ class Export_Members {
 	/**
 	 * Returns the expected header key for the requested DB Key
 	 *
-	 * @param string $key
-	 * @param string $requested
-	 * @param string $column_type
+	 * @param string $key The header key to find the header for.
+	 * @param string $requested The requested header value.
+	 * @param string $column_type The type of column it represents.
 	 *
 	 * @return null|string
 	 */
@@ -566,11 +584,11 @@ class Export_Members {
 	}
 
 	/**
-	 * Return all of the user's metadata that we (may) care about
+	 * Return all the user's metadata that we (may) care about
 	 *
-	 * @param int $user_id
+	 * @param int $user_id The ID of the user for whom we intend to load user metadata.
 	 *
-	 * @return null|\stdClass
+	 * @return null|stdClass
 	 */
 	private function load_user_meta( $user_id ) {
 
@@ -579,10 +597,10 @@ class Export_Members {
 		// Returns array of meta keys containing array(s) of meta_values.
 		$um_values = get_user_meta( $user_id );
 
-		// Process user metadata
+		// Process user metadata.
 		if ( ! empty( $um_values ) ) {
 
-			$meta_values = new \stdClass();
+			$meta_values = new stdClass();
 
 			foreach ( $um_values as $key => $value ) {
 
@@ -597,7 +615,7 @@ class Export_Members {
 	/**
 	 * Enclose the data we're adding to the export file
 	 *
-	 * @param string $text
+	 * @param string $text The text to quote.
 	 *
 	 * @return string
 	 */
@@ -606,8 +624,10 @@ class Export_Members {
 	}
 
 	/**
-	 * @param array     $csv_record
-	 * @param \stdClass $member
+	 * Loads the value we're going to be exporting.
+	 *
+	 * @param array             $csv_record The record (CSV) to load.
+	 * @param stdClass|\WP_User $member The member (user) information.
 	 *
 	 * @return array
 	 */
@@ -618,9 +638,7 @@ class Export_Members {
 		$datetime_format = $this->set_datetime_format();
 		$level           = $utils->get_variable( 'membership_id', '' );
 
-		// $utils->log( "For member: " . print_r( $member, true ) );
-
-		// Process the membership data (by column)
+		// Process the membership data (by column).
 		foreach ( $this->default_columns as $field_def ) {
 
 			$column_type  = $field_def[0];
@@ -631,7 +649,7 @@ class Export_Members {
 				$column_type
 			);
 
-			// Process Join/Start dates for membership
+			// Process Join/Start dates for membership.
 			if ( in_array( $column_name, array( 'user_registered', 'startdate' ), true ) ) {
 
 				$column_value = date_i18n(
@@ -643,14 +661,14 @@ class Export_Members {
 				);
 			}
 
-			// Process End of membership column
+			// Process End of membership column.
 			if ( 'enddate' === $column_name ) {
 
 				$enddate_value = $column_value;
 
 				if ( ! is_null( $member->membership_id ) && ! empty( $column_value ) ) {
 
-					// Membership is terminated or about to be terminated
+					// Membership is terminated or about to be terminated.
 					if (
 						in_array( $level, array( 'oldmembers', 'expired', 'cancelled' ), true ) &&
 						'0000-00-00 00:00:00' !== $column_value
@@ -687,7 +705,7 @@ class Export_Members {
 						);
 					}
 
-					// Save record info for the column
+					// Save record info for the column.
 					$column_value = apply_filters( 'e20r_members_list_expires_col_value', $enddate_value, $member );
 
 				}
@@ -720,11 +738,11 @@ class Export_Members {
 				$column_value = null;
 			}
 
-			// Save the entry info
+			// Save the entry info.
 			$csv_record[ $column_name ] = $this->enclose( $column_value );
 		}
 
-		// Clear the Discount Info (for the member)
+		// Clear the Discount Info (for the member).
 		$this->member_discount_info = null;
 
 		return $csv_record;
@@ -760,7 +778,7 @@ class Export_Members {
 		 */
 		$time_format = apply_filters( 'e20r_members_list_csv_timeformat', get_option( 'time_format' ) );
 
-		// Assume that we want a valid MySQL DateTime format if date is Y-m-d
+		// Assume that we want a valid MySQL DateTime format if date is Y-m-d.
 		if ( 'Y-m-d' === $date_format && 'H:i' === $time_format ) {
 			$expected_format = "{$date_format} {$time_format}:00";
 		} else {
@@ -789,9 +807,9 @@ class Export_Members {
 	/**
 	 * Return a value for the specified column (name)
 	 *
-	 * @param \stdClass $member
-	 * @param string    $column_name
-	 * @param string    $column_type
+	 * @param stdClass $member The member record we intend to fetch data for.
+	 * @param string   $column_name The column name to return data for.
+	 * @param string   $column_type The type of column data we'll be returning.
 	 *
 	 * @return mixed|null
 	 */
@@ -849,16 +867,17 @@ class Export_Members {
 	/**
 	 * Fetch discount code (ID and code) for the code ID/User ID/Level ID combination
 	 *
-	 * @param int $code_id
-	 * @param int $user_id
-	 * @param int $level_id
+	 * @param int $code_id The discount code ID we're collecting data for.
+	 * @param int $user_id The user ID for whom we're collecting discount data.
+	 * @param int $level_id The membership Level ID the member has.
 	 *
-	 * @return \stdClass
+	 * @return stdClass
 	 */
 	public static function get_pmpro_discount_code( $code_id, $user_id, $level_id ) {
 
 		global $wpdb;
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$pmpro_discount_code = $wpdb->get_row(
 			$wpdb->prepare(
 				"
@@ -875,9 +894,9 @@ class Export_Members {
 			)
 		);
 
-		// Make sure there's data for the discount code info
+		// Make sure there's data for the discount code info.
 		if ( empty( $pmpro_discount_code ) ) {
-			$empty_dc                         = new \stdClass();
+			$empty_dc                         = new stdClass();
 			$empty_dc->pmpro_discount_code_id = null;
 			$empty_dc->pmpro_discount_code    = null;
 			$pmpro_discount_code              = $empty_dc;
@@ -898,6 +917,8 @@ class Export_Members {
 		$fh = fopen( $this->file_name, 'a' );
 
 		/**
+		 * The CSV data
+		 *
 		 * @var $row_data -> $csv_entry[ $col_heading ] = $this->enclose( $val );
 		 */
 		foreach ( $this->csv_rows as $row_id => $row_data ) {
@@ -906,7 +927,7 @@ class Export_Members {
 
 			foreach ( $this->csv_headers as $col_key ) {
 
-				/*
+				/* phpcs:ignore Squiz.PHP.CommentedOutCode.Found
 				if ( 'ID' == $col_key ) {
 					$col_key = 'user_id';
 				}
@@ -936,18 +957,20 @@ class Export_Members {
 
 		// Problem with the HTTP headers we need to use to send a file?
 		if ( empty( $this->headers ) ) {
-			$msg = __( 'Error - Undefined HTTP headers. Exiting!', 'e20r-members-list' );
+			$msg = esc_attr__( 'Error - Undefined HTTP headers. Exiting!', 'e20r-members-list' );
+			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r
 			$utils->log( $msg . print_r( ob_get_contents(), true ) );
 			$utils->add_message( $msg, 'error', 'backend' );
 			exit();
 		}
 
-		// Problem: The browser already received headers so it can't receive this file
+		// Problem: The browser already received headers so it can't receive this file.
 		if ( true === headers_sent() ) {
-			$msg = __(
+			$msg = esc_attr__(
 				'Cannot transmit export file. Review web server error logs for notices/warnings/errors. Exiting!',
 				'e20r-members-list'
 			);
+			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r
 			$utils->log( $msg . print_r( ob_get_contents(), true ) );
 			$utils->add_message( $msg, 'error', 'backend' );
 			exit();
@@ -955,45 +978,46 @@ class Export_Members {
 
 		// The temporary export file we'll use to send data to the browser is gone?!?
 		if ( ! file_exists( $this->file_name ) ) {
-			$msg = __( 'Error: No export data found to transmit...', 'e20r-members-list' );
+			$msg = esc_attr__( 'Error: No export data found to transmit...', 'e20r-members-list' );
+			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r
 			$utils->log( $msg . print_r( ob_get_contents(), true ) );
 			$utils->add_message( $msg, 'error', 'backend' );
 			exit();
 		}
 
-		// Actually send the data to the browser
+		// Actually send the data to the browser.
 		$sent_content = ob_get_clean();
 
-		// phpcs:ignore
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r
 		$utils->log( 'DEBUG: Browser received: ' . print_r( $sent_content, true ) );
 
 		if ( version_compare( phpversion(), '5.3.0', '>' ) ) {
 
-			//Clear the file cache for the export file
+			// Clear the file cache for the export file.
 			clearstatcache( true, $this->file_name );
 		} else {
-			// for any PHP version prior to v5.3.0
+			// for any PHP version prior to v5.3.0.
 			clearstatcache();
 		}
 
-		//Set the download size for the file
+		// Set the download size for the file.
 		$this->headers[] = sprintf( 'Content-Length: %1$s', filesize( $this->file_name ) );
 
-		//Set transmission (PHP) headers
+		// Set transmission (PHP) headers.
 		foreach ( $this->headers as $header ) {
 			header( $header . "\r\n" );
 		}
 
-		// Disable compression for the duration of file download
+		// Disable compression for the duration of file download.
 		if ( ini_get( 'zlib.output_compression' ) ) {
-			// phpcs:ignore
+			// phpcs:ignore WordPress.PHP.IniSet.Risky
 			ini_set( 'zlib.output_compression', 'Off' );
 		}
 
-		// Bug fix for Flywheel Hosted like hosts where fpassthru() is disabled
+		// Bug fix for Flywheel Hosted like hosts where fpassthru() is disabled.
 		if ( function_exists( 'fpassthru' ) ) {
-			// Open and send the file contents to the remote location
-			// phpcs:ignore
+			// Open and send the file contents to the remote location.
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_fopen
 			$fh = fopen( $this->file_name, 'rb' );
 			fpassthru( $fh );
 			// phpcs:ignore
@@ -1003,7 +1027,7 @@ class Export_Members {
 			readfile( $this->file_name );
 		}
 
-		// Remove the temp file
+		// Remove the temp file.
 		unlink( $this->file_name );
 		exit();
 	}
@@ -1011,9 +1035,9 @@ class Export_Members {
 	/**
 	 * Returns the column name to use from the specified $header_name
 	 *
-	 * @param $header_name
+	 * @param string $header_name The header to retrieve the column name for.
 	 *
-	 * @return mixed
+	 * @return string
 	 */
 	private function map_header_to_column( $header_name ) {
 
