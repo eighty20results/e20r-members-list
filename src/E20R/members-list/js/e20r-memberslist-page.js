@@ -352,10 +352,10 @@
 
                 if (value instanceof Array) {
                     value.forEach(function (v) {
-                        form.append($('<input></input>').attr('type', 'hidden').attr('name', key + "[]").attr('value', v));
+                        form.append($('<input />').attr('type', 'hidden').attr('name', key + "[]").attr('value', v));
                     });
                 } else {
-                    form.append($('<input></input>').attr('type', 'hidden').attr('name', key).attr('value', value));
+                    form.append($('<input />').attr('type', 'hidden').attr('name', key).attr('value', value));
                 }
             });
 
