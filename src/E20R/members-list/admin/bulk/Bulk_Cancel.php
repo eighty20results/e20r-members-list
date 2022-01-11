@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (c) 2018-2021 - Eighty / 20 Results by Wicked Strong Chicks.
+ * Copyright (c) 2018 - 2022 - Eighty / 20 Results by Wicked Strong Chicks.
  * ALL RIGHTS RESERVED
  *
  * This program is free software: you can redistribute it and/or modify
@@ -15,13 +15,17 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * @package E20R\Members_List\Admin\Bulk\Bulk_Cancel
  */
 
 namespace E20R\Members_List\Admin\Bulk;
 
-use E20R\Members_List\E20R_Members_List;
 use E20R\Utilities\Utilities;
 
+/**
+ * The bulk cancel operation handler
+ */
 class Bulk_Cancel {
 
 	/**
@@ -78,12 +82,12 @@ class Bulk_Cancel {
 			}
 		}
 
-		//Check for errors & display error banner if we got one.
+		// Check for errors & display error banner if we got one.
 		if ( ! empty( $failed ) ) {
 
 			$message = sprintf(
 				// translators: %1$s List of User IDs
-				__(
+				esc_attr__(
 					'Unable to cancel membership(s) for the following user IDs: %1$s',
 					'e20r-members-list'
 				),
@@ -137,7 +141,7 @@ class Bulk_Cancel {
 	/**
 	 * Set the list of members & their levels to update
 	 *
-	 * @param array $member_info
+	 * @param array $member_info The array of members we intend to process.
 	 */
 	public function set_members( $member_info = array() ) {
 		$this->members_to_update = $member_info;
