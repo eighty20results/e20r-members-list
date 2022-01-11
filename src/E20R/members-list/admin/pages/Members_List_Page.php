@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (c) 2018-2021 - Eighty / 20 Results by Wicked Strong Chicks.
+ * Copyright (c) 2018 - 2022 - Eighty / 20 Results by Wicked Strong Chicks.
  * ALL RIGHTS RESERVED
  *
  * This program is free software: you can redistribute it and/or modify
@@ -15,13 +15,18 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * @package E20R\Members_List\Admin\Pages\Members_List_Page
  */
 
 namespace E20R\Members_List\Admin\Pages;
 
-use E20R\Members_List\Admin\Members_List;
+use E20R\Members_List\Members_List;
 use E20R\Utilities\Utilities;
 
+/**
+ * Generates the page for the Members_List wp-admin interface.
+ */
 class Members_List_Page {
 
 	/**
@@ -33,6 +38,7 @@ class Members_List_Page {
 
 	/**
 	 * Holds the list of members (Members_List class)
+	 *
 	 * @var Members_List $member_list
 	 */
 	public $member_list;
@@ -96,11 +102,11 @@ class Members_List_Page {
 		$wp_admin_bar->remove_menu( 'pmpro-members-list' );
 		$wp_admin_bar->remove_node( 'pmpro-members-list' );
 
-		//Add the (new) Members List page to the admin_bar menu
+		// Add the (new) Members List page to the admin_bar menu.
 		$wp_admin_bar->add_menu(
 			array(
 				'id'     => 'e20r-members-list',
-				'title'  => __( 'Members List', 'pmpro' ),
+				'title'  => esc_attr__( 'Members List', 'pmpro' ),
 				'href'   => add_query_arg(
 					'page',
 					'pmpro-memberslist',
@@ -114,8 +120,9 @@ class Members_List_Page {
 	/**
 	 * Screen Option option(s) for the Members List page.
 	 *
-	 * @param mixed  $value
-	 * @param string $option
+	 * @param mixed  $status The screen status.
+	 * @param string $option The screen parameter.
+	 * @param mixed  $value The value we expect to return.
 	 *
 	 * @return mixed
 	 */
@@ -138,8 +145,9 @@ class Members_List_Page {
 		if ( class_exists( '\E20R\Utilities\Utilities' ) ) {
 			$this->utils = Utilities::get_instance();
 		} else {
+			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 			error_log( 'Unable to load the E20R Utilities library!' );
-			return false;
+			return;
 		}
 
 		// Filters
@@ -149,6 +157,7 @@ class Members_List_Page {
 		// Actions
 		add_action( 'admin_menu', array( $this, 'plugin_menu' ), 9999 );
 		add_action( 'admin_init', 'E20R\Members_List\Admin\Export\Export_Members::clear_temp_files' );
+		// phpcs:ignore Squiz.PHP.CommentedOutCode.Found
 		// add_action( 'admin_bar_menu', array( $this, 'admin_bar_menu' ), 9999 );
 		add_action( 'admin_enqueue_scripts', array( $this, 'load_scripts_styles' ) );
 
@@ -156,6 +165,8 @@ class Members_List_Page {
 
 	/**
 	 * Load the custom CSS and JavaScript for the Members List
+	 *
+	 * @param string $hook_suffix The suffix for the hook
 	 */
 	public function load_scripts_styles( $hook_suffix ) {
 
@@ -174,14 +185,14 @@ class Members_List_Page {
 
 			wp_enqueue_style(
 				'e20r-memberslist-page',
-				plugins_url( '/css/e20r-memberslist-page.css', __FILE__ ),
+				plugins_url( '/css/e20r-memberslist-page.css', E20R_ML_BASE_DIR ),
 				array( 'pmpro_admin' ),
 				E20R_MEMBERSLIST_VER
 			);
 
 			wp_register_script(
 				'e20r-memberslist-page',
-				plugins_url( '/js/e20r-memberslist-page.js', __FILE__ ),
+				plugins_url( '/js/e20r-memberslist-page.js', E20R_ML_BASE_DIR ),
 				array( 'jquery' ),
 				E20R_MEMBERSLIST_VER,
 				true
@@ -195,9 +206,9 @@ class Members_List_Page {
 					'url'    => add_query_arg( 'page', 'pmpro-memberslist', admin_url( 'admin.php' ) ),
 					'lang'   => array(
 						'save_btn_text'    =>
-								__( 'Save Updates', 'e20r-members-list' ),
+								esc_attr__( 'Save Updates', 'e20r-members-list' ),
 						'clearing_enddate' =>
-								__(
+								esc_attr__(
 									'This action will clear the current membership end date/expiration date!',
 									'e20r-members-list'
 								),
@@ -219,6 +230,7 @@ class Members_List_Page {
 				version_compare( PMPRO_VERSION, '2.0', 'ge' ) :
 				null;
 	}
+
 	/**
 	 * Point Members List menu handler(s) to this plugin
 	 */
@@ -229,7 +241,7 @@ class Members_List_Page {
 		$pmpro_menu_slug = 'pmpro-membershiplevels';
 
 		if ( null === $this->is_pmpro_v2() ) {
-			return false;
+			return;
 		}
 
 		if ( true === $this->is_pmpro_v2() ) {
@@ -249,9 +261,9 @@ class Members_List_Page {
 	/**
 	 * Add parameters to limit/include records to any members list page URI
 	 *
-	 * @param string $url
-	 * @param string $scheme
-	 * @param string $original_scheme
+	 * @param string $url The URL to apply the pagination info to.
+	 * @param string $scheme The HTTP/HTTPS scheme.
+	 * @param string $original_scheme The original Scheme.
 	 *
 	 * @return string
 	 */
@@ -259,7 +271,7 @@ class Members_List_Page {
 
 		$page = $this->utils->get_variable( 'page', '' );
 
-		if ( 1 === preg_match(
+		if ( isset( $_SERVER['HTTP_HOST'] ) && 1 === preg_match(
 			sprintf(
 				'/%1$s\/wp-admin\/admin.php\?page=pmpro-memberslist/i',
 				sanitize_key( $_SERVER['HTTP_HOST'] )
@@ -282,7 +294,9 @@ class Members_List_Page {
 			}
 
 			/**
-			 * @filter e20r_memberslist_pagination_args - Add filtering to the URI (to preserve it for pagination ,etc)
+			 * Add filtering to the URI (to preserve it for pagination ,etc)
+			 *
+			 * @filter e20r_memberslist_pagination_args
 			 *
 			 * @param array $arg_list List of arguments to add to the pagination links
 			 */
@@ -319,6 +333,8 @@ class Members_List_Page {
 
 	/**
 	 * Load the e20rMembersList page content
+	 *
+	 * @return string
 	 */
 	public function memberslist_settings_page() {
 
@@ -359,14 +375,14 @@ class Members_List_Page {
 		$e20r_info_msgs    = $this->utils->get_message( 'info' );
 
 		$top_list = array(
-			'active' => __( 'Active Members', 'e20r-members-list' ),
-			'all'    => __( 'All Members', 'e20r-members-list' ),
+			'active' => esc_attr__( 'Active Members', 'e20r-members-list' ),
+			'all'    => esc_attr__( 'All Members', 'e20r-members-list' ),
 		);
 
 		$bottom_list = array(
-			'cancelled'  => __( 'Cancelled Members', 'e20r-members-list' ),
-			'expired'    => __( 'Expired Members', 'e20r-members-list' ),
-			'oldmembers' => __( 'Old Members', 'e20r-members-list' ),
+			'cancelled'  => esc_attr__( 'Cancelled Members', 'e20r-members-list' ),
+			'expired'    => esc_attr__( 'Expired Members', 'e20r-members-list' ),
+			'oldmembers' => esc_attr__( 'Old Members', 'e20r-members-list' ),
 		);
 
 		$level_list = array();
@@ -422,13 +438,13 @@ class Members_List_Page {
 				<div class="e20r-search-arguments">
 					<p class="search-box float-left">
 						<?php
-						$label      = __( 'Update List', 'e20r-members-list' );
+						$label      = esc_attr__( 'Update List', 'e20r-members-list' );
 						$button_def = 'button';
 
 						// phpcs:ignore
 						if ( isset( $_REQUEST['find'] ) && ! empty( $_REQUEST['find'] ) ) {
 
-							$label       = __( 'Clear Search', 'e20r-members-list' );
+							$label       = esc_attr__( 'Clear Search', 'e20r-members-list' );
 							$button_def .= ' button-primary';
 						}
 						?>
@@ -437,7 +453,7 @@ class Members_List_Page {
 					</p>
 					<ul class="subsubsub">
 						<li>
-							<?php esc_attr_e( 'Show', 'e20r-members-list' ); ?>
+							<label for="e20r-pmpro-memberslist-levels"><?php esc_attr_e( 'Show', 'e20r-members-list' ); ?></label>
 							<select name="level" id="e20r-pmpro-memberslist-levels">
 								<?php foreach ( $option_list as $option_id => $option_name ) { ?>
 									<option value="<?php esc_attr_e( $option_id ); // phpcs:ignore ?>" <?php selected( $level, $option_id ); ?>>
@@ -478,6 +494,7 @@ class Members_List_Page {
 		<?php
 		// phpcs:ignore
 		echo pmpro_loadTemplate( 'admin_footer', 'local', 'adminpages' );
+		return '';
 	}
 
 	/**
