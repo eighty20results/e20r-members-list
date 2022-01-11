@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (c) 2018-2021 - Eighty / 20 Results by Wicked Strong Chicks.
+ * Copyright (c) 2018 - 2022 - Eighty / 20 Results by Wicked Strong Chicks.
  * ALL RIGHTS RESERVED
  *
  * This program is free software: you can redistribute it and/or modify
@@ -15,12 +15,17 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * @package E20R\Members_List\Admin\Bulk\Bulk_Update
  */
 
 namespace E20R\Members_List\Admin\Bulk;
 
 use E20R\Utilities\Utilities;
 
+/**
+ * Performs Bulk Updates from the Members List.
+ */
 class Bulk_Update {
 
 	/**
@@ -114,19 +119,19 @@ class Bulk_Update {
 
 			$utils->log( "Have to update level for {$user_info['user_id']}? {$new_user_level}" );
 
-			// Update the membership level for the user we're processing
+			// Update the membership level for the user we're processing.
 			if ( ! empty( $new_user_level ) && $old_user_level !== $new_user_level ) {
 
 				if ( false === $this->update_membership( $user_info['user_id'], $old_user_level, $new_user_level ) ) {
 
-					// Add to list of failed updates
+					// Add to list of failed updates.
 					$level_failed[] = array(
 						'user_id'   => $user_info['user_id'],
 						'new_level' => $new_user_level,
 						'old_level' => $old_user_level,
 					);
 				} else {
-					// Used by subsequen update operations (start/end date)
+					// Used by subsequen update operations (start/end date).
 					$level_changed = true;
 				}
 			}
@@ -240,8 +245,8 @@ class Bulk_Update {
 		/**
 		 * Error handling for build-in edit fields
 		 */
-		// translators: %1$s user's email address, %2$d user ID, %3$s type of data, %4$s new value, %5$s new value, %6$s existing level
-		$msg_template = __(
+		// translators: %1$s user's email address, %2$d user ID, %3$s type of data, %4$s new value, %5$s new value, %6$s existing level.
+		$msg_template = esc_attr__(
 			'Error updating data for %1$s (ID: %2$d). Could not update %3$s from %4$s to %5$s (current membership level: \'%6$s\')',
 			'e20r-members-list'
 		);
@@ -257,15 +262,15 @@ class Bulk_Update {
 					$msg_template,
 					$user->user_email,
 					$user->ID,
-					__( 'membership level', 'e20r-members-list' ),
+					esc_attr__( 'membership level', 'e20r-members-list' ),
 					$old_user_level->name,
 					( ! empty( $new_user_level->name ) ?
 						$new_user_level->name :
-						__( 'Not Applicable', 'e20r-members-list' )
+						esc_attr__( 'Not Applicable', 'e20r-members-list' )
 					),
 					( ! empty( $old_user_level->name ) ?
 						$old_user_level->name :
-						__( 'Not Applicable', 'e20r-members-list' )
+						esc_attr__( 'Not Applicable', 'e20r-members-list' )
 					)
 				);
 			}
@@ -280,7 +285,7 @@ class Bulk_Update {
 					$msg_template,
 					$user->user_email,
 					$user->ID,
-					__( 'membership end date', 'e20r-members-list' ),
+					esc_attr__( 'membership end date', 'e20r-members-list' ),
 					$info['old_date'],
 					$info['new_date'],
 					$user_level->name
@@ -297,7 +302,7 @@ class Bulk_Update {
 					$msg_template,
 					$user->user_email,
 					$user->ID,
-					__( 'membership start date', 'e20r-members-list' ),
+					esc_attr__( 'membership start date', 'e20r-members-list' ),
 					$info['old_date'],
 					$info['new_date'],
 					$user_level->name
@@ -315,7 +320,7 @@ class Bulk_Update {
 					$msg_template,
 					$user->user_email,
 					$user->ID,
-					__( 'membership status', 'e20r-members-list' ),
+					esc_attr__( 'membership status', 'e20r-members-list' ),
 					$info['old_status'],
 					$info['new_status'],
 					$user_level->name
@@ -335,7 +340,7 @@ class Bulk_Update {
 				$utils->add_message( $e_msg, 'error', 'backend' );
 			}
 
-			// And return false (error)
+			// And then we return a false (error).
 			return false;
 		}
 
@@ -346,9 +351,9 @@ class Bulk_Update {
 	/**
 	 * Change the membership level for the specified User ID
 	 *
-	 * @param int $user_id
-	 * @param int $current_level_id
-	 * @param int $new_level_id
+	 * @param int $user_id The User ID to update the membership for.
+	 * @param int $current_level_id The level ID the member currently has.
+	 * @param int $new_level_id The level ID to change to for the user ID (member).
 	 *
 	 * @return bool
 	 */
@@ -370,15 +375,15 @@ class Bulk_Update {
 	/**
 	 * Update the specified field name (a date field)
 	 *
-	 * @param string   $field_name
-	 * @param int      $user_id
-	 * @param int      $current_level
-	 * @param int      $new_level
-	 * @param string   $new_date Uses MySQL DateTime format: YYYY-MM-DD HH:MM:SS
-	 * @param null|int $record_id
-	 * @param bool     $use_new
+	 * @param string   $field_name The field name to update.
+	 * @param int      $user_id The user ID for whom the update is being made.
+	 * @param int      $current_level The current membership level ID.
+	 * @param int      $new_level The new level ID.
+	 * @param string   $new_date New end-date. Uses MySQL DateTime format: YYYY-MM-DD HH:MM:SS.
+	 * @param null|int $record_id The DB record ID to update.
+	 * @param bool     $use_new The new or old format.
 	 *
-	 * @return bool|false|int
+	 * @return bool
 	 */
 	public function update_date(
 		$field_name,
@@ -395,16 +400,16 @@ class Bulk_Update {
 		$where        = null;
 		$where_format = null;
 
-		// Make sure we received a valid date
+		// Make sure we received a valid date.
 		if ( ! empty( $new_date ) && false === $this->validate_date_format( $new_date, 'Y-m-d' ) ) {
 
 			$user = get_user_by( 'ID', $user_id );
 
 			$msg = sprintf(
-				// translators: %1$s date value, %2$d record ID, %3$s email address
-				__( 'Invalid date format for %1$s (record: %2$d/email: %3$s)', 'e20r-members-list' ),
+				// translators: %1$s date value, %2$d record ID, %3$s email address.
+				esc_attr__( 'Invalid date format for %1$s (record: %2$d/email: %3$s)', 'e20r-members-list' ),
 				$new_date,
-				( $record_id ? $record_id : __( 'Unknown', 'e20r-members-list' ) ),
+				( $record_id ? $record_id : esc_attr__( 'Unknown', 'e20r-members-list' ) ),
 				$user->user_email
 			);
 
@@ -448,6 +453,7 @@ class Bulk_Update {
 				);
 			}
 		}
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$retval = $wpdb->update(
 			$wpdb->pmpro_memberships_users,
 			array( $field_name => $date ),
@@ -466,8 +472,8 @@ class Bulk_Update {
 	/**
 	 * Update the user's Membership status for the specified record
 	 *
-	 * @param int    $record_id
-	 * @param string $status
+	 * @param int    $record_id The record ID to update the membership status for.
+	 * @param string $status The status to update to.
 	 *
 	 * @return bool
 	 */
@@ -475,6 +481,7 @@ class Bulk_Update {
 
 		global $wpdb;
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$retval = $wpdb->update(
 			$wpdb->pmpro_memberships_users,
 			array( 'status' => $status ),
@@ -493,7 +500,7 @@ class Bulk_Update {
 	/**
 	 * Set the list of members to update
 	 *
-	 * @param array[] $member_info
+	 * @param array[] $member_info Array of member info (configuration) to set for the members.
 	 */
 	public function set_members( $member_info ) {
 		$this->members_to_update = $member_info;
@@ -520,7 +527,7 @@ class Bulk_Update {
 	/**
 	 * Configure/set the Operation for the Bulk Update
 	 *
-	 * @param string $operation
+	 * @param string $operation The operation to perform.
 	 */
 	public function set_operation( $operation ) {
 		$this->operation = $operation;
@@ -529,8 +536,8 @@ class Bulk_Update {
 	/**
 	 * Test the date supplied for MySQL compliance
 	 *
-	 * @param string $date
-	 * @param string $format
+	 * @param string $date The date to validate the format of.
+	 * @param string $format The format to validate (default is YYYY-MM-DD).
 	 *
 	 * @return bool
 	 *
