@@ -12,6 +12,7 @@ services:
       - ./:/var/www/html:cached
       - /Volumes/Development/www/clean.local/wp-content/themes/e20r-coaching:/var/www/html/wp-content/themes/e20r-coaching:cached
       - /Volumes/Development/www/clean.local/wp-content/plugins/paid-memberships-pro:/var/www/html/wp-content/plugins/paid-memberships-pro:cached
+      - /Volumes/Development/www/clean.local/wp-content/plugins/00-e20r-utilities:/var/www/html/wp-content/plugins/00-e20r-utilities:cached
       - /Volumes/Development/www/clean.local/wp-content/plugins/e20r-members-list:/var/www/html/wp-content/plugins/e20r-members-list:cached
     ports:
       - target: 80 # Web server
@@ -45,6 +46,7 @@ services:
       - ./:/var/www/html:cached
       - /Volumes/Development/www/clean.local/wp-content/themes/e20r-coaching:/var/www/html/wp-content/themes/e20r-coaching:cached
       - /Volumes/Development/www/clean.local/wp-content/plugins/paid-memberships-pro:/var/www/html/wp-content/plugins/paid-memberships-pro:cached
+      - /Volumes/Development/www/clean.local/wp-content/plugins/00-e20r-utilities:/var/www/html/wp-content/plugins/00-e20r-utilities:cached
       - /Volumes/Development/www/clean.local/wp-content/plugins/e20r-members-list:/var/www/html/wp-content/plugins/e20r-members-list:cached
     labels:
       - "traefik.enable=true"

@@ -7,13 +7,14 @@ services:
       - ./mariadb-init:/docker-entrypoint-initdb.d # Place init .sql file(s) here.
     ports:
       - target: 3306 # MariaDB server
-        published: 3306
+        published: 3307
         protocol: tcp
         mode: host
   nginx:
     volumes:
       - /Volumes/Development/www/clean.local/wp-content/themes/e20r-coaching:/var/www/html/wp-content/themes/e20r-coaching
       - /Volumes/Development/www/clean.local/wp-content/plugins/paid-memberships-pro:/var/www/html/wp-content/plugins/paid-memberships-pro
+      - /Volumes/Development/www/clean.local/wp-content/plugins/00-e20r-utilities:/var/www/html/wp-content/plugins/00-e20r-utilities
       - /Volumes/Development/www/clean.local/wp-content/plugins/e20r-members-list:/var/www/html/wp-content/plugins/e20r-members-list:ro
     ports:
       - target: 80 # Web server
@@ -46,6 +47,7 @@ services:
       - ./:/var/www/html
       - /Volumes/Development/www/clean.local/wp-content/themes/e20r-coaching:/var/www/html/wp-content/themes/e20r-coaching
       - /Volumes/Development/www/clean.local/wp-content/plugins/paid-memberships-pro:/var/www/html/wp-content/plugins/paid-memberships-pro
+      - /Volumes/Development/www/clean.local/wp-content/plugins/00-e20r-utilities:/var/www/html/wp-content/plugins/00-e20r-utilities
       - /Volumes/Development/www/clean.local/wp-content/plugins/e20r-members-list:/var/www/html/wp-content/plugins/e20r-members-list:ro
     labels:
       - "traefik.enable=true"
