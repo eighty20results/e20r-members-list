@@ -1,6 +1,9 @@
 {
     "config": {
-        "vendor-dir": "inc/"
+        "vendor-dir": "inc/",
+        "allow-plugins": {
+            "phpstan/extension-installer": true
+        }
     },
     "name": "eight20results/e20r-members-list",
     "type": "plugin",
@@ -19,6 +22,7 @@
     "require": {
         "php": ">=7.3",
         "10quality/license-keys-php-client": ">=v1.2.2",
+        "mixpanel/mixpanel-php" : "2.*",
         "ext-curl": "*",
         "ext-json": "*"
     },
