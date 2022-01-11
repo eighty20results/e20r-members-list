@@ -19,15 +19,15 @@
  * @package E20R\Licensing\Exceptions\BadOperation
  */
 
-namespace E20R\Members_List\Exceptions;
+namespace E20R\Members_List\Admin\Exceptions;
 
 use Exception;
 use Throwable;
 
 /**
- * Raised when the Utilities module hasn't been found!
+ * Raised when an invalid operation is attempted against a Defaults() constant or locked parameter
  */
-class MissingUtilitiesModule extends Exception {
+class InvalidSQL extends Exception {
 
 	/**
 	 * Custom exception constructor
