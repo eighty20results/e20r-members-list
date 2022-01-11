@@ -1,5 +1,5 @@
 <?php
-/*
+/**
 Plugin Name: Better Members List for Paid Memberships Pro
 Plugin URI: https://wordpress.org/plugins/e20r-members-list
 Description: Extensible, sortable & bulk action capable members listing + export to CSV tool for Paid Memberships Pro.
@@ -24,8 +24,9 @@ License:
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-
-*/
+ *
+ * @package E20R\Members_List\E20R_Members_List
+ */
 
 namespace E20R\Members_List;
 
@@ -219,14 +220,16 @@ if ( ! class_exists( '\E20R\Members_List\E20R_Members_List' ) ) {
 }
 
 
-/**
-try {
-	spl_autoload_register( 'E20R\Members_List\E20R_Members_List::auto_loader' );
-} catch ( \Exception $exception ) {
-	// phpcs:ignore
-	\error_log( 'Unable to register auto_loader: ' . $exception->getMessage(), E_USER_ERROR );
-	return false;
-}
+/* phpcs:ignore Squiz.PHP.CommentedOutCode.Found, Generic.Commenting.DocComment.ShortNotCapital, Generic.WhiteSpace.DisallowSpaceIndent.SpacesUsed
+ 	try {
+		spl_autoload_register( 'E20R\Members_List\E20R_Members_List::auto_loader' );
+	} catch ( \Exception $exception ) {
+		// phpcs:ignore
+		\error_log( 'Unable to register auto_loader: ' . $exception->getMessage(), E_USER_ERROR );
+		return false;
+	}
 */
 
-\add_action( 'plugins_loaded', array( E20R_Members_List::get_instance(), 'load_hooks' ) );
+if ( function_exists( '\add_action' ) ) {
+	\add_action( 'plugins_loaded', array( E20R_Members_List::get_instance(), 'load_hooks' ) );
+}
