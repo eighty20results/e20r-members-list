@@ -226,4 +226,6 @@ if ( ! class_exists( 'E20R\Utilities\ActivateUtilitiesPlugin' ) ) {
 	}
 }
 
-add_action( 'admin_init', '\E20R\Utilities\ActivateUtilitiesPlugin::attempt_activation', 9999, 1 );
+if ( function_exists( '\add_action' ) ) {
+	add_action( 'admin_init', '\E20R\Utilities\ActivateUtilitiesPlugin::attempt_activation', 9999, 1 );
+}
