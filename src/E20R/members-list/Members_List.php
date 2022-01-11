@@ -24,6 +24,7 @@ namespace E20R\Members_List;
 
 use E20R\Members_List\Admin\Bulk\Bulk_Cancel;
 use E20R\Members_List\Admin\Bulk\Bulk_Update;
+use E20R\Members_List\Admin\Exceptions\DBQueryError;
 use E20R\Members_List\Admin\Exceptions\InvalidSQL;
 use E20R\Members_List\Admin\Exceptions\MissingUtilitiesModule;
 use E20R\Members_List\Admin\Export\Export_Members;
@@ -606,7 +607,8 @@ class Members_List extends WP_List_Table {
 	 * Private function to capture the count of records in the membership database
 	 *
 	 * @return int|null
-	 * @throws \Exception Raised by generate_member_sql().
+	 * @throws InvalidSQL Raised by generate_member_sql() if it fails.
+	 * @throws DBQueryError Raised if there's a problem with the Database connection/query result.
 	 */
 	public function get_member_record_count() {
 
@@ -711,8 +713,14 @@ class Members_List extends WP_List_Table {
 
 		$this->utils->log( 'Fetch records from DB' );
 		// Load  & count records.
-		$this->items                = $this->get_members( $per_page, $current_page );
-		$this->total_member_records = $this->get_member_record_count();
+		try {
+			$this->items                = $this->get_members( $per_page, $current_page );
+			$this->total_member_records = $this->get_member_record_count();
+		} catch ( DBQueryError | InvalidSQL $e ) {
+			$this->utils->log( 'Error: ' . $e->getMessage() );
+			$this->items                = null;
+			$this->total_member_records = 0;
+		}
 
 		// BUG FIX: Handle situation(s) where there are no records found.
 		if ( null !== $this->items ) {
@@ -972,6 +980,9 @@ class Members_List extends WP_List_Table {
 	 * @param null|string $action The list page action being performed.
 	 * @param null|int    $user_id The WP User ID to export data for.
 	 * @param null|int    $level_id The membership level ID to export data for.
+	 *
+	 * @throws DBQueryError Raised if there's a problem with the underlying DB query
+	 * @throws InvalidSQL Raised if there's a problem with the generated SQL for the DB query
 	 */
 	public function export_members( $action = null, $user_id = null, $level_id = null ) {
 
@@ -993,8 +1004,7 @@ class Members_List extends WP_List_Table {
 		add_filter( 'e20r_memberslist_order_by', array( $this, 'export_order_by' ), 10, 1 );
 
 		$members_to_export = $this->get_members( - 1, 1 );
-
-		$export = new Export_Members( $members_to_export );
+		$export            = new Export_Members( $members_to_export );
 		$export->get_data_list();
 		$export->save_data_for_export();
 		$export->return_content();
@@ -1003,11 +1013,13 @@ class Members_List extends WP_List_Table {
 	/**
 	 * Load member data for listing
 	 *
-	 * @param int $per_page The number of records to display per page.
+	 * @param int $per_page    The number of records to display per page.
 	 * @param int $page_number The page number we're on to calculate the offset from.
 	 *
 	 * @return array|null|object
-	 * @throws \Exception Raised by default when there's a problem with the SQL statement generated.
+	 *
+	 * @throws InvalidSQL Raised when there's a problem with the SQL we generated.
+	 * @throws DBQueryError Raised if the DB Query reports a problem
 	 */
 	public function get_members( $per_page = 15, $page_number = 1 ) {
 
@@ -1016,11 +1028,11 @@ class Members_List extends WP_List_Table {
 		// Get Pagination SQL.
 		try {
 			$this->sql_query = $this->generate_member_sql( $per_page, $page_number );
-		} catch ( \Exception $exception ) {
+		} catch ( InvalidSQL $exception ) {
 			$this->utils->log( "Error: {$exception->getMessage()}" );
 			// translators: %1$s query string.
 			$this->utils->add_message( sprintf( esc_attr__( 'Members List database query error: %1$s', 'e20r-members-list' ), $exception->getMessage() ), 'error', 'backend' );
-			return null;
+			throw $exception;
 		}
 
 		// Fetch the data.
@@ -1051,18 +1063,22 @@ class Members_List extends WP_List_Table {
 
 		$error_msg = $wpdb->print_error();
 		if ( ! empty( $error_msg ) ) {
-			$this->utils->add_message(
-				sprintf(
-							// translators: %1$s query string.
-					esc_attr__(
-						'Error processing Members List database query: %1$s',
-						'e20r-members-list'
-					),
-					$error_msg
+			$msg = sprintf(
+					// translators: %1$s query string.
+				esc_attr__(
+					'Error processing Members List database query: %1$s',
+					'e20r-members-list'
 				),
+				$error_msg
+			);
+
+			$this->utils->add_message(
+				$msg,
 				'error',
 				'backend'
 			);
+
+			throw new DBQueryError( $msg );
 		}
 
 		return null;
