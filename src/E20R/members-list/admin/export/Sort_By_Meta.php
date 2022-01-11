@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (c) 2018-2021 - Eighty / 20 Results by Wicked Strong Chicks.
+ * Copyright (c) 2018 - 2022 - Eighty / 20 Results by Wicked Strong Chicks.
  * ALL RIGHTS RESERVED
  *
  * This program is free software: you can redistribute it and/or modify
@@ -15,12 +15,17 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * @package E20R\Members_List\Admin\Export\Sort_By_Meta
  */
 
 namespace E20R\Members_List\Admin\Export;
 
 if ( ! class_exists( '\E20R\Members_List\Admin\Export\Sort_By_Meta' ) ) {
 
+	/**
+	 * Handles metadata based sorting for the export operation.
+	 */
 	class Sort_By_Meta {
 
 		/**
@@ -40,8 +45,8 @@ if ( ! class_exists( '\E20R\Members_List\Admin\Export\Sort_By_Meta' ) ) {
 		/**
 		 * Sort_Meta constructor.
 		 *
-		 * @param string $key_name
-		 * @param string $order
+		 * @param string $key_name The metadata key to sort by.
+		 * @param string $order The metadata value sort order.
 		 */
 		public function __construct( $key_name, $order = 'DESC' ) {
 			$this->meta_key = $key_name;
@@ -49,12 +54,12 @@ if ( ! class_exists( '\E20R\Members_List\Admin\Export\Sort_By_Meta' ) ) {
 		}
 
 		/**
-		 * @param array $a
-		 * @param array $b
+		 * Sorts the actual records for us.
+		 *
+		 * @param array $a The first value to compare the sort against
+		 * @param array $b The 2nd value to compare the sort against
 		 *
 		 * @return int
-		 *
-		 * @throws \Exception
 		 */
 		public function sort_records( $a, $b ) {
 
@@ -94,7 +99,8 @@ if ( ! class_exists( '\E20R\Members_List\Admin\Export\Sort_By_Meta' ) ) {
 			if ( 'ASC' === $this->order ) {
 				return ( $a_value < $b_value ? 1 : - 1 );
 			}
-		}
 
+			return false;
+		}
 	}
 }
