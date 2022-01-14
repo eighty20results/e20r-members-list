@@ -15,6 +15,11 @@ services:
       - /Volumes/Development/www/clean.local/wp-content/themes/e20r-coaching:/var/www/html/wp-content/themes/e20r-coaching
       - /Volumes/Development/www/clean.local/wp-content/plugins/paid-memberships-pro:/var/www/html/wp-content/plugins/paid-memberships-pro
       - /Volumes/Development/www/clean.local/wp-content/plugins/00-e20r-utilities:/var/www/html/wp-content/plugins/00-e20r-utilities
+      # Only mount the composer-prod specific Composer modules (licensing, metrics, plus updater when developing a non-wordpress.org plugin)
+      - /Volumes/Development/www/clean.local/wp-content/plugins/00-e20r-utilities/inc/10quality:/var/www/html/wp-content/plugins/00-e20r-utilities/inc/10quality
+      - /Volumes/Development/www/clean.local/wp-content/plugins/00-e20r-utilities/inc/composer:/var/www/html/wp-content/plugins/00-e20r-utilities/inc/composer
+      - /Volumes/Development/www/clean.local/wp-content/plugins/00-e20r-utilities/inc/mixpanel:/var/www/html/wp-content/plugins/00-e20r-utilities/inc/mixpanel
+      - /Volumes/Development/www/clean.local/wp-content/plugins/00-e20r-utilities/inc/autoload.php:/var/www/html/wp-content/plugins/00-e20r-utilities/inc/autoload.php
       - /Volumes/Development/www/clean.local/wp-content/plugins/e20r-members-list:/var/www/html/wp-content/plugins/e20r-members-list:ro
     ports:
       - target: 80 # Web server
@@ -48,6 +53,11 @@ services:
       - /Volumes/Development/www/clean.local/wp-content/themes/e20r-coaching:/var/www/html/wp-content/themes/e20r-coaching
       - /Volumes/Development/www/clean.local/wp-content/plugins/paid-memberships-pro:/var/www/html/wp-content/plugins/paid-memberships-pro
       - /Volumes/Development/www/clean.local/wp-content/plugins/00-e20r-utilities:/var/www/html/wp-content/plugins/00-e20r-utilities
+      # Only mount the composer-prod specific Composer modules (licensing, metrics, plus updater when developing a non-wordpress.org plugin)
+      - /Volumes/Development/www/clean.local/wp-content/plugins/00-e20r-utilities/inc/10quality:/var/www/html/wp-content/plugins/00-e20r-utilities/inc/10quality
+      - /Volumes/Development/www/clean.local/wp-content/plugins/00-e20r-utilities/inc/composer:/var/www/html/wp-content/plugins/00-e20r-utilities/inc/composer
+      - /Volumes/Development/www/clean.local/wp-content/plugins/00-e20r-utilities/inc/mixpanel:/var/www/html/wp-content/plugins/00-e20r-utilities/inc/mixpanel
+      - /Volumes/Development/www/clean.local/wp-content/plugins/00-e20r-utilities/inc/autoload.php:/var/www/html/wp-content/plugins/00-e20r-utilities/inc/autoload.php
       - /Volumes/Development/www/clean.local/wp-content/plugins/e20r-members-list:/var/www/html/wp-content/plugins/e20r-members-list:ro
     labels:
       - "traefik.enable=true"
