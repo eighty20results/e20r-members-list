@@ -35,16 +35,14 @@ github_url="https://github.com/eighty20results/${short_name}/"
 # Plugin specific files to include/exclude and move if necessary during build
 declare -x -a include=( \
 	"docs" \
-	"inc/composer" \
-	"inc/yahnis-elsts" \
-	"inc/10quality"
-	"inc/autoload.php" \
+	"inc" \
+	"languages" \
 	"src" \
-	"class-loader.php" \
 	"composer.json" \
 	"composer.phar" \
-	"README.txt" \
 	"CHANGELOG.md"
+	"README.txt" \
+	"class-e20r-members-list.php" \
 	)
 declare -x -a exclude=( \
 	".git" \
