@@ -17,21 +17,11 @@ parameters:
         - '#^Constant WP_PLUGIN_DIR not found\.$#'
         - '#^Constant WP_LANG_DIR not found\.$#'
     scanDirectories:
-        - inc/wp_plugins/00-e20r-utilities
         - inc/
     paths:
         - class-e20r-members-list.php
         - src/
-#        - tests/integration
-#        - tests/unit
-#        - tests/functional
-#        - tests/acceptance
     bootstrapFiles:
     	- class-e20r-members-list.php
-#    	- tests/_bootstrap.php
     excludePaths:
-        - inc/
-        - tests/*/data/*
-        - tests/_*/
-        - tests/_docker*
-        - tests/test_env*
+        - tests/
