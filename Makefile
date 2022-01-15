@@ -151,7 +151,7 @@ clean: prerequisite
 # Remove all installed composer, WordPress and E20R plugins/components from the $(COMPOSER_DIR) - /inc - directory
 #
 clean-inc: prerequisite
-	if [[ -d $(COMPOSER_DIR) ]]; then \
+	@if [[ -d $(COMPOSER_DIR) ]]; then \
   	  echo "Removing existing composer packages from $(COMPOSER_DIR)" ; \
   	  find $(COMPOSER_DIR)/ -type d -maxdepth 1 ! -name inc -exec rm -rf {} \; ; \
   	  if [[ -f "$(COMPOSER_DIR)/autoload.php" ]]; then \
@@ -242,7 +242,7 @@ image-pull: docker-hub-login
 # Clean up Composer and WP/E20R dependencies as well as the Docker container(s) used for testing/development
 #
 real-clean: prerequisite stop-stack clean clean-inc clean-wp-deps
-	echo "Removing docker images" && \
+	@echo "Removing docker images" && \
 	docker image remove $(PROJECT)_wordpress --force
 
 #
@@ -593,7 +593,7 @@ $(E20R_PLUGIN_BASE_FILE): prerequisite stop-stack clean-inc composer-prod
 # Build the plugin .zip archive (and upload to the eighty20results.com server if applicable
 # Saves the built plugin .zip archive to build/kits
 #
-build: prerequisite $(E20R_PLUGIN_BASE_FILE)
+build: prerequisite stop-stack clean-inc composer-prod $(E20R_PLUGIN_BASE_FILE)
 	@echo "Built kit for $(E20R_PLUGIN_NAME)"
 
 deploy: prerequisite
