@@ -494,8 +494,9 @@ integration-tests: docker-deps start-stack db-import
   		DB_IMAGE=$(DB_IMAGE) DB_VERSION=$(DB_VERSION) WP_VERSION=$(WP_VERSION) VOLUME_CONTAINER=$(VOLUME_CONTAINER) \
   		docker-compose --project-name $(PROJECT) --env-file $(DC_ENV_FILE) --file $(DC_CONFIG_FILE) \
   			exec -T -w /var/www/html/wp-content/plugins/$(PROJECT)/ \
-  			wordpress $(COMPOSER_DIR)/bin/codecept run integration --coverage-html ./coverage/integration --verbose --debug $(WPUNIT_TEST_CASE_PATH); \
+  			wordpress $(COMPOSER_DIR)/bin/codecept run integration --coverage-html ./coverage/integration --verbose --debug $(INTEGRATION_TEST_CASE_PATH); \
 	fi
+
 # TODO: Add coverage support to the integration-test target
 integration-start: docker-deps start-stack db-import
 
