@@ -21,138 +21,167 @@
 
 namespace E20R\Members_List\Admin\Bulk;
 
+use E20R\Utilities\Message;
 use E20R\Utilities\Utilities;
 
-/**
- * The bulk cancel operation handler
- */
-class Bulk_Cancel {
+if ( ! defined( 'ABSPATH' ) ) {
+	die( 'WordPress not loaded. Naughty, naughty!' );
+}
+
+if ( ! class_exists( '\\E20R\\Members_List\\Admin\\Bulk\\Bulk_Cancel' ) ) {
 
 	/**
-	 * Instance of this class
-	 *
-	 * @var null|Bulk_Cancel
+	 * The bulk cancel operation handler
 	 */
-	private static $instance = null;
-	/**
-	 * Update operation to perform
-	 *
-	 * @var null|string
-	 */
-	private $operation = null;
+	class Bulk_Cancel {
 
-	/**
-	 * List of member IDs to update
-	 *
-	 * @var array|int[]
-	 */
-	private $members_to_update = array();
+		/**
+		 * Instance of this class
+		 *
+		 * @var null|Bulk_Cancel
+		 */
+		private static $instance = null;
+		/**
+		 * Update operation to perform
+		 *
+		 * @var null|string
+		 */
+		private $operation = null;
 
-	/**
-	 * Bulk_Cancel constructor (singleton)
-	 *
-	 * @access private
-	 */
-	private function __construct() {
-	}
+		/**
+		 * Array of members to update where the memebr date is represented as an array per member
+		 *
+		 * @var array[]
+		 */
+		private $members_to_update = array();
 
-	/**
-	 * The __clone() method for Bulk_Cancel() (singleton class)
-	 *
-	 * @access private
-	 */
-	private function __clone() {}
+		/**
+		 * Instance of the E20R Utilities Module class
+		 *
+		 * @var Utilities|null $utils
+		 */
+		private $utils = null;
 
-	/**
-	 * Process cancellations for all members/membership_ids
-	 */
-	public function cancel() {
+		/**
+		 * Bulk_Cancel constructor (singleton)
+		 *
+		 * @param array[]        $members_to_update The array of member IDs to perform the bulk cancel operation against
+		 * @param Utilities|null $utils             Instance of the E20R Utilities Module class
+		 *
+		 * @access public
+		 */
+		public function __construct( $members_to_update = array(), $utils = null ) {
 
-		// Process all User & level ID for the single action.
-		$failed = array();
-
-		$utils = Utilities::get_instance();
-		$utils->log( 'Cancelling ' . count( $this->members_to_update ) . ' members' );
-
-		// Process all selected records/members
-		foreach ( $this->members_to_update as $key => $cancel_info ) {
-
-			if ( false === $this->cancel_member( $cancel_info['user_id'], $cancel_info['level_id'] ) ) {
-				$failed[] = $cancel_info['user_id']; // FIXME: Add level info for multiple membership levels
+			if ( empty( $utils ) ) {
+				$message = new Message();
+				$utils   = new Utilities( $message );
 			}
+
+			$this->utils = $utils;
+
+			if ( ! empty( $members_to_update ) ) {
+				$this->members_to_update = $members_to_update;
+			}
+
+			self::$instance = $this;
 		}
 
-		// Check for errors & display error banner if we got one.
-		if ( ! empty( $failed ) ) {
+		/**
+		 * Process cancellations for all members/membership_ids
+		 */
+		public function cancel() {
 
-			$message = sprintf(
+			// Process all User & level ID for the single action.
+			$failed = array();
+
+			$this->utils->log( 'Cancelling ' . count( $this->members_to_update ) . ' members' );
+
+			// Process all selected records/members
+			foreach ( $this->members_to_update as $key => $cancel_info ) {
+
+				if ( false === $this->cancel_member( $cancel_info['user_id'], $cancel_info['level_id'] ) ) {
+					$failed[] = $cancel_info['user_id']; // FIXME: Add level info for multiple membership levels
+				}
+			}
+
+			// Check for errors & display error banner if we got one.
+			if ( ! empty( $failed ) ) {
+
+				$message = sprintf(
 				// translators: %1$s List of User IDs
-				esc_attr__(
-					'Unable to cancel membership(s) for the following user IDs: %1$s',
-					'e20r-members-list'
-				),
-				implode( ', ', $failed )
-			);
+					esc_attr__(
+						'Unable to cancel membership(s) for the following user IDs: %1$s',
+						'e20r-members-list'
+					),
+					implode( ', ', $failed )
+				);
 
-			if ( function_exists( 'pmpro_setMessage' ) ) {
-				pmpro_setMessage( $message, 'error' );
-			} else {
-				global $msg;
-				global $msgt;
+				$this->utils->add_message( $message, 'error', 'backend' );
 
-				$msg  = $message;
-				$msgt = 'error';
+				if ( function_exists( 'pmpro_setMessage' ) ) {
+					pmpro_setMessage( $message, 'error' );
+				} else {
+					global $msg;
+					global $msgt;
+
+					$msg  = $message;
+					$msgt = 'error';
+				}
+
+				return false;
 			}
-		}
-	}
 
-	/**
-	 * The cancel member action
-	 *
-	 * @param int      $id       User ID
-	 * @param int|null $level_id Level ID
-	 *
-	 * @return bool
-	 */
-	public static function cancel_member( $id, $level_id = null ) {
-
-		if ( function_exists( 'pmpro_cancelMembershipLevel' ) ) {
-			return pmpro_cancelMembershipLevel( $level_id, $id, 'admin_cancelled' );
-		} else {
-			return false;
+			return true;
 		}
 
-	}
+		/**
+		 * The cancel member action
+		 *
+		 * @param int      $id       User ID
+		 * @param int|null $level_id Level ID
+		 *
+		 * @return bool
+		 */
+		public static function cancel_member( $id, $level_id = null ) {
 
-	/**
-	 * Get or create an instance of the Bulk_Cancel class
-	 *
-	 * @return Bulk_Cancel|null
-	 */
-	public static function get_instance() {
+			if ( function_exists( 'pmpro_cancelMembershipLevel' ) ) {
+				return pmpro_cancelMembershipLevel( $level_id, $id, 'admin_cancelled' );
+			} else {
+				return false;
+			}
 
-		if ( is_null( self::$instance ) ) {
-			self::$instance = new self();
 		}
 
-		return self::$instance;
-	}
+		/**
+		 * Get or create an instance of the Bulk_Cancel class
+		 *
+		 * @return Bulk_Cancel|null
+		 */
+		public static function get_instance() {
 
-	/**
-	 * Set the list of members & their levels to update
-	 *
-	 * @param array $member_info The array of members we intend to process.
-	 */
-	public function set_members( $member_info = array() ) {
-		$this->members_to_update = $member_info;
-	}
+			if ( is_null( self::$instance ) ) {
+				self::$instance = new self();
+			}
 
-	/**
-	 * Return the list of members being updated
-	 *
-	 * @return array
-	 */
-	public function get_members() {
-		return $this->members_to_update;
+			return self::$instance;
+		}
+
+		/**
+		 * Set the list of members & their levels to update
+		 *
+		 * @param int[] $member_info The array of members we intend to process.
+		 */
+		public function set_members( $member_info = array() ) {
+			$this->members_to_update = $member_info;
+		}
+
+		/**
+		 * Return the list of members being updated
+		 *
+		 * @return array
+		 */
+		public function get_members() {
+			return $this->members_to_update;
+		}
 	}
 }

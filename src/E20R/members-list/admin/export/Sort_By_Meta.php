@@ -21,7 +21,11 @@
 
 namespace E20R\Members_List\Admin\Export;
 
-if ( ! class_exists( '\E20R\Members_List\Admin\Export\Sort_By_Meta' ) ) {
+if ( ! defined( 'ABSPATH' ) ) {
+	die( 'WordPress not loaded. Naughty, naughty!' );
+}
+
+if ( ! class_exists( '\\E20R\\Members_List\\Admin\\Export\\Sort_By_Meta' ) ) {
 
 	/**
 	 * Handles metadata based sorting for the export operation.
