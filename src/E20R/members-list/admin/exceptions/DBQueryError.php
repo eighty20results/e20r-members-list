@@ -24,19 +24,22 @@ namespace E20R\Members_List\Admin\Exceptions;
 use Exception;
 use Throwable;
 
-/**
- * Raised when the DB returns an unexpected error.
- */
-class DBQueryError extends Exception {
+if ( ! class_exists( '\\E20R\\Members_List\\Admin\\Exceptions\\DBQueryError' ) ) {
 
 	/**
-	 * Custom exception constructor
-	 *
-	 * @param string         $message The exception error message to use.
-	 * @param int            $code The Exception error code (int) to use.
-	 * @param Throwable|null $previous Previous exception that called this one.
+	 * Raised when the DB returns an unexpected error.
 	 */
-	public function __construct( string $message = '', int $code = 0, ?Throwable $previous = null ) { // phpcs:ignore Generic.CodeAnalysis.UselessOverridingMethod.Found
-		parent::__construct( $message, $code, $previous );
+	class DBQueryError extends Exception {
+
+		/**
+		 * Custom exception constructor
+		 *
+		 * @param string         $message  The exception error message to use.
+		 * @param int            $code     The Exception error code (int) to use.
+		 * @param Throwable|null $previous Previous exception that called this one.
+		 */
+		public function __construct( string $message = '', int $code = 0, ?Throwable $previous = null ) { // phpcs:ignore Generic.CodeAnalysis.UselessOverridingMethod.Found
+			parent::__construct( $message, $code, $previous );
+		}
 	}
 }

@@ -24,19 +24,21 @@ namespace E20R\Members_List\Admin\Exceptions;
 use Exception;
 use Throwable;
 
-/**
- * Raised when an invalid operation is attempted against a Defaults() constant or locked parameter
- */
-class InvalidSQL extends Exception {
-
+if ( ! class_exists( '\\E20R\\Members_List\\Admin\\Exceptions\\InvalidSQL' ) ) {
 	/**
-	 * Custom exception constructor
-	 *
-	 * @param string         $message The exception error message to use.
-	 * @param int            $code The Exception error code (int) to use.
-	 * @param Throwable|null $previous Previous exception that called this one.
+	 * Raised when an invalid operation is attempted against a Defaults() constant or locked parameter
 	 */
-	public function __construct( string $message = '', int $code = 0, ?Throwable $previous = null ) { // phpcs:ignore Generic.CodeAnalysis.UselessOverridingMethod.Found
-		parent::__construct( $message, $code, $previous );
+	class InvalidSQL extends Exception {
+
+		/**
+		 * Custom exception constructor
+		 *
+		 * @param string         $message  The exception error message to use.
+		 * @param int            $code     The Exception error code (int) to use.
+		 * @param Throwable|null $previous Previous exception that called this one.
+		 */
+		public function __construct( string $message = '', int $code = 0, ?Throwable $previous = null ) { // phpcs:ignore Generic.CodeAnalysis.UselessOverridingMethod.Found
+			parent::__construct( $message, $code, $previous );
+		}
 	}
 }
