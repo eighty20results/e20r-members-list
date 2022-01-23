@@ -36,6 +36,7 @@ use E20R\Members_List\Admin\Pages\Members_List_Page;
 use E20R\Metrics\Exceptions\InvalidPluginInfo;
 use E20R\Metrics\Exceptions\MissingDependencies;
 use E20R\Metrics\MixpanelConnector;
+use E20R\Utilities\Cache;
 use E20R\Utilities\Utilities;
 use E20R\Utilities\Message;
 use function add_action;
@@ -178,6 +179,57 @@ if ( ! class_exists( '\\E20R\\Members_List\\E20R_Members_List' ) ) {
 			$this->utils->log( 'Loading hooks for the E20R_Members_List class' );
 			add_action( 'init', array( $this, 'load_text_domain' ), 1 );
 			add_action( 'wp_loaded', array( $this->page, 'load_hooks' ), 10 );
+
+			// All sorts of events trigger an attempted cache clearing
+			add_action( 'pmpro_after_change_membership_level', array( $this, 'attempt_clear_cache', 99999 ) );
+			add_action( 'deleted_user', array( $this, 'attempt_clear_cache', 99999 ) );
+			add_action( 'profile_update', array( $this, 'attempt_clear_cache' ), 99999 );
+			add_action( 'edit_user_profile_update', array( $this, 'attempt_clear_cache' ), 99999 );
+		}
+
+		/**
+		 * Attempt to clear cached Members List information
+		 *
+		 * @return void
+		 */
+		public function attempt_clear_cache() {
+			if ( false === $this->clear_cache() ) {
+				$message = esc_attr__(
+					'Could not clear all of the cached members list data. Check error logs for more information.',
+					'e20r-members-list'
+				);
+				$this->utils->add_message( $message, 'warning', 'backend' );
+			}
+		}
+
+		/**
+		 * Clear the cache for the Better Members List plugin (used by save user/update member, etc actions)
+		 *
+		 * @return bool
+		 */
+		public function clear_cache() {
+			try {
+				// Delete the total # of records cache
+				if ( false === Cache::delete( null, $this->page->get( 'total_count_cache_group' ) ) ) {
+					return false;
+				}
+			} catch ( InvalidSettingsKey $e ) {
+				$this->utils->log( 'Error clearing the "total_count_cache_group" cache' );
+				return false;
+			}
+
+			try {
+				// Delete the search/query result cache
+				if ( false === Cache::delete( null, $this->page->get( 'result_cache_group' ) ) ) {
+					return false;
+				}
+			} catch ( InvalidSettingsKey $e ) {
+				$this->utils->log( 'Error clearing the "result_cache_group" cache' );
+				return false;
+			}
+
+			// We successfully deleted everything
+			return true;
 		}
 
 		/**
