@@ -65,6 +65,7 @@
             "E20R\\Members_List\\Admin\\": "src/E20R/members-list/admin",
             "E20R\\Members_List\\Admin\\Exceptions\\": "src/E20R/members-list/admin/exceptions",
             "E20R\\Members_List\\Admin\\Export\\": "src/E20R/members-list/admin/export",
+            "E20R\\Members_List\\Admin\\Modules\\": "src/E20R/members-list/modules",
             "E20R\\Members_List\\Admin\\Pages\\": "src/E20R/members-list/admin/pages",
             "E20R\\Members_List\\Admin\\Bulk\\": "src/E20R/members-list/admin/bulk",
             "E20R\\Tests\\": "tests/",
