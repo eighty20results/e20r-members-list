@@ -30,7 +30,19 @@ License:
 
 namespace E20R\Members_List;
 
+use E20R\Exceptions\InvalidSettingsKey;
+use E20R\Members_List\Admin\Exceptions\MissingUtilitiesModule;
 use E20R\Members_List\Admin\Pages\Members_List_Page;
+use E20R\Metrics\Exceptions\InvalidPluginInfo;
+use E20R\Metrics\Exceptions\MissingDependencies;
+use E20R\Metrics\MixpanelConnector;
+use E20R\Utilities\Utilities;
+use E20R\Utilities\Message;
+use function add_action;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	die( 'WordPress not loaded. Naughty, naughty!' );
+}
 
 require_once __DIR__ . '/inc/autoload.php';
 require_once __DIR__ . '/ActivateUtilitiesPlugin.php';
@@ -39,7 +51,7 @@ if ( ! defined( 'E20R_MEMBERSLIST_VER' ) ) {
 	define( 'E20R_MEMBERSLIST_VER', '8.5' );
 }
 
-if ( ! class_exists( '\E20R\Members_List\E20R_Members_List' ) ) {
+if ( ! class_exists( '\\E20R\\Members_List\\E20R_Members_List' ) ) {
 	/**
 	 * Class E20R_Members_List
 	 */
@@ -53,11 +65,76 @@ if ( ! class_exists( '\E20R\Members_List\E20R_Members_List' ) ) {
 		private static $instance = null;
 
 		/**
-		 * E20R_Members_List constructor.
+		 * The E20R Utilities Module class instance
+		 *
+		 * @var Utilities|null $utils
 		 */
-		private function __construct() {
+		private $utils = null;
+
+
+		/**
+		 * The Member List Page class instance
+		 *
+		 * @var Members_List_Page|null $page
+		 */
+		private $page = null;
+
+		/**
+		 * The class managing metrics for Mixpanel
+		 *
+		 * @var null|MixpanelConnector $metrics
+		 */
+		private $metrics = null;
+
+		/**
+		 * E20R_Members_List constructor.
+		 *
+		 * @param null|Members_List_Page $ml_page The Members List Page (view) class to use to display the wp-admin page
+		 * @param null|Utilities         $utils The E20R Utilities Module class instance
+		 * @param null|MixpanelConnector $mixpanel The MixpanelConnector class instance
+		 */
+		public function __construct( $ml_page = null, $utils = null, $mixpanel = null ) {
+			self::$instance = $this;
+
+			if ( empty( $utils ) ) {
+				$message = new Message();
+				$utils   = new Utilities( $message );
+			}
+
+			$this->utils = $utils;
+
+			if ( empty( $ml_page ) ) {
+				$ml_page = new Members_List_Page( $this->utils );
+			}
+
+			$this->page = $ml_page;
+
+			// Add the usage metrics (Mixpanel) class unless it's supplied
+			if ( empty( $mixpanel ) ) {
+				$mixpanel = new MixpanelConnector( 'a14f11781866c2117ab6487792e4ebfd' );
+			}
+
+			$this->metrics = $mixpanel;
 		}
 
+		/**
+		 * Return the content of the property we're processing
+		 *
+		 * @param string $property The E20R_Members_List() class property to return the value of.
+		 *
+		 * @return mixed
+		 * @throws InvalidSettingsKey Raised when an invalid class property is specified for the get() method
+		 */
+		public function get( $property = 'instance' ) {
+
+			if ( ! property_exists( $this, $property ) ) {
+				throw new InvalidSettingsKey(
+					esc_attr__( 'The specified E20R_Members_List() class property does not exist!', 'e20r-members-list' )
+				);
+			}
+
+			return $this->{$property};
+		}
 		/**
 		 * Get or instantiate and get the current class
 		 *
@@ -75,108 +152,32 @@ if ( ! class_exists( '\E20R\Members_List\E20R_Members_List' ) ) {
 		}
 
 		/**
-		 * Class auto-loader for the Enhanced Members List plugin
-		 *
-		 * @param string $class_name Name of the class to auto-load.
-		 *
-		 * @return false|bool
-		 * @since  1.0
-		 * @access public static
-		 *
-		 * @test E20R_Members_ListTest::test_auto_loader_success
-		 * @test E20R_Members_ListTest::test_auto_loader_error_returns
-		 */
-		public static function auto_loader( $class_name ) {
-
-			if ( false === stripos( $class_name, 'e20r' ) ) {
-				return false;
-			}
-
-			$parts     = explode( '\\', $class_name );
-			$c_name    = strtolower( preg_replace( '/_/', '-', $parts[ ( count( $parts ) - 1 ) ] ) );
-			$base_path = plugin_dir_path( __FILE__ ) . 'classes/';
-
-			if ( file_exists( plugin_dir_path( __FILE__ ) . 'class/' ) ) {
-				$base_path = plugin_dir_path( __FILE__ ) . 'class/';
-			}
-
-			if ( file_exists( plugin_dir_path( __FILE__ ) . 'src/' ) ) {
-				$base_path = plugin_dir_path( __FILE__ ) . 'src/';
-			}
-
-			$filename = "class-{$c_name}.php";
-
-			try {
-				$iterator = new \RecursiveDirectoryIterator(
-					$base_path,
-					\RecursiveDirectoryIterator::SKIP_DOTS |
-					\RecursiveIteratorIterator::SELF_FIRST |
-					\RecursiveIteratorIterator::CATCH_GET_CHILD |
-					\RecursiveDirectoryIterator::FOLLOW_SYMLINKS
-				);
-			} catch ( \Exception $ri_except ) {
-				// phpcs:ignore
-				error_log( "Error instantiating iterator for ${class_name}: " . $ri_except->getMessage() );
-				return false;
-			}
-			/**
-			 * Locate the class files for the plugin, recursively
-			 */
-			try {
-				$filter = new \RecursiveCallbackFilterIterator(
-					$iterator,
-					function ( $current, $key, $iterator ) use ( $filename ) {
-						$file_name = $current->getFilename();
-
-						// Skip hidden files and directories.
-						if ( '.' === $file_name[0] || '..' === $file_name ) {
-							return false;
-						}
-
-						if ( $current->isDir() ) {
-							// Only recurse into intended subdirectories.
-							return $file_name() === $filename;
-						} else {
-							// Only consume files of interest.
-							return strpos( $file_name, $filename ) === 0;
-						}
-					}
-				);
-			} catch ( \Exception $fh_except ) {
-				// phpcs:ignore
-				error_log( "Error locating ${class_name}: " . $fh_except->getMessage() );
-				return false;
-			}
-
-			try {
-				foreach ( new \RecursiveIteratorIterator( $iterator ) as $f_filename => $f_file ) {
-
-					$class_path = sprintf( '%1$s/%2$s', $f_file->getPath(), $f_file->getFilename() );
-
-					if ( $f_file->isFile() && false !== strpos( $class_path, $filename ) ) {
-						require_once $class_path;
-						return true;
-					}
-				}
-			} catch ( \Exception $e ) {
-				// phpcs:ignore
-				error_log( "Error loading ${class_name}: " . $e->getMessage() );
-				return false;
-			}
-
-			return false;
-		}
-
-		/**
 		 * Initialize the Enhanced Members List functionality
+		 *
+		 * @param null|Utilities $utils The E20R Utilities Module class instance
 		 *
 		 * @since v3.3 - ENHANCEMENT: Load translation/I18N
 		 *
 		 * @test E20R_Members_ListTest::test_load_hooks()
+		 *
+		 * @throws MissingUtilitiesModule Raised if the Utilities module is missing/not loaded on the site.
 		 */
-		public function load_hooks() {
-			add_action( 'init', array( Members_List_Page::get_instance(), 'load_hooks' ), - 1 );
+		public function load_hooks( $utils = null ) {
+
+			if ( ! method_exists( '\\E20R\\Utilities\\Utilities', 'get_instance' ) ) {
+				$msg = esc_attr__( 'The E20R Utilities Module is missing/inactive!', 'e20r-members-list' );
+				throw new MissingUtilitiesModule( $msg );
+			}
+
+			if ( empty( $utils ) ) {
+				$message = new Message();
+				$utils   = new Utilities( $message );
+			}
+
+			$this->utils = $utils;
+			$this->utils->log( 'Loading hooks for the E20R_Members_List class' );
 			add_action( 'init', array( $this, 'load_text_domain' ), 1 );
+			add_action( 'wp_loaded', array( $this->page, 'load_hooks' ), 10 );
 		}
 
 		/**
@@ -215,21 +216,70 @@ if ( ! class_exists( '\E20R\Members_List\E20R_Members_List' ) ) {
 				dirname( __FILE__ ) . '/languages/'
 			);
 		}
+
+		/**
+		 * Register with MixPanel when activating the plugin
+		 */
+		public function installed() {
+			// Install/Uninstall events for the plugin
+			$mp_events = array(
+				'e20r-members-list_activated'   => true,
+				'e20r-members-list_deactivated' => true,
+			);
+
+			try {
+				$this->metrics->get()->registerAllOnce( $mp_events );
+			} catch ( InvalidSettingsKey $exception ) {
+				$this->utils->log( $exception->getMessage() );
+			}
+
+			try {
+				$this->metrics->increment_activations( 'e20r-members-list' );
+			} catch ( MissingDependencies | InvalidPluginInfo $e ) {
+				$this->utils->log( $e->getMessage() );
+				$this->utils->add_message( $e->getMessage(), 'error', 'backend' );
+			}
+		}
+
+		/**
+		 * Various actions when deactivating the plugin
+		 */
+		public function uninstalled() {
+			try {
+				$this->metrics->decrement_activations( 'e20r-members-list' );
+			} catch ( MissingDependencies | InvalidPluginInfo $e ) {
+				$this->utils->log( $e->getMessage() );
+				$this->utils->add_message( $e->getMessage(), 'error', 'backend' );
+			}
+		}
 	}
 
 }
 
+/**
+ * Load the required E20R Utilities Module functionality
+ */
+require_once __DIR__ . '/ActivateUtilitiesPlugin.php';
 
-/* phpcs:ignore Squiz.PHP.CommentedOutCode.Found, Generic.Commenting.DocComment.ShortNotCapital, Generic.WhiteSpace.DisallowSpaceIndent.SpacesUsed
- 	try {
-		spl_autoload_register( 'E20R\Members_List\E20R_Members_List::auto_loader' );
-	} catch ( \Exception $exception ) {
-		// phpcs:ignore
-		\error_log( 'Unable to register auto_loader: ' . $exception->getMessage(), E_USER_ERROR );
+if ( ! apply_filters( 'e20r_utilities_module_installed', false ) ) {
+
+	$required_plugin = 'Better Members List for Paid Memberships Pro';
+
+	if ( false === \E20R\Utilities\ActivateUtilitiesPlugin::attempt_activation() ) {
+		add_action(
+			'admin_notices',
+			function () use ( $required_plugin ) {
+				\E20R\Utilities\ActivateUtilitiesPlugin::plugin_not_installed( $required_plugin );
+			}
+		);
+
 		return false;
 	}
-*/
+}
 
-if ( function_exists( '\add_action' ) ) {
-	\add_action( 'plugins_loaded', array( E20R_Members_List::get_instance(), 'load_hooks' ) );
+if ( function_exists( 'add_action' ) ) {
+	$ml_class = new E20R_Members_List();
+	add_action( 'plugins_loaded', array( $ml_class, 'load_hooks' ) );
+	register_activation_hook( __FILE__, array( $ml_class, 'installed' ) );
+	register_deactivation_hook( __FILE__, array( $ml_class, 'uninstalled' ) );
 }
