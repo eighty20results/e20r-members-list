@@ -25,3 +25,4 @@ parameters:
     	- class-e20r-members-list.php
     excludePaths:
         - tests/
+        - *.js
