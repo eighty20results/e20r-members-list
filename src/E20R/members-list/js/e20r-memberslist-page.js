@@ -231,7 +231,12 @@
 
                 let export_args = self.prepare_export(self, inputs);
 				// Open a new tab to trigger the AJAX request for the download
-				self.download_csv('members_list.csv', export_args, ); //jshint ignore:line
+				let file_name = window.prompt( 'Filename for data to save/export', 'members_list' );
+				let extension = '.csv';
+				if ( file_name.toLowerCase().endsWith( '.csv' ) ) {
+					extension = '';
+				}
+				self.download_csv(file_name + extension, export_args, ); //jshint ignore:line
             });
         },
 		set_search: function(url, paramName, paramValue) {
