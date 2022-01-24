@@ -112,7 +112,7 @@ if ( ! class_exists( '\\E20R\\Members_List\\E20R_Members_List' ) ) {
 
 			// Add the usage metrics (Mixpanel) class unless it's supplied
 			if ( empty( $mixpanel ) ) {
-				$mixpanel = new MixpanelConnector( 'a14f11781866c2117ab6487792e4ebfd' );
+				$mixpanel = new MixpanelConnector( 'a14f11781866c2117ab6487792e4ebfd', array( 'host' => 'api-eu.mixpanel.com' ), null, $this->utils );
 			}
 
 			$this->metrics = $mixpanel;
