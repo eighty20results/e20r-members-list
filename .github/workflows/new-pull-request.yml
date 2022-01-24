@@ -2,9 +2,9 @@ name: Run Unit Tests and create translations when creating a PR
 
 # Run Unit Test and POT files when new PR is created
 on:
-  push:
-    branches:
-      - main
+#   push:
+#     branches:
+#       - main
   pull_request:
     branches:
       - main
@@ -19,6 +19,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
+        with:
+          repository: eighty20results/e20r-members-list
 
       - name: Setup PHP with Composer V2+
         uses: shivammathur/setup-php@v2
@@ -41,21 +43,29 @@ jobs:
           key: ${{ runner.os }}-composer-cache-${{ hashFiles('**/composer.lock') }}
           restore-keys: ${{ runner.os }}-composer-cache
           path: inc/**
+        env:
+          E20R_PLUGIN_NAME: e20r-members-list
 
       - name: Install all needed dependencies for Composer
         shell: bash
         if: steps.restore-cache.outputs.cache-hit != 'true'
         run: make composer-dev
+        env:
+          E20R_PLUGIN_NAME: e20r-members-list
 
       - name: Install all needed WordPress plugin dependencies
         shell: bash
         if: steps.composer-cache.outputs.cache-hit != 'true'
         run: make wp-deps
+        env:
+          E20R_PLUGIN_NAME: e20r-members-list
 
       - name: Install all needed dependencies for Docker
         shell: bash
         if: steps.composer-cache.outputs.cache-hit != 'true'
         run: make docker-deps
+        env:
+          E20R_PLUGIN_NAME: e20r-members-list
 
       - name: Run all Standard Tests
         shell: bash
@@ -67,14 +77,14 @@ jobs:
           CONTAINER_ACCESS_TOKEN: ${{ secrets.CONTAINER_ACCESS_TOKEN }}
 
   build_i18n:
-    # Only run when the pull request is created
-    if: github.event.pull_request.opened == true
     name: Build the I18N translation files
     needs: [pr_tests]
     runs-on: ubuntu-18.04
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
+        with:
+          repository: eighty20results/e20r-members-list
 
       - name: WordPress .pot File Generator for 00-e20r-utilities
         uses: iamdharmesh/action-wordpress-pot-generator@main
