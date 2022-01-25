@@ -29,7 +29,7 @@ use E20R\Members_List\Admin\Bulk\Bulk_Update;
 use E20R\Members_List\Admin\Exceptions\DBQueryError;
 use E20R\Members_List\Admin\Exceptions\InvalidSQL;
 use E20R\Members_List\Admin\Export\Export_Members;
-use E20R\Members_List\Admin\Modules\Multiple_Members;
+use E20R\Members_List\Admin\Modules\Multiple_Memberships;
 use E20R\Members_List\Admin\Pages\Members_List_Page;
 use E20R\Utilities\Cache;
 use E20R\Utilities\Message;
@@ -1021,7 +1021,7 @@ if ( ! class_exists( '\\E20R\\Members_List\\Members_List' ) ) {
 
 				$selected_members = $this->utils->get_variable( 'member_id', array() );
 
-				foreach ( $selected_members as $key => $user_id ) {
+				foreach ( $selected_members as $key => $user_id ) { /* @phpstan-ignore-line FIXME: When Utilities is >= 2.3.1 and Utilities::get_variable() phpdoc string is correct */
 					$user_level = $this->utils->get_variable( "e20r-members-list-membership_id_{$user_id}", 0 );
 					$data[]     = array(
 						'user_id'  => $user_id,
@@ -1587,6 +1587,7 @@ if ( ! class_exists( '\\E20R\\Members_List\\Members_List' ) ) {
 				$added_where .= " mu.user_id IN ( {$in_list} )";
 
 			} elseif ( ! empty( $member_ids ) ) {
+				/* @phpstan-ignore-next-line */
 				$this->utils->log( 'Processing single member ID: ' . count( $member_ids ) );
 				$added_where .= sprintf( ' mu.user_id = %d', esc_sql( $member_ids ) );
 			}
@@ -1744,7 +1745,7 @@ if ( ! class_exists( '\\E20R\\Members_List\\Members_List' ) ) {
 		 *
 		 * @param array $item Database record for the row being processed.
 		 *
-		 * @return  string          Content for the cell
+		 * @return string|null         Content for the cell
 		 */
 		public function column_first_name( $item ) {
 			$user = get_userdata( $item['ID'] );
@@ -1771,7 +1772,7 @@ if ( ! class_exists( '\\E20R\\Members_List\\Members_List' ) ) {
 		 *
 		 * @param array $item Database record for the row being processed.
 		 *
-		 * @return  string          Content for the cell
+		 * @return string|null          Content for the cell
 		 */
 		public function column_last_name( $item ) {
 			$user = get_userdata( $item['ID'] );
@@ -1931,7 +1932,7 @@ if ( ! class_exists( '\\E20R\\Members_List\\Members_List' ) ) {
 		 */
 		public function column_name( $item ) {
 			if ( true === $this->is_module_enabled( 'pmpro-multiple-memberships-per-user/pmpro-multiple-memberships-per-user.php' ) ) {
-				$mmpu = new Multiple_Members();
+				$mmpu = new Multiple_Memberships();
 				return $mmpu->column_name( $item );
 			}
 
@@ -2207,7 +2208,7 @@ if ( ! class_exists( '\\E20R\\Members_List\\Members_List' ) ) {
 				$status_text = explode( '_', $status );
 				$text        = is_array( $status_text ) ?
 						implode( ' ', array_map( 'ucfirst', $status_text ) ) :
-						ucfirst( $status_text );
+						ucfirst( $status_text ); /* @phpstan-ignore-line */
 
 				$options .= sprintf(
 					'\t<option value="%1$s" %2$s>%3$s</option>\n',
