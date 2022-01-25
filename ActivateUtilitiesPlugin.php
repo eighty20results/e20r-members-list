@@ -24,6 +24,10 @@ use WP_Error;
 use function add_action;
 use function is_wp_error;
 
+if ( ! defined( 'ABSPATH' ) && ! defined( 'PLUGIN_PHPUNIT' ) ) {
+	die( 'WordPress not loaded. Naughty, naughty!' );
+}
+
 if ( ! class_exists( 'E20R\Utilities\ActivateUtilitiesPlugin' ) ) {
 	/**
 	 * Class ActivateUtilitiesPlugin

@@ -25,7 +25,7 @@ use E20R\Utilities\Message;
 use E20R\Utilities\Utilities;
 use stdClass;
 
-if ( ! defined( 'ABSPATH' ) && defined( 'PLUGIN_PHPUNIT' ) ) {
+if ( ! defined( 'ABSPATH' ) && ! defined( 'PLUGIN_PHPUNIT' ) ) {
 	die( 'WordPress not loaded. Naughty, naughty!' );
 }
 

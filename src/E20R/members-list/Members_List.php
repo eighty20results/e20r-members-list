@@ -36,7 +36,7 @@ use E20R\Utilities\Message;
 use E20R\Utilities\Utilities;
 use WP_List_Table;
 
-if ( ! defined( 'ABSPATH' ) && defined( 'PLUGIN_PHPUNIT' ) ) {
+if ( ! defined( 'ABSPATH' ) && ! defined( 'PLUGIN_PHPUNIT' ) ) {
 	die( 'WordPress not loaded. Naughty, naughty!' );
 }
 
