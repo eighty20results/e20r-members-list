@@ -25,7 +25,7 @@ use E20R\Utilities\Message;
 use E20R\Utilities\Utilities;
 use stdClass;
 
-if ( ! defined( 'ABSPATH' ) ) {
+if ( ! defined( 'ABSPATH' ) && defined( 'PLUGIN_PHPUNIT' ) ) {
 	die( 'WordPress not loaded. Naughty, naughty!' );
 }
 
@@ -469,7 +469,7 @@ if ( ! class_exists( '\\E20R\\Members_List\\Admin\\Export\\Export_Members' ) ) {
 
 			$i_start     = 0;
 			$iterations  = 1;
-			$users_found = is_countable( $this->member_list ) ? count( $this->member_list ) : 0;
+			$users_found = count( $this->member_list );
 
 			if ( $users_found >= $max_users_per_loop ) {
 				$iterations = ceil( $users_found / $max_users_per_loop );
@@ -486,7 +486,7 @@ if ( ! class_exists( '\\E20R\\Members_List\\Admin\\Export\\Export_Members' ) ) {
 				if ( 0 !== $end ) {
 
 					$iteration_diff = $end - $start;
-					$new_time_limit = ceil( $iteration_diff * $iterations * 1.2 );
+					$new_time_limit = (int) ceil( $iteration_diff * $iterations * 1.2 );
 
 					if ( $time_limit < $new_time_limit ) {
 						$time_limit = $new_time_limit;
@@ -656,7 +656,7 @@ if ( ! class_exists( '\\E20R\\Members_List\\Admin\\Export\\Export_Members' ) ) {
 		/**
 		 * Enclose the data we're adding to the export file
 		 *
-		 * @param string $text The text to quote.
+		 * @param string|null $text The text to quote.
 		 *
 		 * @return string
 		 */
@@ -966,7 +966,7 @@ if ( ! class_exists( '\\E20R\\Members_List\\Admin\\Export\\Export_Members' ) ) {
 			/**
 			 * The CSV data
 			 *
-			 * @var $row_data -> $csv_entry[ $col_heading ] = $this->enclose( $val );
+			 * @var array $row_data -> $csv_entry[ $col_heading ] = $this->enclose( $val );
 			 */
 			foreach ( $this->csv_rows as $row_id => $row_data ) {
 
