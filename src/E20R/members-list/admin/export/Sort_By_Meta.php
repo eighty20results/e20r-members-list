@@ -21,7 +21,7 @@
 
 namespace E20R\Members_List\Admin\Export;
 
-if ( ! defined( 'ABSPATH' ) ) {
+if ( ! defined( 'ABSPATH' ) && defined( 'PLUGIN_PHPUNIT' ) ) {
 	die( 'WordPress not loaded. Naughty, naughty!' );
 }
 
@@ -63,7 +63,7 @@ if ( ! class_exists( '\\E20R\\Members_List\\Admin\\Export\\Sort_By_Meta' ) ) {
 		 * @param array $a The first value to compare the sort against
 		 * @param array $b The 2nd value to compare the sort against
 		 *
-		 * @return int
+		 * @return int|false
 		 */
 		public function sort_records( $a, $b ) {
 
