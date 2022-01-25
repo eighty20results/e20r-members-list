@@ -65,8 +65,8 @@ if ( ! class_exists( '\\E20R\\Members_List\\Admin\\Bulk\\Bulk_Cancel' ) ) {
 		/**
 		 * Bulk_Cancel constructor (singleton)
 		 *
-		 * @param array[]        $members_to_update The array of member IDs to perform the bulk cancel operation against
-		 * @param Utilities|null $utils             Instance of the E20R Utilities Module class
+		 * @param array|int[]|null $members_to_update The array of member IDs to perform the bulk cancel operation against
+		 * @param Utilities|null   $utils             Instance of the E20R Utilities Module class
 		 *
 		 * @access public
 		 */
