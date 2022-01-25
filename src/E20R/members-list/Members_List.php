@@ -36,8 +36,12 @@ use E20R\Utilities\Message;
 use E20R\Utilities\Utilities;
 use WP_List_Table;
 
-if ( ! defined( 'ABSPATH' ) ) {
+if ( ! defined( 'ABSPATH' ) && defined( 'PLUGIN_PHPUNIT' ) ) {
 	die( 'WordPress not loaded. Naughty, naughty!' );
+}
+
+if ( ! defined( 'E20R_ML_BASE_DIR' ) ) {
+	define( 'E20R_ML_BASE_DIR', __FILE__ );
 }
 
 if ( ! class_exists( '\\E20R\\Members_List\\Members_List' ) ) {
@@ -272,10 +276,6 @@ if ( ! class_exists( '\\E20R\\Members_List\\Members_List' ) ) {
 		 * @param Members_List_Page|null $page An instance of the Members List Page rendering class
 		 */
 		public function __construct( $utils = null, $page = null ) {
-
-			if ( ! defined( 'E20R_ML_BASE_DIR' ) ) {
-				define( 'E20R_ML_BASE_DIR', __FILE__ );
-			}
 
 			if ( empty( $utils ) ) {
 				$message = new Message();
@@ -1041,7 +1041,7 @@ if ( ! class_exists( '\\E20R\\Members_List\\Members_List' ) ) {
 
 				if ( in_array( 'bulk-cancel', $bulk_actions, true ) ) {
 
-					$this->cancel = new Bulk_Cancel( $this->utils );
+					$this->cancel = new Bulk_Cancel( null, $this->utils );
 					$this->cancel->set_members( $data );
 					$this->cancel->cancel();
 
@@ -1578,7 +1578,7 @@ if ( ! class_exists( '\\E20R\\Members_List\\Members_List' ) ) {
 			}
 
 			$this->utils->log( "Starting appended WHERE statement: {$added_where}" );
-			// Is this a bulk export operation?
+			// Is this a bulk export operation? @phpstan-ignore-next-line
 			if ( ! empty( $member_ids ) && is_array( $member_ids ) ) {
 
 				sort( $member_ids );
@@ -2078,7 +2078,9 @@ if ( ! class_exists( '\\E20R\\Members_List\\Members_List' ) ) {
 		 */
 		public function column_last( $item ) {
 
-			// No billing amount (not recurring) and no endd ate (i.e. a free, limit less membership)
+			$enddate = null;
+
+			// No billing amount (not recurring) and no end date (i.e. a free, limit less membership)
 			if (
 					empty( $item['billing_amount'] ) &&
 				( empty( $item['enddate'] ) || '0000-00-00 00:00:00' === $item['enddate'] )
@@ -2177,12 +2179,11 @@ if ( ! class_exists( '\\E20R\\Members_List\\Members_List' ) ) {
 			$options = '';
 
 			$status_list = apply_filters( 'e20r_memberslist_member_status', $this->get_pmpro_statuses() );
-
 			$status_text = explode( '_', $item['status'] );
+			$label_text  = '';
+
 			if ( is_array( $status_text ) ) {
 				$label_text = implode( ' ', array_map( 'ucfirst', $status_text ) );
-			} else {
-				$label_text = ucfirst( $status_text );
 			}
 
 			$status_input = sprintf(
@@ -2204,12 +2205,9 @@ if ( ! class_exists( '\\E20R\\Members_List\\Members_List' ) ) {
 			foreach ( $status_list as $status ) {
 
 				$status_text = explode( '_', $status );
-
-				if ( is_array( $status_text ) ) {
-					$text = implode( ' ', array_map( 'ucfirst', $status_text ) );
-				} else {
-					$text = ucfirst( $status_text );
-				}
+				$text        = is_array( $status_text ) ?
+						implode( ' ', array_map( 'ucfirst', $status_text ) ) :
+						ucfirst( $status_text );
 
 				$options .= sprintf(
 					'\t<option value="%1$s" %2$s>%3$s</option>\n',
