@@ -24,7 +24,7 @@ namespace E20R\Members_List\Admin\Bulk;
 use E20R\Utilities\Message;
 use E20R\Utilities\Utilities;
 
-if ( ! defined( 'ABSPATH' ) ) {
+if ( ! defined( 'ABSPATH' ) && defined( 'PLUGIN_PHPUNIT' ) ) {
 	die( 'WordPress not loaded. Naughty, naughty!' );
 }
 
