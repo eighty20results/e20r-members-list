@@ -24,7 +24,7 @@ namespace E20R\Members_List\Admin\Bulk;
 use E20R\Utilities\Message;
 use E20R\Utilities\Utilities;
 
-if ( ! defined( 'ABSPATH' ) ) {
+if ( ! defined( 'ABSPATH' ) && defined( 'PLUGIN_PHPUNIT' ) ) {
 	die( 'WordPress not loaded. Naughty, naughty!' );
 }
 
@@ -41,6 +41,7 @@ if ( ! class_exists( '\\E20R\\Members_List\\Admin\\Bulk\\Bulk_Cancel' ) ) {
 		 * @var null|Bulk_Cancel
 		 */
 		private static $instance = null;
+
 		/**
 		 * Update operation to perform
 		 *
@@ -51,7 +52,7 @@ if ( ! class_exists( '\\E20R\\Members_List\\Admin\\Bulk\\Bulk_Cancel' ) ) {
 		/**
 		 * Array of members to update where the memebr date is represented as an array per member
 		 *
-		 * @var array[]
+		 * @var array[]|int[]|null
 		 */
 		private $members_to_update = array();
 
@@ -65,8 +66,8 @@ if ( ! class_exists( '\\E20R\\Members_List\\Admin\\Bulk\\Bulk_Cancel' ) ) {
 		/**
 		 * Bulk_Cancel constructor (singleton)
 		 *
-		 * @param array|int[]|null $members_to_update The array of member IDs to perform the bulk cancel operation against
-		 * @param Utilities|null   $utils             Instance of the E20R Utilities Module class
+		 * @param array[]|int[]|null $members_to_update The array of member IDs to perform the bulk cancel operation against
+		 * @param Utilities|null     $utils             Instance of the E20R Utilities Module class
 		 *
 		 * @access public
 		 */
@@ -169,7 +170,7 @@ if ( ! class_exists( '\\E20R\\Members_List\\Admin\\Bulk\\Bulk_Cancel' ) ) {
 		/**
 		 * Set the list of members & their levels to update
 		 *
-		 * @param int[] $member_info The array of members we intend to process.
+		 * @param array $member_info The array of members we intend to process.
 		 */
 		public function set_members( $member_info = array() ) {
 			$this->members_to_update = $member_info;
