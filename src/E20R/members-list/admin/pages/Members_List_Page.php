@@ -26,7 +26,7 @@ use E20R\Members_List\Members_List;
 use E20R\Utilities\Message;
 use E20R\Utilities\Utilities;
 
-if ( ! defined( 'ABSPATH' ) ) {
+if ( ! defined( 'ABSPATH' ) && defined( 'PLUGIN_PHPUNIT' ) ) {
 	die( 'WordPress not loaded. Naughty, naughty!' );
 }
 
@@ -283,7 +283,7 @@ if ( ! class_exists( '\\E20R\\Members_List\\Admin\\Members_List_Page' ) ) {
 				wp_enqueue_style(
 					'jquery-ui',
 					'//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css',
-					null,
+					array(),
 					'1.12.1'
 				);
 				wp_enqueue_script( 'jquery-ui-datepicker' );
@@ -329,7 +329,7 @@ if ( ! class_exists( '\\E20R\\Members_List\\Admin\\Members_List_Page' ) ) {
 		/**
 		 * Tests whether Paid Memberships Pro v2.x or later is installed
 		 *
-		 * @return bool|int|null
+		 * @return bool|null
 		 */
 		private function is_pmpro_v2() {
 			return defined( 'PMPRO_VERSION' ) ?
