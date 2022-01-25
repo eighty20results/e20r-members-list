@@ -39,9 +39,10 @@ use E20R\Metrics\MixpanelConnector;
 use E20R\Utilities\Cache;
 use E20R\Utilities\Utilities;
 use E20R\Utilities\Message;
-use function add_action;
+use function \add_action;
+use function \apply_filters;
 
-if ( ! defined( 'ABSPATH' ) ) {
+if ( ! defined( 'ABSPATH' ) && defined( 'PLUGIN_PHPUNIT' ) ) {
 	die( 'WordPress not loaded. Naughty, naughty!' );
 }
 
@@ -180,9 +181,12 @@ if ( ! class_exists( '\\E20R\\Members_List\\E20R_Members_List' ) ) {
 			add_action( 'init', array( $this, 'load_text_domain' ), 1 );
 			add_action( 'wp_loaded', array( $this->page, 'load_hooks' ), 10 );
 
+			// Set URIs in plugin listing to plugin support
+			add_filter( 'plugin_row_meta', array( $this, 'plugin_row_meta' ), 10, 2 );
+
 			// All sorts of events trigger an attempted cache clearing
-			add_action( 'pmpro_after_change_membership_level', array( $this, 'attempt_clear_cache', 99999 ) );
-			add_action( 'deleted_user', array( $this, 'attempt_clear_cache', 99999 ) );
+			add_action( 'pmpro_after_change_membership_level', array( $this, 'attempt_clear_cache' ), 99999 );
+			add_action( 'deleted_user', array( $this, 'attempt_clear_cache' ), 99999 );
 			add_action( 'profile_update', array( $this, 'attempt_clear_cache' ), 99999 );
 			add_action( 'edit_user_profile_update', array( $this, 'attempt_clear_cache' ), 99999 );
 		}
@@ -304,8 +308,67 @@ if ( ! class_exists( '\\E20R\\Members_List\\E20R_Members_List' ) ) {
 				$this->utils->add_message( $e->getMessage(), 'error', 'backend' );
 			}
 		}
-	}
 
+		/**
+		 * Add links to support & docs for the plugin
+		 *
+		 * @param array  $links Links for the wp-admin/plugins.php page
+		 * @param string $file File name for the plugin we're processing
+		 *
+		 * @return array
+		 */
+		public function plugin_row_meta( $links, $file ) {
+
+			if ( false !== stripos( $file, 'class-e20r-members-list.php' ) ) {
+				// Add (new) 'E20R Better Members List for PMPro' links to plugin listing
+				$new_links = array(
+					'donate'        => sprintf(
+						'<a href="%1$s" title="%2$s">%3$s</a>',
+						esc_url_raw( 'https://www.paypal.me/eighty20results' ),
+						esc_attr__(
+							'Donate to support updates, maintenance and tech support for this plugin',
+							'e20r-members-list'
+						),
+						esc_attr__( 'Donate', 'e20r-members-list' )
+					),
+					'documentation' => sprintf(
+						'<a href="%1$s" title="%2$s">%3$s</a>',
+						esc_url_raw( 'https://wordpress.org/plugins/e20r-members-list/' ),
+						esc_attr__( 'View the documentation', 'e20r-members-list' ),
+						esc_attr__( 'Docs', 'e20r-members-list' )
+					),
+					'filters'       => sprintf(
+						'<a href="%1$s" title="%2$s">%3$s</a>',
+						esc_url_raw( plugin_dir_url( __FILE__ ) . '../docs/FILTERS.md' ),
+						esc_attr__( 'View the Filter documentation', 'e20r-members-list' ),
+						esc_attr__( 'Filters', 'e20r-members-list' )
+					),
+					'actions'       => sprintf(
+						'<a href="%1$s" title="%2$s">%3$s</a>',
+						esc_url_raw( plugin_dir_url( __FILE__ ) . '../docs/ACTIONS.md' ),
+						esc_attr__( 'View the Actions documentation', 'e20r-members-list' ),
+						esc_attr__( 'Actions', 'e20r-members-list' )
+					),
+					'help'          => sprintf(
+						'<a href="%1$s" title="%2$s">%3$s</a>',
+						esc_url_raw( 'https://wordpress.org/support/plugin/e20r-members-list' ),
+						esc_attr__( 'Visit the support forum', 'e20r-members-list' ),
+						esc_attr__( 'Support', 'e20r-members-list' )
+					),
+					'issues'        => sprintf(
+						'<a href="%1$s" title="%2$s" target="_blank">%3$s</a>',
+						esc_url_raw( 'https://github.com/eighty20results/e20r-members-list/issues' ),
+						esc_attr__( 'Report issues with this plugin', 'e20r-members-list' ),
+						esc_attr__( 'Report Issues', 'e20r-members-list' )
+					),
+				);
+
+				$links = array_merge( $links, $new_links );
+			}
+
+			return $links;
+		}
+	}
 }
 
 /**
@@ -313,7 +376,7 @@ if ( ! class_exists( '\\E20R\\Members_List\\E20R_Members_List' ) ) {
  */
 require_once __DIR__ . '/ActivateUtilitiesPlugin.php';
 
-if ( ! apply_filters( 'e20r_utilities_module_installed', false ) ) {
+if ( function_exists( 'apply_filters' ) && ! apply_filters( 'e20r_utilities_module_installed', false ) ) {
 
 	$required_plugin = 'Better Members List for Paid Memberships Pro';
 
