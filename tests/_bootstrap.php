@@ -21,7 +21,7 @@
 
 use Codeception\Util\Autoload;
 
-Autoload::addNamespace( 'E20R\\Utilities', __DIR__ . '/../src' );
+Autoload::addNamespace( 'E20R\\Members_List', __DIR__ . '/../src/E20R/members-list/' );
 
 /**
  * The following snippets uses `PLUGIN` to prefix
@@ -32,7 +32,7 @@ Autoload::addNamespace( 'E20R\\Utilities', __DIR__ . '/../src' );
 const PLUGIN_PHPUNIT = true;
 
 if ( ! defined( 'PLUGIN_PATH' ) ) {
-	define( 'PLUGIN_PATH', __DIR__ . '/../src/' );
+	define( 'PLUGIN_PATH', __DIR__ . '/../src/E20R/members-list/' );
 }
 
 require_once __DIR__ . '/../inc/autoload.php';
