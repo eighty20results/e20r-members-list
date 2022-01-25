@@ -28,9 +28,9 @@
     },
     "require-dev": {
         "squizlabs/php_codesniffer": ">=3.5.8",
-        "wp-coding-standards/wpcs": ">=2.3.0",
-        "automattic/phpcs-neutron-standard": ">=v1.7.0",
-        "phpstan/phpstan": ">=0.12.78",
+        "wp-coding-standards/wpcs": "^2.3.0",
+        "automattic/phpcs-neutron-standard": "^v1.7.0",
+        "phpstan/phpstan": "^0.12.78",
         "phpmetrics/phpmetrics": ">=v1.10.0",
         "phpunit/phpunit": "^8.5",
         "codeception/codeception": "^4.1.0",
@@ -44,17 +44,17 @@
         "codeception/aspect-mock": "<4.0",
         "codeception/assert-throws": "^1.1.0",
         "spatie/phpunit-snapshot-assertions": "^4.2.5",
-        "lucatume/wp-browser": ">=3.0",
+        "lucatume/wp-browser": "^3.0",
         "brain/monkey": ">=2.3.0",
         "szepeviktor/phpstan-wordpress": "^v0.7",
         "mikey179/vfsstream": "~1",
-        "phpstan/extension-installer": ">=1.1",
-        "codeception/module-rest": ">=1.3"
+        "phpstan/extension-installer": "^1.1",
+        "codeception/module-rest": "^1.3"
     },
     "scripts": {
         "post-install-cmd": "if [ -f inc/bin/phpcs ] ; then inc/bin/phpcs --config-set installed_paths inc/wp-coding-standards/wpcs ; fi",
         "post-update-cmd" : "if [ -f inc/bin/phpcs ] ; then inc/bin/phpcs --config-set installed_paths inc/wp-coding-standards/wpcs ; fi",
-        "lint": "docker-compose -p ${PROJECT} --env-file ${DC_ENV_FILE} --file ${DC_CONFIG_FILE} exec -T -w /var/www/html/wp-content/plugins/00-e20r-utilities/ wordpress ./inc/bin/phpcs --report=full --colors -p --standard=WordPress-Extra --ignore=*/inc/*,*/node_modules/* --extensions=php *.php src/*/*.php"
+        "lint": "docker-compose -p ${PROJECT} --env-file ${DC_ENV_FILE} --file ${DC_CONFIG_FILE} exec -T -w /var/www/html/wp-content/plugins/e20r-members-list/ wordpress ./inc/bin/phpcs --report=full --colors -p --standard=WordPress-Extra --ignore=*/inc/*,*/node_modules/* --extensions=php *.php src/*/*.php"
     },
     "autoload": {
         "psr-4": {
@@ -67,13 +67,7 @@
             "E20R\\Members_List\\Admin\\Export\\": "src/E20R/members-list/admin/export",
             "E20R\\Members_List\\Admin\\Modules\\": "src/E20R/members-list/modules",
             "E20R\\Members_List\\Admin\\Pages\\": "src/E20R/members-list/admin/pages",
-            "E20R\\Members_List\\Admin\\Bulk\\": "src/E20R/members-list/admin/bulk",
-            "E20R\\Tests\\": "tests/",
-            "E20R\\Tests\\Unit\\": "tests/unit/testcases/",
-            "E20R\\Tests\\Integration\\": "tests/integration/testcases/",
-            "E20R\\Tests\\Functional\\": "tests/functional/testcases/",
-            "E20R\\Tests\\Acceptance\\": "tests/acceptance/testcases/",
-            "E20R\\Tests\\Api\\": "tests/api/testcases/"
+            "E20R\\Members_List\\Admin\\Bulk\\": "src/E20R/members-list/admin/bulk"
         }
     },
     "autoload-dev": {
