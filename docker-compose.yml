@@ -1,31 +1,27 @@
-version: "3.8"
-
-#  ${LOCAL_PLUGIN_DIR}:/var/www/html/wp-content/plugins/${E20R_PLUGIN_NAME}
-volumes:
-  wordpress:
-  database:
+version: "3.7"
 
 services:
   wordpress:
-    container_name: ${E20R_PLUGIN_NAME}_wordpress
+    container_name: codecep-wp-${E20R_PLUGIN_NAME}
     build:
       context: .
-      dockerfile: tests/docker/Dockerfile.unittest
+      dockerfile: tests/_docker/Dockerfile.unittest
       args:
-        WP_TAG: wordpress:${WP_RELEASE}
-        APACHE_RUN_USER: ${APACHE_RUN_USER}
+        WP_RELEASE: ${WP_RELEASE}
         APACHE_RUN_GROUP: ${APACHE_RUN_GROUP}
+        APACHE_RUN_USER: ${APACHE_RUN_USER}
     restart: always
     ports:
       - ${WP_PORT}:80
+    stdin_open: true # docker run -i
+    tty: true        # docker run -t
     command:
       - /bin/sh
       - -c
       - |
         test $$(getent group docker) || addgroup --gid ${APACHE_RUN_GROUP} docker
-        test $$(id -u docker) || \
-        adduser --uid ${APACHE_RUN_USER} --gid ${APACHE_RUN_GROUP} --home /home/docker --disabled-password --gecos '' docker
-        sudo chown -R docker:docker /var/www/html/wp-content/plugins/*
+        test $$(id -u docker) || adduser --uid ${APACHE_RUN_USER} --ingroup docker \
+        --home /home/docker --disabled-password --gecos '' docker
         /usr/local/bin/docker-entrypoint.sh apache2-foreground
     environment:
       WORDPRESS_DB_HOST: ${WORDPRESS_DB_HOST}
@@ -36,16 +32,16 @@ services:
       WORDPRESS_DEBUG: 1
       WORDPRESS_DEBUG_LOG_FILE: 1
       WORDPRESS_DEBUG_DISPLAY: 0
-      APACHE_RUN_USER: docker
-      APACHE_RUN_GROUP: docker
     volumes:
       - ${LOCAL_PLUGIN_DIR}:/var/www/html/wp-content/plugins/${E20R_PLUGIN_NAME}
     depends_on:
       - database
 
   database:
-    image: ${DB_IMAGE}:${DB_VERSION}
-    container_name: ${DB_IMAGE}-wp-${E20R_PLUGIN_NAME}
+    image: mariadb:latest
+    stdin_open: true # docker run -i
+    tty: true        # docker run -t
+    container_name: mariadb-wp-${E20R_PLUGIN_NAME}
     restart: always
     ports:
       - ${DB_PORT}:3306
@@ -56,4 +52,8 @@ services:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_RANDOM_ROOT_PASSWORD: ${MYSQL_RANDOM_ROOT_PASSWORD}
     volumes:
-      - ${LOCAL_PLUGIN_DIR}:/docker-entrypoint-initdb.d
+      - ${LOCAL_PLUGIN_DIR}/tests/_data:/docker-entrypoint-initdb.d
+
+volumes:
+  wordpress:
+  database:
