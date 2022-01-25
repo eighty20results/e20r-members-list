@@ -6,6 +6,7 @@ parameters:
     	- E20R_LICENSE_SERVER_URL
     	- E20R_LICENSING_DEBUG
     	- E20R_MISSING_SETTING
+    	- E20R_ML_BASE_DIR
     	- WP_PLUGIN_DIR
     	- WP_LANG_DIR
     parallel:
@@ -13,9 +14,10 @@ parameters:
     ignoreErrors:
         # Uses func_get_args()
         - '#^Function apply_filters(_ref_array)? invoked with [34567] parameters, 2 required\.$#'
-        - '#^Access to an undefined property object::\$cycle_period\.$#'
-        - '#^Constant WP_PLUGIN_DIR not found\.$#'
         - '#^Constant WP_LANG_DIR not found\.$#'
+        - '#^Cannot access property \$pmpro_b.* on WP_User\|false\.#'
+        # - '#^Access to an undefined property object::\$cycle_period\.$#'
+        # - '#^Constant WP_PLUGIN_DIR not found\.$#'
     scanDirectories:
         - inc/
     paths:
