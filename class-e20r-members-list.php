@@ -42,12 +42,11 @@ use E20R\Utilities\Message;
 use function \add_action;
 use function \apply_filters;
 
+require_once __DIR__ . '/inc/autoload.php';
+
 if ( ! defined( 'ABSPATH' ) && ! defined( 'PLUGIN_PHPUNIT' ) ) {
 	die( 'WordPress not loaded. Naughty, naughty!' );
 }
-
-require_once __DIR__ . '/inc/autoload.php';
-require_once __DIR__ . '/ActivateUtilitiesPlugin.php';
 
 if ( ! defined( 'E20R_MEMBERSLIST_VER' ) ) {
 	define( 'E20R_MEMBERSLIST_VER', '8.5' );
