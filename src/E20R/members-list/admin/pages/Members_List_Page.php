@@ -389,7 +389,9 @@ if ( ! class_exists( '\\E20R\\Members_List\\Admin\\Members_List_Page' ) ) {
 				$arg_list = array();
 
 				if ( null === $this->level ) {
-					$this->level = $this->utils->get_variable( 'level', '' );
+					$default_level = apply_filters( 'e20r_members_list_default_member_status', 'active' );
+					$this->level   = $this->utils->get_variable( 'level', $default_level );
+
 				}
 
 				if ( null === $this->search ) {
@@ -462,9 +464,9 @@ if ( ! class_exists( '\\E20R\\Members_List\\Admin\\Members_List_Page' ) ) {
 
 			global $pmpro_msg;
 			global $pmpro_msgt;
-
+			$default_level   = apply_filters( 'e20r_members_list_default_member_status', 'active' );
+			$this->level     = $this->utils->get_variable( 'level', $default_level );
 			$this->search    = $this->utils->get_variable( 'find', '' );
-			$this->level     = $this->utils->get_variable( 'level', '' );
 			$this->level_ids = $this->utils->get_variable( 'level_ids', '' );
 
 			// phpcs:ignore

@@ -352,7 +352,8 @@ if ( ! class_exists( '\\E20R\\Members_List\\Members_List' ) ) {
 
 			$this->utils->log( 'Called by: ' . $this->utils->who_called_me() );
 
-			$this->requested_status = $this->utils->get_variable( 'level', null );
+			$default_level          = apply_filters( 'e20r_members_list_default_member_status', 'active' );
+			$this->requested_status = $this->utils->get_variable( 'level', $default_level );
 			$this->user_search      = $this->utils->get_variable( 'find', null );
 
 			// Default sort order and field (membership ID).
@@ -1146,8 +1147,10 @@ if ( ! class_exists( '\\E20R\\Members_List\\Members_List' ) ) {
 			$this->utils->log( 'Called by: ' . $this->utils->who_called_me() );
 
 			$this->set_membership_status();
-			// phpcs:ignore Squiz.PHP.CommentedOutCode.Found
-			// $this->requested_status = $this->utils->get_variable( 'level', '' );
+			/* phpcs:ignore Squiz.PHP.CommentedOutCode.Found
+			$default_level   = apply_filters( 'e20r_members_list_default_member_status', 'active' );
+			$this->requested_status = $this->utils->get_variable( 'level', $default_level );
+			*/
 
 			$this->utils->log( 'Content sent...?' . ( headers_sent() ? 'Yes' : 'No' ) );
 			/* phpcs:ignore Squiz.PHP.CommentedOutCode.Found
@@ -1357,7 +1360,8 @@ if ( ! class_exists( '\\E20R\\Members_List\\Members_List' ) ) {
 			);
 			} */
 
-			$this->requested_status = $this->utils->get_variable( 'level', null );
+			$default_level          = apply_filters( 'e20r_members_list_default_member_status', 'active' );
+			$this->requested_status = $this->utils->get_variable( 'level', $default_level );
 
 			// We're looking for a specific membership level.
 			if (
@@ -1445,7 +1449,8 @@ if ( ! class_exists( '\\E20R\\Members_List\\Members_List' ) ) {
 			}
 
 			// If we have the 'level' REQUEST parameter set, we have more checks to run.
-			$search_level = $this->utils->get_variable( 'level', null );
+			$default_level = apply_filters( 'e20r_members_list_default_member_status', 'active' );
+			$search_level  = $this->utils->get_variable( 'level', $default_level );
 			if (
 					in_array( $search_level, array( 'oldmembers', 'expired', 'cancelled', 'all' ), true )
 					|| is_numeric( $search_level )
@@ -2306,8 +2311,9 @@ if ( ! class_exists( '\\E20R\\Members_List\\Members_List' ) ) {
 		 * Default text when no records are found/returned
 		 */
 		public function no_items() {
-			$this->search = $this->utils->get_variable( 'find', '' );
-			$level        = $this->utils->get_variable( 'level', '' );
+			$default_level = apply_filters( 'e20r_members_list_default_member_status', 'active' );
+			$level         = $this->utils->get_variable( 'level', $default_level );
+			$this->search  = $this->utils->get_variable( 'find', '' );
 
 			$active_members_url = add_query_arg(
 				array(
