@@ -70,15 +70,15 @@
             });
 
 			// self.updateListBtn.unbind('click').on('click', function(ev) {
-            self.updateListBtn.unbind('click').on('click', function() {
+            self.updateListBtn.unbind('click').on('click', function(ev) {
+				$('#post-search-input').val(null);
 
 				if ( 'Clear Search' === self.updateListBtn.val() ) {
+					ev.preventDefault();
                 	window.console.log("We're clearing the search...");
                     window.console.log(e20rml.url); //jshint ignore:line
-                    window.location.assign(e20rml.url); //jshint ignore:line
+                    window.location = e20rml.url; //jshint ignore:line
                 }
-
-                $('#post-search-input').val(null);
             });
 
             // Trigger search whenever the levels drop-down is changed
@@ -93,6 +93,7 @@
 			self.dataSearchBtn.unbind('click').on('click', function(event) {
 
 				let $search_string = $( '#post-search-input' ).val();
+				let $level_string  = $( '#e20r-pmpro-memberslist-levels' ).val();
 				let $uri		   = window.location.toString();
 
 				// If we have a string in the search box we'll append it to the URL
@@ -100,11 +101,12 @@
 					event.preventDefault();
 
 					// URL Encode the search string and add or replace it for the URI
-					$uri = self.set_search( $uri, 'find', encodeURIComponent( $search_string ) );
+					$uri = self.add_to_uri( $uri, 'find', encodeURIComponent( $search_string ) );
+					$uri = self.add_to_uri( $uri, 'level', encodeURIComponent( $level_string ) );
 					window.console.log( 'New URI should be: ' + $uri );
 
 					// Now we trigger the search
-					// window.location = $uri;
+					window.location = $uri;
 
 					// Clear the search field - Possible FIXME if user's do not want clearing the search field to happen
 					// $( '#post-search-input' ).val( null );
@@ -239,7 +241,7 @@
 				self.download_csv(file_name + extension, export_args, ); //jshint ignore:line
             });
         },
-		set_search: function(url, paramName, paramValue) {
+		add_to_uri: function(url, paramName, paramValue) {
 
 			let pattern = new RegExp('\\b('+paramName+'=).*?(&|#|$)');
 
