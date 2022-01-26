@@ -1,4 +1,4 @@
-name: Test of "Release *" workflows
+name: Test of "Release to Eighty20Results.com" workflows
 
 # This is used to test changes to the test/build/deploy workflow for the plugin so only applies if the
 # branch is named test_workflow<something>
@@ -20,6 +20,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
+        with:
+          repository: eighty20results/e20r-members-list
 
       - name: Setup PHP with Composer V2+
         uses: shivammathur/setup-php@v2
@@ -47,22 +49,28 @@ jobs:
         shell: bash
         if: steps.restore-cache.outputs.cache-hit != 'true'
         run: make composer-dev
+        env:
+          E20R_PLUGIN_NAME: e20r-members-list
 
       - name: Install all needed WordPress plugin dependencies
         shell: bash
         if: steps.composer-cache.outputs.cache-hit != 'true'
         run: make wp-deps
+        env:
+          E20R_PLUGIN_NAME: e20r-members-list
 
       - name: Install all needed dependencies for Docker
         shell: bash
         if: steps.composer-cache.outputs.cache-hit != 'true'
         run: make docker-deps
+        env:
+          E20R_PLUGIN_NAME: e20r-members-list
 
       - name: Run all Standard Tests
         shell: bash
         run: make tests
         env:
-          E20R_PLUGIN_NAME:  ${{ env.E20R_PLUGIN_NAME }}
+          E20R_PLUGIN_NAME: e20r-members-list
           GITHUB_TOKEN: ${{ secrets.GITHUB }}
           DOCKER_USER: ${{ secrets.DOCKER_USER }}
           CONTAINER_ACCESS_TOKEN: ${{ secrets.CONTAINER_ACCESS_TOKEN }}
@@ -75,6 +83,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
+        with:
+          repository: eighty20results/e20r-members-list
+          # ref: main
 
       - name: Install SSH Key
         uses: shimataro/ssh-key-action@v2
@@ -111,16 +122,22 @@ jobs:
         shell: bash
         if: steps.composer-cache.outputs.cache-hit != 'true'
         run: make composer-dev
+        env:
+          E20R_PLUGIN_NAME: e20r-members-list
 
       - name: Install all needed WordPress plugin dependencies
         shell: bash
         if: steps.composer-cache.outputs.cache-hit != 'true'
         run: make wp-deps
+        env:
+          E20R_PLUGIN_NAME: e20r-members-list
 
       - name: Install all needed dependencies for Docker
         shell: bash
         if: steps.composer-cache.outputs.cache-hit != 'true'
         run: make docker-deps
+        env:
+          E20R_PLUGIN_NAME: e20r-members-list
 
       - name: Cache the built plugin package
         uses: actions/cache@v2
@@ -134,7 +151,7 @@ jobs:
         shell: bash
         run: make build
         env:
-          E20R_PLUGIN_NAME:  ${{ env.E20R_PLUGIN_NAME }}
+          E20R_PLUGIN_NAME: e20r-members-list
           GITHUB_TOKEN: ${{ secrets.GITHUB }}
           CONTAINER_ACCESS_TOKEN: ${{ secrets.CONTAINER_ACCESS_TOKEN }}
 
@@ -146,6 +163,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
+        with:
+          repository: eighty20results/e20r-members-list
+          # ref: main
 
       - name: Install SSH Key
         uses: shimataro/ssh-key-action@v2
@@ -183,16 +203,22 @@ jobs:
         if: steps.composer-cache-prod.outputs.cache-hit != 'true'
         shell: bash
         run: make composer-dev
+        env:
+          E20R_PLUGIN_NAME: e20r-members-list
 
       - name: Install all needed WordPress plugin dependencies
         if: steps.composer-cache-prod.outputs.cache-hit != 'true'
         shell: bash
         run: make wp-deps
+        env:
+          E20R_PLUGIN_NAME: e20r-members-list
 
       - name: Install all needed dependencies for Docker
         if: steps.composer-cache-prod.outputs.cache-hit != 'true'
         shell: bash
         run: make docker-deps
+        env:
+          E20R_PLUGIN_NAME: e20r-members-list
 
       - name: Restore the built plugin package
         id: plugin-package-cache
@@ -223,7 +249,7 @@ jobs:
         run: make deploy
         env:
           BRANCH_NAME: ${{ steps.branch-name.outputs.current_branch }}
-          E20R_PLUGIN_NAME:  e20r-members-list
+          E20R_PLUGIN_NAME: e20r-members-list
           GITHUB_TOKEN: ${{ secrets.GITHUB }}
           DOCKER_USER: ${{ secrets.DOCKER_USER }}
           CONTAINER_ACCESS_TOKEN: ${{ secrets.CONTAINER_ACCESS_TOKEN }}
