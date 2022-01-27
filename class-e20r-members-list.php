@@ -33,6 +33,8 @@ namespace E20R\Members_List;
 use E20R\Exceptions\InvalidSettingsKey;
 use E20R\Members_List\Admin\Exceptions\MissingUtilitiesModule;
 use E20R\Members_List\Admin\Pages\Members_List_Page;
+use E20R\Metrics\Exceptions\HostNotDefined;
+use E20R\Metrics\Exceptions\InvalidMixpanelKey;
 use E20R\Metrics\Exceptions\InvalidPluginInfo;
 use E20R\Metrics\Exceptions\MissingDependencies;
 use E20R\Metrics\MixpanelConnector;
@@ -112,7 +114,12 @@ if ( ! class_exists( '\\E20R\\Members_List\\E20R_Members_List' ) ) {
 
 			// Add the usage metrics (Mixpanel) class unless it's supplied
 			if ( empty( $mixpanel ) ) {
-				$mixpanel = new MixpanelConnector( 'a14f11781866c2117ab6487792e4ebfd', array( 'host' => 'api-eu.mixpanel.com' ), null, $this->utils );
+				try {
+					$mixpanel = new MixpanelConnector( 'a14f11781866c2117ab6487792e4ebfd', array( 'host' => 'api-eu.mixpanel.com' ), null, $this->utils );
+				} catch ( HostNotDefined | InvalidMixpanelKey $e ) {
+					$this->utils->log( 'Mixpanel error: ' . $e->getMessage() );
+					$this->utils->add_message( 'Mixpanel: ' . $e->getMessage(), 'error', 'backend' );
+				}
 			}
 
 			$this->metrics = $mixpanel;
