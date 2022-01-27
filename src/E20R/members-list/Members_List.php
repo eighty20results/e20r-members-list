@@ -113,9 +113,9 @@ if ( ! class_exists( '\\E20R\\Members_List\\Members_List' ) ) {
 		/**
 		 * The status of the membership when searching for totals
 		 *
-		 * @var string[] $membership_status
+		 * @var null|string[] $membership_status
 		 */
-		private $membership_status = array( 'active' );
+		private $membership_status = null;
 
 		/**
 		 * The current level status requested by the user (REQUEST)
@@ -353,7 +353,7 @@ if ( ! class_exists( '\\E20R\\Members_List\\Members_List' ) ) {
 			$this->utils->log( 'Called by: ' . $this->utils->who_called_me() );
 
 			$default_level          = apply_filters( 'e20r_members_list_default_member_status', 'active' );
-			$this->requested_status = $this->utils->get_variable( 'level', $default_level );
+			$this->requested_status = trim( $this->utils->get_variable( 'level', $default_level ) );
 			$this->user_search      = $this->utils->get_variable( 'find', null );
 
 			// Default sort order and field (membership ID).
@@ -411,7 +411,6 @@ if ( ! class_exists( '\\E20R\\Members_List\\Members_List' ) ) {
 				$this->from  = " FROM {$this->table_list['from']['name']}";
 				$this->from .= ( empty( $this->table_list['from']['alias'] ) ? null : " AS {$this->table_list['from']['alias']}" );
 			} else {
-
 				throw new InvalidSQL( esc_attr__( 'Error: No FROM table specified for member list!', 'e20r-members-list' ) );
 			}
 
@@ -431,7 +430,8 @@ if ( ! class_exists( '\\E20R\\Members_List\\Members_List' ) ) {
 			}
 			$this->set_membership_status();
 			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r
-			$this->utils->log( 'Current status value: ' . print_r( $this->requested_status, true ) );
+			$this->utils->log( 'Current membership level value: ' . print_r( $this->requested_status, true ) );
+			$this->utils->log( "Value ({$this->requested_status}) is numeric? " . ( is_numeric( $this->requested_status ) ? 'Yes' : 'No' ) );
 
 			$this->where = ' WHERE ';
 
@@ -592,6 +592,24 @@ if ( ! class_exists( '\\E20R\\Members_List\\Members_List' ) ) {
 		}
 
 		/**
+		 * Test whether a supplied value/string/something is actually a number
+		 *
+		 * @param mixed $value The value we're testing
+		 *
+		 * @return bool
+		 */
+		private function is_number( $value ) {
+			// phpcs:ignore WordPress.PHP.StrictComparisons.LooseComparison
+			if ( (string) (float) $value == $value ) {
+				return (bool) is_numeric( $value );
+			}
+			if ( $value >= 0 && is_string( $value ) && ! is_float( $value ) ) {
+				return (bool) is_numeric( $value );
+			}
+			return (bool) is_numeric( $value );
+		}
+
+		/**
 		 * Set request status(es) to return records for
 		 */
 		private function set_membership_status() {
@@ -657,6 +675,7 @@ if ( ! class_exists( '\\E20R\\Members_List\\Members_List' ) ) {
 
 			// Add the membership ID if.
 			if ( is_numeric( $this->requested_status ) ) {
+				$this->utils->log( 'Processing a numeric membership level (ID)' );
 				$levels_sql .= sprintf( ' AND mu.membership_id = %1$d ', esc_sql( $this->requested_status ) );
 			}
 
@@ -847,7 +866,7 @@ if ( ! class_exists( '\\E20R\\Members_List\\Members_List' ) ) {
 			$default_status = apply_filters( 'e20r_members_list_default_member_status', 'active' );
 
 			// Do we need to limit?
-			$this->requested_status = $this->utils->get_variable( 'level', $default_status );
+			$this->requested_status = trim( $this->utils->get_variable( 'level', $default_status ) );
 
 			// Get the current page number.
 			$current_page = $this->get_pagenum();
@@ -1149,7 +1168,7 @@ if ( ! class_exists( '\\E20R\\Members_List\\Members_List' ) ) {
 			$this->set_membership_status();
 			/* phpcs:ignore Squiz.PHP.CommentedOutCode.Found
 			$default_level   = apply_filters( 'e20r_members_list_default_member_status', 'active' );
-			$this->requested_status = $this->utils->get_variable( 'level', $default_level );
+			$this->requested_status = trim( $this->utils->get_variable( 'level', $default_level ) );
 			*/
 
 			$this->utils->log( 'Content sent...?' . ( headers_sent() ? 'Yes' : 'No' ) );
@@ -1361,7 +1380,7 @@ if ( ! class_exists( '\\E20R\\Members_List\\Members_List' ) ) {
 			} */
 
 			$default_level          = apply_filters( 'e20r_members_list_default_member_status', 'active' );
-			$this->requested_status = $this->utils->get_variable( 'level', $default_level );
+			$this->requested_status = trim( $this->utils->get_variable( 'level', $default_level ) );
 
 			// We're looking for a specific membership level.
 			if (
@@ -1450,7 +1469,7 @@ if ( ! class_exists( '\\E20R\\Members_List\\Members_List' ) ) {
 
 			// If we have the 'level' REQUEST parameter set, we have more checks to run.
 			$default_level = apply_filters( 'e20r_members_list_default_member_status', 'active' );
-			$search_level  = $this->utils->get_variable( 'level', $default_level );
+			$search_level  = trim( $this->utils->get_variable( 'level', $default_level ) );
 			if (
 					in_array( $search_level, array( 'oldmembers', 'expired', 'cancelled', 'all' ), true )
 					|| is_numeric( $search_level )
@@ -2312,7 +2331,7 @@ if ( ! class_exists( '\\E20R\\Members_List\\Members_List' ) ) {
 		 */
 		public function no_items() {
 			$default_level = apply_filters( 'e20r_members_list_default_member_status', 'active' );
-			$level         = $this->utils->get_variable( 'level', $default_level );
+			$level         = trim( $this->utils->get_variable( 'level', $default_level ) );
 			$this->search  = $this->utils->get_variable( 'find', '' );
 
 			$active_members_url = add_query_arg(
