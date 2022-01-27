@@ -34,10 +34,9 @@ coverage:
       verify_peer: false
   low_limit: 16
   include:
-    - ./src/members-list/*
+    - ./src/E20R/members-list/*
     - ./class-e20r-members-list.php
   exclude:
-    - src/utilities/*
     - inc/*
     - languages/*
     - tests/*
