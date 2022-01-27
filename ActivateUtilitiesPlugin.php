@@ -62,7 +62,7 @@ if ( ! class_exists( 'E20R\Utilities\ActivateUtilitiesPlugin' ) ) {
 			}
 
 			$plugin      = trim( $plugin );
-			$plugin_list = get_option( 'active_plugins' );
+			$plugin_list = get_option( 'active_plugins', array() );
 			return in_array( $plugin, $plugin_list, true );
 		}
 
