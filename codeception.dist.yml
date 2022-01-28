@@ -34,6 +34,7 @@ coverage:
       verify_peer: false
   low_limit: 16
   include:
+    - ./inc/wp_plugins/00-e20r-utilities/*
     - ./src/E20R/members-list/*
     - ./class-e20r-members-list.php
   exclude:
