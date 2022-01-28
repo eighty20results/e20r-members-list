@@ -16,7 +16,7 @@
  *   You should have received a copy of the GNU General Public License
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @package E20R\Licensing\Exceptions\BadOperation
+ * @package E20R\Members_List\Admin\Exceptions\InvalidUtilitiesModule
  */
 
 namespace E20R\Members_List\Admin\Exceptions;
