@@ -82,20 +82,6 @@ if ( ! class_exists( '\\E20R\\Members_List\\Admin\\Bulk\\Bulk_Update' ) ) {
 		}
 
 		/**
-		 * Get or create an instance of the Bulk_Update class
-		 *
-		 * @return Bulk_Update|null
-		 */
-		public static function get_instance() {
-
-			if ( is_null( self::$instance ) ) {
-				self::$instance = new self();
-			}
-
-			return self::$instance;
-		}
-
-		/**
 		 * Handle bulk update (for core member list columns). Triggers action for external bulk update activities/fields
 		 *
 		 * @return bool
@@ -106,8 +92,6 @@ if ( ! class_exists( '\\E20R\\Members_List\\Admin\\Bulk\\Bulk_Update' ) ) {
 			$level_failed  = array();
 
 			$this->utils->log( 'User count to update: ' . count( $this->members_to_update ) );
-			// phpcs:ignore
-			$this->utils->log( 'Request: ' . print_r( $_REQUEST, true ) );
 
 			/**
 			 * Process build-in edit fields for the specified members to update
