@@ -207,3 +207,15 @@ Dependencies: The left hand side of the pairs need to match the table alias(es) 
 I.e. `u.ID` implies there's a `wp_users` table alias'ed as `u`; `wp_users AS u` somewhere in the SQL statement
 
 Example: `add_filter( 'e20r_members_list_default_column_map', 'tls_default_column_pair_override', 10, 1 );`
+
+### e20r_memberslist_membership_starts_at_midnight
+
+Modifies: Start time for a membership
+
+Purpose: Set to true if you want to force all memberships to start at midnight
+
+Default: True
+
+Dependencies: N/A
+
+Example: `add_filter( 'e20r_memberslist_membership_starts_at_midnight', '__return_false', 11, 1 );`
