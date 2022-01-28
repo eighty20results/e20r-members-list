@@ -27,6 +27,7 @@ use E20R\Licensing\Exceptions\BadOperation;
 use E20R\Members_List\Admin\Bulk\Bulk_Cancel;
 use E20R\Members_List\Admin\Bulk\Bulk_Update;
 use E20R\Members_List\Admin\Exceptions\DBQueryError;
+use E20R\Members_List\Admin\Exceptions\InvalidProperty;
 use E20R\Members_List\Admin\Exceptions\InvalidSQL;
 use E20R\Members_List\Admin\Export\Export_Members;
 use E20R\Members_List\Admin\Modules\Multiple_Memberships;
@@ -592,24 +593,6 @@ if ( ! class_exists( '\\E20R\\Members_List\\Members_List' ) ) {
 		}
 
 		/**
-		 * Test whether a supplied value/string/something is actually a number
-		 *
-		 * @param mixed $value The value we're testing
-		 *
-		 * @return bool
-		 */
-		private function is_number( $value ) {
-			// phpcs:ignore WordPress.PHP.StrictComparisons.LooseComparison
-			if ( (string) (float) $value == $value ) {
-				return (bool) is_numeric( $value );
-			}
-			if ( $value >= 0 && is_string( $value ) ) {
-				return (bool) is_numeric( $value );
-			}
-			return (bool) is_numeric( $value );
-		}
-
-		/**
 		 * Set request status(es) to return records for
 		 */
 		private function set_membership_status() {
@@ -998,19 +981,17 @@ if ( ! class_exists( '\\E20R\\Members_List\\Members_List' ) ) {
 		 */
 		public function process_bulk_action() {
 
-			$a    = $this->utils->get_variable( 'action', '' );
-			$a2   = $this->utils->get_variable( 'action2', '' );
+			$a    = $this->utils->get_variable( 'action', null );
+			$a2   = $this->utils->get_variable( 'action2', null );
 			$page = $this->utils->get_variable( 'page', '' );
 
-			if ( -1 === $a && -1 === $a2 ) {
+			if ( null === $a && null === $a2 ) {
 				$this->utils->log( 'No bulk action to execute' );
-
 				return;
 			}
 
 			if ( 'e20r-memberslist' !== $page ) {
 				$this->utils->log( 'Not on the Members List page, so nothing to do' );
-
 				return;
 			}
 
@@ -1061,9 +1042,8 @@ if ( ! class_exists( '\\E20R\\Members_List\\Members_List' ) ) {
 
 				if ( in_array( 'bulk-cancel', $bulk_actions, true ) ) {
 
-					$this->cancel = new Bulk_Cancel( null, $this->utils );
-					$this->cancel->set_members( $data );
-					$this->cancel->cancel();
+					$this->cancel = new Bulk_Cancel( $data, $this->utils );
+					$this->cancel->execute();
 
 					return;
 
@@ -1092,12 +1072,12 @@ if ( ! class_exists( '\\E20R\\Members_List\\Members_List' ) ) {
 
 					$this->utils->log( 'Requested member updates for ' . count( $data ) . ' records' );
 
-					$this->update = new Bulk_Update( $this->utils );
-					$this->update->set_members( $data );
-					$this->update->update();
-
-					return;
-
+					$this->update = new Bulk_Update( $data, $this->utils );
+					try {
+						$this->update->execute();
+					} catch ( InvalidProperty $e ) {
+						$this->utils->log( 'Error: ' . $e->getMessage() );
+					}
 				}
 			} else {
 
@@ -1123,9 +1103,8 @@ if ( ! class_exists( '\\E20R\\Members_List\\Members_List' ) ) {
 							$this->cancel = new Bulk_Cancel( $user_ids, $this->utils );
 						}
 
-						$this->cancel->set_members( $user_ids );
 
-						if ( false === $this->cancel->cancel() ) {
+						if ( false === $this->cancel->execute() ) {
 							$message = esc_attr__( 'Error cancelling membership(s)', 'e20r-members-list' );
 							$this->utils->add_message( $message, 'error', 'backend' );
 
@@ -1231,6 +1210,7 @@ if ( ! class_exists( '\\E20R\\Members_List\\Members_List' ) ) {
 		 *
 		 * @throws InvalidSQL Raised when there's a problem with the SQL we generated.
 		 * @throws DBQueryError Raised if the DB Query reports a problem
+		 * @throws BadOperation Raised when the Cache() class tries something unexpected
 		 */
 		public function get_members( $per_page = null, $page_number = null, $return_count = false ) {
 
@@ -1312,13 +1292,13 @@ if ( ! class_exists( '\\E20R\\Members_List\\Members_List' ) ) {
 		 * @param null|string $member_var The class parameter to return the value of.
 		 *
 		 * @return Members_List
-		 * @throws \Exception Raised when the parameter isn't defined in the class.
+		 * @throws InvalidProperty Raised when the parameter isn't defined in the class.
 		 */
 		public function get( $member_var = null ) {
 
 			// Make sure we let the caller know there's a problem if the variable doesn't exist.
-			if ( ! isset( $this->{$member_var} ) ) {
-				throw new \Exception(
+			if ( ! property_exists( $this, $member_var ) ) {
+				throw new InvalidProperty(
 					sprintf(
 							// translators: %1$s - The class parameter, %2$s - The class name where we expect said parameter to exist.
 						esc_attr__( '%1$s is not a member variable in %2$s', 'e20r-members-list' ),
