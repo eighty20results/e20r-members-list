@@ -105,6 +105,15 @@ if ( ! class_exists( '\\E20R\\Members_List\\Admin\\Bulk\\Bulk_Cancel' ) ) {
 				}
 			}
 
+			/**
+			 * Trigger action for bulk Cancel (allows external handling of bulk cancel operation if needed/desired)
+			 *
+			 * @action e20r_memberslist_process_bulk_updates
+			 *
+			 * @param array[] $members_to_update - List of list of user ID's and level IDs for the selected bulk-update users
+			 */
+			do_action( 'e20r_memberslist_process_bulk_cancel', $this->members_to_update );
+
 			// Check for errors & display error banner if we got one.
 			if ( ! empty( $failed ) ) {
 
@@ -151,20 +160,6 @@ if ( ! class_exists( '\\E20R\\Members_List\\Admin\\Bulk\\Bulk_Cancel' ) ) {
 				return false;
 			}
 
-		}
-
-		/**
-		 * Get or create an instance of the Bulk_Cancel class
-		 *
-		 * @return Bulk_Cancel|null
-		 */
-		public static function get_instance() {
-
-			if ( is_null( self::$instance ) ) {
-				self::$instance = new self();
-			}
-
-			return self::$instance;
 		}
 
 		/**
