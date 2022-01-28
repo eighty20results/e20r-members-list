@@ -6,13 +6,13 @@ To best understand how to extend this plugin, we recommend searching through the
 
 There are also several Paid Memberships Pro specific filters present in this plugin to, as well as possible, maintain compatibility with the default PMPro Members List functionality.
 
-### e20r_memberslist_process_bulk_updates
+### e20r_memberslist_process_bulk_{$operation}_done
 
-Purpose: Allows post-update processing during a bulk update operation, or creation of your own bulk-update operation.
+Purpose: Allows post-update processing after a bulk operation, or creation of your own bulk operation. Use the `Bulk_Cancel::execute()` or `Bulk_Update::execute()` class methods as examples.
 
 Dependencies: N/A
 
-Default: List (array) of member information supplied by the Bulk_Update::set_members() method.
+Default: List (array) of member information supplied by the calling function
 
 ```
 $member_info = array(
@@ -30,10 +30,10 @@ $member_info = array(
 Example:
 ```
 add_action(
-	'e20r_memberslist_process_bulk_updates',
+	'e20r_memberslist_process_bulk_updates_done',
 	function( $member_info_array ) {
 		foreach( $member_info_array as $key => $user_info ) {
-			// Do something to the user record based on WPUser->id and PMPro membership level ID
+			// Do something to the user record based on WP_User->id and PMPro membership level ID
 			...
 		}
 	},
@@ -41,34 +41,12 @@ add_action(
 );
 ```
 
-### e20r_memberslist_process_bulk_cancel
-
-Purpose: Allows post-update processing during a bulk cancel operation, or creation of your own bulk-cancel operation.
-
-Dependencies: N/A
-
-Default: List (array) of member information supplied by the Bulk_Cancel::set_members() method.
-
-```
-$member_info = array(
-	array(
-		'user_id'  => $user_id,
-		'level_id' => $user_level,
-	),
-		array(
-		'user_id'  => $user_id,
-		'level_id' => $user_level,
-	),
-	...
-);
-```
-Example:
 ```
 add_action(
-	'e20r_memberslist_process_bulk_cancel',
+	'e20r_memberslist_process_bulk_cancel_done',
 	function( $member_info_array ) {
 		foreach( $member_info_array as $key => $user_info ) {
-			// Do additional cancellation operations to the user record based on WPUser->id and/or the PMPro membership level ID. I.e. clean-up, etc.
+			// Cancel the membership level(s) for the user record based on WP_User->id
 			...
 		}
 	},
