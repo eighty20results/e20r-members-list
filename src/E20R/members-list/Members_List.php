@@ -603,7 +603,7 @@ if ( ! class_exists( '\\E20R\\Members_List\\Members_List' ) ) {
 			if ( (string) (float) $value == $value ) {
 				return (bool) is_numeric( $value );
 			}
-			if ( $value >= 0 && is_string( $value ) && ! is_float( $value ) ) {
+			if ( $value >= 0 && is_string( $value ) ) {
 				return (bool) is_numeric( $value );
 			}
 			return (bool) is_numeric( $value );
@@ -1041,7 +1041,7 @@ if ( ! class_exists( '\\E20R\\Members_List\\Members_List' ) ) {
 
 				$selected_members = $this->utils->get_variable( 'member_id', array() );
 
-				foreach ( $selected_members as $key => $user_id ) { /* @phpstan-ignore-line FIXME: When Utilities is >= 2.3.1 and Utilities::get_variable() phpdoc string is correct */
+				foreach ( $selected_members as $key => $user_id ) {
 					$user_level = $this->utils->get_variable( "e20r-members-list-membership_id_{$user_id}", 0 );
 					$data[]     = array(
 						'user_id'  => $user_id,
@@ -1602,7 +1602,7 @@ if ( ! class_exists( '\\E20R\\Members_List\\Members_List' ) ) {
 			}
 
 			$this->utils->log( "Starting appended WHERE statement: {$added_where}" );
-			// Is this a bulk export operation? @phpstan-ignore-next-line
+			// Is this a bulk export operation?
 			if ( ! empty( $member_ids ) && is_array( $member_ids ) ) {
 
 				sort( $member_ids );
@@ -1611,7 +1611,6 @@ if ( ! class_exists( '\\E20R\\Members_List\\Members_List' ) ) {
 				$added_where .= " mu.user_id IN ( {$in_list} )";
 
 			} elseif ( ! empty( $member_ids ) ) {
-				/* @phpstan-ignore-next-line */
 				$this->utils->log( 'Processing single member ID: ' . count( $member_ids ) );
 				$added_where .= sprintf( ' mu.user_id = %d', esc_sql( $member_ids ) );
 			}
