@@ -21,6 +21,7 @@
 
 namespace E20R\Members_List\Admin\Bulk;
 
+use E20R\Members_List\Admin\Exceptions\InvalidProperty;
 use E20R\Utilities\Message;
 use E20R\Utilities\Utilities;
 
@@ -33,60 +34,36 @@ if ( ! class_exists( '\\E20R\\Members_List\\Admin\\Bulk\\Bulk_Update' ) ) {
 	/**
 	 * Performs Bulk Updates from the Members List.
 	 */
-	class Bulk_Update {
+	class Bulk_Update extends Bulk_Operations {
 
 		/**
-		 * Instance of this class
+		 * Bulk_Update constructor
 		 *
-		 * @var null|Bulk_Update
-		 */
-		private static $instance = null;
-
-		/**
-		 * Update operation to perform
-		 *
-		 * @var null|string
-		 */
-		private $operation = null;
-
-		/**
-		 * List of members to update
-		 *
-		 * @var array[]
-		 */
-		private $members_to_update = array();
-
-		/**
-		 * Instance of the E20R Utilities Module class
-		 *
-		 * @var Utilities|null $utils
-		 */
-		private $utils = null;
-
-		/**
-		 * Bulk_Update constructor (singleton)
-		 *
+		 * @param array          $members Array of member information to update
 		 * @param null|Utilities $utils Instance of the E20R Utilities Module class
 		 *
-		 * @access private
+		 * @throws InvalidProperty Raised if the specified class parameter for some reason is missing
 		 */
-		public function __construct( $utils = null ) {
+		public function __construct( $members, $utils = null ) {
 
 			if ( empty( $utils ) ) {
 				$message = new Message();
 				$utils   = new Utilities( $message );
 			}
 
-			$this->utils    = $utils;
-			self::$instance = $this;
+			parent::__construct( $utils );
+			$this->set( 'members_to_update', $members );
+			$this->set( 'operation', 'cancel' );
 		}
 
 		/**
 		 * Handle bulk update (for core member list columns). Triggers action for external bulk update activities/fields
 		 *
 		 * @return bool
+		 *
+		 * @throws InvalidProperty Raised when the supplied get() method parameter doesn't exist
 		 */
-		public function update() {
+		public function execute() {
 
 			$update_errors = array();
 			$level_failed  = array();
@@ -241,7 +218,7 @@ if ( ! class_exists( '\\E20R\\Members_List\\Admin\\Bulk\\Bulk_Update' ) ) {
 			 *
 			 * @param array[] $members_to_update - List of list of user ID's and level IDs for the selected bulk-update users
 			 */
-			do_action( 'e20r_memberslist_process_bulk_updates', $this->members_to_update );
+			do_action( "e20r_memberslist_process_bulk_{$this->operation}_done", $this, $this->get( 'members_to_update' ) );
 
 			/**
 			 * Error handling for build-in edit fields
@@ -360,17 +337,17 @@ if ( ! class_exists( '\\E20R\\Members_List\\Admin\\Bulk\\Bulk_Update' ) ) {
 		 */
 		public function update_membership( $user_id, $current_level_id, $new_level_id ) {
 
-			// Execute the membership level change for the specified user ID/Level ID
-			if ( function_exists( 'pmpro_changeMembershipLevel' ) ) {
-				return pmpro_changeMembershipLevel(
-					$new_level_id,
-					$user_id,
-					'admin_change',
-					$current_level_id
-				);
-			} else {
+			if ( ! function_exists( 'pmpro_changeMembershipLevel' ) ) {
 				return false;
 			}
+			// Execute the membership level change for the specified user ID/Level ID
+			return pmpro_changeMembershipLevel(
+				$new_level_id,
+				$user_id,
+				'admin_change',
+				$current_level_id
+			);
+
 		}
 
 		/**
@@ -498,39 +475,12 @@ if ( ! class_exists( '\\E20R\\Members_List\\Admin\\Bulk\\Bulk_Update' ) ) {
 		}
 
 		/**
-		 * Set the list of members to update
-		 *
-		 * @param array[] $member_info Array of member info (configuration) to set for the members.
-		 */
-		public function set_members( $member_info ) {
-			$this->members_to_update = $member_info;
-		}
-
-		/**
 		 * Return the list of members being updated
 		 *
 		 * @return array[]
 		 */
 		public function get_members() {
 			return $this->members_to_update;
-		}
-
-		/**
-		 * Return the ongoing operation
-		 *
-		 * @return null|string
-		 */
-		public function get_operation() {
-			return $this->operation;
-		}
-
-		/**
-		 * Configure/set the Operation for the Bulk Update
-		 *
-		 * @param string $operation The operation to perform.
-		 */
-		public function set_operation( $operation ) {
-			$this->operation = $operation;
 		}
 
 		/**

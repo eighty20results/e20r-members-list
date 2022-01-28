@@ -21,6 +21,7 @@
 
 namespace E20R\Members_List\Admin\Bulk;
 
+use E20R\Members_List\Admin\Exceptions\InvalidProperty;
 use E20R\Utilities\Message;
 use E20R\Utilities\Utilities;
 use function pmpro_cancelMembershipLevel;
@@ -34,34 +35,13 @@ if ( ! class_exists( '\\E20R\\Members_List\\Admin\\Bulk\\Bulk_Cancel' ) ) {
 	/**
 	 * The bulk cancel operation handler
 	 */
-	class Bulk_Cancel {
-
-		/**
-		 * Update operation to perform
-		 *
-		 * @var null|string
-		 */
-		private $operation = null;
-
-		/**
-		 * Array of members to update where the memebr date is represented as an array per member
-		 *
-		 * @var array[]|int[]|null
-		 */
-		private $members_to_update = array();
-
-		/**
-		 * Instance of the E20R Utilities Module class
-		 *
-		 * @var Utilities|null $utils
-		 */
-		private $utils = null;
+	class Bulk_Cancel extends Bulk_Operations {
 
 		/**
 		 * Bulk_Cancel constructor (singleton)
 		 *
 		 * @param array[]|int[]|null $members_to_update The array of member IDs to perform the bulk cancel operation against
-		 * @param Utilities|null     $utils             Instance of the E20R Utilities Module class
+		 * @param Utilities|null     $utils Instance of the E20R Utilities Module class
 		 *
 		 * @access public
 		 */
@@ -72,20 +52,23 @@ if ( ! class_exists( '\\E20R\\Members_List\\Admin\\Bulk\\Bulk_Cancel' ) ) {
 				$utils   = new Utilities( $message );
 			}
 
-			$this->utils = $utils;
+			parent::__construct( $utils );
+			$this->set( 'operation', 'cancel' );
 
-			if ( ! empty( $members_to_update ) ) {
-				$this->members_to_update = $members_to_update;
+			try {
+				$this->set( 'members_to_update', $members_to_update );
+			} catch ( InvalidProperty $e ) {
+				$this->utils->log( 'Error saving array to members_to_update parameter: ' . $e->getMessage() );
 			}
 		}
 
 		/**
 		 * Process cancellations for all members/membership_ids
 		 */
-		public function cancel() {
+		public function execute() {
 
 			// Process all User & level ID for the single action.
-			$failed = array();
+			$this->failed = array();
 
 			$this->utils->log( 'Cancelling ' . count( $this->members_to_update ) . ' members' );
 
@@ -104,10 +87,10 @@ if ( ! class_exists( '\\E20R\\Members_List\\Admin\\Bulk\\Bulk_Cancel' ) ) {
 			 *
 			 * @param array[] $members_to_update - List of list of user ID's and level IDs for the selected bulk-update users
 			 */
-			do_action( 'e20r_memberslist_process_bulk_cancel', $this->members_to_update );
+			do_action( "e20r_memberslist_process_bulk_{$this->operation}_done", $this, $this->get( 'members_to_update' ) );
 
 			// Check for errors & display error banner if we got one.
-			if ( ! empty( $failed ) ) {
+			if ( ! empty( $this->failed ) ) {
 
 				$message = sprintf(
 				// translators: %1$s List of User IDs
@@ -115,7 +98,7 @@ if ( ! class_exists( '\\E20R\\Members_List\\Admin\\Bulk\\Bulk_Cancel' ) ) {
 						'Unable to cancel membership(s) for the following user IDs: %1$s',
 						'e20r-members-list'
 					),
-					implode( ', ', $failed )
+					implode( ', ', $this->failed )
 				);
 
 				$this->utils->add_message( $message, 'error', 'backend' );
@@ -146,20 +129,11 @@ if ( ! class_exists( '\\E20R\\Members_List\\Admin\\Bulk\\Bulk_Cancel' ) ) {
 		 */
 		public function cancel_member( $id, $level_id = null ) {
 			if ( ! function_exists( 'pmpro_cancelMembershipLevel' ) ) {
-				$this->utils->log( sprintf( 'PMPro not installed! Cannot cancel the membership for %1$d!', $id ) );
+				$this->utils->log( sprintf( 'PMPro not installed! Cannot cancel the membership for User ID: %1$d!', $id ) );
 				return false;
 			}
 			$this->utils->log( "Cancelling membership for {$id}" );
 			return pmpro_cancelMembershipLevel( $level_id, $id, 'admin_cancelled' );
-		}
-
-		/**
-		 * Set the list of members & their levels to update
-		 *
-		 * @param array $member_info The array of members we intend to process.
-		 */
-		public function set_members( $member_info = array() ) {
-			$this->members_to_update = $member_info;
 		}
 
 		/**
