@@ -41,4 +41,37 @@ add_action(
 );
 ```
 
-Action list is to be announced...
+### e20r_memberslist_process_bulk_cancel
+
+Purpose: Allows post-update processing during a bulk cancel operation, or creation of your own bulk-cancel operation.
+
+Dependencies: N/A
+
+Default: List (array) of member information supplied by the Bulk_Cancel::set_members() method.
+
+```
+$member_info = array(
+	array(
+		'user_id'  => $user_id,
+		'level_id' => $user_level,
+	),
+		array(
+		'user_id'  => $user_id,
+		'level_id' => $user_level,
+	),
+	...
+);
+```
+Example:
+```
+add_action(
+	'e20r_memberslist_process_bulk_cancel',
+	function( $member_info_array ) {
+		foreach( $member_info_array as $key => $user_info ) {
+			// Do additional cancellation operations to the user record based on WPUser->id and/or the PMPro membership level ID. I.e. clean-up, etc.
+			...
+		}
+	},
+	11
+);
+```
