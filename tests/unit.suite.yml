@@ -3,7 +3,7 @@
 # Suite for unit tests not relying WordPress code.
 
 actor: UnitTester
-boostrap: ./tests/unit/inc/bootstrap.php
+boostrap: ./tests/unit/_bootstrap.php
 modules:
     enabled:
         - Asserts
