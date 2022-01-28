@@ -23,6 +23,7 @@ namespace E20R\Members_List\Admin\Bulk;
 
 use E20R\Utilities\Message;
 use E20R\Utilities\Utilities;
+use function pmpro_cancelMembershipLevel;
 
 if ( ! defined( 'ABSPATH' ) && ! defined( 'PLUGIN_PHPUNIT' ) ) {
 	die( 'WordPress not loaded. Naughty, naughty!' );
@@ -34,13 +35,6 @@ if ( ! class_exists( '\\E20R\\Members_List\\Admin\\Bulk\\Bulk_Cancel' ) ) {
 	 * The bulk cancel operation handler
 	 */
 	class Bulk_Cancel {
-
-		/**
-		 * Instance of this class
-		 *
-		 * @var null|Bulk_Cancel
-		 */
-		private static $instance = null;
 
 		/**
 		 * Update operation to perform
@@ -83,8 +77,6 @@ if ( ! class_exists( '\\E20R\\Members_List\\Admin\\Bulk\\Bulk_Cancel' ) ) {
 			if ( ! empty( $members_to_update ) ) {
 				$this->members_to_update = $members_to_update;
 			}
-
-			self::$instance = $this;
 		}
 
 		/**
@@ -152,14 +144,13 @@ if ( ! class_exists( '\\E20R\\Members_List\\Admin\\Bulk\\Bulk_Cancel' ) ) {
 		 *
 		 * @return bool
 		 */
-		public static function cancel_member( $id, $level_id = null ) {
-
-			if ( function_exists( 'pmpro_cancelMembershipLevel' ) ) {
-				return pmpro_cancelMembershipLevel( $level_id, $id, 'admin_cancelled' );
-			} else {
+		public function cancel_member( $id, $level_id = null ) {
+			if ( ! function_exists( 'pmpro_cancelMembershipLevel' ) ) {
+				$this->utils->log( sprintf( 'PMPro not installed! Cannot cancel the membership for %1$d!', $id ) );
 				return false;
 			}
-
+			$this->utils->log( "Cancelling membership for {$id}" );
+			return pmpro_cancelMembershipLevel( $level_id, $id, 'admin_cancelled' );
 		}
 
 		/**
