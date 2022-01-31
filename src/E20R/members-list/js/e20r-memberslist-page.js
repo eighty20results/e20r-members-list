@@ -138,11 +138,7 @@
                 ev.preventDefault();
 
                 if ('bulk-export' === self.bulkActionSelectTop.val() || 'bulk-export' === self.bulkActionSelectBottom.val()) {
-                    let inputs = $('.e20r-search-arguments input, .e20r-search-arguments textarea, .e20r-search-arguments select')
-                        .not(':input[type=button], :input[type=submit], input[type=reset]');
-                    let export_args = {};
-
-                    self.prepare_export(self, export_args, inputs);
+                    self.export_data(self);
                     return true;
                 }
 
@@ -224,21 +220,10 @@
             });
 
             self.exportBtn.unbind('click').on('click', function (ev) {
-
                 ev.preventDefault();
                 window.console.log("Export button clicked!");
-				$("#overlay").fadeIn(300);
-				let inputs = $('.e20r-search-arguments input, .e20r-search-arguments textarea, .e20r-search-arguments select')
-                    .not(':input[type=button], :input[type=submit], input[type=reset]');
 
-                let export_args = self.prepare_export(self, inputs);
-				// Open a new tab to trigger the AJAX request for the download
-				let file_name = window.prompt( 'Filename for data to save/export', 'members_list' );
-				let extension = '.csv';
-				if ( file_name.toLowerCase().endsWith( '.csv' ) ) {
-					extension = '';
-				}
-				self.download_csv(file_name + extension, export_args, ); //jshint ignore:line
+                self.export_data( self );
             });
         },
 		add_to_uri: function(url, paramName, paramValue) {
@@ -255,6 +240,21 @@
 
 			url = url.replace(/[?#]$/,'');
 			return url + (url.indexOf('?')>0 ? '&' : '?') + paramName + '=' + paramValue;
+		},
+		export_data: function( self ) {
+
+			$("#overlay").fadeIn(300);
+			let inputs = $('.e20r-search-arguments input, .e20r-search-arguments textarea, .e20r-search-arguments select')
+				.not(':input[type=button], :input[type=submit], input[type=reset]');
+			let export_args = self.prepare_export(self, inputs);
+
+			// Open a new tab to trigger the AJAX request for the download
+			let file_name = window.prompt( 'Filename for data to save/export', 'members_list' );
+			let extension = '.csv';
+			if ( file_name.toLowerCase().endsWith( '.csv' ) ) {
+				extension = '';
+			}
+			self.download_csv(file_name + extension, export_args, ); //jshint ignore:line
 		},
 		/**
 		 * Set the request variables based on the members list page
@@ -282,7 +282,7 @@
 
 			let is_checked = false;
 			let selected_ids = [];
-			$('input[name^="member_id"]').each(function () {
+			$('input[name^="member_user_id"]').each(function () {
 				if ($(this).is(':checked')) {
 					is_checked = true;
 					selected_ids.push($(this).val());
