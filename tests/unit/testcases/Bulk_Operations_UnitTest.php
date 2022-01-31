@@ -25,10 +25,10 @@ namespace E20R\Tests\Unit;
 use Brain\Monkey;
 use Brain\Monkey\Functions;
 use E20R\Members_List\Admin\Exceptions\InvalidProperty;
+use E20R\Utilities\Message;
 use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 use Codeception\Test\Unit;
-use E20R\Members_List\Admin\Exceptions\PMProNotActive;
-use E20R\Tests\Unit\Fixtures;
+
 
 use E20R\Members_List\Admin\Bulk\Bulk_Operations;
 use E20R\Utilities\Utilities;
@@ -222,7 +222,64 @@ class Bulk_Operations_UnitTest extends Unit {
 			array( 'failed', false, null, null ), // #3 -> Tests the default value
 			array( 'nothing_useful', false, null, InvalidProperty::class ), // #4
 			array( 'should raise exception', false, null, InvalidProperty::class ), // #4
+		);
+	}
 
+	/**
+	 * Unit test for the abstract and fully mocked Bulk_Operations::execute() method
+	 *
+	 * @return void
+	 * @test
+	 */
+	public function it_triggers_mocked_execute() {
+		$m_bo   = $this->make(
+			Bulk_Operations::class,
+			array(
+				'utils'   => $this->m_utils,
+				'execute' => true,
+			),
+		);
+		$result = $m_bo->execute();
+		self::assertTrue( $result );
+	}
+
+	/**
+	 * Unit test for the Bulk_Operations::__construct() (constructor)
+	 *
+	 * @param mixed $arguments The argument to supply to the class constructor
+	 * @param mixed $expected The expected result from the get('utils') method
+	 *
+	 * @return void
+	 * @throws InvalidProperty Raised if 'utils' is not a class property
+	 * @dataProvider fixture_instantiate_bulk_operations
+	 * @test
+	 */
+	public function it_instantiates_bulk_operations( $arguments, $expected ) {
+
+		$m_bo = $this->construct(
+			Bulk_Operations::class,
+			array( $arguments ),
+			array( 'execute' => true )
+		);
+
+		$result = $m_bo->get( 'utils' );
+		self::assertTrue( is_a( $result, $expected ) );
+	}
+
+	/**
+	 * Fixture for the it_instantiates_bulk_operations() test method
+	 *
+	 * @return array[]
+	 */
+	public function fixture_instantiate_bulk_operations() {
+		$utils     = new Utilities();
+		$message   = new Message();
+		$new_utils = new Utilities( $message );
+		return array(
+			array( null, Utilities::class ),
+			array( $utils, Utilities::class ),
+			array( $message, Message::class ),
+			array( $new_utils, Utilities::class ),
 		);
 	}
 }

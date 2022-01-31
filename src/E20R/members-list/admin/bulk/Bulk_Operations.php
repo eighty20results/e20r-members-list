@@ -26,7 +26,7 @@ use E20R\Utilities\Message;
 use E20R\Utilities\Utilities;
 
 if ( ! defined( 'ABSPATH' ) && ! defined( 'PLUGIN_PHPUNIT' ) ) {
-	die( 'WordPress not loaded. Naughty, naughty!' );
+	die( 'WordPress not loaded. Naughty, naughty!' ); // @codeCoverageIgnore
 }
 
 if ( ! class_exists( '\\E20R\\Members_List\\Admin\\Bulk\\Bulk_Operations' ) ) {
