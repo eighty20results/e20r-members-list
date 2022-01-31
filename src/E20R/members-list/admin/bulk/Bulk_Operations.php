@@ -94,8 +94,9 @@ if ( ! class_exists( '\\E20R\\Members_List\\Admin\\Bulk\\Bulk_Operations' ) ) {
 			if ( ! property_exists( $this, $param ) ) {
 				throw new InvalidProperty(
 					sprintf(
-					// translators: %1$s - The class name where we expect the supplied parameter to exist.
-						esc_attr__( 'Invalid parameter supplied for %1$s', 'e20r-members-list' ),
+					// translators: %1$s - The parameter supplied, %2$s - The class name where we expect the supplied parameter to exist,
+						esc_attr__( 'Invalid parameter "%1$s" supplied for %2$s', 'e20r-members-list' ),
+						$param,
 						__CLASS__
 					)
 				);
