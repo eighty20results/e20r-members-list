@@ -24,8 +24,9 @@ namespace E20R\Tests\Unit;
 
 use Brain\Monkey;
 use Brain\Monkey\Functions;
-use Codeception\AssertThrows;
+use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 use Codeception\Test\Unit;
+use E20R\Members_List\Admin\Exceptions\PMProNotActive;
 use E20R\Tests\Unit\Fixtures;
 
 use E20R\Members_List\Admin\Bulk\Bulk_Cancel;
@@ -36,6 +37,8 @@ use Exception;
  * Unit testing of the Bulk_Cancel() class
  */
 class Bulk_Cancel_UnitTest extends Unit {
+
+	use MockeryPHPUnitIntegration;
 
 	/**
 	 * The Mocked Utilities class
@@ -52,9 +55,20 @@ class Bulk_Cancel_UnitTest extends Unit {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		Monkey\setUp();
 
 		$this->loadStubs();
 		$this->loadMocks();
+	}
+
+	/**
+	 * Tear-down method for the Bulk_Cancel_UnitTest() class
+	 *
+	 * @return void
+	 */
+	public function tearDown(): void {
+		Monkey\tearDown();
+		parent::tearDown();
 	}
 
 	/**
@@ -63,7 +77,8 @@ class Bulk_Cancel_UnitTest extends Unit {
 	 * @return void
 	 */
 	private function loadStubs() {
-		Fixtures\e20r_unittest_stubs();
+		Functions\when( 'esc_attr__' )
+			->returnArg( 1 );
 	}
 
 	/**
@@ -90,12 +105,31 @@ class Bulk_Cancel_UnitTest extends Unit {
 	/**
 	 * Happy Path unit test for the Bulk_Cancel::cancel() method
 	 *
+	 * @param array $members_to_cancel The list of members to "cancel"
+	 * @param bool  $pmpro_present What the 'function_exists()' function is supposed to return
+	 * @param bool  $cancel_returns What the pmpro_cnacelMembershipLevel() function is supposed to return
+	 * @param bool  $expected The expected result from the attempted cancellation
+	 *
 	 * @dataProvider fixture_generates_users_to_bulk_cancel
 	 * @return void
 	 * @test
 	 */
-	public function it_performs_the_bulk_cancel_operation() {
+	public function it_performs_the_bulk_cancel_operation( $members_to_cancel, $pmpro_present, $cancel_returns, $expected ) {
+		Functions\stubs(
+			array(
+				'do_action'                   => null,
+				'function_exists'             => $pmpro_present,
+				'pmpro_cancelMembershipLevel' => $cancel_returns,
+				'pmpro_setMessage'            => function( $msg, $prio ) {
+					$this->m_utils->add_message( $msg, $prio, 'backend' );
+				},
+			)
+		);
+		$this->markTestIncomplete();
 
+		$bc     = new Bulk_Cancel( $members_to_cancel, $this->m_utils );
+		$result = $bc->execute();
+		self::assertSame( $expected, $result );
 	}
 
 	/**
@@ -104,37 +138,57 @@ class Bulk_Cancel_UnitTest extends Unit {
 	 * @return array
 	 */
 	public function fixture_generates_users_to_bulk_cancel() {
-		return array();
+		$members_to_cancel = array();
+
+		// Build user IDs with level(s)
+		foreach ( range( 1, 5, -1 ) as $level_id ) {
+			foreach ( range( ( 65535 - ( 10 * $level_id ) ), ( 65530 - ( 10 * $level_id ) ), -1 ) as $user_id ) {
+				$user_info = array(
+					'user_id'  => $user_id,
+					'level_id' => $level_id,
+				);
+
+				$members_to_cancel[] = $user_info;
+			}
+		}
+		// members_to_cancel, pmpro_present,
+		$fixture[] = array( $members_to_cancel, true, true, true );
+		return $fixture;
 	}
 
 	/**
-	 * Happy Path unit test for the Bulk_Cancel::cancel_member() method
+	 * Unit test for the Bulk_Cancel::cancel_member() method
 	 *
 	 * @param int  $user_id The WP_User ID for the member we're affecting
 	 * @param int  $level_id The id for the membership level as represented in the PMPro pmpro_memberships_levels table
-	 * @param bool $pmp_returns The result we should return from the mocked 'pmpro_cancelMembershipLevel' function
 	 * @param bool $function_exists What the mocked 'function_exists()' function should return
+	 * @param bool $pmp_returns The result we should return from the mocked 'pmpro_cancelMembershipLevel' function
 	 * @param bool $expected The expected return value for the (mocked)
 	 * @return void
 	 *
 	 * @dataProvider fixture_user_to_cancel
 	 * @test
+	 * @covers Bulk_Cancel::cancel_member
 	 */
-	public function it_cancels_the_membership_for_the_specified_wpuser_id( $user_id, $level_id, $pmp_returns, $function_exists, $expected ) {
+	public function it_tries_to_cancel_the_membership_for_the_specified_wpuser_id( $user_id, $level_id, $function_exists, $pmp_returns, $expected ) {
 
-		Functions\when( 'function_exists' )
-			->justReturn( $function_exists );
-
-		if ( true === $function_exists ) {
-			Functions\expect( 'pmpro_cancelMembershipLevel' )
-				->atLeast()
-				->once()
-				->andReturn( $pmp_returns );
+		if ( false === $function_exists ) {
+			$this->expectException( PMProNotActive::class );
 		}
+
+		Functions\stubs(
+			array(
+				'do_action'                   => null,
+				'function_exists'             => $function_exists,
+				'pmpro_cancelMembershipLevel' => $pmp_returns,
+			)
+		);
 
 		$bc     = new Bulk_Cancel( null, $this->m_utils );
 		$result = $bc->cancel_member( $user_id, $level_id );
-		self::assertSame( $expected, $result );
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r
+		self::assertSame( $expected, $result, 'Error: Unexpected value returned. ' . print_r( $result, true ) );
+
 	}
 
 	/**
@@ -145,8 +199,8 @@ class Bulk_Cancel_UnitTest extends Unit {
 	public function fixture_user_to_cancel() {
 		return array(
 			// user Id, Level Id, cancel_returns, function_exists, expected result
+			array( 1234567, 123456, false, null, null ),
 			array( 1, 1, true, true, true ),
-			array( 1234567, 123456, null, false, false ),
 		);
 	}
 }
