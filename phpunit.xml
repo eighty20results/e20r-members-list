@@ -23,7 +23,7 @@
 		xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/6.3/phpunit.xsd"
 		backupGlobals="true"
 		backupStaticAttributes="false"
-		bootstrap="tests/bootstrap.php"
+		bootstrap="tests/_bootstrap.php"
 		colors="false"
 		convertErrorsToExceptions="true"
 		convertNoticesToExceptions="true"
