@@ -1204,7 +1204,7 @@ if ( ! class_exists( '\\E20R\\Members_List\\Members_List' ) ) {
 		 *
 		 * @throws InvalidSQL Raised when there's a problem with the SQL we generated.
 		 * @throws DBQueryError Raised if the DB Query reports a problem
-		 * @throws BadOperation Raised when the Cache() class tries something unexpected
+		 * @throws BadOperation|InvalidSettingsKey Raised when the Cache() class tries something unexpected
 		 */
 		public function get_members( $per_page = null, $page_number = null, $return_count = false ) {
 
