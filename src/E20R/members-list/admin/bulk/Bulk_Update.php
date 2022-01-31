@@ -78,7 +78,6 @@ if ( ! class_exists( '\\E20R\\Members_List\\Admin\\Bulk\\Bulk_Update' ) ) {
 				);
 			}
 
-
 			$update_errors = array();
 			$level_failed  = array();
 
@@ -368,7 +367,6 @@ if ( ! class_exists( '\\E20R\\Members_List\\Admin\\Bulk\\Bulk_Update' ) ) {
 				'admin_change',
 				$current_level_id
 			);
-
 		}
 
 		/**
