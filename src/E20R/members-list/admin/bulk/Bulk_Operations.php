@@ -24,7 +24,6 @@ namespace E20R\Members_List\Admin\Bulk;
 use E20R\Members_List\Admin\Exceptions\InvalidProperty;
 use E20R\Utilities\Message;
 use E20R\Utilities\Utilities;
-use function pmpro_cancelMembershipLevel;
 
 if ( ! defined( 'ABSPATH' ) && ! defined( 'PLUGIN_PHPUNIT' ) ) {
 	die( 'WordPress not loaded. Naughty, naughty!' );

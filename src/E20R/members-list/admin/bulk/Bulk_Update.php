@@ -22,6 +22,7 @@
 namespace E20R\Members_List\Admin\Bulk;
 
 use E20R\Members_List\Admin\Exceptions\InvalidProperty;
+use E20R\Members_List\Admin\Exceptions\PMProNotActive;
 use E20R\Utilities\Message;
 use E20R\Utilities\Utilities;
 
@@ -62,8 +63,21 @@ if ( ! class_exists( '\\E20R\\Members_List\\Admin\\Bulk\\Bulk_Update' ) ) {
 		 * @return bool
 		 *
 		 * @throws InvalidProperty Raised when the supplied get() method parameter doesn't exist
+		 * @throws PMProNotActive Raised if the Paid Memberships Pro plugin is inactive or not installed
+		 *
+		 * phpcs:ignore Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
 		 */
 		public function execute() {
+
+			if ( ! function_exists( 'pmpro_getLevel' ) ) {
+				throw new PMProNotActive(
+					esc_attr__(
+						'Cannot find the pmpro_getLevel() function!',
+						'e20r-members-list'
+					)
+				);
+			}
+
 
 			$update_errors = array();
 			$level_failed  = array();
@@ -214,7 +228,7 @@ if ( ! class_exists( '\\E20R\\Members_List\\Admin\\Bulk\\Bulk_Update' ) ) {
 			/**
 			 * Trigger action for bulk update (allows external handling of bulk update if needed/desired)
 			 *
-			 * @action e20r_memberslist_process_bulk_updates
+			 * @action e20r_memberslist_process_bulk_updates_done
 			 *
 			 * @param array[] $members_to_update - List of list of user ID's and level IDs for the selected bulk-update users
 			 */
@@ -334,11 +348,18 @@ if ( ! class_exists( '\\E20R\\Members_List\\Admin\\Bulk\\Bulk_Update' ) ) {
 		 * @param int $new_level_id     The level ID to change to for the user ID (member).
 		 *
 		 * @return bool
+		 *
+		 * @throws PMProNotActive Thrown when Paid Memberships Pro is not available/active
 		 */
 		public function update_membership( $user_id, $current_level_id, $new_level_id ) {
 
 			if ( ! function_exists( 'pmpro_changeMembershipLevel' ) ) {
-				return false;
+				throw new PMProNotActive(
+					esc_attr__(
+						'Cannot find the pmpro_changeMembershipLevel() function!',
+						'e20r-members-list'
+					)
+				);
 			}
 			// Execute the membership level change for the specified user ID/Level ID
 			return pmpro_changeMembershipLevel(

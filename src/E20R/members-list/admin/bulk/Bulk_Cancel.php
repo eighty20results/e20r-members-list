@@ -22,9 +22,9 @@
 namespace E20R\Members_List\Admin\Bulk;
 
 use E20R\Members_List\Admin\Exceptions\InvalidProperty;
+use E20R\Members_List\Admin\Exceptions\PMProNotActive;
 use E20R\Utilities\Message;
 use E20R\Utilities\Utilities;
-use function pmpro_cancelMembershipLevel;
 
 if ( ! defined( 'ABSPATH' ) && ! defined( 'PLUGIN_PHPUNIT' ) ) {
 	die( 'WordPress not loaded. Naughty, naughty!' );
@@ -44,6 +44,7 @@ if ( ! class_exists( '\\E20R\\Members_List\\Admin\\Bulk\\Bulk_Cancel' ) ) {
 		 * @param Utilities|null     $utils Instance of the E20R Utilities Module class
 		 *
 		 * @access public
+		 * @throws InvalidProperty Thrown when the class or base class lacks the specified set() property
 		 */
 		public function __construct( $members_to_update = array(), $utils = null ) {
 
@@ -53,13 +54,9 @@ if ( ! class_exists( '\\E20R\\Members_List\\Admin\\Bulk\\Bulk_Cancel' ) ) {
 			}
 
 			parent::__construct( $utils );
-			$this->set( 'operation', 'cancel' );
 
-			try {
-				$this->set( 'members_to_update', $members_to_update );
-			} catch ( InvalidProperty $e ) {
-				$this->utils->log( 'Error saving array to members_to_update parameter: ' . $e->getMessage() );
-			}
+			$this->set( 'operation', 'cancel' );
+			$this->set( 'members_to_update', $members_to_update );
 		}
 
 		/**
@@ -69,21 +66,28 @@ if ( ! class_exists( '\\E20R\\Members_List\\Admin\\Bulk\\Bulk_Cancel' ) ) {
 
 			// Process all User & level ID for the single action.
 			$this->failed = array();
-
 			$this->utils->log( 'Cancelling ' . count( $this->members_to_update ) . ' members' );
 
 			// Process all selected records/members
 			foreach ( $this->members_to_update as $key => $cancel_info ) {
-
-				if ( false === $this->cancel_member( $cancel_info['user_id'], $cancel_info['level_id'] ) ) {
-					$failed[] = $cancel_info['user_id']; // FIXME: Add level info for multiple membership levels
+				try {
+					if ( false === $this->cancel_member( $cancel_info['user_id'], $cancel_info['level_id'] ) ) {
+						if ( ! is_array( $this->failed[ $cancel_info['user_id'] ] ) ) {
+							$this->failed[ $cancel_info['user_id'] ] = array();
+						}
+						$this->failed[ $cancel_info['user_id'] ][] = $cancel_info['level_id']; // FIXME: Add level info for multiple membership levels
+					}
+				} catch ( PMProNotActive $e ) {
+					$this->utils->add_message( $e->getMessage(), 'error', 'backend' );
+					$this->failed[] = $cancel_info['user_id'];
+					return false;
 				}
 			}
 
 			/**
 			 * Trigger action for bulk Cancel (allows external handling of bulk cancel operation if needed/desired)
 			 *
-			 * @action e20r_memberslist_process_bulk_updates
+			 * @action e20r_memberslist_process_bulk_cancel_done
 			 *
 			 * @param array[] $members_to_update - List of list of user ID's and level IDs for the selected bulk-update users
 			 */
@@ -91,28 +95,27 @@ if ( ! class_exists( '\\E20R\\Members_List\\Admin\\Bulk\\Bulk_Cancel' ) ) {
 
 			// Check for errors & display error banner if we got one.
 			if ( ! empty( $this->failed ) ) {
+				foreach ( $this->failed as $user_id => $level_ids ) {
+					$message = sprintf(
+						// translators: %1$s User ID, %2$s List of level(s) where the cancel operation failed
+						esc_attr__(
+							'Unable to cancel the following membership levels for user (ID: %1$s): %2$s',
+							'e20r-members-list'
+						),
+						implode( ', ', $level_ids )
+					);
+					$this->utils->add_message( $message, 'error', 'backend' );
 
-				$message = sprintf(
-				// translators: %1$s List of User IDs
-					esc_attr__(
-						'Unable to cancel membership(s) for the following user IDs: %1$s',
-						'e20r-members-list'
-					),
-					implode( ', ', $this->failed )
-				);
+					if ( function_exists( 'pmpro_setMessage' ) ) {
+						pmpro_setMessage( $message, 'error' );
+					} else {
+						global $msg;
+						global $msgt;
 
-				$this->utils->add_message( $message, 'error', 'backend' );
-
-				if ( function_exists( 'pmpro_setMessage' ) ) {
-					pmpro_setMessage( $message, 'error' );
-				} else {
-					global $msg;
-					global $msgt;
-
-					$msg  = $message;
-					$msgt = 'error';
+						$msg  = $message;
+						$msgt = 'error';
+					}
 				}
-
 				return false;
 			}
 
@@ -126,23 +129,20 @@ if ( ! class_exists( '\\E20R\\Members_List\\Admin\\Bulk\\Bulk_Cancel' ) ) {
 		 * @param int|null $level_id Level ID
 		 *
 		 * @return bool
+		 *
+		 * @throws PMProNotActive Thrown if the Paid Memberships Pro plugin is not installed and active
 		 */
 		public function cancel_member( $id, $level_id = null ) {
 			if ( ! function_exists( 'pmpro_cancelMembershipLevel' ) ) {
-				$this->utils->log( sprintf( 'PMPro not installed! Cannot cancel the membership for User ID: %1$d!', $id ) );
-				return false;
+				throw new PMProNotActive(
+					esc_attr__(
+						'Cannot find the pmpro_cancelMembershipLevel() function!',
+						'e20r-members-list'
+					)
+				);
 			}
-			$this->utils->log( "Cancelling membership for {$id}" );
-			return pmpro_cancelMembershipLevel( $level_id, $id, 'admin_cancelled' );
-		}
-
-		/**
-		 * Return the list of members being updated
-		 *
-		 * @return array
-		 */
-		public function get_members() {
-			return $this->members_to_update;
+			$this->utils->log( "Cancelling membership level {$id} for user {$id}" );
+			return \pmpro_cancelMembershipLevel( $level_id, $id, 'admin_cancelled' );
 		}
 	}
 }
