@@ -61,6 +61,9 @@ if ( ! class_exists( '\\E20R\\Members_List\\Admin\\Bulk\\Bulk_Cancel' ) ) {
 
 		/**
 		 * Process cancellations for all members/membership_ids
+		 *
+		 * @return bool
+		 * @throws InvalidProperty Thrown if 'members_to_update' has been removed as a property from the Bulk_*() classes
 		 */
 		public function execute() {
 
@@ -72,7 +75,7 @@ if ( ! class_exists( '\\E20R\\Members_List\\Admin\\Bulk\\Bulk_Cancel' ) ) {
 			foreach ( $this->members_to_update as $key => $cancel_info ) {
 				try {
 					if ( false === $this->cancel_member( $cancel_info['user_id'], $cancel_info['level_id'] ) ) {
-						if ( ! is_array( $this->failed[ $cancel_info['user_id'] ] ) ) {
+						if ( ! isset( $this->failed[ $cancel_info['user_id'] ] ) ) {
 							$this->failed[ $cancel_info['user_id'] ] = array();
 						}
 						$this->failed[ $cancel_info['user_id'] ][] = $cancel_info['level_id']; // FIXME: Add level info for multiple membership levels
@@ -96,12 +99,16 @@ if ( ! class_exists( '\\E20R\\Members_List\\Admin\\Bulk\\Bulk_Cancel' ) ) {
 			// Check for errors & display error banner if we got one.
 			if ( ! empty( $this->failed ) ) {
 				foreach ( $this->failed as $user_id => $level_ids ) {
+					if ( empty( $level_ids ) ) {
+						continue;
+					}
 					$message = sprintf(
 						// translators: %1$s User ID, %2$s List of level(s) where the cancel operation failed
 						esc_attr__(
 							'Unable to cancel the following membership levels for user (ID: %1$s): %2$s',
 							'e20r-members-list'
 						),
+						$user_id,
 						implode( ', ', $level_ids )
 					);
 					$this->utils->add_message( $message, 'error', 'backend' );
