@@ -1004,23 +1004,20 @@ if ( ! class_exists( '\\E20R\\Members_List\\Members_List' ) ) {
 				// In our file that handles the request, verify the nonce.
 				$nonce = esc_attr( $this->utils->get_variable( '_wpnonce', null ) );
 
-				$this->utils->log( "Nonce is: {$nonce} for action: " . $this->current_action() );
-
 				if ( ! wp_verify_nonce( $nonce, 'bulk-' . $this->_args['plural'] ) ) {
 					$this->utils->add_message(
-						esc_attr__( 'Error: Insecure bulk action denied.', 'e20r-members-list' ),
-						'warning',
+						esc_attr__( 'Insecure action denied.', 'e20r-members-list' ),
+						'error',
 						'backend'
 					);
 
 					return;
 				}
 
-				$level_id = $this->utils->get_variable( 'membership_id', array() );
-				$action   = $this->current_action();
-				$data     = array();
-
-				$selected_members = $this->utils->get_variable( 'member_id', array() );
+				$level_id         = $this->utils->get_variable( 'membership_id', array() );
+				$action           = $this->current_action();
+				$data             = array();
+				$selected_members = $this->utils->get_variable( 'member_user_id', array() );
 
 				foreach ( $selected_members as $key => $user_id ) {
 					$user_level = $this->utils->get_variable( "e20r-members-list-membership_id_{$user_id}", 0 );
@@ -1035,16 +1032,9 @@ if ( ! class_exists( '\\E20R\\Members_List\\Members_List' ) ) {
 				// Prepare plugin specific data for member list bulk action processing.
 				$data = apply_filters( 'e20r_memberslist_bulk_action_data_array', $data, $action, $level_id );
 
-				// Process member list bulk action in add-ons/plugins.
-				do_action( 'e20r_memberslist_process_bulk_actions', $nonce, $action, $bulk_actions, $data, $this->_args['plural'] );
-
-				$this->utils->log( 'About to try and trigger one of the default actions' );
-
 				if ( in_array( 'bulk-cancel', $bulk_actions, true ) ) {
-
 					$this->cancel = new Bulk_Cancel( $data, $this->utils );
 					$this->cancel->execute();
-
 					return;
 
 				} elseif ( in_array( 'bulk-export', $bulk_actions, true ) ) {
@@ -1078,12 +1068,16 @@ if ( ! class_exists( '\\E20R\\Members_List\\Members_List' ) ) {
 					} catch ( InvalidProperty $e ) {
 						$this->utils->log( 'Error: ' . $e->getMessage() );
 					}
+				} else {
+					$this->utils->log( 'About to trigger any custom defined bulk actions' );
+					// Process member list bulk action in add-ons/plugins.
+					do_action( 'e20r_memberslist_process_custom_bulk_actions', $nonce, $action, $bulk_actions, $data, $this->_args['plural'] );
 				}
 			} else {
 
 				$this->utils->log( 'Single action for the Members List...' );
 
-				$user_id                     = $this->utils->get_variable( 'member_id', array() );
+				$user_id                     = $this->utils->get_variable( 'member_user_id', array() );
 				$level_id                    = $this->utils->get_variable( 'membership_id', array() );
 				$action                      = $this->current_action();
 				$membership_levels_to_cancel = $this->utils->get_variable( 'membership_level_ids', array() );
@@ -1572,7 +1566,7 @@ if ( ! class_exists( '\\E20R\\Members_List\\Members_List' ) ) {
 
 			$this->utils->log( 'Requesting (active/old/etc) member export' );
 
-			$member_ids  = $this->utils->get_variable( 'member_id', array() );
+			$member_ids  = $this->utils->get_variable( 'member_user_id', array() );
 			$added_where = null;
 
 			if ( ! empty( $where ) && ! empty( $member_ids ) ) {
@@ -1668,7 +1662,7 @@ if ( ! class_exists( '\\E20R\\Members_List\\Members_List' ) ) {
 				'e20r_memberslist_bulk_checkbox',
 				sprintf(
 					'<input type="checkbox" name="%1$s[]" value="%2$s" />',
-					"{$this->_args['singular']}_id",
+					"{$this->_args['singular']}_user_id",
 					$item['ID']
 				)
 			);
