@@ -219,3 +219,33 @@ Default: True
 Dependencies: N/A
 
 Example: `add_filter( 'e20r_memberslist_membership_starts_at_midnight', '__return_false', 11, 1 );`
+
+### e20r_memberlist_bulk_actions
+
+Modifies: List of "Bulk Actions" (in drop-down on Members List page)
+
+Purpose: Lets you add (remove) a bulk action that then can be processed by the [e20r_memberslist_process_custom_bulk_actions](https://github.com/eighty20results/e20r-members-list/docs/FILTERS.md#e20r_memberslist_process_custom_bulk_actions) action.
+
+Default: 
+```php
+array(
+   'bulk-cancel' => esc_attr__( 'Cancel', 'e20r-members-list' ),
+   'bulk-update' => esc_attr__( 'Update', 'e20r-members-list' ),
+   'bulk-export' => esc_attr__( 'Export', 'e20r-members-list' ),
+);
+```
+
+Dependencies: N/A
+
+Example:
+```php
+add_filter(
+	'e20r_memberlist_bulk_actions',
+	function( $bulk_actions ) {
+		$bulk_actions['bulk-my_delete_action'] => esc_attr__( 'Bulk Delete', 'my-custom-plugin' );
+		return $bulk_actions;
+	},
+	10,
+	1
+);
+```

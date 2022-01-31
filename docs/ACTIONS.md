@@ -14,7 +14,7 @@ Dependencies: N/A
 
 Default: List (array) of member information supplied by the calling function
 
-```
+```php
 $member_info = array(
 	array(
 		'user_id'  => $user_id,
@@ -28,7 +28,7 @@ $member_info = array(
 );
 ```
 Example:
-```
+```php
 add_action(
 	'e20r_memberslist_process_bulk_updates_done',
 	function( $member_info_array ) {
@@ -41,7 +41,7 @@ add_action(
 );
 ```
 
-```
+```php
 add_action(
 	'e20r_memberslist_process_bulk_cancel_done',
 	function( $member_info_array ) {
@@ -52,4 +52,25 @@ add_action(
 	},
 	11
 );
+```
+### e20r_memberslist_process_custom_bulk_actions
+
+Purpose: Allows processing of custom bulk actions in the Members List
+
+Dependencies: Depends on the '[e20r_memberlist_bulk_actions](https://github.com/eighty20results/e20r-members-list/docs/FILTERS.md#e20r_memberlist_bulk_actions) filter
+
+Default: List (array) of bulk actions supplied by the calling function
+
+```php
+add_action(
+	'e20r_memberslist_process_custom_bulk_actions',
+	function( $nonce, $action, $bulk_actions, $data, $plural_name ) {
+		// Exit if we're not processing our custom action.
+	 	if ( ! in_array( 'bulk-my_delete_action', $bulk_actions ) ) {
+	 		return;
+	 	}
+	 	...
+	},
+	10
+);  
 ```
