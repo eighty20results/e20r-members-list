@@ -269,7 +269,7 @@ jobs:
 
       # And then deploy the package if it exists _and_ we're on the main branch with a release tag
 
-      - name: Deploy plugin when building a release (to WooCommerce Store or Wordpress.org repo)
+      - name: Deploy plugin when building a release (to WooCommerce Store)
         if: steps.branch-name.outputs.is_tag && startsWith(steps.branch-name.outputs.tag, 'release-') && ${{ env.E20R_SSH_SERVER }}
         run: make deploy
         # The deployment target will depend on whether the
@@ -286,7 +286,7 @@ jobs:
 #           E20R_SSH_USER: ${{ secrets.SSH_USER }}
 #           E20R_SSH_PORT: ${{ secrets.SSH_PORT }}
 
-      - name: Deploy plugin when building a release (Wordpress.org repo)
+      - name: Deploy plugin when building a release (to Wordpress.org repo)
         if: steps.branch-name.outputs.is_tag && startsWith(steps.branch-name.outputs.tag, 'release-') && ${{ env.SVN_USERNAME }}
         run: make deploy
         # The deployment target will depend on whether the
