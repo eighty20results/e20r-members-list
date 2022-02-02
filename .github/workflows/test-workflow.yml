@@ -8,13 +8,13 @@ on:
       - '!main'   # excludes main (default) branch
     tags:
       - 'test_workflow*'
+
 jobs:
   plugin_tests:
-    strategy:
-      matrix:
-        php_version: [ '7.3', '7.4', '8.0' ]
     name: "Plugin tests - PHP"
-    runs-on: ubuntu-18.04
+    defaults:
+      run:
+        shell: bash
     env:
       E20R_PLUGIN_NAME: e20r-members-list
       GITHUB_TOKEN: ${{ secrets.GITHUB }}
@@ -22,6 +22,10 @@ jobs:
       CONTAINER_ACCESS_TOKEN: ${{ secrets.CONTAINER_ACCESS_TOKEN }}
       SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
       SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
+    strategy:
+      matrix:
+        php_version: [ '7.3', '7.4', '8.0' ]
+    runs-on: ubuntu-18.04
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -57,28 +61,24 @@ jobs:
           path: inc/**
 
       - name: Install all needed dependencies for Composer
-        shell: bash
         if: steps.restore-cache.outputs.cache-hit != 'true'
         run: make composer-dev
 #         env:
 #           E20R_PLUGIN_NAME: e20r-members-list
 
       - name: Install all needed WordPress plugin dependencies
-        shell: bash
         if: steps.composer-cache.outputs.cache-hit != 'true'
         run: make wp-deps
 #         env:
 #           E20R_PLUGIN_NAME: e20r-members-list
 
       - name: Install all needed dependencies for Docker
-        shell: bash
         if: steps.composer-cache.outputs.cache-hit != 'true'
         run: make docker-deps
 #         env:
 #           E20R_PLUGIN_NAME: e20r-members-list
 
       - name: Run all Standard Tests
-        shell: bash
         run: make tests
 #         env:
 #           E20R_PLUGIN_NAME: e20r-members-list
@@ -91,6 +91,9 @@ jobs:
     name: Build plugin package to the plugin repository (Our License server or WordPress.org)
     needs: [plugin_tests]
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
     env:
       E20R_PLUGIN_NAME: e20r-members-list
       GITHUB_TOKEN: ${{ secrets.GITHUB }}
@@ -139,21 +142,18 @@ jobs:
           path: inc/
 
       - name: Install all needed dependencies for Composer
-        shell: bash
         if: steps.composer-cache.outputs.cache-hit != 'true'
         run: make composer-dev
 #         env:
 #           E20R_PLUGIN_NAME: e20r-members-list
 
       - name: Install all needed WordPress plugin dependencies
-        shell: bash
         if: steps.composer-cache.outputs.cache-hit != 'true'
         run: make wp-deps
 #         env:
 #           E20R_PLUGIN_NAME: e20r-members-list
 
       - name: Install all needed dependencies for Docker
-        shell: bash
         if: steps.composer-cache.outputs.cache-hit != 'true'
         run: make docker-deps
 #         env:
@@ -168,7 +168,6 @@ jobs:
           path: build/kits/**.zip
 
       - name: Build and test plugin before deployment
-        shell: bash
         run: make build
 #         env:
 #           E20R_PLUGIN_NAME: e20r-members-list
@@ -180,6 +179,9 @@ jobs:
     name: Deploy plugin package to the plugin repository (Our License server or WordPress.org)
     needs: [plugin_tests, build_plugin]
     runs-on: ubuntu-18.04
+    defaults:
+      run:
+        shell: bash
     env:
       E20R_PLUGIN_NAME: e20r-members-list
       GITHUB_TOKEN: ${{ secrets.GITHUB }}
@@ -203,7 +205,6 @@ jobs:
 
       - name: Adding deployment target to known_hosts file
         if: startsWith( '${{ secrets.E20R_SSH_SERVER }}', 'eighty20results.com')
-        shell: bash
         run: ssh-keyscan -H -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
 
       - name: Login to Docker HUB
@@ -230,21 +231,18 @@ jobs:
 
       - name: Install all needed dependencies for Composer
         if: steps.composer-cache-prod.outputs.cache-hit != 'true'
-        shell: bash
         run: make composer-dev
 #         env:
 #           E20R_PLUGIN_NAME: e20r-members-list
 
       - name: Install all needed WordPress plugin dependencies
         if: steps.composer-cache-prod.outputs.cache-hit != 'true'
-        shell: bash
         run: make wp-deps
 #         env:
 #           E20R_PLUGIN_NAME: e20r-members-list
 
       - name: Install all needed dependencies for Docker
         if: steps.composer-cache-prod.outputs.cache-hit != 'true'
-        shell: bash
         run: make docker-deps
 #         env:
 #           E20R_PLUGIN_NAME: e20r-members-list
@@ -263,7 +261,6 @@ jobs:
         uses: tj-actions/branch-names@v5.1
 
       - name: Show me the branch
-        shell: bash
         run: |
           echo "Reference branch is: ${{ steps.branch-name.outputs.ref_branch }}"
           echo "Current branch is: ${{ steps.branch-name.outputs.current_branch }}"
@@ -273,8 +270,7 @@ jobs:
       # And then deploy the package if it exists _and_ we're on the main branch with a release tag
 
       - name: Deploy plugin when building a release (to WooCommerce Store or Wordpress.org repo)
-        if: steps.branch-name.outputs.is_tag && startsWith(steps.branch-name.outputs.tag, 'release-') && ${{env.E20R_SSH_SERVER}} == 'eighty20results.com'
-        shell: bash
+        if: steps.branch-name.outputs.is_tag && startsWith(steps.branch-name.outputs.tag, 'release-') && ${{ env.E20R_SSH_SERVER }} == 'eighty20results.com'
         run: make deploy
         # The deployment target will depend on whether the
         # E20R_SSH_USER or SVN_USERNAME environment variable is defined
@@ -292,7 +288,6 @@ jobs:
 
       - name: Deploy plugin when building a release (Wordpress.org repo)
         if: steps.branch-name.outputs.is_tag && startsWith(steps.branch-name.outputs.tag, 'release-') && ${{ secrets.SVN_USERNAME }} == 'eighty20results'
-        shell: bash
         run: make deploy
         # The deployment target will depend on whether the
         # E20R_SSH_USER or SVN_USERNAME environment variable is defined
