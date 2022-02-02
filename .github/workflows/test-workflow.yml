@@ -109,7 +109,7 @@ jobs:
           ref: main
 
       - name: Install SSH Key
-        if: ${{ env.E20R_SSH_SERVER }} === 'eighty20results.com'
+        if: ${{ env.E20R_SSH_SERVER }} == 'eighty20results.com'
         uses: shimataro/ssh-key-action@v2
         with:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
@@ -197,14 +197,14 @@ jobs:
           ref: main
 
       - name: Install SSH Key
-        if: ${{ env.E20R_SSH_SERVER }} == 'eighty20results.com'
+        if: ${{ env.E20R_SSH_SERVER }}
         uses: shimataro/ssh-key-action@v2
         with:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           known_hosts: 'just-a-placeholder-so-we-dont-get-errors'
 
       - name: Adding deployment target to known_hosts file
-        if: ${{ env.E20R_SSH_SERVER }} == 'eighty20results.com'
+        if: ${{ env.E20R_SSH_SERVER }}
         run: ssh-keyscan -H -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
 
       - name: Login to Docker HUB
@@ -270,7 +270,7 @@ jobs:
       # And then deploy the package if it exists _and_ we're on the main branch with a release tag
 
       - name: Deploy plugin when building a release (to WooCommerce Store or Wordpress.org repo)
-        if: steps.branch-name.outputs.is_tag && startsWith(steps.branch-name.outputs.tag, 'release-') && ${{ env.E20R_SSH_SERVER }} == 'eighty20results.com'
+        if: steps.branch-name.outputs.is_tag && startsWith(steps.branch-name.outputs.tag, 'release-') && ${{ env.E20R_SSH_SERVER }}
         run: make deploy
         # The deployment target will depend on whether the
         # E20R_SSH_USER or SVN_USERNAME environment variable is defined
@@ -287,7 +287,7 @@ jobs:
 #           E20R_SSH_PORT: ${{ secrets.SSH_PORT }}
 
       - name: Deploy plugin when building a release (Wordpress.org repo)
-        if: steps.branch-name.outputs.is_tag && startsWith(steps.branch-name.outputs.tag, 'release-') && ${{ env.SVN_USERNAME }} == 'eighty20results'
+        if: steps.branch-name.outputs.is_tag && startsWith(steps.branch-name.outputs.tag, 'release-') && ${{ env.SVN_USERNAME }}
         run: make deploy
         # The deployment target will depend on whether the
         # E20R_SSH_USER or SVN_USERNAME environment variable is defined
