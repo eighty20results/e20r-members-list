@@ -287,7 +287,7 @@ jobs:
 #           E20R_SSH_PORT: ${{ secrets.SSH_PORT }}
 
       - name: Deploy plugin when building a release (Wordpress.org repo)
-        if: steps.branch-name.outputs.is_tag && startsWith(steps.branch-name.outputs.tag, 'release-') && ${{ secrets.SVN_USERNAME }} == 'eighty20results'
+        if: steps.branch-name.outputs.is_tag && startsWith(steps.branch-name.outputs.tag, 'release-') && ${{ env.SVN_USERNAME }} == 'eighty20results'
         run: make deploy
         # The deployment target will depend on whether the
         # E20R_SSH_USER or SVN_USERNAME environment variable is defined
