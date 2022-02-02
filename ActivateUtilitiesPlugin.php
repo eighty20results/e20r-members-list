@@ -102,7 +102,7 @@ if ( ! class_exists( 'E20R\Utilities\ActivateUtilitiesPlugin' ) ) {
 				}
 
 				ob_start();
-				include plugin_dir_path( __DIR__ ) . "/{$plugin}";
+				include_once plugin_dir_path( __DIR__ ) . "/{$plugin}";
 				do_action( 'activate_plugin', trim( $plugin ) );
 
 				if ( $network_wide ) {
