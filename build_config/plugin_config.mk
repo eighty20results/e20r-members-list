@@ -1,10 +1,7 @@
 E20R_PLUGIN_NAME ?= default-plugin-name
 E20R_PLUGIN_BASE_FILE ?= class-e20r-members-list.php
-LOCAL_NETWORK_IF ?= en0
-
-ifeq ($(E20R_DEPLOYMENT_SERVER),"")
 E20R_DEPLOYMENT_SERVER ?= wordpress.org
-endif
+LOCAL_NETWORK_IF ?= en0
 
 ifneq ($(LOCAL_NETWORK_IF), "")
 LOCAL_NETWORK_STATUS ?= $(shell ifconfig $(LOCAL_NETWORK_IF) | awk '/status:/ { print $$2 }')

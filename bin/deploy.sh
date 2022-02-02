@@ -21,7 +21,7 @@ function to_woocommerce_store() {
 
 	# Should only be used when running as a GitHub action for a non-main branch
 	if [[ ! "${BRANCH_NAME}" =~ (release-([vV])?[0-9]+\.[0-9]+(\.[0-9]+)?|([vV])?[0-9]+\.[0-9]+(\.[0-9]+)?) ]]; then
-		echo "Creating mocked ssh, scp and svn commands, then we won't actually deploy anything from ${BRANCH_NAME}"
+		echo "Creating mocked ssh and scp commands, then we won't actually deploy anything from ${BRANCH_NAME}"
 
 		function ssh() {
 			echo ssh "$@"
@@ -29,10 +29,6 @@ function to_woocommerce_store() {
 
 		function scp() {
 			echo scp "$@"
-		}
-
-		function svn() {
-			echo svn "$@"
 		}
 	else
 		echo "Not sure what the BRANCH_NAME environment variable is..? '${BRANCH_NAME}'"
@@ -109,6 +105,19 @@ function to_woocommerce_store() {
 # so do not echo or use debug mode unless you want your secrets exposed!
 function to_wordpress_org() {
 
+	declare build_dir
+
+		# Should only be used when running as a GitHub action for a non-main branch
+	if [[ ! "${BRANCH_NAME}" =~ (release-([vV])?[0-9]+\.[0-9]+(\.[0-9]+)?|([vV])?[0-9]+\.[0-9]+(\.[0-9]+)?) ]]; then
+		echo "Creating mocked svn command, then we won't actually deploy anything from ${BRANCH_NAME}"
+
+		function svn() {
+			echo svn "$@"
+		}
+	else
+		echo "Not sure what the BRANCH_NAME environment variable is...? '${BRANCH_NAME}'"
+	fi
+
 	if [[ -z "${SVN_USERNAME}" ]]; then
 		echo "Set the SVN_USERNAME secret"
 		exit 1
@@ -116,11 +125,6 @@ function to_wordpress_org() {
 
 	if [[ -z "${SVN_PASSWORD}" ]]; then
 		echo "Set the SVN_PASSWORD secret"
-		exit 1
-	fi
-
-	if [[ -z "${BUILD_DIR}" ]]; then
-		echo "Set BUILD_DIR environment variable!"
 		exit 1
 	fi
 
@@ -217,9 +221,9 @@ function to_wordpress_org() {
 	fi
 
 	# Removal of unsupported/disallowed one-click update functionality
-	if [[ -f "${BUILD_DIR}/remove_update.sh" ]]; then
-		echo "➤ Trigger removal of custom one-click update functionality. In ${PWD}"
-		"${BUILD_DIR}/remove_update.sh"
+	if [[ -f "bin/remove_update.sh" ]]; then
+		echo "➤ Trigger removal of custom one-click update functionality."
+		bin/remove_update.sh
 	fi
 
 	# Copy dotorg assets to /assets

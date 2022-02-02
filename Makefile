@@ -614,7 +614,7 @@ deploy: prerequisite
 	  	exit 1; \
 	fi
 	@echo "Preparing to deploy the ${E20R_PLUGIN_NAME}-*.zip plugin archive to the Deployment Server"
-	@BUILD_DIR=$(BUILD_DIR) ./bin/deploy.sh "${E20R_PLUGIN_BASE_FILE}" "${E20R_DEPLOYMENT_SERVER}"
+	@./bin/deploy.sh "${E20R_PLUGIN_BASE_FILE}" "$(E20R_DEPLOYMENT_SERVER)"
 
 
 #new-release: test composer-prod
