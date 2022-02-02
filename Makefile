@@ -563,7 +563,7 @@ tests: prerequisite clean wp-deps code-standard-tests phpstan-tests unit-tests d
 # Generate a GIT commit log in build_readmes/current.txt
 #
 git-log: prerequisite
-	@./bin/create_log.sh
+	@MAIN_BRANCH_NAME=$(MAIN_BRANCH_NAME) ./bin/create_log.sh
 
 #
 # Generate (and update) the custom WP Plugin Updater metadata.json file
