@@ -15,15 +15,14 @@ jobs:
       matrix:
         php_version: [ '7.3', '7.4', '8.0' ]
     name: "Plugin tests - PHP"
+    runs-on: ubuntu-18.04
     env:
-      BRANCH_NAME: ${{ steps.branch-name.outputs.tag }}
       E20R_PLUGIN_NAME: e20r-members-list
       GITHUB_TOKEN: ${{ secrets.GITHUB }}
       DOCKER_USER: ${{ secrets.DOCKER_USER }}
       CONTAINER_ACCESS_TOKEN: ${{ secrets.CONTAINER_ACCESS_TOKEN }}
       SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
       SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
-    runs-on: ubuntu-18.04
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -91,16 +90,15 @@ jobs:
   # To create the plugin .zip archive
   build_plugin:
     name: Build plugin package to the plugin repository (Our License server or WordPress.org)
+    needs: [plugin_tests]
+    runs-on: ubuntu-latest
     env:
-      BRANCH_NAME: ${{ steps.branch-name.outputs.tag }}
       E20R_PLUGIN_NAME: e20r-members-list
       GITHUB_TOKEN: ${{ secrets.GITHUB }}
       DOCKER_USER: ${{ secrets.DOCKER_USER }}
       CONTAINER_ACCESS_TOKEN: ${{ secrets.CONTAINER_ACCESS_TOKEN }}
       SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
       SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
-    needs: [plugin_tests]
-    runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -183,6 +181,13 @@ jobs:
     name: Deploy plugin package to the plugin repository (Our License server or WordPress.org)
     needs: [plugin_tests, build_plugin]
     runs-on: ubuntu-18.04
+    env:
+      E20R_PLUGIN_NAME: e20r-members-list
+      GITHUB_TOKEN: ${{ secrets.GITHUB }}
+      DOCKER_USER: ${{ secrets.DOCKER_USER }}
+      CONTAINER_ACCESS_TOKEN: ${{ secrets.CONTAINER_ACCESS_TOKEN }}
+      SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+      SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -274,6 +279,8 @@ jobs:
         run: make deploy
         # The deployment target will depend on whether the
         # E20R_SSH_USER or SVN_USERNAME environment variable is defined
+        env:
+          BRANCH_NAME: ${{ steps.branch-name.outputs.tag }}
 #         env:
 #           BRANCH_NAME: ${{ steps.branch-name.outputs.tag }}
 #           E20R_PLUGIN_NAME: e20r-members-list
@@ -290,3 +297,5 @@ jobs:
         run: make deploy
         # The deployment target will depend on whether the
         # E20R_SSH_USER or SVN_USERNAME environment variable is defined
+        env:
+          BRANCH_NAME: ${{ steps.branch-name.outputs.tag }}
