@@ -15,6 +15,7 @@ UNZIP := $(shell which unzip)
 PHP_BIN := $(shell which php)
 DC_BIN := $(shell which docker-compose)
 SQL_BACKUP_FILE ?= tests/_data
+BUILD_DIR ?= build_env
 MYSQL_DATABASE ?= wordpress
 MYSQL_USER ?= wordpress
 MYSQL_PASSWORD ?= wordpress
