@@ -105,8 +105,6 @@ function to_woocommerce_store() {
 # so do not echo or use debug mode unless you want your secrets exposed!
 function to_wordpress_org() {
 
-	declare build_dir
-
 		# Should only be used when running as a GitHub action for a non-main branch
 	if [[ ! "${BRANCH_NAME}" =~ (release-([vV])?[0-9]+\.[0-9]+(\.[0-9]+)?|([vV])?[0-9]+\.[0-9]+(\.[0-9]+)?) ]]; then
 		echo "Creating mocked svn command, then we won't actually deploy anything from ${BRANCH_NAME}"
@@ -221,26 +219,21 @@ function to_wordpress_org() {
 	fi
 
 	# Removal of unsupported/disallowed one-click update functionality
-	if [[ -f "bin/remove_update.sh" ]]; then
+	if [[ -f bin/remove_update.sh ]]; then
 		echo "➤ Trigger removal of custom one-click update functionality."
 		bin/remove_update.sh
 	fi
 
 	# Copy dotorg assets to /assets
-	if [[ -d "${GITHUB_WORKSPACE}/$ASSETS_DIR/" ]]; then
-		rsync -rc "${GITHUB_WORKSPACE}/$ASSETS_DIR/" assets/ --delete
+	if [[ -d "${GITHUB_WORKSPACE}/${ASSETS_DIR}/" ]]; then
+		rsync -rc "${GITHUB_WORKSPACE}/${ASSETS_DIR}/" assets/ --delete
 	else
 		echo "ℹ︎ No assets directory found; skipping asset copy"
 	fi
 
-	if [[ -f "${SVN_DIR}/src/utilities/class.utilities.php" ]]; then
-		echo "ℹ︎ Refreshing the Utilities module from ${SVN_DIR}/class/utilities:"
-		cp -R "${SVN_DIR}/src/utilities/*" "trunk/src/utilities/"
-	fi
-
 	# Should be excluded from the Wordpress.org repo
 	if [ -z "${excluded_for_svn}" ]; then
-		echo "ℹ︎ Don't believe there's nothing Git related that should be excluded from the SVN repository!"
+		echo "ℹ︎ Don't believe we have nothing Git related to exclude from the SVN repository!"
 		exit 1
 	fi
 
@@ -269,7 +262,7 @@ function to_wordpress_org() {
 
 	echo "➤ Testing that we need to push to Wordpress.org"
 
-	if [[ -n "${BRANCH_NAME}" && "${BRANCH_NAME}" =~ ^v[0-9]+\..*[0-9]$ ]]; then
+	if [[ -n "${BRANCH_NAME}" && "${BRANCH_NAME}" =~ (release-([vV])?[0-9]+\.[0-9]+(\.[0-9]+)?|([vV])?[0-9]+\.[0-9]+(\.[0-9]+)?) ]]; then
 		echo "➤ In main branch so committing files to Wordpress.org SVN repository..."
 		svn commit -m "Update to version ${VERSION} from GitHub" \
 		--no-auth-cache \
