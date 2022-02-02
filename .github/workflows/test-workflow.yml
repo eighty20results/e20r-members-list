@@ -1,14 +1,10 @@
-name: Test of "Release to Eighty20Results.com" workflows
+name: Release (and deploy)
 
-# This is used to test changes to the test/build/deploy workflow for the plugin so only applies if the
-# branch is named test_workflow<something>
+# Deploy when a new release is created in the Main branch
 on:
-  push:
-    branches:
-      - 'test_workflow*'
-      - '!main'   # excludes main (default) branch
-    tags:
-      - 'test_workflow*'
+  release:
+    # Only deploy when the admin publishes/pre-releases from GitHub
+    types: [published]
 
 jobs:
   plugin_tests:
@@ -22,6 +18,12 @@ jobs:
         uses: actions/checkout@v2
         with:
           repository: eighty20results/e20r-members-list
+          ref: main
+
+      # Extract the branch name for all events except for pull requests
+      - name: Extract branch or tag name
+        id: branch-name
+        uses: tj-actions/branch-names@v5.1
 
       - name: Setup PHP with Composer V2+
         uses: shivammathur/setup-php@v2
@@ -85,7 +87,7 @@ jobs:
         uses: actions/checkout@v2
         with:
           repository: eighty20results/e20r-members-list
-          # ref: main
+          ref: main
 
       - name: Install SSH Key
         uses: shimataro/ssh-key-action@v2
@@ -165,7 +167,7 @@ jobs:
         uses: actions/checkout@v2
         with:
           repository: eighty20results/e20r-members-list
-          # ref: main
+          ref: main
 
       - name: Install SSH Key
         uses: shimataro/ssh-key-action@v2
@@ -229,26 +231,28 @@ jobs:
           path: build/kits/**.zip
 
       # Extract the branch name for all events except for pull requests
-      - name: Extract branch or tag name
+      - name: Decide whether to run deploy action
         id: branch-name
         uses: tj-actions/branch-names@v5.1
 
-      - name: Show me the branch info (tag should be blank)
+      - name: Show me the branch
         shell: bash
         run: |
           echo "Reference branch is: ${{ steps.branch-name.outputs.ref_branch }}"
           echo "Current branch is: ${{ steps.branch-name.outputs.current_branch }}"
           echo "Tag is: ${{ steps.branch-name.outputs.tag }}"
-          echo "Tag status is: ${{ steps.branch-name.outputs.is_tag }}"
+          echo "Tag state is: '${{ steps.branch-name.outputs.is_tag }}'"
 
-      # And then deploy the package if it exists _and_ we're on the main branch
+      # And then deploy the package if it exists _and_ we're on the main branch with a release tag
 
       - name: Deploy plugin when building a release (to WooCommerce Store or Wordpress.org repo)
-        if: contains(steps.branch-name.outputs.current_branch, 'test_workflow_')
+        if: steps.branch-name.outputs.is_tag && startsWith(steps.branch-name.outputs.tag, 'release-') && startsWith( '${{ secrets.E20R_SSH_SERVER }}', 'eighty20results.com')
         shell: bash
         run: make deploy
+        # The deployment target will depend on whether the
+        # E20R_SSH_USER or SVN_USERNAME environment variable is defined
         env:
-          BRANCH_NAME: ${{ steps.branch-name.outputs.current_branch }}
+          BRANCH_NAME: ${{ steps.branch-name.outputs.tag }}
           E20R_PLUGIN_NAME: e20r-members-list
           GITHUB_TOKEN: ${{ secrets.GITHUB }}
           DOCKER_USER: ${{ secrets.DOCKER_USER }}
@@ -256,3 +260,18 @@ jobs:
           E20R_SSH_SERVER: ${{ secrets.SSH_HOST }}
           E20R_SSH_USER: ${{ secrets.SSH_USER }}
           E20R_SSH_PORT: ${{ secrets.SSH_PORT }}
+
+      - name: Deploy plugin when building a release (Wordpress.org repo)
+        if: steps.branch-name.outputs.is_tag && startsWith(steps.branch-name.outputs.tag, 'release-') && startsWith('${{ secrets.SVN_USERNAME }}', 'eighty20results')
+        shell: bash
+        run: make deploy
+        # The deployment target will depend on whether the
+        # E20R_SSH_USER or SVN_USERNAME environment variable is defined
+        env:
+          BRANCH_NAME: ${{ steps.branch-name.outputs.tag }}
+          E20R_PLUGIN_NAME: e20r-members-list
+          GITHUB_TOKEN: ${{ secrets.GITHUB }}
+          DOCKER_USER: ${{ secrets.DOCKER_USER }}
+          CONTAINER_ACCESS_TOKEN: ${{ secrets.CONTAINER_ACCESS_TOKEN }}
+          SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+          SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
