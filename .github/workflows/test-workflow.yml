@@ -15,6 +15,14 @@ jobs:
       matrix:
         php_version: [ '7.3', '7.4', '8.0' ]
     name: "Plugin tests - PHP"
+    env:
+      BRANCH_NAME: ${{ steps.branch-name.outputs.tag }}
+      E20R_PLUGIN_NAME: e20r-members-list
+      GITHUB_TOKEN: ${{ secrets.GITHUB }}
+      DOCKER_USER: ${{ secrets.DOCKER_USER }}
+      CONTAINER_ACCESS_TOKEN: ${{ secrets.CONTAINER_ACCESS_TOKEN }}
+      SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+      SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
     runs-on: ubuntu-18.04
     steps:
       - name: Checkout repository
@@ -54,35 +62,43 @@ jobs:
         shell: bash
         if: steps.restore-cache.outputs.cache-hit != 'true'
         run: make composer-dev
-        env:
-          E20R_PLUGIN_NAME: e20r-members-list
+#         env:
+#           E20R_PLUGIN_NAME: e20r-members-list
 
       - name: Install all needed WordPress plugin dependencies
         shell: bash
         if: steps.composer-cache.outputs.cache-hit != 'true'
         run: make wp-deps
-        env:
-          E20R_PLUGIN_NAME: e20r-members-list
+#         env:
+#           E20R_PLUGIN_NAME: e20r-members-list
 
       - name: Install all needed dependencies for Docker
         shell: bash
         if: steps.composer-cache.outputs.cache-hit != 'true'
         run: make docker-deps
-        env:
-          E20R_PLUGIN_NAME: e20r-members-list
+#         env:
+#           E20R_PLUGIN_NAME: e20r-members-list
 
       - name: Run all Standard Tests
         shell: bash
         run: make tests
-        env:
-          E20R_PLUGIN_NAME: e20r-members-list
-          GITHUB_TOKEN: ${{ secrets.GITHUB }}
-          DOCKER_USER: ${{ secrets.DOCKER_USER }}
-          CONTAINER_ACCESS_TOKEN: ${{ secrets.CONTAINER_ACCESS_TOKEN }}
+#         env:
+#           E20R_PLUGIN_NAME: e20r-members-list
+#           GITHUB_TOKEN: ${{ secrets.GITHUB }}
+#           DOCKER_USER: ${{ secrets.DOCKER_USER }}
+#           CONTAINER_ACCESS_TOKEN: ${{ secrets.CONTAINER_ACCESS_TOKEN }}
 
   # To create the plugin .zip archive
   build_plugin:
     name: Build plugin package to the plugin repository (Our License server or WordPress.org)
+    env:
+      BRANCH_NAME: ${{ steps.branch-name.outputs.tag }}
+      E20R_PLUGIN_NAME: e20r-members-list
+      GITHUB_TOKEN: ${{ secrets.GITHUB }}
+      DOCKER_USER: ${{ secrets.DOCKER_USER }}
+      CONTAINER_ACCESS_TOKEN: ${{ secrets.CONTAINER_ACCESS_TOKEN }}
+      SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+      SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
     needs: [plugin_tests]
     runs-on: ubuntu-latest
     steps:
@@ -93,14 +109,14 @@ jobs:
           ref: main
 
       - name: Install SSH Key
-        if: startsWith( '${{ secrets.E20R_SSH_SERVER }}', 'eighty20results.com')
+        if: ${{ env.E20R_SSH_SERVER }} === 'eighty20results.com'
         uses: shimataro/ssh-key-action@v2
         with:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           known_hosts: 'just-a-placeholder-so-we-dont-get-errors'
 
       - name: Adding deployment target to known_hosts file
-        if: startsWith( '${{ secrets.E20R_SSH_SERVER }}', 'eighty20results.com')
+        if: ${{ env.E20R_SSH_SERVER }} == 'eighty20results.com'
         run: ssh-keyscan -H -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
 
       - name: "Setup PHP with Composer V2+"
@@ -129,22 +145,22 @@ jobs:
         shell: bash
         if: steps.composer-cache.outputs.cache-hit != 'true'
         run: make composer-dev
-        env:
-          E20R_PLUGIN_NAME: e20r-members-list
+#         env:
+#           E20R_PLUGIN_NAME: e20r-members-list
 
       - name: Install all needed WordPress plugin dependencies
         shell: bash
         if: steps.composer-cache.outputs.cache-hit != 'true'
         run: make wp-deps
-        env:
-          E20R_PLUGIN_NAME: e20r-members-list
+#         env:
+#           E20R_PLUGIN_NAME: e20r-members-list
 
       - name: Install all needed dependencies for Docker
         shell: bash
         if: steps.composer-cache.outputs.cache-hit != 'true'
         run: make docker-deps
-        env:
-          E20R_PLUGIN_NAME: e20r-members-list
+#         env:
+#           E20R_PLUGIN_NAME: e20r-members-list
 
       - name: Cache the built plugin package
         uses: actions/cache@v2
@@ -157,10 +173,10 @@ jobs:
       - name: Build and test plugin before deployment
         shell: bash
         run: make build
-        env:
-          E20R_PLUGIN_NAME: e20r-members-list
-          GITHUB_TOKEN: ${{ secrets.GITHUB }}
-          CONTAINER_ACCESS_TOKEN: ${{ secrets.CONTAINER_ACCESS_TOKEN }}
+#         env:
+#           E20R_PLUGIN_NAME: e20r-members-list
+#           GITHUB_TOKEN: ${{ secrets.GITHUB }}
+#           CONTAINER_ACCESS_TOKEN: ${{ secrets.CONTAINER_ACCESS_TOKEN }}
 
   # To push the release to the plugin store
   release:
@@ -212,22 +228,22 @@ jobs:
         if: steps.composer-cache-prod.outputs.cache-hit != 'true'
         shell: bash
         run: make composer-dev
-        env:
-          E20R_PLUGIN_NAME: e20r-members-list
+#         env:
+#           E20R_PLUGIN_NAME: e20r-members-list
 
       - name: Install all needed WordPress plugin dependencies
         if: steps.composer-cache-prod.outputs.cache-hit != 'true'
         shell: bash
         run: make wp-deps
-        env:
-          E20R_PLUGIN_NAME: e20r-members-list
+#         env:
+#           E20R_PLUGIN_NAME: e20r-members-list
 
       - name: Install all needed dependencies for Docker
         if: steps.composer-cache-prod.outputs.cache-hit != 'true'
         shell: bash
         run: make docker-deps
-        env:
-          E20R_PLUGIN_NAME: e20r-members-list
+#         env:
+#           E20R_PLUGIN_NAME: e20r-members-list
 
       - name: Restore the built plugin package
         id: plugin-package-cache
@@ -253,32 +269,24 @@ jobs:
       # And then deploy the package if it exists _and_ we're on the main branch with a release tag
 
       - name: Deploy plugin when building a release (to WooCommerce Store or Wordpress.org repo)
-        if: steps.branch-name.outputs.is_tag && startsWith(steps.branch-name.outputs.tag, 'release-') && startsWith( '${{ secrets.E20R_SSH_SERVER }}', 'eighty20results.com')
+        if: steps.branch-name.outputs.is_tag && startsWith(steps.branch-name.outputs.tag, 'release-') && ${{env.E20R_SSH_SERVER}} == 'eighty20results.com'
         shell: bash
         run: make deploy
         # The deployment target will depend on whether the
         # E20R_SSH_USER or SVN_USERNAME environment variable is defined
-        env:
-          BRANCH_NAME: ${{ steps.branch-name.outputs.tag }}
-          E20R_PLUGIN_NAME: e20r-members-list
-          GITHUB_TOKEN: ${{ secrets.GITHUB }}
-          DOCKER_USER: ${{ secrets.DOCKER_USER }}
-          CONTAINER_ACCESS_TOKEN: ${{ secrets.CONTAINER_ACCESS_TOKEN }}
-          E20R_SSH_SERVER: ${{ secrets.SSH_HOST }}
-          E20R_SSH_USER: ${{ secrets.SSH_USER }}
-          E20R_SSH_PORT: ${{ secrets.SSH_PORT }}
+#         env:
+#           BRANCH_NAME: ${{ steps.branch-name.outputs.tag }}
+#           E20R_PLUGIN_NAME: e20r-members-list
+#           GITHUB_TOKEN: ${{ secrets.GITHUB }}
+#           DOCKER_USER: ${{ secrets.DOCKER_USER }}
+#           CONTAINER_ACCESS_TOKEN: ${{ secrets.CONTAINER_ACCESS_TOKEN }}
+#           E20R_SSH_SERVER: ${{ secrets.SSH_HOST }}
+#           E20R_SSH_USER: ${{ secrets.SSH_USER }}
+#           E20R_SSH_PORT: ${{ secrets.SSH_PORT }}
 
       - name: Deploy plugin when building a release (Wordpress.org repo)
-        if: steps.branch-name.outputs.is_tag && startsWith(steps.branch-name.outputs.tag, 'release-') && startsWith('${{ secrets.SVN_USERNAME }}', 'eighty20results')
+        if: steps.branch-name.outputs.is_tag && startsWith(steps.branch-name.outputs.tag, 'release-') && ${{ secrets.SVN_USERNAME }} == 'eighty20results'
         shell: bash
         run: make deploy
         # The deployment target will depend on whether the
         # E20R_SSH_USER or SVN_USERNAME environment variable is defined
-        env:
-          BRANCH_NAME: ${{ steps.branch-name.outputs.tag }}
-          E20R_PLUGIN_NAME: e20r-members-list
-          GITHUB_TOKEN: ${{ secrets.GITHUB }}
-          DOCKER_USER: ${{ secrets.DOCKER_USER }}
-          CONTAINER_ACCESS_TOKEN: ${{ secrets.CONTAINER_ACCESS_TOKEN }}
-          SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
-          SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
