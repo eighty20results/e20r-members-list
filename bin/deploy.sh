@@ -21,7 +21,7 @@ function to_woocommerce_store() {
 
 	# Should only be used when running as a GitHub action for a non-main branch
 	if [[ ! "${BRANCH_NAME}" =~ (release-([vV])?[0-9]+\.[0-9]+(\.[0-9]+)?|([vV])?[0-9]+\.[0-9]+(\.[0-9]+)?) ]]; then
-		echo "Creating mocked ssh and scp command, then we won't actually deploy anything from ${BRANCH_NAME}"
+		echo "Creating mocked ssh, scp and svn commands, then we won't actually deploy anything from ${BRANCH_NAME}"
 
 		function ssh() {
 			echo ssh "$@"
@@ -29,6 +29,10 @@ function to_woocommerce_store() {
 
 		function scp() {
 			echo scp "$@"
+		}
+
+		function svn() {
+			echo svn "$@"
 		}
 	else
 		echo "Not sure what the BRANCH_NAME environment variable is..? '${BRANCH_NAME}'"
