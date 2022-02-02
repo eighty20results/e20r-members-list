@@ -2,9 +2,12 @@ name: Release (and deploy)
 
 # Deploy when a new release is created in the Main branch
 on:
-  release:
-    # Only deploy when the admin publishes/pre-releases from GitHub
-    types: [published]
+  push:
+    branches:
+      - 'test_workflow*'
+      - '!main'   # excludes main (default) branch
+    tags:
+      - 'test_workflow*'
 
 jobs:
   plugin_tests:
