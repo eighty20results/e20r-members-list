@@ -1,17 +1,17 @@
 {
-  "name": "E20R Enhanced Members List Paid Memberships Pro",
+  "name": "Better Members List for Paid Memberships Pro",
   "slug": "e20r-members-list",
-  "download_url": "https://eighty20results.com/protected-content/e20r-members-list/e20r-members-list-8.4.zip",
-  "version": "8.4",
-  "tested": "5.7",
-  "requires": "4.8",
+  "download_url": "https:///protected-content/e20r-members-list/e20r-members-list-8.5.zip",
+  "version": "8.5",
+  "tested": "5.9",
+  "requires": "5.0",
   "author": "Thomas Sjolshagen <thomas@eighty20results.com>",
   "author_homepage": "https://eighty20results.com/thomas-sjolshagen",
-  "last_updated": "2021-03-21 17:42:00 CET",
-  "homepage": "https://eighty20results.com/wordpress-plugins/paid-memberships-pro/e20r-members-list/",
+  "last_updated": "2022-02-02 13:50:52 CET",
+  "homepage": "https:///plugins/e20r-members-list/",
   "sections": {
-    "description": "Extensible, sortable & bulk action capable members listing tool for Paid Memberships Pro, fully compatible with the existing filters and hooks for the PMPro Members List functionality. Will also export members to CSV.",
-    "changelog": "See the linked <a href=\"CHANGELOG.md\" target=\"_blank\">Change Log</a> for details",
-	"faq": "<h3>I found a bug in the plugin.</h3><p>Please report your issue to us by using the <a href='https://github.com/eighty20results/e20r-members-list/issues' target='_blank'>Github Issues page</a>, and we'll try to respond within 1 business day.</p>"
+    "description": "Extensible, sortable & bulk action capable members listing + export to CSV tool for Paid Memberships Pro.",
+    "changelog": "See the linked <a href='CHANGELOG.md' target='_blank'>Change Log</a> for details",
+    "faq": "<h3>I found a bug in the plugin.</h3><p>Please report your issue to us by using the <a href='https://github.com/eighty20results/e20r-members-list//issues' target='_blank'>Github Issues page</a>, and we'll try to respond within 1 business day.</p>"
     }
 }

@@ -4,7 +4,7 @@ services:
   mariadb:
     image: wodby/mariadb:$MARIADB_TAG
     volumes:
-      - /Volumes/Development/www/docker-images/docker4wordpress/mariadb-init:/docker-entrypoint-initdb.d:cached # Place init .sql file(s) here.
+      - ./mariadb-init:/docker-entrypoint-initdb.d:cached # Place init .sql file(s) here.
 
   nginx:
     volumes:
@@ -12,7 +12,17 @@ services:
       - ./:/var/www/html:cached
       - /Volumes/Development/www/clean.local/wp-content/themes/e20r-coaching:/var/www/html/wp-content/themes/e20r-coaching:cached
       - /Volumes/Development/www/clean.local/wp-content/plugins/paid-memberships-pro:/var/www/html/wp-content/plugins/paid-memberships-pro:cached
+      - /Volumes/Development/www/clean.local/wp-content/plugins/00-e20r-utilities:/var/www/html/wp-content/plugins/00-e20r-utilities:cached
+      - /Volumes/Development/www/clean.local/wp-content/plugins/00-e20r-utilities/inc/10quality:/var/www/html/wp-content/plugins/00-e20r-utilities/inc/10quality:cached
+      - /Volumes/Development/www/clean.local/wp-content/plugins/00-e20r-utilities/inc/composer:/var/www/html/wp-content/plugins/00-e20r-utilities/inc/composer:cached
+      - /Volumes/Development/www/clean.local/wp-content/plugins/00-e20r-utilities/inc/mixpanel:/var/www/html/wp-content/plugins/00-e20r-utilities/inc/mixpanel:cached
+      - /Volumes/Development/www/clean.local/wp-content/plugins/00-e20r-utilities/inc/autoload.php:/var/www/html/wp-content/plugins/00-e20r-utilities/inc/autoload.php:cached
       - /Volumes/Development/www/clean.local/wp-content/plugins/e20r-members-list:/var/www/html/wp-content/plugins/e20r-members-list:cached
+      - /Volumes/Development/www/clean.local/wp-content/plugins/e20r-members-list/inc/10quality:/var/www/html/wp-content/plugins/e20r-members-list/inc/10quality:cached
+      - /Volumes/Development/www/clean.local/wp-content/plugins/e20r-members-list/inc/composer:/var/www/html/wp-content/plugins/e20r-members-list/inc/composer:cached
+      - /Volumes/Development/www/clean.local/wp-content/plugins/e20r-members-list/inc/mixpanel:/var/www/html/wp-content/plugins/e20r-members-list/inc/mixpanel:cached
+      - /Volumes/Development/www/clean.local/wp-content/plugins/e20r-members-list/inc/autoload.php:/var/www/html/wp-content/plugins/e20r-members-list/inc/autoload.php:cached
+
     ports:
       - target: 80 # Web server
         published: 80
@@ -45,7 +55,16 @@ services:
       - ./:/var/www/html:cached
       - /Volumes/Development/www/clean.local/wp-content/themes/e20r-coaching:/var/www/html/wp-content/themes/e20r-coaching:cached
       - /Volumes/Development/www/clean.local/wp-content/plugins/paid-memberships-pro:/var/www/html/wp-content/plugins/paid-memberships-pro:cached
+      - /Volumes/Development/www/clean.local/wp-content/plugins/00-e20r-utilities:/var/www/html/wp-content/plugins/00-e20r-utilities:cached
+      - /Volumes/Development/www/clean.local/wp-content/plugins/00-e20r-utilities/inc/10quality:/var/www/html/wp-content/plugins/00-e20r-utilities/inc/10quality:cached
+      - /Volumes/Development/www/clean.local/wp-content/plugins/00-e20r-utilities/inc/composer:/var/www/html/wp-content/plugins/00-e20r-utilities/inc/composer:cached
+      - /Volumes/Development/www/clean.local/wp-content/plugins/00-e20r-utilities/inc/mixpanel:/var/www/html/wp-content/plugins/00-e20r-utilities/inc/mixpanel:cached
+      - /Volumes/Development/www/clean.local/wp-content/plugins/00-e20r-utilities/inc/autoload.php:/var/www/html/wp-content/plugins/00-e20r-utilities/inc/autoload.php:cached
       - /Volumes/Development/www/clean.local/wp-content/plugins/e20r-members-list:/var/www/html/wp-content/plugins/e20r-members-list:cached
+      - /Volumes/Development/www/clean.local/wp-content/plugins/e20r-members-list/inc/10quality:/var/www/html/wp-content/plugins/e20r-members-list/inc/10quality:cached
+      - /Volumes/Development/www/clean.local/wp-content/plugins/e20r-members-list/inc/composer:/var/www/html/wp-content/plugins/e20r-members-list/inc/composer:cached
+      - /Volumes/Development/www/clean.local/wp-content/plugins/e20r-members-list/inc/mixpanel:/var/www/html/wp-content/plugins/e20r-members-list/inc/mixpanel:cached
+      - /Volumes/Development/www/clean.local/wp-content/plugins/e20r-members-list/inc/autoload.php:/var/www/html/wp-content/plugins/e20r-members-list/inc/autoload.php:cached
     labels:
       - "traefik.enable=true"
       - "traefik.frontend.rule=Host:development.local"

@@ -1,0 +1,12 @@
+actor: ApiTester
+modules:
+    enabled:
+        - PhpBrowser:
+            url: 'https://eighty20results.com/'
+            curl:
+              CURLOPT_RETURNTRANSFER: true
+        - REST:
+            url: 'https://eighty20results.com/'
+            depends: phpBrowser
+            part: Json
+        - \Helper\Api

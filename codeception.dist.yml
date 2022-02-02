@@ -2,9 +2,10 @@ paths:
     tests: tests
     output: tests/_output
     data: tests/_data
+    helpers: tests/_support
     support: tests/_support
     envs: tests/_envs
-actor_suffix: Tester
+actor: Tester
 extensions:
     enabled:
         - Codeception\Extension\RunFailed
@@ -17,17 +18,26 @@ extensions:
         - Codeception\Command\GenerateWPCanonical
         - Codeception\Command\GenerateWPXMLRPC
 params:
-    - tests/_envs/.env.utilities
+    - ./tests/_envs/.env.testing
+bootstrap: _bootstrap.php
 settings:
   lint: true
   colors: true
+  memory_limit: 1024M
 coverage:
   enabled: true
+  colors: true
+  remote_context_options:
+    http:
+      timeout: 60
+    ssl:
+      verify_peer: false
+  low_limit: 16
   include:
-    - src/members-list/*
+    - ./inc/wp_plugins/00-e20r-utilities/*
+    - ./src/E20R/members-list/*
     - ./class-e20r-members-list.php
   exclude:
-    - src/utilities/*
     - inc/*
     - languages/*
     - tests/*

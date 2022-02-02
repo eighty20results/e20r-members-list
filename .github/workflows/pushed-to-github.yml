@@ -1,0 +1,95 @@
+name: Automated Tests
+
+# Run Unit Test and POT files when new PR is created
+on:
+  push:
+    branch:
+      - '*'         # matches every branch that doesn't contain a '/'
+      - '*/*'       # matches every branch containing a single '/'
+      - '**'        # matches every branch
+      - '!main'   # excludes master
+
+jobs:
+  pr_tests:
+    strategy:
+      matrix:
+        php_version: [ '7.3', '7.4', '8.0' ]
+    name: "Plugin tests - PHP"
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          repository: eighty20results/e20r-members-list
+
+      - name: Setup PHP with Composer V2+
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php_version }}
+          extensions: mbstring, xdebug
+          tools: composer:v2
+          coverage: pcov
+
+      - name: Login to Docker HUB
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USER }}
+          password: ${{ secrets.CONTAINER_ACCESS_TOKEN }}
+
+      - name: Load cached Composer and test related dependencies
+        uses: actions/cache@v2
+        id: composer-cache
+        with:
+          key: ${{ runner.os }}-composer-cache-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-cache
+          path: inc/**
+        env:
+          E20R_PLUGIN_NAME: e20r-members-list
+
+      - name: Install all needed dependencies for Composer
+        shell: bash
+        if: steps.restore-cache.outputs.cache-hit != 'true'
+        run: make composer-dev
+        env:
+          E20R_PLUGIN_NAME: e20r-members-list
+
+      - name: Install all needed WordPress plugin dependencies
+        shell: bash
+        if: steps.composer-cache.outputs.cache-hit != 'true'
+        run: make wp-deps
+        env:
+          E20R_PLUGIN_NAME: e20r-members-list
+
+      - name: Install all needed dependencies for Docker
+        shell: bash
+        if: steps.composer-cache.outputs.cache-hit != 'true'
+        run: make docker-deps
+        env:
+          E20R_PLUGIN_NAME: e20r-members-list
+
+      - name: Run WordPress Code Standard Tests
+        shell: bash
+        run: make code-standard-tests
+        env:
+          E20R_PLUGIN_NAME: e20r-members-list
+          GITHUB_TOKEN: ${{ secrets.GITHUB }}
+          DOCKER_USER: ${{ secrets.DOCKER_USER }}
+          CONTAINER_ACCESS_TOKEN: ${{ secrets.CONTAINER_ACCESS_TOKEN }}
+
+      - name: Run PHP Static Code Analysis Tests
+        shell: bash
+        run: make phpstan-tests
+        env:
+          E20R_PLUGIN_NAME: e20r-members-list
+          GITHUB_TOKEN: ${{ secrets.GITHUB }}
+          DOCKER_USER: ${{ secrets.DOCKER_USER }}
+          CONTAINER_ACCESS_TOKEN: ${{ secrets.CONTAINER_ACCESS_TOKEN }}
+
+      - name: Run Unit Tests with Code Coverage check
+        shell: bash
+        run: make coverage
+        env:
+          E20R_PLUGIN_NAME: e20r-members-list
+          GITHUB_TOKEN: ${{ secrets.GITHUB }}
+          DOCKER_USER: ${{ secrets.DOCKER_USER }}
+          CONTAINER_ACCESS_TOKEN: ${{ secrets.CONTAINER_ACCESS_TOKEN }}

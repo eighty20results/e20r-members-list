@@ -1,0 +1,94 @@
+name: Build I18N files for repository
+
+# This is used to test changes to the test/build/deploy workflow for the plugin so only applies if the
+# branch is named test_workflow<something>
+on:
+  push:
+    branches:
+     - refs/heads/*
+     - !main
+     - !master
+
+jobs:
+  plugin_tests:
+    strategy:
+      matrix:
+        php_version: [ '7.3', '7.4', '8.0' ]
+    name: "Plugin tests - PHP"
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          repository: eighty20results/e20r-members-list
+
+      - name: Setup PHP with Composer V2+
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php_version }}
+          extensions: mbstring, xdebug
+          tools: composer:v2
+          coverage: pcov
+
+      - name: Login to Docker HUB
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USER }}
+          password: ${{ secrets.CONTAINER_ACCESS_TOKEN }}
+
+      - name: Load cached Composer and test related dependencies
+        uses: actions/cache@v2
+        id: composer-cache
+        with:
+          key: ${{ runner.os }}-composer-cache-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-cache
+          path: inc/**
+
+      - name: Install all needed dependencies for Composer
+        shell: bash
+        if: steps.restore-cache.outputs.cache-hit != 'true'
+        run: make composer-dev
+        env:
+          E20R_PLUGIN_NAME: e20r-members-list
+
+      - name: Install all needed WordPress plugin dependencies
+        shell: bash
+        if: steps.composer-cache.outputs.cache-hit != 'true'
+        run: make wp-deps
+        env:
+          E20R_PLUGIN_NAME: e20r-members-list
+
+      - name: Install all needed dependencies for Docker
+        shell: bash
+        if: steps.composer-cache.outputs.cache-hit != 'true'
+        run: make docker-deps
+        env:
+          E20R_PLUGIN_NAME: e20r-members-list
+
+      - name: Run all Standard Tests
+        shell: bash
+        run: make tests
+        env:
+          E20R_PLUGIN_NAME: e20r-members-list
+          GITHUB_TOKEN: ${{ secrets.GITHUB }}
+          DOCKER_USER: ${{ secrets.DOCKER_USER }}
+          CONTAINER_ACCESS_TOKEN: ${{ secrets.CONTAINER_ACCESS_TOKEN }}
+
+  build_i18n:
+    name: Build the I18N translation files
+    needs: plugin_tests
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          repository: eighty20results/e20r-members-list
+
+      - name: WordPress .pot File Generator for e20r-members-list
+        uses: iamdharmesh/action-wordpress-pot-generator@main
+        with:
+          destination_path: './languages'
+          slug: 'e20r-members-list'
+          text_domain: 'e20r-members-list'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

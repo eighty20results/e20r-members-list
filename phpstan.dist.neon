@@ -1,18 +1,31 @@
 parameters:
     level: 5
+    treatPhpDocTypesAsCertain: false
+    dynamicConstantNames:
+    	- E20R_LICENSING_VERSION
+    	- E20R_LICENSE_SERVER_URL
+    	- E20R_LICENSING_DEBUG
+    	- E20R_MISSING_SETTING
+    	- E20R_ML_BASE_DIR
+    	- WP_PLUGIN_DIR
+    	- WP_LANG_DIR
+    parallel:
+    	maximumNumberOfProcesses: 2
+    ignoreErrors:
+        # Uses func_get_args()
+        - '#^Function apply_filters(_ref_array)? invoked with [34567] parameters, 2 required\.$#'
+        - '#^Constant WP_LANG_DIR not found\.$#'
+        - '#^Cannot access property \$pmpro_b.* on WP_User\|false\.#'
+        - '#^Parameter \#1 \$page_name of function pmpro_loadTemplate expects null, string given\.#'
+        # - '#^Access to an undefined property object::\$cycle_period\.$#'
+        # - '#^Constant WP_PLUGIN_DIR not found\.$#'
+    scanDirectories:
+        - inc/
     paths:
         - class-e20r-members-list.php
-        - src/members-list
-        - tests/wpunit
-        - tests/unit
-        - tests/functional
-        - tests/acceptance
+        - src/
     bootstrapFiles:
-    	- tests/bootstrap.php
     	- class-e20r-members-list.php
     excludePaths:
-        - inc/
-        - tests/*/data/*
-        - tests/_*/
-        - tests/docker*
-        - tests/test_env*
+        - tests/
+        - *.js

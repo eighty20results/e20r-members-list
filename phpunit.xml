@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~  Copyright (c) 2021. - Eighty / 20 Results by Wicked Strong Chicks.
+  ~  Copyright (c) 2021 - 2022. - Eighty / 20 Results by Wicked Strong Chicks.
   ~  ALL RIGHTS RESERVED
   ~
   ~  This program is free software: you can redistribute it and/or modify
@@ -18,11 +18,30 @@
   ~
   ~  You can contact us at mailto:info@eighty20results.com
   -->
-
-<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/7.2/phpunit.xsd" bootstrap="tests/phpunit/bootstrap.php" backupGlobals="true" colors="true" convertErrorsToExceptions="true" convertNoticesToExceptions="true" convertWarningsToExceptions="true" verbose="true" printerClass="PHPUnit\TextUI\ResultPrinter" >
+<phpunit
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/6.3/phpunit.xsd"
+		backupGlobals="true"
+		backupStaticAttributes="false"
+		bootstrap="tests/_bootstrap.php"
+		colors="false"
+		convertErrorsToExceptions="true"
+		convertNoticesToExceptions="true"
+		convertWarningsToExceptions="true"
+		forceCoversAnnotation="false"
+		processIsolation="false"
+		stopOnError="false"
+		stopOnFailure="false"
+		stopOnIncomplete="false"
+		stopOnSkipped="false"
+		stopOnRisky="false"
+		timeoutForSmallTests="1"
+		timeoutForMediumTests="10"
+		timeoutForLargeTests="60"
+		verbose="false">
 	<testsuites>
-		<testsuite name="E20R Better Members List for PMPro Test Suite">
-			<directory suffix="Test.php">./tests/wpunit/testcases/</directory>
+		<testsuite name="E20R WordPress Plugin Unit Test Suite">
+			<directory suffix="Test.php">./tests/units/testcases/</directory>
 		</testsuite>
 	</testsuites>
 	<filter>
