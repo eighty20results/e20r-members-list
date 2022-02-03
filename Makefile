@@ -606,7 +606,7 @@ build: prerequisite stop-stack clean-inc composer-prod $(E20R_PLUGIN_BASE_FILE)
 	@echo "Built kit for $(E20R_PLUGIN_NAME)"
 
 deploy: prerequisite
-	@echo "Deploy ${E20R_PLUGIN_NAME}.zip to ${E20R_DEPLOYMENT_SERVER}"
+	@echo "Deploy $(E20R_PLUGIN_NAME).zip to $(E20R_DEPLOYMENT_SERVER)"
 	@if ! compgen -G "build/kits/${E20R_PLUGIN_NAME}-*.zip" > /dev/null; then \
 	  	echo "Error: ${PWD}/build/kits/${E20R_PLUGIN_NAME}*.zip not found!" ; \
 	  	ls -l "${PWD}/build/kits/" ; \

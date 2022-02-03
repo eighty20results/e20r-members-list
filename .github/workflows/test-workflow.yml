@@ -269,11 +269,11 @@ jobs:
 
       # And then deploy the package if it exists _and_ we're on the main branch with a release tag
 
+      # The deployment target will depend on whether the
+      # E20R_SSH_USER or SVN_USERNAME environment variable is defined
       - name: Deploy plugin when building a release (to WooCommerce Store)
-        if: steps.branch-name.outputs.is_tag && startsWith(steps.branch-name.outputs.tag, 'release-') && ${{ env.E20R_SSH_SERVER }}
+        if: ${{ env.E20R_SSH_SERVER }}
         run: make deploy
-        # The deployment target will depend on whether the
-        # E20R_SSH_USER or SVN_USERNAME environment variable is defined
         env:
           BRANCH_NAME: ${{ steps.branch-name.outputs.tag }}
 #         env:
@@ -287,9 +287,7 @@ jobs:
 #           E20R_SSH_PORT: ${{ secrets.SSH_PORT }}
 
       - name: Deploy plugin when building a release (to Wordpress.org repo)
-        if: steps.branch-name.outputs.is_tag && startsWith(steps.branch-name.outputs.tag, 'release-') && ${{ env.SVN_USERNAME }}
+        if: ${{ env.SVN_USERNAME }}
         run: make deploy
-        # The deployment target will depend on whether the
-        # E20R_SSH_USER or SVN_USERNAME environment variable is defined
         env:
           BRANCH_NAME: ${{ steps.branch-name.outputs.tag }}
