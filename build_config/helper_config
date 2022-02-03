@@ -24,12 +24,13 @@ declare -x remote_server
 declare -x wordpress_version
 declare -x build_dir
 declare -x branch_name
+declare -x plugin_slug
 
 short_description="Better Members List for Paid Memberships Pro"
 plugin_description_text="Extensible, sortable & bulk action capable members listing + export to CSV tool for Paid Memberships Pro."
 remote_server="${2}"
+plugin_slug="${E20R_PLUGIN_NAME}"
 build_dir="build_env"
-
 
 short_name="e20r-members-list"
 plugin_homepage="https://${remote_server}/plugins/${short_name}/"
@@ -112,3 +113,19 @@ declare -x -a build=()
 
 # Not a plugin specific variable, but expensive to populate
 wordpress_version=$(wget -q -O - http://api.wordpress.org/core/stable-check/1.0/  | grep latest | awk '{ print $1 }' | sed -e 's/"//g')
+
+# Populate the GITHUB_REF env variable if we're local
+if [ -z "${GITHUB_REF}" ]; then
+	echo "Setting GITHUB_REF environment variable"
+	declare -x GITHUB_REF
+	GITHUB_REF=$(git symbolic-ref HEAD)
+fi
+
+if [ -n "${GITHUB_REF}" ] && [ -z "${branch_name}" ]; then
+	branch_name="${GITHUB_REF/}"
+fi
+
+if [ -n "${GITHUB_WORKSPACE}" ]; then
+	declate -x GITHUB_WORKSPACE
+	GITHUB_WORKSPACE="./"
+fi

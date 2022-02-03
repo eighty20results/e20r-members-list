@@ -105,6 +105,9 @@ function to_woocommerce_store() {
 # so do not echo or use debug mode unless you want your secrets exposed!
 function to_wordpress_org() {
 
+	declare SVN_URL
+	declare SVN_DIR
+
 	# Should only be used when running as a GitHub action for a non-main branch
 	if [[ ! "${branch_name}" =~ (release-([vV])?[0-9]+\.[0-9]+(\.[0-9]+)?|([vV])?[0-9]+\.[0-9]+(\.[0-9]+)?) ]]; then
 		echo "Creating mocked svn command, then we won't actually deploy anything from ${branch_name}"
@@ -127,24 +130,27 @@ function to_wordpress_org() {
 	fi
 
 	# Allow some ENV variables to be customized
-	if [[ -z "${SLUG}" ]]; then
-		SLUG="${GITHUB_REPOSITORY#*/}"
+	if [[ -z "${plugin_slug}" ]]; then
+		declare -x plugin_slug
+		plugin_slug="${GITHUB_REPOSITORY#*/}"
 	fi
-	echo "ℹ︎ SLUG is ${SLUG}"
+	echo "ℹ︎ The plugin slug is: ${plugin_slug}"
 
 	if [[ -z "${branch_name}" ]]; then
 		branch_name=$( awk -F/ '{ print $NF }' <<< "${GITHUB_REF}" )
 	fi
-	echo "ℹ︎ BRANCH is ${branch_name}"
+	echo "ℹ︎ Branch is ${branch_name}"
 
 	# Does it even make sense for VERSION to be editable in a workflow definition?
 	if [[ -z "${VERSION}" ]]; then
+		declare -x VERSION
 		VERSION="${GITHUB_REF#refs/tags/}"
-		VERSION=$("${VERSION}" | sed -e "s/^v//")
+		VERSION=$(echo "${VERSION}" | sed -e "s/^release-//" | sed -e "s/^[vV]//")
 	fi
-	echo "ℹ︎ VERSION is ${VERSION}"
+	echo "ℹ︎ Version is ${VERSION}"
 
 	if [[ -z "${ASSETS_DIR}" ]]; then
+		declare -x ASSETS_DIR
 		ASSETS_DIR=".wordpress-org"
 	fi
 	echo "ℹ︎ ASSETS_DIR is ${ASSETS_DIR}"
@@ -157,8 +163,8 @@ function to_wordpress_org() {
 		git submodule update --remote
 	fi
 
-	SVN_URL="http://plugins.svn.wordpress.org/${SLUG}/"
-	SVN_DIR="/github/svn-${SLUG}"
+	SVN_URL="http://plugins.svn.wordpress.org/${plugin_slug}/"
+	SVN_DIR="./github/svn-${plugin_slug}"
 
 	# Checkout just trunk and assets for efficiency
 	# Tagging will be handled on the SVN level
@@ -187,7 +193,7 @@ function to_wordpress_org() {
 		cd "${GITHUB_WORKSPACE}" || (echo "ℹ︎ Cannot change directory to ${GITHUB_WORKSPACE}!" ; exit 1)
 
 		# "Export" a cleaned copy to a temp directory
-		TMP_DIR="/github/archivetmp"
+		TMP_DIR="./github/archivetmp"
 		mkdir "${TMP_DIR}"
 
 		git config --global user.email "thomas@eighty20results.com"

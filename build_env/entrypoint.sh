@@ -20,8 +20,8 @@ if [[ -z "${SVN_PASSWORD}" ]]; then
 	exit 1
 fi
 
-if [[ -z "${BUILD_DIR}" ]]; then
-	echo "Set BUILD_DIR environment variable!"
+if [[ -z "${build_dir}" ]]; then
+	echo "Set build_dir environment variable!"
 	exit 1
 fi
 
@@ -126,7 +126,7 @@ else
 	cd "${GITHUB_WORKSPACE}"
 
 	# "Export" a cleaned copy to a temp directory
-	TMP_DIR="/github/archivetmp"
+	TMP_DIR="./github/archivetmp"
 	mkdir "${TMP_DIR}"
 
 	git config --global user.email "thomas@eighty20results.com"
@@ -158,9 +158,9 @@ else
 fi
 
 # Removal of unsupported/disallowed one-click update functionality
-if [[ -f "${BUILD_DIR}/remove_update.sh" ]]; then
+if [[ -f bin/remove_update.sh ]]; then
 	echo "➤ Trigger removal of custom one-click update functionality. In ${PWD}"
-	"${BUILD_DIR}/remove_update.sh"
+	bin/remove_update.sh
 fi
 
 # Copy dotorg assets to /assets
