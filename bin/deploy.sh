@@ -105,7 +105,7 @@ function to_woocommerce_store() {
 # so do not echo or use debug mode unless you want your secrets exposed!
 function to_wordpress_org() {
 
-		# Should only be used when running as a GitHub action for a non-main branch
+	# Should only be used when running as a GitHub action for a non-main branch
 	if [[ ! "${BRANCH_NAME}" =~ (release-([vV])?[0-9]+\.[0-9]+(\.[0-9]+)?|([vV])?[0-9]+\.[0-9]+(\.[0-9]+)?) ]]; then
 		echo "Creating mocked svn command, then we won't actually deploy anything from ${BRANCH_NAME}"
 
@@ -132,10 +132,10 @@ function to_wordpress_org() {
 	fi
 	echo "ℹ︎ SLUG is ${SLUG}"
 
-	if [[ -z "${BRANCH}" ]]; then
-		BRANCH=$( awk -F/ '{ print $NF }' <<< "${GITHUB_REF}" )
+	if [[ -z "${BRANCH_NAME}" ]]; then
+		BRANCH_NAME=$( awk -F/ '{ print $NF }' <<< "${GITHUB_REF}" )
 	fi
-	echo "ℹ︎ BRANCH is ${BRANCH}"
+	echo "ℹ︎ BRANCH is ${BRANCH_NAME}"
 
 	# Does it even make sense for VERSION to be editable in a workflow definition?
 	if [[ -z "${VERSION}" ]]; then
@@ -276,6 +276,8 @@ function to_wordpress_org() {
 }
 
 source build_config/helper_config "${@}"
+
+echo "ℹ︎ Executing for branch: ${BRANCH_NAME}"
 
 if [ -z "${SVN_USERNAME}"  ] && [ -n "${E20R_SSH_USER}" ]; then
 	echo "ℹ︎ Will attempt to deploy ${E20R_PLUGIN_NAME} to the WooCommerce Store"
