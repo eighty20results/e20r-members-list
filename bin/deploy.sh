@@ -20,8 +20,8 @@ function to_woocommerce_store() {
 	declare ssh_host
 
 	# Should only be used when running as a GitHub action for a non-main branch
-	if [[ ! "${BRANCH_NAME}" =~ (release-([vV])?[0-9]+\.[0-9]+(\.[0-9]+)?|([vV])?[0-9]+\.[0-9]+(\.[0-9]+)?) ]]; then
-		echo "Creating mocked ssh and scp commands, then we won't actually deploy anything from ${BRANCH_NAME}"
+	if [[ ! "${branch_name}" =~ (release-([vV])?[0-9]+\.[0-9]+(\.[0-9]+)?|([vV])?[0-9]+\.[0-9]+(\.[0-9]+)?) ]]; then
+		echo "Creating mocked ssh and scp commands, then we won't actually deploy anything from ${branch_name}"
 
 		function ssh() {
 			echo ssh "$@"
@@ -31,7 +31,7 @@ function to_woocommerce_store() {
 			echo scp "$@"
 		}
 	else
-		echo "Not sure what the BRANCH_NAME environment variable is..? '${BRANCH_NAME}'"
+		echo "Not sure what the BRANCH_NAME environment variable is..? '${branch_name}'"
 	fi
 
 	src_path="$(pwd)"
@@ -106,14 +106,14 @@ function to_woocommerce_store() {
 function to_wordpress_org() {
 
 	# Should only be used when running as a GitHub action for a non-main branch
-	if [[ ! "${BRANCH_NAME}" =~ (release-([vV])?[0-9]+\.[0-9]+(\.[0-9]+)?|([vV])?[0-9]+\.[0-9]+(\.[0-9]+)?) ]]; then
-		echo "Creating mocked svn command, then we won't actually deploy anything from ${BRANCH_NAME}"
+	if [[ ! "${branch_name}" =~ (release-([vV])?[0-9]+\.[0-9]+(\.[0-9]+)?|([vV])?[0-9]+\.[0-9]+(\.[0-9]+)?) ]]; then
+		echo "Creating mocked svn command, then we won't actually deploy anything from ${branch_name}"
 
 		function svn() {
 			echo svn "$@"
 		}
 	else
-		echo "Not sure what the BRANCH_NAME environment variable is...? '${BRANCH_NAME}'"
+		echo "Not sure what the BRANCH_NAME environment variable is...? '${branch_name}'"
 	fi
 
 	if [[ -z "${SVN_USERNAME}" ]]; then
@@ -132,10 +132,10 @@ function to_wordpress_org() {
 	fi
 	echo "ℹ︎ SLUG is ${SLUG}"
 
-	if [[ -z "${BRANCH_NAME}" ]]; then
-		BRANCH_NAME=$( awk -F/ '{ print $NF }' <<< "${GITHUB_REF}" )
+	if [[ -z "${branch_name}" ]]; then
+		branch_name=$( awk -F/ '{ print $NF }' <<< "${GITHUB_REF}" )
 	fi
-	echo "ℹ︎ BRANCH is ${BRANCH_NAME}"
+	echo "ℹ︎ BRANCH is ${branch_name}"
 
 	# Does it even make sense for VERSION to be editable in a workflow definition?
 	if [[ -z "${VERSION}" ]]; then
@@ -262,7 +262,7 @@ function to_wordpress_org() {
 
 	echo "➤ Testing that we need to push to Wordpress.org"
 
-	if [[ -n "${BRANCH_NAME}" && "${BRANCH_NAME}" =~ (release-([vV])?[0-9]+\.[0-9]+(\.[0-9]+)?|([vV])?[0-9]+\.[0-9]+(\.[0-9]+)?) ]]; then
+	if [[ -n "${branch_name}" && "${branch_name}" =~ (release-([vV])?[0-9]+\.[0-9]+(\.[0-9]+)?|([vV])?[0-9]+\.[0-9]+(\.[0-9]+)?) ]]; then
 		echo "➤ In main branch so committing files to Wordpress.org SVN repository..."
 		svn commit -m "Update to version ${VERSION} from GitHub" \
 		--no-auth-cache \
@@ -277,14 +277,14 @@ function to_wordpress_org() {
 
 source build_config/helper_config "${@}"
 
-echo "ℹ︎ Executing for branch: ${BRANCH_NAME}"
+echo "ℹ︎ Executing for branch: ${branch_name}"
 
-if [ -z "${SVN_USERNAME}"  ] && [ -n "${E20R_SSH_USER}" ]; then
+if [ -z "${SVN_USERNAME}"  ] && [ -n "${E20R_SSH_USER}" ] && [ "${remote_server}" != "wordpress.org" ]; then
 	echo "ℹ︎ Will attempt to deploy ${E20R_PLUGIN_NAME} to the WooCommerce Store"
 	to_woocommerce_store "$@"
 fi
 
-if [ -z "${E20R_SSH_USER}" ] && [ -n "${SVN_USERNAME}" ]; then
+if [ -z "${E20R_SSH_USER}" ] && [ -n "${SVN_USERNAME}" ] && [ "${remote_server}" == "wordpress.org" ]; then
 	echo "ℹ︎ Will attempt to deploy ${E20R_PLUGIN_NAME} to the Wordpress.org Repository"
 	to_wordpress_org "$@"
 fi

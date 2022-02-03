@@ -23,11 +23,13 @@ declare -x version
 declare -x remote_server
 declare -x wordpress_version
 declare -x build_dir
+declare -x branch_name
 
 short_description="Better Members List for Paid Memberships Pro"
 plugin_description_text="Extensible, sortable & bulk action capable members listing + export to CSV tool for Paid Memberships Pro."
 remote_server="${2}"
 build_dir="build_env"
+
 
 short_name="e20r-members-list"
 plugin_homepage="https://${remote_server}/plugins/${short_name}/"
