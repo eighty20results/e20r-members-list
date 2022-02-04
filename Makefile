@@ -611,6 +611,7 @@ build: prerequisite stop-stack clean-inc composer-prod $(E20R_PLUGIN_BASE_FILE)
 		echo "Package for $(E20R_PLUGIN_NAME) not found!" ; \
 		exit 1 ; \
 	fi
+	@rm -rf "build/kits/$(E20R_PLUGIN_NAME)" || die "Error: Cannot remove build/kits/$(E20R_PLUGIN_NAME)"
 
 deploy: prerequisite build
 	@echo "Deploy $(E20R_PLUGIN_NAME).zip to $(E20R_DEPLOYMENT_SERVER)"
@@ -621,7 +622,7 @@ deploy: prerequisite build
 	  	exit 1; \
 	fi
 	@echo "Preparing to deploy the ${E20R_PLUGIN_NAME}-*.zip plugin archive to the $(E20R_DEPLOYMENT_SERVER) Server"
-	@./bin/deploy.sh "$(E20R_PLUGIN_BASE_FILE)" "$(E20R_DEPLOYMENT_SERVER)"
+	@E20R_MAIN_BRANCH_NAME="$(E20R_MAIN_BRANCH_NAME)" ./bin/deploy.sh "$(E20R_PLUGIN_BASE_FILE)" "$(E20R_DEPLOYMENT_SERVER)"
 
 
 #new-release: test composer-prod

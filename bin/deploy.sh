@@ -274,7 +274,7 @@ function to_wordpress_org() {
 	echo "➤ Testing that we need to push to Wordpress.org"
 
 	if [[ -n "${branch_name}" && "${branch_name}" =~ (release-([vV])?[0-9]+\.[0-9]+(\.[0-9]+)?|([vV])?[0-9]+\.[0-9]+(\.[0-9]+)?) ]]; then
-		echo "➤ In main branch so committing files to Wordpress.org SVN repository..."
+		echo "➤ In ${E20R_MAIN_BRANCH_NAME} branch so committing files to Wordpress.org SVN repository..."
 		svn commit -m "Update to version ${version} from GitHub" \
 		--no-auth-cache \
 		--non-interactive  \
@@ -282,7 +282,7 @@ function to_wordpress_org() {
 		--password "${SVN_PASSWORD}"
 		echo "✓ Plugin deployed!"
 	else
-		echo "✓ Not in main branch. Nothing to do"
+		echo "✓ Not in ${E20R_MAIN_BRANCH_NAME} branch. Nothing to do"
 	fi
 
 	echo "➤ Cleaning up..."

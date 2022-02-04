@@ -1,20 +1,38 @@
-# http://editorconfig.org
+# EditorConfig helps keep your project formatting consistent.
+# See https://EditorConfig.org
+#
+# This is a modified version of the WordPress coding standards.
+#
+# Author: Sal Ferrarello (@salcode)
+# https://salferrarello.com/wordpress-editorconfig/
+#
+# You can download this file directly
+# to your project from the command-line with
+# curl -O https://gist.githubusercontent.com/salcode/285303f7983ad729b74d13d752214f4c/raw/.editorconfig
+
 root = true
 
 [*]
-indent_style = tab
-end_of_line = lf
 charset = utf-8
-trim_trailing_whitespace = true
+end_of_line = lf
 insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = tab
+indent_size = 4
 
-[{package.json,*.yml}]
+[*.{js,json}]
 indent_style = space
 indent_size = 2
 
-[composer.json]
+[*.yml]
 indent_style = space
-indent_size = 4
+indent_size = 2
 
 [*.md]
 trim_trailing_whitespace = false
+
+[{*.txt,wp-config-sample.php}]
+end_of_line = crlf
+
+[composer.json]
+indent_size = 4
