@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2022-02-02T12:54:48+00:00\n"
+"POT-Creation-Date: 2022-02-04T12:38:42+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.6.0\n"
 "X-Domain: e20r-members-list\n"
@@ -34,63 +34,63 @@ msgstr ""
 msgid "https://eighty20results.com/thomas-sjolshagen/"
 msgstr ""
 
-#: class-e20r-members-list.php:140
+#: class-e20r-members-list.php:145
 msgid "The specified E20R_Members_List() class property does not exist!"
 msgstr ""
 
-#: class-e20r-members-list.php:176
+#: class-e20r-members-list.php:184
 msgid "The E20R Utilities Module is missing/inactive!"
 msgstr ""
 
-#: class-e20r-members-list.php:207
+#: class-e20r-members-list.php:215
 msgid "Could not clear all of the cached members list data. Check error logs for more information."
 msgstr ""
 
-#: class-e20r-members-list.php:334
+#: class-e20r-members-list.php:342
 msgid "Donate to support updates, maintenance and tech support for this plugin"
 msgstr ""
 
-#: class-e20r-members-list.php:338
+#: class-e20r-members-list.php:346
 msgid "Donate"
 msgstr ""
 
-#: class-e20r-members-list.php:343
+#: class-e20r-members-list.php:351
 msgid "View the documentation"
 msgstr ""
 
-#: class-e20r-members-list.php:344
+#: class-e20r-members-list.php:352
 msgid "Docs"
 msgstr ""
 
-#: class-e20r-members-list.php:349
+#: class-e20r-members-list.php:357
 msgid "View the Filter documentation"
 msgstr ""
 
-#: class-e20r-members-list.php:350
+#: class-e20r-members-list.php:358
 msgid "Filters"
 msgstr ""
 
-#: class-e20r-members-list.php:355
+#: class-e20r-members-list.php:363
 msgid "View the Actions documentation"
 msgstr ""
 
-#: class-e20r-members-list.php:356
+#: class-e20r-members-list.php:364
 msgid "Actions"
 msgstr ""
 
-#: class-e20r-members-list.php:361
+#: class-e20r-members-list.php:369
 msgid "Visit the support forum"
 msgstr ""
 
-#: class-e20r-members-list.php:362
+#: class-e20r-members-list.php:370
 msgid "Support"
 msgstr ""
 
-#: class-e20r-members-list.php:367
+#: class-e20r-members-list.php:375
 msgid "Report issues with this plugin"
 msgstr ""
 
-#: class-e20r-members-list.php:368
+#: class-e20r-members-list.php:376
 msgid "Report Issues"
 msgstr ""
 
