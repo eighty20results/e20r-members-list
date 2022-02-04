@@ -184,6 +184,7 @@ jobs:
         with:
           repository: eighty20results/e20r-members-list
 
+      - run: touch ./.am_on_github
 
       - name: Install SSH Key
         if: ${{ env.E20R_SSH_SERVER }}

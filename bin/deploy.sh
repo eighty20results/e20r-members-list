@@ -166,8 +166,10 @@ function to_wordpress_org() {
 	SVN_URL="http://plugins.svn.wordpress.org/${plugin_slug}/"
 	SVN_DIR="./github/svn-${plugin_slug}"
 
-	echo "➤ Making SVN source directory..."
-	mkdir -p "${SVN_DIR}"/{tags,assets,trunk}
+	if [[ ! -f "./.am_on_github" ]]; then
+		echo "➤ Making SVN source directory..."
+		mkdir -p "${SVN_DIR}"/{tags,assets,trunk}
+	fi
 
 	# Checkout just trunk and assets for efficiency
 	# Tagging will be handled on the SVN level
