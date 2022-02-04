@@ -25,12 +25,20 @@ declare -x wordpress_version
 declare -x build_dir
 declare -x branch_name
 declare -x plugin_slug
+declare -x codeception_update_list
+declare -x search_string
+declare -x update_to_check
 
 short_description="Better Members List for Paid Memberships Pro"
 plugin_description_text="Extensible, sortable & bulk action capable members listing + export to CSV tool for Paid Memberships Pro."
 remote_server="${2}"
 plugin_slug="${E20R_PLUGIN_NAME}"
-build_dir="build_env"
+
+# Remove any wordpress.org prohibited one-click update functionality as necessary
+# Removes the custom one-click installer utility calls and functionality if present
+read -r -a codeception_update_list <<< "yahnis-elsts"
+search_string="Utilities::configureUpdateServer"
+read -r -a update_to_check <<< "class-e20r-members-list.php class-utility-loader.php class-loader.php"
 
 short_name="e20r-members-list"
 plugin_homepage="https://${remote_server}/plugins/${short_name}/"
