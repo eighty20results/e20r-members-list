@@ -142,12 +142,12 @@ function to_wordpress_org() {
 	echo "ℹ︎ Branch is ${branch_name}"
 
 	# Does it even make sense for VERSION to be editable in a workflow definition?
-	if [[ -z "${VERSION}" ]]; then
-		declare -x VERSION
-		VERSION="${GITHUB_REF#refs/tags/}"
-		VERSION=$(echo "${VERSION}" | sed -e "s/^release-//" | sed -e "s/^[vV]//")
+	if [[ -z "${version}" ]]; then
+		declare -x version
+		version="${GITHUB_REF#refs/tags/}"
+		version=$(echo "${version}" | sed -e "s/^release-//" | sed -e "s/^[vV]//")
 	fi
-	echo "ℹ︎ Version is ${VERSION}"
+	echo "ℹ︎ Version is ${version}"
 
 	if [[ -z "${ASSETS_DIR}" ]]; then
 		declare -x ASSETS_DIR
@@ -166,6 +166,9 @@ function to_wordpress_org() {
 	SVN_URL="http://plugins.svn.wordpress.org/${plugin_slug}/"
 	SVN_DIR="./github/svn-${plugin_slug}"
 
+	echo "➤ Making SVN source directory..."
+	mkdir -p "${SVN_DIR}"/{tags,assets,trunk}
+
 	# Checkout just trunk and assets for efficiency
 	# Tagging will be handled on the SVN level
 	echo "➤ Checking out .org repository with SVN..."
@@ -174,9 +177,9 @@ function to_wordpress_org() {
 	svn update --set-depth infinity assets
 	svn update --set-depth infinity trunk
 
-	if [[ -d "${SVN_DIR}/tags/${VERSION}" ]]; then
+	if [[ -d "${SVN_DIR}/tags/${version}" ]]; then
 		echo "ℹ︎ Removing pre-existing release from /tags/ directory"
-		rm -rf "${SVN_DIR}/tags/${VERSION}"
+		rm -rf "${SVN_DIR}/tags/${version}"
 		# TODO(?): Remove commit that contains the update(d) version from SVN?
 	fi
 
@@ -190,11 +193,13 @@ function to_wordpress_org() {
 	else
 		echo "ℹ︎ Using .gitattributes in ${GITHUB_WORKSPACE}"
 
-		cd "${GITHUB_WORKSPACE}" || (echo "ℹ︎ Cannot change directory to ${GITHUB_WORKSPACE}!" ; exit 1)
+		if [[ "${GITHUB_WORKSPACE}" != "${PWD}" ]]; then
+			cd "${GITHUB_WORKSPACE}" || (echo "ℹ︎ Cannot change directory to ${GITHUB_WORKSPACE}!" ; exit 1)
+		fi
 
 		# "Export" a cleaned copy to a temp directory
-		TMP_DIR="./github/archivetmp"
-		mkdir "${TMP_DIR}"
+		TMP_DIR="github/archivetmp"
+		mkdir -p "${TMP_DIR}"
 
 		git config --global user.email "thomas@eighty20results.com"
 		git config --global user.name "Eighty/20Results Bot on Github"
@@ -262,7 +267,7 @@ function to_wordpress_org() {
 	svn status | grep '^\!' | sed 's/! *//' | xargs -I% svn rm %@ > /dev/null
 
 	echo "➤ Copying tag..."
-	svn cp "trunk" "tags/${VERSION}"
+	svn cp "trunk" "tags/${version}"
 
 	svn status
 
@@ -270,7 +275,7 @@ function to_wordpress_org() {
 
 	if [[ -n "${branch_name}" && "${branch_name}" =~ (release-([vV])?[0-9]+\.[0-9]+(\.[0-9]+)?|([vV])?[0-9]+\.[0-9]+(\.[0-9]+)?) ]]; then
 		echo "➤ In main branch so committing files to Wordpress.org SVN repository..."
-		svn commit -m "Update to version ${VERSION} from GitHub" \
+		svn commit -m "Update to version ${version} from GitHub" \
 		--no-auth-cache \
 		--non-interactive  \
 		--username "${SVN_USERNAME}" \
@@ -279,6 +284,9 @@ function to_wordpress_org() {
 	else
 		echo "✓ Not in main branch. Nothing to do"
 	fi
+
+	echo "➤ Cleaning up..."
+	rm -rf github/ || die "Error: Unable to remove ./github directory!"
 }
 
 source build_config/helper_config "${@}"

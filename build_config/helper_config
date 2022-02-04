@@ -122,10 +122,10 @@ if [ -z "${GITHUB_REF}" ]; then
 fi
 
 if [ -n "${GITHUB_REF}" ] && [ -z "${branch_name}" ]; then
-	branch_name="${GITHUB_REF/}"
+	branch_name="${GITHUB_REF#refs/tags/}"
 fi
 
-if [ -n "${GITHUB_WORKSPACE}" ]; then
-	declate -x GITHUB_WORKSPACE
-	GITHUB_WORKSPACE="./"
+if [ -z "${GITHUB_WORKSPACE}" ]; then
+	declare -x GITHUB_WORKSPACE
+	GITHUB_WORKSPACE="${PWD}"
 fi
