@@ -2,10 +2,8 @@ name: Run Unit Tests and create translations when creating a PR
 
 # Run Unit Test and POT files when new PR is created
 on:
-#   push:
-#     branches:
-#       - main
   pull_request:
+    types: [opened]
     branches:
       - main
 
