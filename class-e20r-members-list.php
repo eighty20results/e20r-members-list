@@ -353,13 +353,13 @@ if ( ! class_exists( '\\E20R\\Members_List\\E20R_Members_List' ) ) {
 					),
 					'filters'       => sprintf(
 						'<a href="%1$s" title="%2$s">%3$s</a>',
-						esc_url_raw( plugin_dir_url( __FILE__ ) . '../docs/FILTERS.md' ),
+						esc_url_raw( plugin_dir_url( __FILE__ ) . '/docs/FILTERS.md' ),
 						esc_attr__( 'View the Filter documentation', 'e20r-members-list' ),
 						esc_attr__( 'Filters', 'e20r-members-list' )
 					),
 					'actions'       => sprintf(
 						'<a href="%1$s" title="%2$s">%3$s</a>',
-						esc_url_raw( plugin_dir_url( __FILE__ ) . '../docs/ACTIONS.md' ),
+						esc_url_raw( plugin_dir_url( __FILE__ ) . '/docs/ACTIONS.md' ),
 						esc_attr__( 'View the Actions documentation', 'e20r-members-list' ),
 						esc_attr__( 'Actions', 'e20r-members-list' )
 					),
