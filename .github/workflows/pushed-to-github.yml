@@ -55,28 +55,22 @@ jobs:
           path: inc/**
 
       - name: Install all needed dependencies for Composer
-        shell: bash
         if: steps.restore-cache.outputs.cache-hit != 'true'
         run: make composer-dev
 
       - name: Install all needed WordPress plugin dependencies
-        shell: bash
         if: steps.composer-cache.outputs.cache-hit != 'true'
         run: make wp-deps
 
       - name: Install all needed dependencies for Docker
-        shell: bash
         if: steps.composer-cache.outputs.cache-hit != 'true'
         run: make docker-deps
 
       - name: Run WordPress Code Standard Tests
-        shell: bash
         run: make code-standard-tests
 
       - name: Run PHP Static Code Analysis Tests
-        shell: bash
         run: make phpstan-tests
 
       - name: Run Unit Tests with Code Coverage check
-        shell: bash
         run: make coverage

@@ -268,7 +268,6 @@ function to_wordpress_org() {
 
 	echo "➤ Copying tag..."
 	svn cp "trunk" "tags/${version}"
-
 	svn status
 
 	echo "➤ Testing that we need to push to Wordpress.org"

@@ -35,8 +35,10 @@ See [FILTERS.md](https://github.com/eighty20results.com/e20r-members-list/blob/m
 == Supported Actions ==
 See [ACTIONS.md](https://github.com/eighty20results.com/e20r-members-list/blob/main/docs/ACTIONS.md)
 
+
 == Known Issues ==
 No known issues at this time
 
 == Changelog ==
 See the official [CHANGELOG.md](https://github.com/eighty20results.com/e20r-members-list/blob/main/CHANGELOG.md) file
+

@@ -25,7 +25,6 @@ jobs:
       GITHUB_TOKEN: ${{ secrets.GITHUB }}
       DOCKER_USER: ${{ secrets.DOCKER_USER }}
       CONTAINER_ACCESS_TOKEN: ${{ secrets.CONTAINER_ACCESS_TOKEN }}
-
     runs-on: ubuntu-18.04
     steps:
       - name: Checkout repository
