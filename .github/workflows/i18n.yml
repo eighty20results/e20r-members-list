@@ -15,6 +15,14 @@ jobs:
       matrix:
         php_version: [ '7.3', '7.4', '8.0' ]
     name: "Plugin tests - PHP"
+    defaults:
+      run:
+        shell: bash
+    env:
+      E20R_PLUGIN_NAME: e20r-members-list
+      GITHUB_TOKEN: ${{ secrets.GITHUB }}
+      DOCKER_USER: ${{ secrets.DOCKER_USER }}
+      CONTAINER_ACCESS_TOKEN: ${{ secrets.CONTAINER_ACCESS_TOKEN }}
     runs-on: ubuntu-18.04
     steps:
       - name: Checkout repository
@@ -45,34 +53,19 @@ jobs:
           path: inc/**
 
       - name: Install all needed dependencies for Composer
-        shell: bash
         if: steps.restore-cache.outputs.cache-hit != 'true'
         run: make composer-dev
-        env:
-          E20R_PLUGIN_NAME: e20r-members-list
 
       - name: Install all needed WordPress plugin dependencies
-        shell: bash
         if: steps.composer-cache.outputs.cache-hit != 'true'
         run: make wp-deps
-        env:
-          E20R_PLUGIN_NAME: e20r-members-list
 
       - name: Install all needed dependencies for Docker
-        shell: bash
         if: steps.composer-cache.outputs.cache-hit != 'true'
         run: make docker-deps
-        env:
-          E20R_PLUGIN_NAME: e20r-members-list
 
       - name: Run all Standard Tests
-        shell: bash
         run: make tests
-        env:
-          E20R_PLUGIN_NAME: e20r-members-list
-          GITHUB_TOKEN: ${{ secrets.GITHUB }}
-          DOCKER_USER: ${{ secrets.DOCKER_USER }}
-          CONTAINER_ACCESS_TOKEN: ${{ secrets.CONTAINER_ACCESS_TOKEN }}
 
   build_i18n:
     name: Build the I18N translation files

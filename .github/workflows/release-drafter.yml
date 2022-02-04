@@ -5,8 +5,8 @@ on:
     # branches to consider in the event; optional, defaults to all
     branches:
       - main
-    pull_request:
-      -
+  pull_request:
+
 jobs:
   update_release_draft:
     # if: github.event.pull_request.merged == true
