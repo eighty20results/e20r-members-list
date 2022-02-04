@@ -1,9 +1,8 @@
 version: 2
 
 on:
-  push:
-    branches:
-      - *
+  schedule:
+    - cron: '0 6 * * *'
 
 updates:
   # Maintain dependencies for GitHub Actions
