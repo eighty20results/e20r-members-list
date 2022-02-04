@@ -28,7 +28,7 @@ for file_name in "${update_to_check[@]}"; do
 
 	# Remove the actual line +1 line in front of, and after, the target line.
 	echo "ℹ︎ Found ${search_string} in ${found_file}. Removing..."
-	sed -i -r "/\n/!N;/\n.*\n/!N;/\n.*\n.*${srch_string}/{\$d;N;N;d};P;D" "${found_file}"
+	sed -i -r "/\n/!N;/\n.*\n/!N;/\n.*\n.*${search_string}/{\$d;N;N;d};P;D" "${found_file}"
 
 done
 
