@@ -95,6 +95,7 @@ declare -x -a excluded_for_svn=(
 		"trunk/src/utilities/composer.json" \
 		"trunk/test" \
 		"trunk/tests" \
+		"trunk/.am_on_github" \
 		"trunk/.distignore" \
 		"trunk/.dockerignore" \
 		"trunk/.editorconfig" \
