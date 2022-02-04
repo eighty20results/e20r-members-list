@@ -1,4 +1,10 @@
 version: 2
+
+on:
+  push:
+    branches:
+      - *
+
 updates:
   # Maintain dependencies for GitHub Actions
   - package-ecosystem: "github-actions"
