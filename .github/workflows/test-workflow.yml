@@ -16,6 +16,8 @@ jobs:
       run:
         shell: bash
     env:
+      # To deploy to the E20R WooCommerce target, set E20R_SSH_SERVER, E20R_SSH_USER, E20R_SSH_PORT, E20R_SSH_KEY and remove traces of the SVN_* variables
+      # To deploy to the wordpress.org repository, set SVN_USERNAME and SVN_PASSWORD and remove traces of the E20R_SSH_* variables
       E20R_PLUGIN_NAME: e20r-members-list
       GITHUB_TOKEN: ${{ secrets.GITHUB }}
       DOCKER_USER: ${{ secrets.DOCKER_USER }}
@@ -63,28 +65,17 @@ jobs:
       - name: Install all needed dependencies for Composer
         if: steps.restore-cache.outputs.cache-hit != 'true'
         run: make composer-dev
-#         env:
-#           E20R_PLUGIN_NAME: e20r-members-list
 
       - name: Install all needed WordPress plugin dependencies
         if: steps.composer-cache.outputs.cache-hit != 'true'
         run: make wp-deps
-#         env:
-#           E20R_PLUGIN_NAME: e20r-members-list
 
       - name: Install all needed dependencies for Docker
         if: steps.composer-cache.outputs.cache-hit != 'true'
         run: make docker-deps
-#         env:
-#           E20R_PLUGIN_NAME: e20r-members-list
 
       - name: Run all Standard Tests
         run: make tests
-#         env:
-#           E20R_PLUGIN_NAME: e20r-members-list
-#           GITHUB_TOKEN: ${{ secrets.GITHUB }}
-#           DOCKER_USER: ${{ secrets.DOCKER_USER }}
-#           CONTAINER_ACCESS_TOKEN: ${{ secrets.CONTAINER_ACCESS_TOKEN }}
 
   # To create the plugin .zip archive
   build_plugin:
@@ -95,6 +86,8 @@ jobs:
       run:
         shell: bash
     env:
+       # To deploy to the E20R WooCommerce target, set E20R_SSH_SERVER, E20R_SSH_USER, E20R_SSH_PORT, E20R_SSH_KEY and remove traces of the SVN_* variables
+       # To deploy to the wordpress.org repository, set SVN_USERNAME and SVN_PASSWORD and remove traces of the E20R_SSH_* variables
       E20R_PLUGIN_NAME: e20r-members-list
       GITHUB_TOKEN: ${{ secrets.GITHUB }}
       DOCKER_USER: ${{ secrets.DOCKER_USER }}
@@ -144,20 +137,14 @@ jobs:
       - name: Install all needed dependencies for Composer
         if: steps.composer-cache.outputs.cache-hit != 'true'
         run: make composer-dev
-#         env:
-#           E20R_PLUGIN_NAME: e20r-members-list
 
       - name: Install all needed WordPress plugin dependencies
         if: steps.composer-cache.outputs.cache-hit != 'true'
         run: make wp-deps
-#         env:
-#           E20R_PLUGIN_NAME: e20r-members-list
 
       - name: Install all needed dependencies for Docker
         if: steps.composer-cache.outputs.cache-hit != 'true'
         run: make docker-deps
-#         env:
-#           E20R_PLUGIN_NAME: e20r-members-list
 
       - name: Cache the built plugin package
         uses: actions/cache@v2
@@ -169,10 +156,6 @@ jobs:
 
       - name: Build and test plugin before deployment
         run: make build
-#         env:
-#           E20R_PLUGIN_NAME: e20r-members-list
-#           GITHUB_TOKEN: ${{ secrets.GITHUB }}
-#           CONTAINER_ACCESS_TOKEN: ${{ secrets.CONTAINER_ACCESS_TOKEN }}
 
   # To push the release to the plugin store
   release:
@@ -183,6 +166,8 @@ jobs:
       run:
         shell: bash
     env:
+     # To deploy to the E20R WooCommerce target, set E20R_SSH_SERVER, E20R_SSH_USER, E20R_SSH_PORT, E20R_SSH_KEY and remove traces of the SVN_* variables
+     # To deploy to the wordpress.org repository, set SVN_USERNAME and SVN_PASSWORD and remove traces of the E20R_SSH_* variables
       E20R_PLUGIN_NAME: e20r-members-list
       GITHUB_TOKEN: ${{ secrets.GITHUB }}
       DOCKER_USER: ${{ secrets.DOCKER_USER }}
@@ -232,20 +217,14 @@ jobs:
       - name: Install all needed dependencies for Composer
         if: steps.composer-cache-prod.outputs.cache-hit != 'true'
         run: make composer-dev
-#         env:
-#           E20R_PLUGIN_NAME: e20r-members-list
 
       - name: Install all needed WordPress plugin dependencies
         if: steps.composer-cache-prod.outputs.cache-hit != 'true'
         run: make wp-deps
-#         env:
-#           E20R_PLUGIN_NAME: e20r-members-list
 
       - name: Install all needed dependencies for Docker
         if: steps.composer-cache-prod.outputs.cache-hit != 'true'
         run: make docker-deps
-#         env:
-#           E20R_PLUGIN_NAME: e20r-members-list
 
       - name: Restore the built plugin package
         id: plugin-package-cache
@@ -276,15 +255,6 @@ jobs:
         run: make deploy
         env:
           BRANCH_NAME: ${{ steps.branch-name.outputs.tag }}
-#         env:
-#           BRANCH_NAME: ${{ steps.branch-name.outputs.tag }}
-#           E20R_PLUGIN_NAME: e20r-members-list
-#           GITHUB_TOKEN: ${{ secrets.GITHUB }}
-#           DOCKER_USER: ${{ secrets.DOCKER_USER }}
-#           CONTAINER_ACCESS_TOKEN: ${{ secrets.CONTAINER_ACCESS_TOKEN }}
-#           E20R_SSH_SERVER: ${{ secrets.SSH_HOST }}
-#           E20R_SSH_USER: ${{ secrets.SSH_USER }}
-#           E20R_SSH_PORT: ${{ secrets.SSH_PORT }}
 
       - name: Deploy plugin when building a release (to Wordpress.org repo)
         if: ${{ env.SVN_USERNAME }}
