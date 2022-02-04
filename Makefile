@@ -620,9 +620,9 @@ deploy: prerequisite build
 	  	echo "Error: ${PWD}/build/kits/$(E20R_PLUGIN_NAME)-$${E20R_PLUGIN_VERSION}.zip not found!" ; \
 	  	ls -l "${PWD}/build/kits/" ; \
 	  	exit 1; \
-	fi
-	@echo "Preparing to deploy the ${E20R_PLUGIN_NAME}-*.zip plugin archive to the $(E20R_DEPLOYMENT_SERVER) Server"
-	@E20R_MAIN_BRANCH_NAME="$(E20R_MAIN_BRANCH_NAME)" ./bin/deploy.sh "$(E20R_PLUGIN_BASE_FILE)" "$(E20R_DEPLOYMENT_SERVER)"
+	fi && \
+	echo "Preparing to deploy the $${E20R_PLUGIN_NAME}-$${E20R_PLUGIN_VERSION}.zip plugin archive to the $(E20R_DEPLOYMENT_SERVER) Server" && \
+	E20R_MAIN_BRANCH_NAME="$(E20R_MAIN_BRANCH_NAME)" ./bin/deploy.sh "$(E20R_PLUGIN_BASE_FILE)" "$(E20R_DEPLOYMENT_SERVER)"
 
 
 #new-release: test composer-prod
