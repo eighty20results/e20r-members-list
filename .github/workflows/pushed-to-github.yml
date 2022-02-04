@@ -15,6 +15,16 @@ jobs:
       matrix:
         php_version: [ '7.3', '7.4', '8.0' ]
     name: "Plugin tests - PHP"
+    defaults:
+      run:
+        shell: bash
+    env:
+      # To deploy to the E20R WooCommerce target, set E20R_SSH_SERVER, E20R_SSH_USER, E20R_SSH_PORT, E20R_SSH_KEY and remove traces of the SVN_* variables
+      # To deploy to the wordpress.org repository, set SVN_USERNAME and SVN_PASSWORD and remove traces of the E20R_SSH_* variables
+      E20R_PLUGIN_NAME: e20r-members-list
+      GITHUB_TOKEN: ${{ secrets.GITHUB }}
+      DOCKER_USER: ${{ secrets.DOCKER_USER }}
+      CONTAINER_ACCESS_TOKEN: ${{ secrets.CONTAINER_ACCESS_TOKEN }}
     runs-on: ubuntu-18.04
     steps:
       - name: Checkout repository
@@ -43,53 +53,24 @@ jobs:
           key: ${{ runner.os }}-composer-cache-${{ hashFiles('**/composer.lock') }}
           restore-keys: ${{ runner.os }}-composer-cache
           path: inc/**
-        env:
-          E20R_PLUGIN_NAME: e20r-members-list
 
       - name: Install all needed dependencies for Composer
-        shell: bash
         if: steps.restore-cache.outputs.cache-hit != 'true'
         run: make composer-dev
-        env:
-          E20R_PLUGIN_NAME: e20r-members-list
 
       - name: Install all needed WordPress plugin dependencies
-        shell: bash
         if: steps.composer-cache.outputs.cache-hit != 'true'
         run: make wp-deps
-        env:
-          E20R_PLUGIN_NAME: e20r-members-list
 
       - name: Install all needed dependencies for Docker
-        shell: bash
         if: steps.composer-cache.outputs.cache-hit != 'true'
         run: make docker-deps
-        env:
-          E20R_PLUGIN_NAME: e20r-members-list
 
       - name: Run WordPress Code Standard Tests
-        shell: bash
         run: make code-standard-tests
-        env:
-          E20R_PLUGIN_NAME: e20r-members-list
-          GITHUB_TOKEN: ${{ secrets.GITHUB }}
-          DOCKER_USER: ${{ secrets.DOCKER_USER }}
-          CONTAINER_ACCESS_TOKEN: ${{ secrets.CONTAINER_ACCESS_TOKEN }}
 
       - name: Run PHP Static Code Analysis Tests
-        shell: bash
         run: make phpstan-tests
-        env:
-          E20R_PLUGIN_NAME: e20r-members-list
-          GITHUB_TOKEN: ${{ secrets.GITHUB }}
-          DOCKER_USER: ${{ secrets.DOCKER_USER }}
-          CONTAINER_ACCESS_TOKEN: ${{ secrets.CONTAINER_ACCESS_TOKEN }}
 
       - name: Run Unit Tests with Code Coverage check
-        shell: bash
         run: make coverage
-        env:
-          E20R_PLUGIN_NAME: e20r-members-list
-          GITHUB_TOKEN: ${{ secrets.GITHUB }}
-          DOCKER_USER: ${{ secrets.DOCKER_USER }}
-          CONTAINER_ACCESS_TOKEN: ${{ secrets.CONTAINER_ACCESS_TOKEN }}

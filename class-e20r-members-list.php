@@ -115,7 +115,12 @@ if ( ! class_exists( '\\E20R\\Members_List\\E20R_Members_List' ) ) {
 			// Add the usage metrics (Mixpanel) class unless it's supplied
 			if ( empty( $mixpanel ) ) {
 				try {
-					$mixpanel = new MixpanelConnector( 'a14f11781866c2117ab6487792e4ebfd', array( 'host' => 'api-eu.mixpanel.com' ), null, $this->utils );
+					$mixpanel = new MixpanelConnector(
+						'a14f11781866c2117ab6487792e4ebfd',
+						array( 'host' => 'api-eu.mixpanel.com' ),
+						null,
+						$this->utils
+					);
 				} catch ( HostNotDefined | InvalidMixpanelKey $e ) {
 					$this->utils->log( 'Mixpanel error: ' . $e->getMessage() );
 					$this->utils->add_message( 'Mixpanel: ' . $e->getMessage(), 'error', 'backend' );
@@ -137,7 +142,10 @@ if ( ! class_exists( '\\E20R\\Members_List\\E20R_Members_List' ) ) {
 
 			if ( ! property_exists( $this, $property ) ) {
 				throw new InvalidSettingsKey(
-					esc_attr__( 'The specified E20R_Members_List() class property does not exist!', 'e20r-members-list' )
+					esc_attr__(
+						'The specified E20R_Members_List() class property does not exist!',
+						'e20r-members-list'
+					)
 				);
 			}
 

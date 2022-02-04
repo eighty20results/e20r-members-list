@@ -1,10 +1,7 @@
 E20R_PLUGIN_NAME ?= default-plugin-name
-E20R_PLUGIN_BASE_FILE ?= class-e20r-members-list.php
-LOCAL_NETWORK_IF ?= en0
-
-ifeq ($(E20R_DEPLOYMENT_SERVER),"")
+E20R_PLUGIN_BASE_FILE ?= ./class-e20r-members-list.php
 E20R_DEPLOYMENT_SERVER ?= wordpress.org
-endif
+LOCAL_NETWORK_IF ?= en0
 
 ifneq ($(LOCAL_NETWORK_IF), "")
 LOCAL_NETWORK_STATUS ?= $(shell ifconfig $(LOCAL_NETWORK_IF) | awk '/status:/ { print $$2 }')
@@ -37,4 +34,4 @@ WP_IMAGE_VERSION ?= 1.0
 
 PHP_CODE_PATHS := *.php src/*/*/*/*.php src/*/*/*/*/*.php
 PHP_IGNORE_PATHS := $(COMPOSER_DIR)/*,node_modules/*,src/utilities/*
-MAIN_BRANCH_NAME := main
+E20R_MAIN_BRANCH_NAME := main

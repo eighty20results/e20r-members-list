@@ -25,3 +25,12 @@
 /class/utilities/composer.json
 /class/utilities/.gitignore
 /class/utilities/.editorconfig
+.idea/
+inc/wp_plugins
+tests/
+composer.lock
+docker.hub.key
+phpcs.xml
+.phpunit.result.cache
+build_config/
+github/

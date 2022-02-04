@@ -1,7 +1,6 @@
-name: Test of "Release to Eighty20Results.com" workflows
+name: Test Workflow - Release (and deploy)
 
-# This is used to test changes to the test/build/deploy workflow for the plugin so only applies if the
-# branch is named test_workflow<something>
+# Deploy when a new release is created in the Main branch
 on:
   push:
     branches:
@@ -12,16 +11,37 @@ on:
 
 jobs:
   plugin_tests:
+    name: "Plugin tests - PHP"
+    defaults:
+      run:
+        shell: bash
+    env:
+      # To deploy to the E20R WooCommerce target, set E20R_SSH_SERVER, E20R_SSH_USER, E20R_SSH_PORT,
+      # E20R_SSH_KEY, and remove traces of the SVN_* variables
+      # To deploy to the wordpress.org repository, set SVN_USERNAME and SVN_PASSWORD,
+      # and remove traces of the E20R_SSH_* variables
+      E20R_PLUGIN_NAME: e20r-members-list
+      GITHUB_TOKEN: ${{ secrets.GITHUB }}
+      DOCKER_USER: ${{ secrets.DOCKER_USER }}
+      CONTAINER_ACCESS_TOKEN: ${{ secrets.CONTAINER_ACCESS_TOKEN }}
+      SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+      SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
     strategy:
       matrix:
         php_version: [ '7.3', '7.4', '8.0' ]
-    name: "Plugin tests - PHP"
     runs-on: ubuntu-18.04
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
         with:
           repository: eighty20results/e20r-members-list
+          # FIXME: Remove comment when applying to release-plugin workstream
+          # ref: main
+
+      # Extract the branch name for all events except for pull requests
+      - name: Extract branch or tag name
+        id: branch-name
+        uses: tj-actions/branch-names@v5.1
 
       - name: Setup PHP with Composer V2+
         uses: shivammathur/setup-php@v2
@@ -46,54 +66,57 @@ jobs:
           path: inc/**
 
       - name: Install all needed dependencies for Composer
-        shell: bash
         if: steps.restore-cache.outputs.cache-hit != 'true'
         run: make composer-dev
-        env:
-          E20R_PLUGIN_NAME: e20r-members-list
 
       - name: Install all needed WordPress plugin dependencies
-        shell: bash
         if: steps.composer-cache.outputs.cache-hit != 'true'
         run: make wp-deps
-        env:
-          E20R_PLUGIN_NAME: e20r-members-list
 
       - name: Install all needed dependencies for Docker
-        shell: bash
         if: steps.composer-cache.outputs.cache-hit != 'true'
         run: make docker-deps
-        env:
-          E20R_PLUGIN_NAME: e20r-members-list
 
       - name: Run all Standard Tests
-        shell: bash
         run: make tests
-        env:
-          E20R_PLUGIN_NAME: e20r-members-list
-          GITHUB_TOKEN: ${{ secrets.GITHUB }}
-          DOCKER_USER: ${{ secrets.DOCKER_USER }}
-          CONTAINER_ACCESS_TOKEN: ${{ secrets.CONTAINER_ACCESS_TOKEN }}
 
   # To create the plugin .zip archive
   build_plugin:
     name: Build plugin package to the plugin repository (Our License server or WordPress.org)
     needs: [plugin_tests]
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    env:
+       # To deploy to the E20R WooCommerce target, set E20R_SSH_SERVER, E20R_SSH_USER, E20R_SSH_PORT,
+       # E20R_SSH_KEY, and remove traces of the SVN_* variables
+       # To deploy to the wordpress.org repository, set SVN_USERNAME and SVN_PASSWORD,
+       # and remove traces of the E20R_SSH_* variables
+      E20R_PLUGIN_NAME: e20r-members-list
+      GITHUB_TOKEN: ${{ secrets.GITHUB }}
+      DOCKER_USER: ${{ secrets.DOCKER_USER }}
+      CONTAINER_ACCESS_TOKEN: ${{ secrets.CONTAINER_ACCESS_TOKEN }}
+      SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+      SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
         with:
           repository: eighty20results/e20r-members-list
+          # FIXME: Remove comment when applying to release-plugin workstream
           # ref: main
 
+
       - name: Install SSH Key
+        if: ${{ env.E20R_SSH_SERVER }}
         uses: shimataro/ssh-key-action@v2
         with:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           known_hosts: 'just-a-placeholder-so-we-dont-get-errors'
 
       - name: Adding deployment target to known_hosts file
+        if: ${{ env.E20R_SSH_SERVER }}
         run: ssh-keyscan -H -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
 
       - name: "Setup PHP with Composer V2+"
@@ -119,25 +142,16 @@ jobs:
           path: inc/
 
       - name: Install all needed dependencies for Composer
-        shell: bash
         if: steps.composer-cache.outputs.cache-hit != 'true'
         run: make composer-dev
-        env:
-          E20R_PLUGIN_NAME: e20r-members-list
 
       - name: Install all needed WordPress plugin dependencies
-        shell: bash
         if: steps.composer-cache.outputs.cache-hit != 'true'
         run: make wp-deps
-        env:
-          E20R_PLUGIN_NAME: e20r-members-list
 
       - name: Install all needed dependencies for Docker
-        shell: bash
         if: steps.composer-cache.outputs.cache-hit != 'true'
         run: make docker-deps
-        env:
-          E20R_PLUGIN_NAME: e20r-members-list
 
       - name: Cache the built plugin package
         uses: actions/cache@v2
@@ -148,33 +162,45 @@ jobs:
           path: build/kits/**.zip
 
       - name: Build and test plugin before deployment
-        shell: bash
         run: make build
-        env:
-          E20R_PLUGIN_NAME: e20r-members-list
-          GITHUB_TOKEN: ${{ secrets.GITHUB }}
-          CONTAINER_ACCESS_TOKEN: ${{ secrets.CONTAINER_ACCESS_TOKEN }}
 
   # To push the release to the plugin store
   release:
-    name: Deploy plugin package to the plugin repository (Our License server or WordPress.org)
+    name: Deploy package to the plugin repository (Our License server or WordPress.org)
     needs: [plugin_tests, build_plugin]
     runs-on: ubuntu-18.04
+    defaults:
+      run:
+        shell: bash
+    env:
+      # To deploy to the E20R WooCommerce target, set E20R_SSH_SERVER, E20R_SSH_USER, E20R_SSH_PORT,
+      # E20R_SSH_KEY, and remove traces of the SVN_* variables
+      # To deploy to the wordpress.org repository, set SVN_USERNAME and SVN_PASSWORD, and remove traces of
+      # the E20R_SSH_* variables
+      E20R_PLUGIN_NAME: e20r-members-list
+      GITHUB_TOKEN: ${{ secrets.GITHUB }}
+      DOCKER_USER: ${{ secrets.DOCKER_USER }}
+      CONTAINER_ACCESS_TOKEN: ${{ secrets.CONTAINER_ACCESS_TOKEN }}
+      SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+      SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
         with:
           repository: eighty20results/e20r-members-list
+          # FIXME: Remove comment when applying to release-plugin workstream
           # ref: main
 
+
       - name: Install SSH Key
+        if: ${{ env.E20R_SSH_SERVER }}
         uses: shimataro/ssh-key-action@v2
         with:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           known_hosts: 'just-a-placeholder-so-we-dont-get-errors'
 
       - name: Adding deployment target to known_hosts file
-        shell: bash
+        if: ${{ env.E20R_SSH_SERVER }}
         run: ssh-keyscan -H -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
 
       - name: Login to Docker HUB
@@ -201,24 +227,15 @@ jobs:
 
       - name: Install all needed dependencies for Composer
         if: steps.composer-cache-prod.outputs.cache-hit != 'true'
-        shell: bash
         run: make composer-dev
-        env:
-          E20R_PLUGIN_NAME: e20r-members-list
 
       - name: Install all needed WordPress plugin dependencies
         if: steps.composer-cache-prod.outputs.cache-hit != 'true'
-        shell: bash
         run: make wp-deps
-        env:
-          E20R_PLUGIN_NAME: e20r-members-list
 
       - name: Install all needed dependencies for Docker
         if: steps.composer-cache-prod.outputs.cache-hit != 'true'
-        shell: bash
         run: make docker-deps
-        env:
-          E20R_PLUGIN_NAME: e20r-members-list
 
       - name: Restore the built plugin package
         id: plugin-package-cache
@@ -229,30 +246,29 @@ jobs:
           path: build/kits/**.zip
 
       # Extract the branch name for all events except for pull requests
-      - name: Extract branch or tag name
+      - name: Decide whether to run deploy action
         id: branch-name
         uses: tj-actions/branch-names@v5.1
 
-      - name: Show me the branch info (tag should be blank)
-        shell: bash
+      - name: Show me the branch
         run: |
           echo "Reference branch is: ${{ steps.branch-name.outputs.ref_branch }}"
           echo "Current branch is: ${{ steps.branch-name.outputs.current_branch }}"
           echo "Tag is: ${{ steps.branch-name.outputs.tag }}"
-          echo "Tag status is: ${{ steps.branch-name.outputs.is_tag }}"
+          echo "Tag state is: '${{ steps.branch-name.outputs.is_tag }}'"
 
-      # And then deploy the package if it exists _and_ we're on the main branch
+      # And then deploy the package if it exists _and_ we're on the main branch with a release tag
 
-      - name: Deploy plugin when building a release (to WooCommerce Store or Wordpress.org repo)
-        if: contains(steps.branch-name.outputs.current_branch, 'test_workflow_')
-        shell: bash
+      # The deployment target will depend on whether the
+      # E20R_SSH_USER or SVN_USERNAME environment variable is defined
+      - name: Deploy plugin when building a release (to WooCommerce Store)
+        if: ${{ env.E20R_SSH_SERVER }}
         run: make deploy
         env:
-          BRANCH_NAME: ${{ steps.branch-name.outputs.current_branch }}
-          E20R_PLUGIN_NAME: e20r-members-list
-          GITHUB_TOKEN: ${{ secrets.GITHUB }}
-          DOCKER_USER: ${{ secrets.DOCKER_USER }}
-          CONTAINER_ACCESS_TOKEN: ${{ secrets.CONTAINER_ACCESS_TOKEN }}
-          E20R_SSH_SERVER: ${{ secrets.SSH_HOST }}
-          E20R_SSH_USER: ${{ secrets.SSH_USER }}
-          E20R_SSH_PORT: ${{ secrets.SSH_PORT }}
+          BRANCH_NAME: ${{ steps.branch-name.outputs.tag }}
+
+      - name: Deploy plugin when building a release (to Wordpress.org repo)
+        if: ${{ env.SVN_USERNAME }}
+        run: make deploy
+        env:
+          BRANCH_NAME: ${{ steps.branch-name.outputs.tag }}

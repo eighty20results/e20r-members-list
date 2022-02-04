@@ -20,8 +20,8 @@ function to_woocommerce_store() {
 	declare ssh_host
 
 	# Should only be used when running as a GitHub action for a non-main branch
-	if [[ ! "${BRANCH_NAME}" =~ (release-([vV])?[0-9]+\.[0-9]+(\.[0-9]+)?|([vV])?[0-9]+\.[0-9]+(\.[0-9]+)?) ]]; then
-		echo "Creating mocked ssh and scp command, then we won't actually deploy anything from ${BRANCH_NAME}"
+	if [[ ! "${branch_name}" =~ (release-([vV])?[0-9]+\.[0-9]+(\.[0-9]+)?|([vV])?[0-9]+\.[0-9]+(\.[0-9]+)?) ]]; then
+		echo "Creating mocked ssh and scp commands, then we won't actually deploy anything from ${branch_name}"
 
 		function ssh() {
 			echo ssh "$@"
@@ -31,7 +31,7 @@ function to_woocommerce_store() {
 			echo scp "$@"
 		}
 	else
-		echo "Not sure what the BRANCH_NAME environment variable is..? '${BRANCH_NAME}'"
+		echo "Not sure what the BRANCH_NAME environment variable is..? '${branch_name}'"
 	fi
 
 	src_path="$(pwd)"
@@ -105,6 +105,20 @@ function to_woocommerce_store() {
 # so do not echo or use debug mode unless you want your secrets exposed!
 function to_wordpress_org() {
 
+	declare SVN_URL
+	declare SVN_DIR
+
+	# Should only be used when running as a GitHub action for a non-main branch
+	if [[ ! "${branch_name}" =~ (release-([vV])?[0-9]+\.[0-9]+(\.[0-9]+)?|([vV])?[0-9]+\.[0-9]+(\.[0-9]+)?) ]]; then
+		echo "Creating mocked svn command, then we won't actually deploy anything from ${branch_name}"
+
+		function svn() {
+			echo svn "$@"
+		}
+	else
+		echo "Not sure what the BRANCH_NAME environment variable is...? '${branch_name}'"
+	fi
+
 	if [[ -z "${SVN_USERNAME}" ]]; then
 		echo "Set the SVN_USERNAME secret"
 		exit 1
@@ -115,30 +129,28 @@ function to_wordpress_org() {
 		exit 1
 	fi
 
-	if [[ -z "${BUILD_DIR}" ]]; then
-		echo "Set BUILD_DIR environment variable!"
-		exit 1
-	fi
-
 	# Allow some ENV variables to be customized
-	if [[ -z "${SLUG}" ]]; then
-		SLUG="${GITHUB_REPOSITORY#*/}"
+	if [[ -z "${plugin_slug}" ]]; then
+		declare -x plugin_slug
+		plugin_slug="${GITHUB_REPOSITORY#*/}"
 	fi
-	echo "ℹ︎ SLUG is ${SLUG}"
+	echo "ℹ︎ The plugin slug is: ${plugin_slug}"
 
-	if [[ -z "${BRANCH}" ]]; then
-		BRANCH=$( awk -F/ '{ print $NF }' <<< "${GITHUB_REF}" )
+	if [[ -z "${branch_name}" ]]; then
+		branch_name=$( awk -F/ '{ print $NF }' <<< "${GITHUB_REF}" )
 	fi
-	echo "ℹ︎ BRANCH is ${BRANCH}"
+	echo "ℹ︎ Branch is ${branch_name}"
 
 	# Does it even make sense for VERSION to be editable in a workflow definition?
-	if [[ -z "${VERSION}" ]]; then
-		VERSION="${GITHUB_REF#refs/tags/}"
-		VERSION=$("${VERSION}" | sed -e "s/^v//")
+	if [[ -z "${version}" ]]; then
+		declare -x version
+		version="${GITHUB_REF#refs/tags/}"
+		version=$(echo "${version}" | sed -e "s/^release-//" | sed -e "s/^[vV]//")
 	fi
-	echo "ℹ︎ VERSION is ${VERSION}"
+	echo "ℹ︎ Version is ${version}"
 
 	if [[ -z "${ASSETS_DIR}" ]]; then
+		declare -x ASSETS_DIR
 		ASSETS_DIR=".wordpress-org"
 	fi
 	echo "ℹ︎ ASSETS_DIR is ${ASSETS_DIR}"
@@ -151,8 +163,11 @@ function to_wordpress_org() {
 		git submodule update --remote
 	fi
 
-	SVN_URL="http://plugins.svn.wordpress.org/${SLUG}/"
-	SVN_DIR="/github/svn-${SLUG}"
+	SVN_URL="http://plugins.svn.wordpress.org/${plugin_slug}/"
+	SVN_DIR="./github/svn-${plugin_slug}"
+
+	echo "➤ Making SVN source directory..."
+	mkdir -p "${SVN_DIR}"/{tags,assets,trunk}
 
 	# Checkout just trunk and assets for efficiency
 	# Tagging will be handled on the SVN level
@@ -162,9 +177,9 @@ function to_wordpress_org() {
 	svn update --set-depth infinity assets
 	svn update --set-depth infinity trunk
 
-	if [[ -d "${SVN_DIR}/tags/${VERSION}" ]]; then
+	if [[ -d "${SVN_DIR}/tags/${version}" ]]; then
 		echo "ℹ︎ Removing pre-existing release from /tags/ directory"
-		rm -rf "${SVN_DIR}/tags/${VERSION}"
+		rm -rf "${SVN_DIR}/tags/${version}"
 		# TODO(?): Remove commit that contains the update(d) version from SVN?
 	fi
 
@@ -178,11 +193,13 @@ function to_wordpress_org() {
 	else
 		echo "ℹ︎ Using .gitattributes in ${GITHUB_WORKSPACE}"
 
-		cd "${GITHUB_WORKSPACE}" || (echo "ℹ︎ Cannot change directory to ${GITHUB_WORKSPACE}!" ; exit 1)
+		if [[ "${GITHUB_WORKSPACE}" != "${PWD}" ]]; then
+			cd "${GITHUB_WORKSPACE}" || (echo "ℹ︎ Cannot change directory to ${GITHUB_WORKSPACE}!" ; exit 1)
+		fi
 
 		# "Export" a cleaned copy to a temp directory
-		TMP_DIR="/github/archivetmp"
-		mkdir "${TMP_DIR}"
+		TMP_DIR="github/archivetmp"
+		mkdir -p "${TMP_DIR}"
 
 		git config --global user.email "thomas@eighty20results.com"
 		git config --global user.name "Eighty/20Results Bot on Github"
@@ -213,26 +230,21 @@ function to_wordpress_org() {
 	fi
 
 	# Removal of unsupported/disallowed one-click update functionality
-	if [[ -f "${BUILD_DIR}/remove_update.sh" ]]; then
-		echo "➤ Trigger removal of custom one-click update functionality. In ${PWD}"
-		"${BUILD_DIR}/remove_update.sh"
+	if [[ -f bin/remove_update.sh ]]; then
+		echo "➤ Trigger removal of custom one-click update functionality."
+		bin/remove_update.sh
 	fi
 
 	# Copy dotorg assets to /assets
-	if [[ -d "${GITHUB_WORKSPACE}/$ASSETS_DIR/" ]]; then
-		rsync -rc "${GITHUB_WORKSPACE}/$ASSETS_DIR/" assets/ --delete
+	if [[ -d "${GITHUB_WORKSPACE}/${ASSETS_DIR}/" ]]; then
+		rsync -rc "${GITHUB_WORKSPACE}/${ASSETS_DIR}/" assets/ --delete
 	else
 		echo "ℹ︎ No assets directory found; skipping asset copy"
 	fi
 
-	if [[ -f "${SVN_DIR}/src/utilities/class.utilities.php" ]]; then
-		echo "ℹ︎ Refreshing the Utilities module from ${SVN_DIR}/class/utilities:"
-		cp -R "${SVN_DIR}/src/utilities/*" "trunk/src/utilities/"
-	fi
-
 	# Should be excluded from the Wordpress.org repo
 	if [ -z "${excluded_for_svn}" ]; then
-		echo "ℹ︎ Don't believe there's nothing Git related that should be excluded from the SVN repository!"
+		echo "ℹ︎ Don't believe we have nothing Git related to exclude from the SVN repository!"
 		exit 1
 	fi
 
@@ -255,33 +267,37 @@ function to_wordpress_org() {
 	svn status | grep '^\!' | sed 's/! *//' | xargs -I% svn rm %@ > /dev/null
 
 	echo "➤ Copying tag..."
-	svn cp "trunk" "tags/${VERSION}"
-
+	svn cp "trunk" "tags/${version}"
 	svn status
 
 	echo "➤ Testing that we need to push to Wordpress.org"
 
-	if [[ -n "${BRANCH_NAME}" && "${BRANCH_NAME}" =~ ^v[0-9]+\..*[0-9]$ ]]; then
-		echo "➤ In main branch so committing files to Wordpress.org SVN repository..."
-		svn commit -m "Update to version ${VERSION} from GitHub" \
+	if [[ -n "${branch_name}" && "${branch_name}" =~ (release-([vV])?[0-9]+\.[0-9]+(\.[0-9]+)?|([vV])?[0-9]+\.[0-9]+(\.[0-9]+)?) ]]; then
+		echo "➤ In ${E20R_MAIN_BRANCH_NAME} branch so committing files to Wordpress.org SVN repository..."
+		svn commit -m "Update to version ${version} from GitHub" \
 		--no-auth-cache \
 		--non-interactive  \
 		--username "${SVN_USERNAME}" \
 		--password "${SVN_PASSWORD}"
 		echo "✓ Plugin deployed!"
 	else
-		echo "✓ Not in main branch. Nothing to do"
+		echo "✓ Not in ${E20R_MAIN_BRANCH_NAME} branch. Nothing to do"
 	fi
+
+	echo "➤ Cleaning up..."
+	rm -rf github/ || die "Error: Unable to remove ./github directory!"
 }
 
 source build_config/helper_config "${@}"
 
-if [ -z "${SVN_USERNAME}"  ] && [ -n "${E20R_SSH_USER}" ]; then
+echo "ℹ︎ Executing for branch: ${branch_name}"
+
+if [ -z "${SVN_USERNAME}"  ] && [ -n "${E20R_SSH_USER}" ] && [ "${remote_server}" != "wordpress.org" ]; then
 	echo "ℹ︎ Will attempt to deploy ${E20R_PLUGIN_NAME} to the WooCommerce Store"
 	to_woocommerce_store "$@"
 fi
 
-if [ -z "${E20R_SSH_USER}" ] && [ -n "${SVN_USERNAME}" ]; then
+if [ -z "${E20R_SSH_USER}" ] && [ -n "${SVN_USERNAME}" ] && [ "${remote_server}" == "wordpress.org" ]; then
 	echo "ℹ︎ Will attempt to deploy ${E20R_PLUGIN_NAME} to the Wordpress.org Repository"
 	to_wordpress_org "$@"
 fi

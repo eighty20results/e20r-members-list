@@ -1,4 +1,9 @@
 version: 2
+
+on:
+  schedule:
+    - cron: '0 6 * * *'
+
 updates:
   # Maintain dependencies for GitHub Actions
   - package-ecosystem: "github-actions"

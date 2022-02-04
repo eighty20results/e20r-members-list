@@ -30,13 +30,13 @@ The same goes for the Export to CSV functionality.
 This plugin should support the standard Paid Memberships Pro filters in order to add new CSV export columns and data.
 
 == Supported Filters ==
-See [FILTERS.md](https://github.com/eighty20results.com/{$short_name}/docs/FILTERS.md)
+See [FILTERS.md](https://github.com/eighty20results.com/{$short_name}/blob/main/docs/FILTERS.md)
 
 == Supported Actions ==
-See [ACTIONS.md](https://github.com/eighty20results.com/{$short_name}/docs/ACTIONS.md)
+See [ACTIONS.md](https://github.com/eighty20results.com/{$short_name}/blob/main/docs/ACTIONS.md)
 
 == Known Issues ==
 No known issues at this time
 
 == Changelog ==
-See the official [CHANGELOG.md](https://github.com/eighty20results.com/{$short_name}/CHANGELOG.md) file
+See the official [CHANGELOG.md](https://github.com/eighty20results.com/{$short_name}/blob/main/CHANGELOG.md) file
