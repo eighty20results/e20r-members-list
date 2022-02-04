@@ -65,6 +65,10 @@ fabric.properties
 .idea/vcs.xml
 /build_readmes/readme_changelog.txt
 /build_readmes/json_changelog.txt
+/build_readmes/
+!/build_readmes/skel/CHANGELOG.md
+!/build_readmes/skel/metadata.json
+!/build_readmes/skel/README.txt
 docker-env/e20r-members-list.sql
 /.circleci/docker/test/db_backup/e20r-members-list.sql
 /composer
