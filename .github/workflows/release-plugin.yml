@@ -1,4 +1,4 @@
-name: Release (and deploy)
+name: Deploy the Release
 
 # Deploy when a new release is created in the Main branch
 on:
@@ -7,11 +7,11 @@ on:
     branches:
       - 'main'
       - 'release/**'
-    types: [opened, closed]
+    types: [released, prereleased, edited]
 
 jobs:
   plugin_tests:
-    if: github.event.pull_request.merged
+    if: github.event.release.released || github.event.release.prereleased || github.event.release.edited
     name: "Plugin tests - PHP"
     defaults:
       run:
