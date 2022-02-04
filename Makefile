@@ -611,12 +611,12 @@ build: prerequisite stop-stack clean-inc composer-prod $(E20R_PLUGIN_BASE_FILE)
 		echo "Package for $(E20R_PLUGIN_NAME) not found!" ; \
 		exit 1 ; \
 	else \
-		echo "Skipping build step. $(E20R_PLUGIN_NAME)-$${E20R_PLUGIN_VERSION}.zip is already built!" ; \
-	fi ; \
-	rm -rf "build/kits/$(E20R_PLUGIN_NAME)" || die "Error: Cannot remove build/kits/$(E20R_PLUGIN_NAME)"
+		echo "$(E20R_PLUGIN_NAME)-$${E20R_PLUGIN_VERSION}.zip is complete" ; \
+	fi && \
+	rm -rf "build/$(E20R_PLUGIN_NAME)" || die "Error: Cannot remove build/kits/$(E20R_PLUGIN_NAME)"
 
 deploy: prerequisite build
-	@echo "Deploy $(E20R_PLUGIN_NAME).zip to $(E20R_DEPLOYMENT_SERVER)"
+	@echo "Deploy $(E20R_PLUGIN_NAME) to $(E20R_DEPLOYMENT_SERVER)"
 	@export E20R_PLUGIN_VERSION="$$(./bin/get_plugin_version.sh $(E20R_PLUGIN_BASE_FILE))" ; \
 	if [[ ! -f "build/kits/$(E20R_PLUGIN_NAME)-$${E20R_PLUGIN_VERSION}.zip" ]]; then \
 	  	echo "Error: ${PWD}/build/kits/$(E20R_PLUGIN_NAME)-$${E20R_PLUGIN_VERSION}.zip not found!" ; \
