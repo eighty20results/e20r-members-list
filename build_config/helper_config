@@ -22,7 +22,6 @@ declare -x short_name
 declare -x version
 declare -x remote_server
 declare -x wordpress_version
-declare -x build_dir
 declare -x branch_name
 declare -x plugin_slug
 declare -x codeception_update_list
