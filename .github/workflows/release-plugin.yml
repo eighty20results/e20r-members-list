@@ -7,11 +7,11 @@ on:
     branches:
       - 'main'
       - 'release/**'
-    types: [closed]
+    types: [opened, closed]
 
 jobs:
   plugin_tests:
-    if: github.event.pull_request.merged == 'true'
+    if: github.event.pull_request.merged
     name: "Plugin tests - PHP"
     defaults:
       run:
