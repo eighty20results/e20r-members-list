@@ -79,3 +79,4 @@ build/
 !build/kits/.gitignore
 !build/kits/.gitkeep
 /.phpunit.result.cache
+/github/
