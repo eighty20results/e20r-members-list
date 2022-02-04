@@ -563,7 +563,7 @@ tests: prerequisite clean wp-deps code-standard-tests phpstan-tests unit-tests d
 # Generate a GIT commit log in build_readmes/current.txt
 #
 git-log: prerequisite
-	@MAIN_BRANCH_NAME=$(MAIN_BRANCH_NAME) ./bin/create_log.sh
+	@E20R_MAIN_BRANCH_NAME=$(E20R_MAIN_BRANCH_NAME) ./bin/create_log.sh
 
 #
 # Generate (and update) the custom WP Plugin Updater metadata.json file
@@ -588,14 +588,17 @@ readme: prerequisite
 # Saves the built plugin .zip archive to build/kits
 #
 $(E20R_PLUGIN_BASE_FILE): prerequisite stop-stack clean-inc composer-prod
-	@if [[ -z "$${USE_LOCAL_BUILD}" ]]; then \
-  		echo "Deploying kit to $(E20R_DEPLOYMENT_SERVER)" && \
-  		E20R_PLUGIN_NAME=$(E20R_PLUGIN_NAME) ./bin/build-plugin.sh "$(E20R_PLUGIN_BASE_FILE)" "$(E20R_DEPLOYMENT_SERVER)"; \
-	else \
-		rm -rf $(COMPOSER_DIR)/wp_plugins && \
-		mkdir -p build/kits/ && \
-		E20R_PLUGIN_VERSION=$$(./bin/get_plugin_version.sh "$(E20R_PLUGIN_BASE_FILE)") \
-		git archive --prefix=$(E20R_PLUGIN_NAME)/ --format=zip --output=build/kits/$(E20R_PLUGIN_NAME)-$${E20R_PLUGIN_VERSION}.zip --worktree-attributes main ; \
+	@export E20R_PLUGIN_VERSION="$$(./bin/get_plugin_version.sh $(E20R_PLUGIN_BASE_FILE))" ; \
+	if [[ ! -f "build/kits/$(E20R_PLUGIN_NAME)-$${E20R_PLUGIN_VERSION}.zip" ]]; then \
+		if [[ -z "$${USE_LOCAL_BUILD}" ]]; then \
+			echo "Deploying kit to $(E20R_DEPLOYMENT_SERVER)" && \
+			E20R_PLUGIN_NAME="$(E20R_PLUGIN_NAME)" ./bin/build-plugin.sh "$(E20R_PLUGIN_BASE_FILE)" "$(E20R_DEPLOYMENT_SERVER)"; \
+		else \
+			rm -rf $(COMPOSER_DIR)/wp_plugins && \
+			mkdir -p build/kits/ && \
+			E20R_PLUGIN_VERSION="$$(./bin/get_plugin_version.sh $(E20R_PLUGIN_BASE_FILE))" \
+			git archive --prefix=$(E20R_PLUGIN_NAME)/ --format=zip --output="build/kits/$(E20R_PLUGIN_NAME)-$${E20R_PLUGIN_VERSION}.zip" --worktree-attributes "$(E20R_MAIN_BRANCH_NAME)" ; \
+		fi ; \
 	fi
 
 #
@@ -603,19 +606,21 @@ $(E20R_PLUGIN_BASE_FILE): prerequisite stop-stack clean-inc composer-prod
 # Saves the built plugin .zip archive to build/kits
 #
 build: prerequisite stop-stack clean-inc composer-prod $(E20R_PLUGIN_BASE_FILE)
-	@if [[ ! -f "build/kits/${E20R_PLUGIN_NAME}-${E20R_PLUGIN_VERSION}.zip" ]]; then \
+	@export E20R_PLUGIN_VERSION="$$(./bin/get_plugin_version.sh $(E20R_PLUGIN_BASE_FILE))" ; \
+	if [[ ! -f "build/kits/$(E20R_PLUGIN_NAME)-$${E20R_PLUGIN_VERSION}.zip" ]]; then \
 		echo "Package for $(E20R_PLUGIN_NAME) not found!" ; \
 		exit 1 ; \
 	fi
 
 deploy: prerequisite build
 	@echo "Deploy $(E20R_PLUGIN_NAME).zip to $(E20R_DEPLOYMENT_SERVER)"
-	@if ! compgen -G "build/kits/${E20R_PLUGIN_NAME}-*.zip" > /dev/null; then \
-	  	echo "Error: ${PWD}/build/kits/${E20R_PLUGIN_NAME}*.zip not found!" ; \
+	@export E20R_PLUGIN_VERSION="$$(./bin/get_plugin_version.sh $(E20R_PLUGIN_BASE_FILE))" ; \
+	if [[ ! -f "build/kits/$(E20R_PLUGIN_NAME)-$${E20R_PLUGIN_VERSION}.zip" ]]; then \
+	  	echo "Error: ${PWD}/build/kits/$(E20R_PLUGIN_NAME)-$${E20R_PLUGIN_VERSION}.zip not found!" ; \
 	  	ls -l "${PWD}/build/kits/" ; \
 	  	exit 1; \
 	fi
-	@echo "Preparing to deploy the ${E20R_PLUGIN_NAME}-*.zip plugin archive to the Deployment Server"
+	@echo "Preparing to deploy the ${E20R_PLUGIN_NAME}-*.zip plugin archive to the $(E20R_DEPLOYMENT_SERVER) Server"
 	@./bin/deploy.sh "$(E20R_PLUGIN_BASE_FILE)" "$(E20R_DEPLOYMENT_SERVER)"
 
 

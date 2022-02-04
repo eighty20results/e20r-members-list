@@ -71,13 +71,14 @@ declare -x -a exclude=( \
 	"vendor" \
 	)
 declare -x -a excluded_for_svn=(
+		"trunk/.idea" \
 		"trunk/.git" \
 		"trunk/.circleci" \
 		"trunk/.github" \
 		"trunk/bin" \
 		"trunk/build_env" \
 		"trunk/docker" \
-		"trunk/inc" \
+		"trunk/github" \
 		"trunk/src/utilities/.git" \
 		"trunk/src/utilities/bin" \
 		"trunk/src/utilities/.gitignore" \
@@ -122,7 +123,7 @@ if [ -z "${GITHUB_REF}" ]; then
 fi
 
 if [ -n "${GITHUB_REF}" ] && [ -z "${branch_name}" ]; then
-	branch_name="${GITHUB_REF#refs/tags/}"
+	branch_name=$( awk -F/ '{ print $NF }' <<< "${GITHUB_REF}" )
 fi
 
 if [ -z "${GITHUB_WORKSPACE}" ]; then

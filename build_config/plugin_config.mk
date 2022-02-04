@@ -1,5 +1,5 @@
 E20R_PLUGIN_NAME ?= default-plugin-name
-E20R_PLUGIN_BASE_FILE ?= class-e20r-members-list.php
+E20R_PLUGIN_BASE_FILE ?= ./class-e20r-members-list.php
 E20R_DEPLOYMENT_SERVER ?= wordpress.org
 LOCAL_NETWORK_IF ?= en0
 
