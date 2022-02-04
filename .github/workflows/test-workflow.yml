@@ -35,7 +35,8 @@ jobs:
         uses: actions/checkout@v2
         with:
           repository: eighty20results/e20r-members-list
-          ref: main
+          # FIXME: Remove comment when applying to release-plugin workstream
+          # ref: main
 
       # Extract the branch name for all events except for pull requests
       - name: Extract branch or tag name
@@ -103,7 +104,9 @@ jobs:
         uses: actions/checkout@v2
         with:
           repository: eighty20results/e20r-members-list
-          ref: main
+          # FIXME: Remove comment when applying to release-plugin workstream
+          # ref: main
+
 
       - name: Install SSH Key
         if: ${{ env.E20R_SSH_SERVER }}
@@ -185,7 +188,9 @@ jobs:
         uses: actions/checkout@v2
         with:
           repository: eighty20results/e20r-members-list
-          ref: main
+          # FIXME: Remove comment when applying to release-plugin workstream
+          # ref: main
+
 
       - name: Install SSH Key
         if: ${{ env.E20R_SSH_SERVER }}
