@@ -16,8 +16,10 @@ jobs:
       run:
         shell: bash
     env:
-      # To deploy to the E20R WooCommerce target, set E20R_SSH_SERVER, E20R_SSH_USER, E20R_SSH_PORT, E20R_SSH_KEY and remove traces of the SVN_* variables
-      # To deploy to the wordpress.org repository, set SVN_USERNAME and SVN_PASSWORD and remove traces of the E20R_SSH_* variables
+      # To deploy to the E20R WooCommerce target, set E20R_SSH_SERVER, E20R_SSH_USER, E20R_SSH_PORT,
+      # E20R_SSH_KEY, and remove traces of the SVN_* variables
+      # To deploy to the wordpress.org repository, set SVN_USERNAME and SVN_PASSWORD,
+      # and remove traces of the E20R_SSH_* variables
       E20R_PLUGIN_NAME: e20r-members-list
       GITHUB_TOKEN: ${{ secrets.GITHUB }}
       DOCKER_USER: ${{ secrets.DOCKER_USER }}
@@ -86,8 +88,10 @@ jobs:
       run:
         shell: bash
     env:
-       # To deploy to the E20R WooCommerce target, set E20R_SSH_SERVER, E20R_SSH_USER, E20R_SSH_PORT, E20R_SSH_KEY and remove traces of the SVN_* variables
-       # To deploy to the wordpress.org repository, set SVN_USERNAME and SVN_PASSWORD and remove traces of the E20R_SSH_* variables
+       # To deploy to the E20R WooCommerce target, set E20R_SSH_SERVER, E20R_SSH_USER, E20R_SSH_PORT,
+       # E20R_SSH_KEY, and remove traces of the SVN_* variables
+       # To deploy to the wordpress.org repository, set SVN_USERNAME and SVN_PASSWORD,
+       # and remove traces of the E20R_SSH_* variables
       E20R_PLUGIN_NAME: e20r-members-list
       GITHUB_TOKEN: ${{ secrets.GITHUB }}
       DOCKER_USER: ${{ secrets.DOCKER_USER }}
@@ -159,15 +163,17 @@ jobs:
 
   # To push the release to the plugin store
   release:
-    name: Deploy plugin package to the plugin repository (Our License server or WordPress.org)
+    name: Deploy package to the plugin repository (Our License server or WordPress.org)
     needs: [plugin_tests, build_plugin]
     runs-on: ubuntu-18.04
     defaults:
       run:
         shell: bash
     env:
-     # To deploy to the E20R WooCommerce target, set E20R_SSH_SERVER, E20R_SSH_USER, E20R_SSH_PORT, E20R_SSH_KEY and remove traces of the SVN_* variables
-     # To deploy to the wordpress.org repository, set SVN_USERNAME and SVN_PASSWORD and remove traces of the E20R_SSH_* variables
+      # To deploy to the E20R WooCommerce target, set E20R_SSH_SERVER, E20R_SSH_USER, E20R_SSH_PORT,
+      # E20R_SSH_KEY, and remove traces of the SVN_* variables
+      # To deploy to the wordpress.org repository, set SVN_USERNAME and SVN_PASSWORD, and remove traces of
+      # the E20R_SSH_* variables
       E20R_PLUGIN_NAME: e20r-members-list
       GITHUB_TOKEN: ${{ secrets.GITHUB }}
       DOCKER_USER: ${{ secrets.DOCKER_USER }}
