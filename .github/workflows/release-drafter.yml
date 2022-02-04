@@ -9,7 +9,7 @@ on:
 
 jobs:
   update_release_draft:
-    if: github.event.pull_request.merged == 'true'
+    if: github.event.pull_request.merged
     runs-on: ubuntu-latest
     steps:
       # Drafts your next Release notes as Pull Requests are merged into "master"
