@@ -603,9 +603,12 @@ $(E20R_PLUGIN_BASE_FILE): prerequisite stop-stack clean-inc composer-prod
 # Saves the built plugin .zip archive to build/kits
 #
 build: prerequisite stop-stack clean-inc composer-prod $(E20R_PLUGIN_BASE_FILE)
-	@echo "Built kit for $(E20R_PLUGIN_NAME)"
+	@if [[ ! -f "build/kits/${E20R_PLUGIN_NAME}-${E20R_PLUGIN_VERSION}.zip" ]]; then \
+		echo "Package for $(E20R_PLUGIN_NAME) not found!" ; \
+		exit 1 ; \
+	fi
 
-deploy: prerequisite
+deploy: prerequisite build
 	@echo "Deploy $(E20R_PLUGIN_NAME).zip to $(E20R_DEPLOYMENT_SERVER)"
 	@if ! compgen -G "build/kits/${E20R_PLUGIN_NAME}-*.zip" > /dev/null; then \
 	  	echo "Error: ${PWD}/build/kits/${E20R_PLUGIN_NAME}*.zip not found!" ; \
@@ -613,7 +616,7 @@ deploy: prerequisite
 	  	exit 1; \
 	fi
 	@echo "Preparing to deploy the ${E20R_PLUGIN_NAME}-*.zip plugin archive to the Deployment Server"
-	@./bin/deploy.sh "${E20R_PLUGIN_BASE_FILE}" "$(E20R_DEPLOYMENT_SERVER)"
+	@./bin/deploy.sh "$(E20R_PLUGIN_BASE_FILE)" "$(E20R_DEPLOYMENT_SERVER)"
 
 
 #new-release: test composer-prod
