@@ -30,9 +30,13 @@ if ( ! defined( 'ABSPATH' ) && defined( 'PLUGIN_PHPUNIT' ) ) {
 use Codeception\TestCase\WPTestCase;
 use E20R\Members_List\Admin\Exceptions\DBQueryError;
 use E20R\Members_List\Admin\Exceptions\InvalidSQL;
+use E20R\Members_List\Admin\Pages\Members_List_Page;
 use E20R\Members_List\Members_List;
 use E20R\Utilities\Message;
 use E20R\Utilities\Utilities;
+
+use Brain\Monkey;
+use Brain\Monkey\Functions;
 
 /**
  * Integration tests for the MembersList class
@@ -51,6 +55,7 @@ class Members_List_IntegrationTest extends WPTestCase {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		Monkey\setUp();
 
 		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$GLOBALS['hook_suffix'] = 'pmpro_membership';
@@ -58,6 +63,15 @@ class Members_List_IntegrationTest extends WPTestCase {
 		$this->utils            = new Utilities( $message );
 	}
 
+	/**
+	 * Tear-down test settings
+	 *
+	 * @return void
+	 */
+	public function tearDown(): void {
+		Monkey\tearDown();
+		parent::tearDown();
+	}
 	/**
 	 * Test the set_tables_and_joins() function with a filter
 	 *
@@ -544,6 +558,143 @@ class Members_List_IntegrationTest extends WPTestCase {
 	}
 
 	/**
+	 * Test the returned column value when processing Members_List::column_last()
+	 *
+	 * @param array       $test_item The simulated CSV column data for the import
+	 * @param string|null $next_payment The next payment
+	 * @param int|null    $time_value The epoch value to use when overriding the 'time()' function
+	 * @param string|null $date_format The date format to use for the column
+	 * @param string      $expected_html The expected HTML/enddate information for the 'last' column
+	 *
+	 * @return void
+	 *
+	 * @dataProvider fixture_last_column_item
+	 * @test
+	 */
+	public function it_should_return_the_correct_html_for_the_last_column( $test_item, $next_payment, $time_value, $date_format, $expected_html ) {
+
+		// TODO: Set up mocks/stubs for the pmpro_nextPayment(), date_i18n() and others.
+		$page        = new Members_List_Page( $this->utils );
+		$ml          = new Members_List( $this->utils, $page );
+		$result_html = $ml->column_last( $test_item );
+		$this->utils->log( $result_html );
+		self::assertSame( $expected_html, $result_html );
+	}
+
+	/**
+	 * Fixture for the it_should_return_the_correct_html_for_the_last_column() test
+	 *
+	 * @return array[]
+	 */
+	public function fixture_last_column_item() {
+		$item_list = $this->fixture_generate_item_list();
+		$return_array    = array();
+		$time_value      = 1644518240;
+
+		// Build the fixture dynamically(ish)
+		foreach ( $item_list as $item ) {
+			// Have custom settings we need to pull
+			$date_format  = $item['date_format'];
+			$next_payment = $item['next_payment_date'];
+
+			// Clean up the item before treating it as a user record
+			unset( $item['date_format'] );
+			unset( $item['next_payment_date'] );
+
+			// Add a test record
+			$return_array[] = array( $item, $time_value, $next_payment, $date_format, $this->fixture_generate_enddate_html( $item, $date_format ) );
+		}
+
+		return $return_array;
+	}
+
+	/**
+	 * Generates a list of records to test against
+	 *
+	 * @return array[]
+	 */
+	private function fixture_generate_item_list() {
+		return array(
+			// Test with what counts as an "empty" (no) enddate value
+			array(
+				'ID'                => 165,
+				'record_id'         => 844,
+				'membership_id'     => 1,
+				'enddate'           => '0000-00-00 00:00:00',
+				'billing_amount'    => null,
+				'cycle_number'      => null,
+				'date_format'       => 'F j, Y',
+				'next_payment_date' => null,
+			),
+			// Test with what is an empty (no) enddate value
+			array(
+				'ID'                => 3,
+				'record_id'         => 682,
+				'membership_id'     => 1,
+				'enddate'           => null,
+				'billing_amount'    => null,
+				'cycle_number'      => null,
+				'date_format'       => 'F j, Y',
+				'next_payment_date' => null,
+			),
+			// Test with what should also be treated as an empty (no) enddate value
+			array(
+				'ID'                => 3,
+				'record_id'         => 682,
+				'membership_id'     => 1,
+				'enddate'           => '',
+				'billing_amount'    => null,
+				'cycle_number'      => null,
+				'date_format'       => 'F j, Y',
+				'next_payment_date' => null,
+			),
+			// Test with a valid end-date
+			array(
+				'ID'                => 3,
+				'record_id'         => 682,
+				'membership_id'     => 1,
+				'enddate'           => '2020-01-01 23:59:59',
+				'billing_amount'    => null,
+				'cycle_number'      => null,
+				'date_format'       => 'F j, Y',
+				'next_payment_date' => null,
+			),
+		);
+	}
+
+	/**
+	 * Generate the expected HTML for the fixture_last_column_item() method
+	 *
+	 * @param array  $item The record we're testing with
+	 * @param string $date_format The date format
+	 *
+	 * @return string
+	 */
+	private function fixture_generate_enddate_html( $item, $date_format ) {
+		$enddate_timestamp = ( ! empty( $item['enddate'] ) ? strtotime( $item['enddate'], time() ) : null );
+		$date              = date( $date_format, $enddate_timestamp ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
+		return sprintf(
+			'<a href="#" class="e20r-members-list_enddate e20r-members-list-editable" title="Update membership end/expiration date">%1$s<span class="dashicons dashicons-edit"></span></a><div class="ml-row-settings clearfix">
+
+				<input type="hidden" value="%2$d" class="e20r-members-list-membership-id" name="e20r-members-list-enddate_mid_%3$d">
+				<input type="hidden" value="%3$d" class="e20r-members-list-user-id" name="e20r-members-list-user_id_%3$d">
+				<input type="hidden" value="%1$s" class="e20r-members-list-enddate-label" name="e20r-members-list-enddatelabel_%3$d">
+				<input type="hidden" value="%4$s" class="e20r-members-list-db-enddate" name="e20r-members-list-db_enddate_%3$d">
+				<input type="hidden" value="%5$d" class="e20r-members-list-db_record_id" name="e20r-members-list-db_record_id_%3$d">
+				<input type="hidden" value="enddate" class="e20r-members-list-field-name" name="e20r-members-list-field_name_%3$d">
+						<input type="date" placeholder="YYYY-MM-DD" pattern="(?:19|20)[0-9]{2}-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1[0-9]|2[0-9])|(?:(?!02)(?:0[1-9]|1[0-2])-(?:30))|(?:(?:0[13578]|1[02])-31))" title="Enter a date in this format YYYY-MM-DD" name="e20r-members-list-new_enddate_%3$d" class="e20r-members-list-input-enddate hasDatepicker" value="" id="dp1644518650983">
+						<br />
+						<a href="#" class="e20r-members-list-cancel e20r-members-list-list-link">Cancel</a>
+					</div>',
+			$date,
+			$item['membership_id'],
+			$item['ID'],
+			$enddate_timestamp,
+			$item['record_id'],
+		);
+	}
+
+	/**
 	 * Test the columns to display (and their order)
 	 *
 	 * @param string   $filter_name The name of the column filter to apply
@@ -565,7 +716,7 @@ class Members_List_IntegrationTest extends WPTestCase {
 		}
 
 		$actual = $members_list->all_columns();
-		$this->assertEquals( $expected, $actual );
+		self::assertSame( $expected, $actual );
 	}
 
 	/**
