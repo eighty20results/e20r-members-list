@@ -20,3 +20,14 @@
  *
  * @package \
  */
+
+// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+error_log( 'Loading fixture definitions for integration tests' );
+
+if ( file_exists( __DIR__ . '/inc/fixture_insert_test_data.php' ) ) {
+	require_once __DIR__ . '/inc/fixture_insert_test_data.php';
+}
+
+if ( file_exists( __DIR__ . '/inc/fixture_clear_test_data.php' ) ) {
+	require_once __DIR__ . '/inc/fixture_clear_test_data.php';
+}
