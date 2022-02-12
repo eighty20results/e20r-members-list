@@ -1,4 +1,4 @@
-bootstrap: ./tests/api/_bootstrap.php
+bootstrap: _bootstrap.php
 actor: ApiTester
 modules:
     enabled:
