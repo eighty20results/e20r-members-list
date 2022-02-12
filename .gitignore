@@ -78,9 +78,10 @@ docker-env/e20r-members-list.sql
 /docker.hub.key
 /workflow/
 /_actions/
-inc/
+/inc/
 build/
 !build/kits/.gitignore
 !build/kits/.gitkeep
 /.phpunit.result.cache
 /github/
+!tests/integration/
