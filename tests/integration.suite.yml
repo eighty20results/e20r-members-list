@@ -2,6 +2,7 @@
 #
 # suite for WordPress integration tests.
 # Load WordPress and integration test classes that rely on it.
+bootstrap: ./tests/integration/_bootstrap.php
 class_name: IntegrationTester
 modules:
     enabled:
