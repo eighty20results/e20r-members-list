@@ -31,3 +31,17 @@ if ( file_exists( __DIR__ . '/inc/fixture_insert_test_data.php' ) ) {
 if ( file_exists( __DIR__ . '/inc/fixture_clear_test_data.php' ) ) {
 	require_once __DIR__ . '/inc/fixture_clear_test_data.php';
 }
+
+// PMPro isn't very defensively coded and
+if ( ! defined( 'AUTH_KEY' ) ) {
+	// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+	error_log( 'Defining AUTH_KEY' );
+	define( 'AUTH_KEY', rand_str( 32 ) );
+}
+
+// pmpro_next_payment() assumes AUTH_KEY and SECURE_AUTH_KEY will always be defined
+if ( ! defined( 'SECURE_AUTH_KEY' ) ) {
+	// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+	error_log( 'Defining SECURE_AUTH_KEY' );
+	define( 'SECURE_AUTH_KEY', rand_str( 32 ) );
+}
