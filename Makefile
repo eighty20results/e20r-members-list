@@ -61,7 +61,7 @@ endif
 DOWNLOAD_MODULE := 1
 
 # Determine if there is a local (to this system) instance of the E20R Utilities module repository
-ifneq ($(wildcard $(E20R_UTILITIES_PATH)/src/licensing/class-licensing.php),)
+ifneq ($(wildcard $(E20R_UTILITIES_PATH)/src/E20R/licensing/class-licensing.php),)
 DOWNLOAD_MODULE := $(shell grep -q 'public function __construct' $(E20R_UTILITIES_PATH)/src/licensing/class-licensing.php 2>/dev/null && echo "0")
 endif
 
@@ -505,7 +505,6 @@ integration-tests: docker-deps start-stack db-import
   			$(COMPOSER_DIR)/bin/codecept run integration --coverage-html ./coverage/integration --verbose --debug --steps $(INTEGRATION_TEST_CASE_PATH); \
 	fi
 
-# TODO: Add coverage support to the integration-test target
 integration-start: docker-deps start-stack db-import
 
 integration:
