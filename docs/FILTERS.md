@@ -249,3 +249,40 @@ add_filter(
 	1
 );
 ```
+
+### e20r_members_list_empty_date_values
+
+Modifies: Array of the date values that we (and PMPro) consider to be the equivalent of an 'empty' (not configured) date value
+
+Purpose: To modify or update the list of date values we'll think of as 'empty'. Anything goes here. Including integer values representing seconds since epoch start.
+
+Default:
+```php
+array(
+	'',
+	null,
+	0,
+	'0',
+	'0000-00-00 00:00:00',
+	'0000-00-00',
+	'00:00:00',
+);
+```
+
+Dependencies: N/A
+
+Example:
+```php
+add_filter(
+	'e20r_members_list_empty_date_values',
+	function( $values ) {
+		// Also include DD-MM-YYYY at midnight as a valid 'empty' value
+		return $values + array(
+		'00-00-0000 00:00:00',
+		'00-00-00 00:00:00',
+		);
+	},
+	10,
+	1
+);
+```
