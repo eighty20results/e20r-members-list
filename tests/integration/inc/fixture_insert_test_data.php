@@ -25,6 +25,41 @@ namespace E20R\Tests\Fixtures;
 use mysqli_result;
 
 /**
+ * Do the tables we need for our testing exist?
+ *
+ * @return false|void
+ */
+function fixture_test_tables_exist() {
+	global $wpdb;
+
+	if ( null === $wpdb ) {
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
+		trigger_error( 'WordPress environment is not running. Invalid test' );
+	}
+
+	$table_names = array(
+		$wpdb->pmpro_memberships_users,
+		$wpdb->pmpro_membership_orders,
+		$wpdb->pmpro_membership_levels,
+		$wpdb->usermeta,
+		$wpdb->users,
+	);
+
+	foreach ( $table_names as $table ) {
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$result = $wpdb->query( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) );
+
+		if ( empty( $result ) ) {
+			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+			error_log( "Error: Table {$table} does not exist!" );
+			return false;
+		}
+	}
+
+	return true;
+}
+
+/**
  * Insert test user records in database
  *
  * @return bool|int|mysqli_result|resource|null
