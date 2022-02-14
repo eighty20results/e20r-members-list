@@ -1035,7 +1035,10 @@ if ( ! class_exists( 'E20R\Members_List\Members_List' ) ) {
 			}
 
 			// Are we processing a bulk action?
-			if ( 1 === preg_match( '/bulk-/', $a ) || 1 === preg_match( '/bulk-/', $a2 ) ) {
+			if (
+				( null !== $a && 1 === preg_match( '/bulk-/', $a ) ) ||
+				( null !== $a2 && 1 === preg_match( '/bulk-/', $a2 ) )
+			) {
 
 				$this->utils->log( 'Processing a bulk action' );
 
@@ -1056,7 +1059,7 @@ if ( ! class_exists( 'E20R\Members_List\Members_List' ) ) {
 				$level_id         = $this->utils->get_variable( 'membership_id', array() );
 				$action           = $this->current_action();
 				$data             = array();
-				$selected_members = $this->utils->get_variable( 'member_user_id', array() );
+				$selected_members = $this->utils->get_variable( 'member_user_ids', array() );
 
 				foreach ( $selected_members as $key => $user_id ) {
 					$user_level = $this->utils->get_variable( "e20r-members-list-membership_id_{$user_id}", 0 );
@@ -1119,7 +1122,7 @@ if ( ! class_exists( 'E20R\Members_List\Members_List' ) ) {
 
 				$this->utils->log( 'Single action for the Members List...' );
 
-				$user_id                     = $this->utils->get_variable( 'member_user_id', array() );
+				$user_id                     = $this->utils->get_variable( 'member_user_ids', array() );
 				$level_id                    = $this->utils->get_variable( 'membership_id', array() );
 				$action                      = $this->current_action();
 				$membership_levels_to_cancel = $this->utils->get_variable( 'membership_level_ids', array() );
@@ -1606,7 +1609,7 @@ if ( ! class_exists( 'E20R\Members_List\Members_List' ) ) {
 
 			$this->utils->log( 'Requesting (active/old/etc) member export' );
 
-			$member_ids  = $this->utils->get_variable( 'member_user_id', array() );
+			$member_ids  = $this->utils->get_variable( 'member_user_ids', array() );
 			$added_where = null;
 
 			if ( ! empty( $where ) && ! empty( $member_ids ) ) {
