@@ -21,11 +21,13 @@
 
 namespace E20R\Members_List\Admin\Modules;
 
+use stdClass;
+
 if ( ! defined( 'ABSPATH' ) && ! defined( 'PLUGIN_PHPUNIT' ) ) {
 	die( 'WordPress not loaded. Naughty, naughty!' );
 }
 
-if ( ! class_exists( '\\E20R\\Members_List\\Admin\\Modules\\Multiple_Memberships' ) ) {
+if ( ! class_exists( 'E20R\Members_List\Admin\Modules\Multiple_Memberships' ) ) {
 	/**
 	 * Support for PHP's Multiple Memberships plugin
 	 */
@@ -88,7 +90,7 @@ if ( ! class_exists( '\\E20R\\Members_List\\Admin\\Modules\\Multiple_Memberships
 			} else {
 
 				// Default info if PMPro is disabled.
-				$null_level           = new \stdClass();
+				$null_level           = new stdClass();
 				$null_level->level_id = 0;
 				$null_level->name     = esc_attr__( 'No levels found. Paid Memberships Pro is inactive!', 'e20r-members-list' );
 				$levels               = array( $null_level );
