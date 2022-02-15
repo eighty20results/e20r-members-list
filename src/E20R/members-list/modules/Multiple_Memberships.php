@@ -129,7 +129,7 @@ if ( ! class_exists( 'E20R\Members_List\Admin\Modules\Multiple_Memberships' ) ) 
 				implode( '<br class="e20r-members-list-level-name-spacer" />', $level_names )
 			);
 			return sprintf(
-				'<a href="#" class="e20r-members-list_membership_id e20r-members-list-editable" title="%1$s">%2$s<span class="dashicons dashicons-edit"></a>%3$s %4$s',
+				'<a href="#" class="e20r-members-list_membership_id e20r-members-list-editable" title="%1$s">%2$s<span class="dashicons dashicons-edit"></a>%3$s',
 				esc_attr__( 'Click to edit primary membership level', 'e20r-members-list' ),
 				$new_level_input,
 				$level_info
