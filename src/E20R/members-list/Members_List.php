@@ -1248,7 +1248,6 @@ if ( ! class_exists( 'E20R\Members_List\Members_List' ) ) {
 		 *
 		 * @throws InvalidSQL Raised when there's a problem with the SQL we generated.
 		 * @throws DBQueryError Raised if the DB Query reports a problem
-		 * @throws BadOperation|InvalidSettingsKey Raised when the Cache() class tries something unexpected
 		 */
 		public function get_members( $per_page = null, $page_number = null, $return_count = false ) {
 
@@ -1257,7 +1256,12 @@ if ( ! class_exists( 'E20R\Members_List\Members_List' ) ) {
 			}
 
 			$result_cache_group = $this->page->get( 'result_cache_group' );
-			$cache_timeout      = ( (int) $this->page->get( 'cache_timeout' ) * self::MINUTE_IN_SECONDS );
+			try {
+				$cache_timeout = ( (int) $this->page->get( 'cache_timeout' ) * self::MINUTE_IN_SECONDS );
+			} catch ( InvalidSettingsKey $e ) {
+				$this->utils->log( 'Error: cache_timeout is not a valid settings key!' );
+				$cache_timeout = 10 * self::MINUTE_IN_SECONDS;
+			}
 
 			global $wpdb;
 
@@ -1268,7 +1272,12 @@ if ( ! class_exists( 'E20R\Members_List\Members_List' ) ) {
 
 			// Generate the Cache key based on
 			$lookup_cache_key = md5( $this->sql_query );
-			$result           = Cache::get( $lookup_cache_key, $result_cache_group );
+			try {
+				$result = Cache::get( $lookup_cache_key, $result_cache_group );
+			} catch ( BadOperation $e ) {
+				$this->utils->log( 'Error returning cached results for ' . $lookup_cache_key );
+				$result = null;
+			}
 
 			if ( null === $result ) {
 				$this->utils->log( "Cache miss. Query database for {$lookup_cache_key}/{$result_cache_group}" );
@@ -1293,8 +1302,12 @@ if ( ! class_exists( 'E20R\Members_List\Members_List' ) ) {
 
 				// Save the result to the cache based on the cache specific key
 				$this->utils->log( "Attempting to cache the results for {$lookup_cache_key}" );
-				if ( false === Cache::set( $lookup_cache_key, $result, $cache_timeout, $result_cache_group ) ) {
-					$this->utils->log( 'Error saving the result to cache!' );
+				try {
+					if ( false === Cache::set( $lookup_cache_key, $result, $cache_timeout, $result_cache_group ) ) {
+						$this->utils->log( 'Error saving the result to cache!' );
+					}
+				} catch ( BadOperation $e ) {
+					$this->utils->log( 'Error: Unable to save to cache for ' . $lookup_cache_key );
 				}
 			} else {
 				$this->utils->log( "Cache hit. Queried the DB for {$lookup_cache_key}/{$this->page->get( 'result_cache_group' )}" );
@@ -1861,7 +1874,6 @@ if ( ! class_exists( 'E20R\Members_List\Members_List' ) ) {
 				return esc_attr__( 'Not found', 'e20r-members-list' );
 			}
 
-			$this->utils->log( 'Loading billing address info for: ' . $item['ID'] );
 			$user    = get_user_by( 'id', $item['ID'] );
 			$address = pmpro_formatAddress(
 				trim( "{$user->pmpro_bfirstname} {$user->pmpro_blastname}" ),
@@ -1901,6 +1913,7 @@ if ( ! class_exists( 'E20R\Members_List\Members_List' ) ) {
 				<input type="hidden" value="%2$d" class="e20r-members-list-user-id" name="e20r-members-list-membership_id_user_id_%2$s" />
 				<input type="hidden" value="%3$s" class="e20r-members-list-membership_id-label" name="e20r-members-list-membership_label_%2$s" />
 				<input type="hidden" value="%1$d" class="e20r-members-list-db-membership_id" name="e20r-members-list-db_membership_id_%2$s" />
+				<input type="hidden" value=""     class="e20r-members-list-db-membership_level_ids" name="e20r-members-list-db_membership_level_ids_%2$s" />
 				<input type="hidden" value="%5$d" class="e20r-members-list-db_record_id" name="e20r-members-list-db_record_id_%2$s" />
 				<input type="hidden" value="%4$s" class="e20r-members-list-field-name" name="e20r-members-list-field_name_%2$s" />',
 				$item['membership_id'],
@@ -1910,26 +1923,8 @@ if ( ! class_exists( 'E20R\Members_List\Members_List' ) ) {
 				$item['record_id']
 			);
 
-			$options = '';
-			if ( function_exists( 'pmpro_getAllLevels' ) ) {
-				$levels = pmpro_getAllLevels( true, true );
-			} else {
+			$options = self::build_option_string( $item['membership_id'] );
 
-				// Default info if PMPro is disabled.
-				$null_level           = new stdClass();
-				$null_level->level_id = 0;
-				$null_level->name     = esc_attr__( 'No levels found. Paid Memberships Pro is inactive!', 'e20r-members-list' );
-				$levels               = array( $null_level );
-			}
-
-			foreach ( $levels as $level ) {
-				$options .= sprintf(
-					'<option value="%1$s" %2$s>%3$s</option>',
-					$level->id,
-					selected( $level->id, $item['membership_id'], false ),
-					$level->name
-				) . "\n";
-			}
 			$new_membershiplevel_input = sprintf(
 				'<div class="ml-row-settings clearfix">
 						%1$s
@@ -1974,7 +1969,8 @@ if ( ! class_exists( 'E20R\Members_List\Members_List' ) ) {
 		public function column_name( $item ) {
 			if ( true === $this->is_module_enabled( 'pmpro-multiple-memberships-per-user/pmpro-multiple-memberships-per-user.php' ) ) {
 				$mmpu = new Multiple_Memberships();
-				return $mmpu->column_name( $item );
+				$this->utils->log( 'MMPU support is deactivated pending support for adding/removing MMPU memberships' );
+				// return $mmpu->multiple_membership_column( $item ); FIXME: Actually enable MMPU support
 			}
 
 			return $this->single_membership_column( $item );
@@ -2061,15 +2057,15 @@ if ( ! class_exists( 'E20R\Members_List\Members_List' ) ) {
 		 */
 		public function column_startdate( $item ) {
 
-			if ( '0000-00-00 00:00:00' === $item['startdate'] || empty( $item['startdate'] ) ) {
+			if ( $this->has_empty_date( $item['startdate'] ) ) {
 				$date_value  = null;
 				$start_label = esc_attr__( 'Invalid', 'e20r-members-list' );
 			} else {
-				$date_value  = ! empty( $item['startdate'] ) ? date_i18n( 'Y-m-d', strtotime( $item['startdate'], time() ) ) : null;
-				$start_label = date_i18n( $this->date_format, strtotime( $item['startdate'], time() ) );
+				$date_value  = ! empty( $item['startdate'] ) ? gmdate( 'Y-m-d', strtotime( $item['startdate'], time() ) ) : null;
+				$start_label = gmdate( $this->date_format, strtotime( $item['startdate'], time() ) );
 			}
 
-			$min_val = empty( $item['startdate'] ) ? sprintf( 'min="%s"', date_i18n( 'Y-m-d', time() ) ) : null;
+			$min_val = empty( $item['startdate'] ) ? sprintf( 'min="%s"', gmdate( 'Y-m-d', time() ) ) : null;
 
 			$startdate_input = sprintf(
 				'
@@ -2111,6 +2107,39 @@ if ( ! class_exists( 'E20R\Members_List\Members_List' ) ) {
 			return $value;
 		}
 
+		/**
+		 * Generate the HTML for the membership level options
+		 *
+		 * @param int $level_id The membership level ID to highlight
+		 *
+		 * @return string
+		 */
+		public static function build_option_string( $level_id ) {
+
+			$options = '';
+
+			if ( function_exists( 'pmpro_getAllLevels' ) ) {
+				$levels = pmpro_getAllLevels( true, true );
+			} else {
+
+				// Default info if PMPro is disabled.
+				$null_level           = new stdClass();
+				$null_level->level_id = 0;
+				$null_level->name     = esc_attr__( 'No levels found. Paid Memberships Pro is inactive!', 'e20r-members-list' );
+				$levels               = array( $null_level );
+			}
+
+			foreach ( $levels as $level ) {
+				$options .= sprintf(
+					'<option value="%1$s" %2$s>%3$s</option>',
+					$level->id,
+					selected( $level->id, $level_id, false ),
+					$level->name
+				) . "\n";
+			}
+
+			return $options;
+		}
 		/**
 		 * Does the received value represent an 'empty' date value
 		 *
