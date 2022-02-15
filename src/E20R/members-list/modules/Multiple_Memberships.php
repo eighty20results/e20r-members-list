@@ -21,7 +21,7 @@
 
 namespace E20R\Members_List\Admin\Modules;
 
-use stdClass;
+use E20R\Members_List\Members_List;
 
 if ( ! defined( 'ABSPATH' ) && ! defined( 'PLUGIN_PHPUNIT' ) ) {
 	die( 'WordPress not loaded. Naughty, naughty!' );
@@ -61,10 +61,31 @@ if ( ! class_exists( 'E20R\Members_List\Admin\Modules\Multiple_Memberships' ) ) 
 		 *
 		 * @return string
 		 */
-		public function column_name( $item ) {
+		public function multiple_membership_column( $item ) {
 
-			// FIXME: Update this to support MMPU
 			// FIXME: Allow adding more levels and changing the "primary" level.
+			if ( ! function_exists( 'pmpro_getMembershipLevelsForUser' ) ) {
+				return '';
+			}
+
+			$level_list    = pmpro_getMembershipLevelsForUser( $item['ID'] );
+			$current_level = isset( $item['membership_id'] ) ? (int) $item['membership_id'] : null;
+			$level_ids     = array();
+			$level_names   = array();
+
+			foreach ( $level_list as $level ) {
+				$level_ids[] = $level->id;
+
+				// Generate HTML for the membership levels the user is assigned to
+				$level_names[] = ( (int) $level->id === $current_level ?
+					sprintf(
+						'<span class="e20r-members-list-level-name e20r-members-list-primary-level">%1$s (%2$s)</span>',
+						esc_attr( $level->name ),
+						esc_attr__( 'primary', 'e20r-members-list' )
+					) :
+					sprintf( '<span class="e20r-members-list-level-name">%1$s</span>', $level->name )
+				);
+			}
 
 			// These are used to configure the membership level with JavaScript.
 			$membership_input = sprintf(
@@ -76,35 +97,19 @@ if ( ! class_exists( 'E20R\Members_List\Admin\Modules\Multiple_Memberships' ) ) 
 				<input type="hidden" value="%6$d" class="e20r-members-list-db-membership_level_ids" name="e20r-members-list-db_membership_level_ids_%2$s" />
 				<input type="hidden" value="%5$d" class="e20r-members-list-db_record_id" name="e20r-members-list-db_record_id_%2$s" />
 				<input type="hidden" value="%4$s" class="e20r-members-list-field-name" name="e20r-members-list-field_name_%2$s" />',
-				$item['membership_id'],
-				$item['ID'],
-				$item['name'],
+				(int) $item['membership_id'],
+				(int) $item['ID'],
+				esc_attr( $item['name'] ),
 				'membership_id',
-				$item['record_id'],
-				$item['membership_level_ids']
+				(int) $item['record_id'],
+				empty( $item['membership_level_ids'] ) ?
+					implode( ',', $level_ids ) :
+					esc_attr( $item['membership_level_ids'] )
 			);
 
-			$options = '';
-			if ( function_exists( 'pmpro_getAllLevels' ) ) {
-				$levels = pmpro_getAllLevels( true, true );
-			} else {
+			$options = Members_List::build_option_string( $item['membership_id'] );
 
-				// Default info if PMPro is disabled.
-				$null_level           = new stdClass();
-				$null_level->level_id = 0;
-				$null_level->name     = esc_attr__( 'No levels found. Paid Memberships Pro is inactive!', 'e20r-members-list' );
-				$levels               = array( $null_level );
-			}
-
-			foreach ( $levels as $level ) {
-				$options .= sprintf(
-					'<option value="%1$s" %2$s>%3$s</option>',
-					$level->id,
-					selected( $level->id, $item['membership_id'], false ),
-					$level->name
-				) . "\n";
-			}
-			$new_membershiplevel_input = sprintf(
+			$new_level_input = sprintf(
 				'<div class="ml-row-settings clearfix">
 						%1$s
 						<select name="e20r-members-list-new_membership_id_%2$s" class="e20r-members-list-select-membership_id">
@@ -114,19 +119,21 @@ if ( ! class_exists( 'E20R\Members_List\Admin\Modules\Multiple_Memberships' ) ) 
 						<a href="#" class="e20r-members-list-cancel e20r-members-list-link">%4$s</a>
 					</div>',
 				$membership_input,
-				$item['ID'],
+				(int) $item['ID'],
 				$options,
 				esc_attr__( 'Reset', 'e20r-members-list' )
 			);
 
-			$value = sprintf(
-				'<a href="#" class="e20r-members-list_membership_id e20r-members-list-editable" title="%1$s">%2$s<span class="dashicons dashicons-edit"></a>%3$s',
-				esc_attr__( 'Click to edit membership level', 'e20rapp' ),
-				$item['name'],
-				$new_membershiplevel_input
+			$level_info = sprintf(
+				'<div class="e20r-members-list-level-names">%1$s</div>',
+				implode( '<br class="e20r-members-list-level-name-spacer" />', $level_names )
 			);
-
-			return '';
+			return sprintf(
+				'<a href="#" class="e20r-members-list_membership_id e20r-members-list-editable" title="%1$s">%2$s<span class="dashicons dashicons-edit"></a>%3$s %4$s',
+				esc_attr__( 'Click to edit primary membership level', 'e20r-members-list' ),
+				$new_level_input,
+				$level_info
+			);
 		}
 	}
 }
