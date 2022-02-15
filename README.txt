@@ -37,8 +37,8 @@ See [ACTIONS.md](https://github.com/eighty20results.com/e20r-members-list/blob/m
 
 
 == Known Issues ==
-Setting the "Members per page" in the "Options" drop-down on the Members List page to a number greater than 50 can result in unexpected errors/warnings.
-("Warning: Unknown: Input variables exceeded 2000. To increase the limit change max_input_vars in php.ini. in Unknown on line 0")
+Setting the "Members per page" in the "Options" drop-down on the Members List page to a number greater than 50 can result in unexpected errors/warnings. The default value is 20.
+One symptom is seeing the PHP warning: "Warning: Unknown: Input variables exceeded 2000. To increase the limit change max_input_vars in php.ini. in Unknown on line 0"
 
 == Changelog ==
 See the official [CHANGELOG.md](https://github.com/eighty20results.com/e20r-members-list/blob/main/CHANGELOG.md) file
