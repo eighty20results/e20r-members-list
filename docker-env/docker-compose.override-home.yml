@@ -10,6 +10,7 @@ services:
         published: 3307
         protocol: tcp
         mode: host
+
   nginx:
     volumes:
       - /Volumes/Development/www/clean.local/wp-content/themes/e20r-coaching:/var/www/html/wp-content/themes/e20r-coaching
@@ -32,11 +33,10 @@ services:
         mode: host
 
   php:
-    image: wodby/wordpress:$WORDPRESS_TAG
+    image: wodby/wordpress-php:$PHP_TAG
     user: wodby
     environment:
       PHP_FPM_CLEAR_ENV: "no"
-      DB_NAME: clean
       PHP_FPM_USER: wodby
       PHP_FPM_GROUP: wodby
       ## Read instructions at https://wodby.com/stacks/wordpress/docs/local/xdebug/
