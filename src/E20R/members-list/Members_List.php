@@ -1267,7 +1267,7 @@ if ( ! class_exists( 'E20R\Members_List\Members_List' ) ) {
 
 			if ( empty( $this->sql_query ) || 1 !== preg_match_all( '/SELECT\s+.*\s+FROM(\s+(.*)){1,}/im', $this->sql_query ) ) {
 				$this->utils->log( 'Error in/Missing SQL statement! "' . $this->sql_query . '"' );
-				throw new InvalidSQL( 'Error: Attempting to fetch data without a valid SQL query!' );
+				throw new InvalidSQL( 'Attempting to fetch data without a valid SQL query!' );
 			}
 
 			// Generate the Cache key based on
