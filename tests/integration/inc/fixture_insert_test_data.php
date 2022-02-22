@@ -22,6 +22,7 @@
 
 namespace E20R\Tests\Fixtures;
 
+use E20R\Tests\Integration\Members_List_IntegrationTest;
 use mysqli_result;
 
 /**
@@ -37,6 +38,8 @@ function fixture_test_tables_exist() {
 		trigger_error( 'WordPress environment is not running. Invalid test' );
 	}
 
+	Members_List_IntegrationTest::fixtureMockPMProTableNames();
+
 	$table_names = array(
 		$wpdb->pmpro_memberships_users,
 		$wpdb->pmpro_membership_orders,
@@ -45,13 +48,13 @@ function fixture_test_tables_exist() {
 		$wpdb->users,
 	);
 
-	foreach ( $table_names as $table ) {
+	foreach ( $table_names as $table_name ) {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$result = $wpdb->query( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) );
+		$result = $wpdb->query( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table_name ) );
 
 		if ( empty( $result ) ) {
 			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-			error_log( "Error: Table {$table} does not exist!" );
+			error_log( "Error: Table {$table_name} does not exist!" );
 			return false;
 		}
 	}

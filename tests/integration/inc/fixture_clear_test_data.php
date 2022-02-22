@@ -22,7 +22,7 @@
 
 namespace E20R\Tests\Fixtures;
 
-use mysqli_result;
+use E20R\Tests\Integration\Members_List_IntegrationTest;
 
 /**
  * Clear DB contents
@@ -34,6 +34,8 @@ function fixture_clear_test_data() {
 		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
 		trigger_error( 'WordPress environment is not running. Invalid test' );
 	}
+
+	Members_List_IntegrationTest::fixtureMockPMProTableNames();
 
 	$table_names = array(
 		$wpdb->pmpro_memberships_users,

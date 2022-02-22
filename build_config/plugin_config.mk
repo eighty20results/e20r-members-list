@@ -12,7 +12,7 @@ ifeq ($(LOCAL_NETWORK_IF), "")
 LOCAL_NETWORK_STATUS ?= ""
 endif
 
-WP_DEPENDENCIES ?= paid-memberships-pro woocommerce
+WP_DEPENDENCIES ?=    # paid-memberships-pro woocommerce
 E20R_DEPENDENCIES ?= 00-e20r-utilities
 
 DOCKER_HUB_USER ?= eighty20results

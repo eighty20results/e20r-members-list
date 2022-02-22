@@ -28,8 +28,6 @@ if ( ! defined( 'ABSPATH' ) && defined( 'PLUGIN_PHPUNIT' ) ) {
 }
 
 use Codeception\TestCase\WPTestCase;
-use E20R\Exceptions\InvalidSettingsKey;
-use E20R\Licensing\Exceptions\BadOperation;
 use E20R\Members_List\Admin\Exceptions\DBQueryError;
 use E20R\Members_List\Admin\Exceptions\InvalidProperty;
 use E20R\Members_List\Admin\Exceptions\InvalidSQL;
@@ -39,7 +37,11 @@ use E20R\Utilities\Message;
 use E20R\Utilities\Utilities;
 
 use Brain\Monkey;
+use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
+use function Brain\faker;
 
+use stdClass;
+use function Brain\fakerReset;
 use function E20R\Tests\Fixtures\fixture_insert_level_data;
 use function E20R\Tests\Fixtures\fixture_insert_member_data;
 use function E20R\Tests\Fixtures\fixture_insert_order_data;
@@ -54,6 +56,8 @@ use function E20R\Tests\Fixtures\fixture_test_tables_exist;
  * @covers \E20R\Members_List\Members_List
  */
 class Members_List_IntegrationTest extends WPTestCase {
+
+	use MockeryPHPUnitIntegration;
 
 	/**
 	 * The utilities class we'll use for these tests
@@ -77,6 +81,13 @@ class Members_List_IntegrationTest extends WPTestCase {
 	private $empty_values = array();
 
 	/**
+	 * Add WP-Faker class
+	 *
+	 * @var null|mixed
+	 */
+	private $wp_faker = null;
+
+	/**
 	 * Set up for the test class
 	 */
 	public function setUp(): void {
@@ -87,8 +98,10 @@ class Members_List_IntegrationTest extends WPTestCase {
 		$GLOBALS['hook_suffix'] = 'pmpro_membership';
 		$message                = new Message();
 		$this->utils            = new Utilities( $message );
-
+		$this->wp_faker         = faker()->wp();
 		$this->utils->log( 'Loading records as necessary' );
+
+		self::fixtureMockPMProTableNames();
 
 		if ( false === fixture_test_tables_exist() ) {
 			$this->utils->log( 'Error: Required tables are not configured!' );
@@ -133,6 +146,7 @@ class Members_List_IntegrationTest extends WPTestCase {
 	 */
 	public function tearDown(): void {
 		fixture_clear_test_data();
+		fakerReset();
 
 		Monkey\tearDown();
 		parent::tearDown();
@@ -575,7 +589,7 @@ class Members_List_IntegrationTest extends WPTestCase {
 
 		try {
 			$mc_class->get_members( $per_page, $page_number );
-		} catch ( InvalidSQL | InvalidSettingsKey | BadOperation | DBQueryError $exp ) {
+		} catch ( InvalidSQL | DBQueryError $exp ) {
 			$this->utils->log( "Error: {$exp->getMessage()}" );
 		}
 
@@ -650,6 +664,12 @@ class Members_List_IntegrationTest extends WPTestCase {
 				$this->fail( 'Cannot configure date format to: ' . $date_format );
 			}
 		}
+
+		Monkey\Functions\stubs(
+			array(
+				'pmpro_next_payment' => $next_payment,
+			)
+		);
 
 		$page        = new Members_List_Page( $this->utils );
 		$ml          = new Members_List( $this->utils, $page );
@@ -747,7 +767,7 @@ class Members_List_IntegrationTest extends WPTestCase {
 				'enddate'         => '0000-00-00 00:00:00',
 				'initial_payment' => 15.00,
 				'billing_amount'  => 10.00,
-				'next_payment'    => 'March 12, 2022',
+				'next_payment'    => strtotime( 'March 12, 2022', time() ),
 				'cycle_number'    => 1,
 				'cycle_period'    => 'Month',
 				'date_format'     => 'F j, Y',
@@ -775,7 +795,7 @@ class Members_List_IntegrationTest extends WPTestCase {
 				'code_id'         => 0,
 				'startdate'       => '2022-02-12 09:38:22',
 				'enddate'         => '0000-00-00 00:00:00',
-				'next_payment'    => '2022-03-12',
+				'next_payment'    => strtotime( '2022-03-12', time() ),
 				'initial_payment' => 15.00,
 				'billing_amount'  => 10.00,
 				'cycle_number'    => 1,
@@ -840,7 +860,7 @@ class Members_List_IntegrationTest extends WPTestCase {
 
 		if ( $empty_date && ! empty( $item['billing_amount'] ) && ! empty( $item['cycle_number'] ) ) {
 			return $this->fixture_get_recurring(
-				$next_payment,
+				null !== $next_payment ? gmdate( $date_format, $next_payment ) : '',
 				$item,
 				$enddate_timestamp,
 				$enddate_label
@@ -979,5 +999,85 @@ class Members_List_IntegrationTest extends WPTestCase {
 		$GLOBALS['hook_suffix'] = 'pmpro_membership'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$members_list           = new Members_List( $this->utils );
 		return $members_list->all_columns();
+	}
+
+	/**
+	 * Makes sure we generate the correct HTML for a single membership level per user record
+	 *
+	 * @param array $test_item The record data used for the test
+	 *
+	 * @return void
+	 *
+	 * @dataProvider fixture_generate_level_column_data
+	 * @test
+	 */
+	public function it_should_return_single_membership_level_column_html( $test_item ) {
+
+		Monkey\Functions\stubs(
+			array(
+				'pmpro_getAllLevels' => function( $bool1, $bool2 ) {
+					return $this->fixture_fake_pmpro_levels();
+				},
+			)
+		);
+
+	}
+
+	/**
+	 * Generate mocked PMPro Membership Level definitions
+	 *
+	 * @return array
+	 */
+	public function fixture_fake_pmpro_levels() {
+		$level_ids = range( 1, 13, 1 );
+		$levels    = array();
+
+		foreach ( $level_ids as $level_id ) {
+			$level               = new stdClass();
+			$level->id           = $level_id;
+			$level->name         = sprintf( 'Test level #%d', $level_id );
+			$levels[ $level_id ] = $level;
+		}
+
+		return $levels;
+	}
+
+	/**
+	 * Fixture for the it_should_return_single_membership_level_column_html
+	 *
+	 * @return \array[][]
+	 */
+	public function fixture_generate_level_column_data() {
+		return array(
+			array(
+				array(
+					'ID'            => 1,
+					'membership_id' => 1,
+					'name'          => '',
+					'record_id'     => 1,
+				),
+			),
+		);
+	}
+
+	/**
+	 * Verify that the PMPro tables are present in the global WPDB object
+	 *
+	 * @return void
+	 */
+	public static function fixtureMockPMProTableNames() {
+		$table_names = array(
+			'pmpro_memberships_users',
+			'pmpro_membership_orders',
+			'pmpro_membership_levels',
+		);
+
+		global $wpdb;
+
+		foreach ( $table_names as $table_name ) {
+			if ( ! isset( $wpdb->{$table_name} ) ) {
+				$wpdb->{$table_name} = "{$wpdb->prefix}{$table_name}";
+			}
+		}
 	}
 }
