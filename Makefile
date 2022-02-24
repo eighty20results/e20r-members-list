@@ -130,11 +130,11 @@ $(info Number of running docker images:$(STACK_RUNNING))
 #
 prerequisite:
 	@echo "Testing prerequisite variable settings"
+	@mkdir -p tests/_output/coverage
 	@if [[ "$(E20R_PLUGIN_NAME)" =~ "default-plugin-name" ]]; then \
 		echo "The E20R_PLUGIN_NAME environment variable must be configured before running this command!"; \
 		exit 1; \
 	fi
-	@mkdir -p tests/_output/coverage/{unit,integration,functional,acceptance}
 
 #
 # Clean up Codeception and GitHub action artifacts
