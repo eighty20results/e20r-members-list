@@ -74,3 +74,17 @@ jobs:
 
       - name: Run Unit Tests with Code Coverage check
         run: make coverage
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v2
+
+      - name: Codecov
+        uses: codecov/codecov-action@v2.1.0
+        with:
+          token: ${{ secrets.E20R_CODECOV_SECRET }}
+          directory: ./tests/_output/coverage
+          files:
+            - ./tests/_output/coverage.serialize
+          flags: unittests
+          verbose: true
+          fail_ci_if_error: true

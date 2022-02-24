@@ -475,14 +475,14 @@ code-standard-tests: wp-deps
 #
 unit-tests: wp-deps
 	@if [[ -n "$(FOUND_UNIT_TESTS)" ]]; then \
-		echo "Running Unit tests for $(PROJECT)"; \
-		$(PHP_BIN) $(COMPOSER_DIR)/bin/codecept run unit --steps --verbose --debug --coverage-html coverage/unit $(UNIT_TEST_CASE_PATH); \
+		echo "Running all unit tests for $(PROJECT)"; \
+		$(PHP_BIN) $(COMPOSER_DIR)/bin/codecept run unit --steps --verbose --debug --coverage-html coverage -- $(UNIT_TEST_CASE_PATH); \
 	fi
 
 unit: wp-deps
 	@if [[ -n "$(FOUND_UNIT_TESTS)" && -n "$(TEST_TO_RUN)" ]]; then \
 		echo "Running Unit tests for $(PROJECT)/$(TEST_TO_RUN)"; \
-		$(PHP_BIN) $(COMPOSER_DIR)/bin/codecept run unit --steps --verbose --debug --coverage-html coverage/unit $(UNIT_TEST_CASE_PATH)/$(TEST_TO_RUN); \
+		$(PHP_BIN) $(COMPOSER_DIR)/bin/codecept run unit --steps --verbose --debug --coverage-html coverage -- $(UNIT_TEST_CASE_PATH)/$(TEST_TO_RUN); \
   	else \
   	  echo "Error: Either FOUND_UNIT_TESTS is empty or TEST_TO_RUN is empty. Exiting!" ; \
   	  exit 1 ; \
@@ -491,7 +491,7 @@ unit: wp-deps
 coverage: wp-deps
 	@if [[ -n "$(FOUND_UNIT_TESTS)" ]]; then \
 		echo "Running Unit tests for $(PROJECT)"; \
-		$(PHP_BIN) $(COMPOSER_DIR)/bin/codecept run unit --steps --coverage --verbose --debug $(UNIT_TEST_CASE_PATH); \
+		$(PHP_BIN) $(COMPOSER_DIR)/bin/codecept run unit --steps --coverage-html coverage --verbose --debug -- $(UNIT_TEST_CASE_PATH); \
 	fi
 #
 # Using codeception to execute the WP Unit Tests (aka WP integration tests) for this plugin
@@ -503,7 +503,7 @@ integration-tests: docker-deps start-stack db-import
   		DB_IMAGE=$(DB_IMAGE) DB_VERSION=$(DB_VERSION) WP_VERSION=$(WP_VERSION) VOLUME_CONTAINER=$(VOLUME_CONTAINER) \
   		docker compose --project-name $(PROJECT) --env-file $(DC_ENV_FILE) --file $(DC_CONFIG_FILE) \
   			exec -T -w /var/www/html/wp-content/plugins/$(PROJECT)/ wordpress \
-  			$(COMPOSER_DIR)/bin/codecept run integration --coverage-html coverage/integration --verbose --debug --steps $(INTEGRATION_TEST_CASE_PATH); \
+  			$(COMPOSER_DIR)/bin/codecept run integration --coverage-html coverage --verbose --debug --steps -- $(INTEGRATION_TEST_CASE_PATH); \
 	fi
 
 integration-start: docker-deps start-stack db-import
@@ -515,7 +515,7 @@ integration:
   		DB_IMAGE=$(DB_IMAGE) DB_VERSION=$(DB_VERSION) WP_VERSION=$(WP_VERSION) VOLUME_CONTAINER=$(VOLUME_CONTAINER) \
   		docker compose --project-name $(PROJECT) --env-file $(DC_ENV_FILE) --file $(DC_CONFIG_FILE) \
   			exec -T -w /var/www/html/wp-content/plugins/$(PROJECT)/ wordpress \
-  			$(COMPOSER_DIR)/bin/codecept run integration --coverage-html coverage/integration --verbose --debug --steps -- $(INTEGRATION_TEST_CASE_PATH)$(TEST_TO_RUN); \
+  			$(COMPOSER_DIR)/bin/codecept run integration --coverage-html coverage --verbose --debug --steps -- $(INTEGRATION_TEST_CASE_PATH)$(TEST_TO_RUN); \
 	fi
 
 #
@@ -523,12 +523,12 @@ integration:
 #
 functional-tests: docker-deps start-stack db-import
 	@if [[ -n "$(FOUND_FUNCTIONAL_TESTS)" ]]; then \
-  		echo "Running WP Unit tests for $(PROJECT)"; \
+  		echo "Running all functional tests for $(PROJECT)"; \
 		APACHE_RUN_USER=$(APACHE_RUN_USER) APACHE_RUN_GROUP=$(APACHE_RUN_GROUP) COMPOSE_INTERACTIVE_NO_CLI=1 \
 			DB_IMAGE=$(DB_IMAGE) DB_VERSION=$(DB_VERSION) WP_VERSION=$(WP_VERSION) VOLUME_CONTAINER=$(VOLUME_CONTAINER) \
 			docker compose --project-name $(PROJECT) --env-file $(DC_ENV_FILE) --file $(DC_CONFIG_FILE) \
 				exec -T -w /var/www/html/wp-content/plugins/$(PROJECT)/ wordpress \
-				$(COMPOSER_DIR)/bin/codecept run --coverage-html coverage/functional --verbose --debug --steps functional $(FUNCTIONAL_TEST_CASE_PATH); \
+				$(COMPOSER_DIR)/bin/codecept run functional --coverage-html coverage --verbose --debug --steps -- $(FUNCTIONAL_TEST_CASE_PATH); \
 	fi
 # TODO: Add coverage support to the functional-test target
 
@@ -537,12 +537,12 @@ functional-tests: docker-deps start-stack db-import
 #
 acceptance-tests: docker-deps start-stack db-import
 	@if [[ -n "$(FOUND_WP_ACCEPTANCE_TESTS)" ]]; then \
-  		echo "Running WP Acceptance tests for $(PROJECT)"; \
+  		echo "Running all acceptance tests for $(PROJECT)"; \
 		APACHE_RUN_USER=$(APACHE_RUN_USER) APACHE_RUN_GROUP=$(APACHE_RUN_GROUP) COMPOSE_INTERACTIVE_NO_CLI=1 \
 		DB_IMAGE=$(DB_IMAGE) DB_VERSION=$(DB_VERSION) WP_VERSION=$(WP_VERSION) VOLUME_CONTAINER=$(VOLUME_CONTAINER) \
 		docker compose --project-name $(PROJECT) --env-file $(DC_ENV_FILE) --file $(DC_CONFIG_FILE) \
 	 		exec -T -w /var/www/html/wp-content/plugins/${PROJECT}/ wordpress \
-	 		$(COMPOSER_DIR)/bin/codecept run acceptance --debug --verbose --steps --coverage-html coverage/acceptance $(ACCEPTANCE_TEST_CASE_PATH); \
+	 		$(COMPOSER_DIR)/bin/codecept run acceptance --debug --verbose --steps --coverage-html coverage $(ACCEPTANCE_TEST_CASE_PATH); \
 	fi
 #
 # Using codeception to build the plugin
