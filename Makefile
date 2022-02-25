@@ -30,6 +30,9 @@ FOUND_UNIT_TESTS ?= $(wildcard tests/unit/testcases/*.php)
 FOUND_WP_ACCEPTANCE_TESTS ?= $(wildcard /tests/acceptance/testcases/*.php)
 FOUND_FUNCTIONAL_TESTS ?= $(wildcard tests/functional/testcases/*.php)
 
+# Default is to not use coverage unless we know we're on a local (non-GitHub) system
+COVERAGE_SETTINGS ?=
+
 UNIT_TEST_CASE_PATH := tests/unit/testcases/
 INTEGRATION_TEST_CASE_PATH := tests/integration/testcases/
 FUNCTIONAL_TEST_CASE_PATH := tests/functional/testcases/
@@ -38,11 +41,13 @@ ACCEPTANCE_TEST_CASE_PATH := tests/acceptance/testcases/
 ifneq ($(wildcard ./tests/docker/docker.hub.key),)
 $(info Path to key for docker hub exists)
 CONTAINER_ACCESS_TOKEN := $(shell cat ./tests/docker/docker.hub.key)
+COVERAGE_SETTINGS := --coverage-xml coverage.xml
 endif
 
 ifneq ($(wildcard ./docker.hub.key),)
 $(info Path to key for docker hub exists)
 CONTAINER_ACCESS_TOKEN := $(shell cat ./docker.hub.key)
+COVERAGE_SETTINGS := --coverage-xml coverage.xml
 endif
 
 ifeq ($(DOCKER_USER),)
@@ -56,6 +61,7 @@ DOCKER_IS_RUNNING := $(shell ps -ef | grep Docker.app | wc -l | xargs)
 ifeq ($(CONTAINER_ACCESS_TOKEN),)
 $(info Setting CONTAINER_ACCESS_TOKEN from environment variable)
 CONTAINER_ACCESS_TOKEN := $(shell echo "$${CONTAINER_ACCESS_TOKEN}" )
+COVERAGE_SETTINGS :=
 endif
 
 DOWNLOAD_MODULE := 1
@@ -476,13 +482,13 @@ code-standard-tests: wp-deps
 unit-tests: wp-deps
 	@if [[ -n "$(FOUND_UNIT_TESTS)" ]]; then \
 		echo "Running all unit tests for $(PROJECT)"; \
-		$(PHP_BIN) $(COMPOSER_DIR)/bin/codecept run unit --steps --verbose --debug --coverage-html coverage -- $(UNIT_TEST_CASE_PATH); \
+		$(PHP_BIN) $(COMPOSER_DIR)/bin/codecept run unit --steps --verbose --debug $(COVERAGE_SETTINGS) -- $(UNIT_TEST_CASE_PATH); \
 	fi
 
 unit: wp-deps
 	@if [[ -n "$(FOUND_UNIT_TESTS)" && -n "$(TEST_TO_RUN)" ]]; then \
 		echo "Running Unit tests for $(PROJECT)/$(TEST_TO_RUN)"; \
-		$(PHP_BIN) $(COMPOSER_DIR)/bin/codecept run unit --steps --verbose --debug --coverage-html coverage -- $(UNIT_TEST_CASE_PATH)/$(TEST_TO_RUN); \
+		$(PHP_BIN) $(COMPOSER_DIR)/bin/codecept run unit --steps --verbose --debug $(COVERAGE_SETTINGS) -- $(UNIT_TEST_CASE_PATH)/$(TEST_TO_RUN); \
   	else \
   	  echo "Error: Either FOUND_UNIT_TESTS is empty or TEST_TO_RUN is empty. Exiting!" ; \
   	  exit 1 ; \
@@ -491,7 +497,7 @@ unit: wp-deps
 coverage: wp-deps
 	@if [[ -n "$(FOUND_UNIT_TESTS)" ]]; then \
 		echo "Running Unit tests for $(PROJECT)"; \
-		$(PHP_BIN) $(COMPOSER_DIR)/bin/codecept run unit --steps --coverage-html coverage --verbose --debug -- $(UNIT_TEST_CASE_PATH); \
+		$(PHP_BIN) $(COMPOSER_DIR)/bin/codecept run unit --steps --verbose --debug $(COVERAGE_SETTINGS) -- $(UNIT_TEST_CASE_PATH); \
 	fi
 #
 # Using codeception to execute the WP Unit Tests (aka WP integration tests) for this plugin
@@ -503,7 +509,7 @@ integration-tests: docker-deps start-stack db-import
   		DB_IMAGE=$(DB_IMAGE) DB_VERSION=$(DB_VERSION) WP_VERSION=$(WP_VERSION) VOLUME_CONTAINER=$(VOLUME_CONTAINER) \
   		docker compose --project-name $(PROJECT) --env-file $(DC_ENV_FILE) --file $(DC_CONFIG_FILE) \
   			exec -T -w /var/www/html/wp-content/plugins/$(PROJECT)/ wordpress \
-  			$(COMPOSER_DIR)/bin/codecept run integration --coverage-html coverage --verbose --debug --steps -- $(INTEGRATION_TEST_CASE_PATH); \
+  			$(COMPOSER_DIR)/bin/codecept run integration --verbose --debug --steps $(COVERAGE_SETTINGS) -- $(INTEGRATION_TEST_CASE_PATH); \
 	fi
 
 integration-start: docker-deps start-stack db-import
@@ -515,7 +521,7 @@ integration:
   		DB_IMAGE=$(DB_IMAGE) DB_VERSION=$(DB_VERSION) WP_VERSION=$(WP_VERSION) VOLUME_CONTAINER=$(VOLUME_CONTAINER) \
   		docker compose --project-name $(PROJECT) --env-file $(DC_ENV_FILE) --file $(DC_CONFIG_FILE) \
   			exec -T -w /var/www/html/wp-content/plugins/$(PROJECT)/ wordpress \
-  			$(COMPOSER_DIR)/bin/codecept run integration --coverage-html coverage --verbose --debug --steps -- $(INTEGRATION_TEST_CASE_PATH)$(TEST_TO_RUN); \
+  			$(COMPOSER_DIR)/bin/codecept run integration --verbose --debug --steps $(COVERAGE_SETTINGS) -- $(INTEGRATION_TEST_CASE_PATH)$(TEST_TO_RUN); \
 	fi
 
 #
@@ -528,7 +534,7 @@ functional-tests: docker-deps start-stack db-import
 			DB_IMAGE=$(DB_IMAGE) DB_VERSION=$(DB_VERSION) WP_VERSION=$(WP_VERSION) VOLUME_CONTAINER=$(VOLUME_CONTAINER) \
 			docker compose --project-name $(PROJECT) --env-file $(DC_ENV_FILE) --file $(DC_CONFIG_FILE) \
 				exec -T -w /var/www/html/wp-content/plugins/$(PROJECT)/ wordpress \
-				$(COMPOSER_DIR)/bin/codecept run functional --coverage-html coverage --verbose --debug --steps -- $(FUNCTIONAL_TEST_CASE_PATH); \
+				$(COMPOSER_DIR)/bin/codecept run functional --verbose --debug --steps $(COVERAGE_SETTINGS) -- $(FUNCTIONAL_TEST_CASE_PATH); \
 	fi
 # TODO: Add coverage support to the functional-test target
 
@@ -542,7 +548,7 @@ acceptance-tests: docker-deps start-stack db-import
 		DB_IMAGE=$(DB_IMAGE) DB_VERSION=$(DB_VERSION) WP_VERSION=$(WP_VERSION) VOLUME_CONTAINER=$(VOLUME_CONTAINER) \
 		docker compose --project-name $(PROJECT) --env-file $(DC_ENV_FILE) --file $(DC_CONFIG_FILE) \
 	 		exec -T -w /var/www/html/wp-content/plugins/${PROJECT}/ wordpress \
-	 		$(COMPOSER_DIR)/bin/codecept run acceptance --debug --verbose --steps --coverage-html coverage $(ACCEPTANCE_TEST_CASE_PATH); \
+	 		$(COMPOSER_DIR)/bin/codecept run acceptance --debug --verbose --steps $(COVERAGE_SETTINGS) $(ACCEPTANCE_TEST_CASE_PATH); \
 	fi
 #
 # Using codeception to build the plugin
