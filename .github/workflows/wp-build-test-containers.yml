@@ -16,7 +16,7 @@ jobs:
     steps:
       # All steps after this one will have env variable `E20R_PLUGIN_NAME` passed to them.
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 #          repository: eighty20results/${{ env.E20R_PLUGIN_NAME }}

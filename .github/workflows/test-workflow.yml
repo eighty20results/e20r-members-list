@@ -32,7 +32,7 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: eighty20results/e20r-members-list
           # FIXME: Remove comment when applying to release-plugin workstream
@@ -101,7 +101,7 @@ jobs:
       SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: eighty20results/e20r-members-list
           # FIXME: Remove comment when applying to release-plugin workstream
@@ -185,7 +185,7 @@ jobs:
       SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: eighty20results/e20r-members-list
           # FIXME: Remove comment when applying to release-plugin workstream
