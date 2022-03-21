@@ -56,7 +56,7 @@ jobs:
           password: ${{ secrets.CONTAINER_ACCESS_TOKEN }}
 
       - name: Load cached Composer and test related dependencies
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         id: composer-cache
         with:
           key: ${{ runner.os }}-composer-cache-${{ hashFiles('**/composer.lock') }}
@@ -129,7 +129,7 @@ jobs:
           password: ${{ secrets.CONTAINER_ACCESS_TOKEN }}
 
       - name: Load cached Composer and test related dependencies
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         id: composer-cache
         with:
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
@@ -149,7 +149,7 @@ jobs:
         run: make docker-deps
 
       - name: Cache the built plugin package
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         id: plugin-package-cache
         with:
           key: ${{ runner.os }}-plugin-package-cache-${{ hashFiles('**/build/kits/**.zip') }}
@@ -212,7 +212,7 @@ jobs:
           coverage: pcov
 
       - name: Load cached Composer and test related dependencies (Production)
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         id: composer-cache-prod
         with:
           key: ${{ runner.os }}-composer-cache-prod-${{ hashFiles('**/composer.lock') }}
@@ -233,7 +233,7 @@ jobs:
 
       - name: Restore the built plugin package
         id: plugin-package-cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           key: ${{ runner.os }}-plugin-package-cache-${{ hashFiles('**/build/kits/**.zip') }}
           restore-keys: ${{ runner.os }}-plugin-package-cache
