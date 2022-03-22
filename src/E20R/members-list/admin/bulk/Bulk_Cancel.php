@@ -21,16 +21,18 @@
 
 namespace E20R\Members_List\Admin\Bulk;
 
+use E20R\Members_List\Admin\Exceptions\InvalidMemberList;
 use E20R\Members_List\Admin\Exceptions\InvalidProperty;
 use E20R\Members_List\Admin\Exceptions\PMProNotActive;
 use E20R\Utilities\Message;
 use E20R\Utilities\Utilities;
+use function pmpro_cancelMembershipLevel;
 
 if ( ! defined( 'ABSPATH' ) && ! defined( 'PLUGIN_PHPUNIT' ) ) {
 	die( 'WordPress not loaded. Naughty, naughty!' );
 }
 
-if ( ! class_exists( '\\E20R\\Members_List\\Admin\\Bulk\\Bulk_Cancel' ) ) {
+if ( ! class_exists( 'E20R\Members_List\Admin\Bulk\Bulk_Cancel' ) ) {
 
 	/**
 	 * The bulk cancel operation handler
@@ -40,23 +42,23 @@ if ( ! class_exists( '\\E20R\\Members_List\\Admin\\Bulk\\Bulk_Cancel' ) ) {
 		/**
 		 * Bulk_Cancel constructor (singleton)
 		 *
-		 * @param array[]|int[]|null $members_to_update The array of member IDs to perform the bulk cancel operation against
-		 * @param Utilities|null     $utils Instance of the E20R Utilities Module class
+		 * @param array[]|null   $members_to_update The array of member IDs to perform the bulk cancel operation against
+		 * @param Utilities|null $utils Instance of the E20R Utilities Module class
 		 *
 		 * @access public
 		 * @throws InvalidProperty Thrown when the class or base class lacks the specified set() property
+		 * @throws InvalidMemberList Thrown when the supplied array isn't null or has the wrong format
 		 */
-		public function __construct( $members_to_update = array(), $utils = null ) {
+		public function __construct( $members_to_update = null, $utils = null ) {
 
 			if ( empty( $utils ) ) {
 				$message = new Message();
 				$utils   = new Utilities( $message );
 			}
 
-			parent::__construct( $utils );
+			parent::__construct( $members_to_update, $utils );
 
 			$this->set( 'operation', 'cancel' );
-			$this->set( 'members_to_update', $members_to_update );
 		}
 
 		/**
@@ -67,23 +69,21 @@ if ( ! class_exists( '\\E20R\\Members_List\\Admin\\Bulk\\Bulk_Cancel' ) ) {
 		 */
 		public function execute() {
 
+			if ( ! $this->pmpro_is_active() ) {
+				return false;
+			}
+
 			// Process all User & level ID for the single action.
 			$this->failed = array();
 			$this->utils->log( 'Cancelling ' . count( $this->members_to_update ) . ' members' );
 
 			// Process all selected records/members
 			foreach ( $this->members_to_update as $key => $cancel_info ) {
-				try {
-					if ( false === $this->cancel_member( $cancel_info['user_id'], $cancel_info['level_id'] ) ) {
-						if ( ! isset( $this->failed[ $cancel_info['user_id'] ] ) ) {
-							$this->failed[ $cancel_info['user_id'] ] = array();
-						}
-						$this->failed[ $cancel_info['user_id'] ][] = $cancel_info['level_id']; // FIXME: Add level info for multiple membership levels
+				if ( false === $this->cancel_member( $cancel_info['user_id'], $cancel_info['level_id'] ) ) {
+					if ( ! isset( $this->failed[ $cancel_info['user_id'] ] ) ) {
+						$this->failed[ $cancel_info['user_id'] ] = array();
 					}
-				} catch ( PMProNotActive $e ) {
-					$this->utils->add_message( $e->getMessage(), 'error', 'backend' );
-					$this->failed[] = $cancel_info['user_id'];
-					return false;
+					$this->failed[ $cancel_info['user_id'] ][] = $cancel_info['level_id']; // FIXME: Add level info for multiple membership levels
 				}
 			}
 
@@ -143,13 +143,22 @@ if ( ! class_exists( '\\E20R\\Members_List\\Admin\\Bulk\\Bulk_Cancel' ) ) {
 			if ( ! function_exists( 'pmpro_cancelMembershipLevel' ) ) {
 				throw new PMProNotActive(
 					esc_attr__(
-						'Cannot find the pmpro_cancelMembershipLevel() function!',
+						'The pmpro_cancelMembershipLevel() function is not defined. Is Paid Memberships Pro activated on this site?',
 						'e20r-members-list'
 					)
 				);
 			}
-			$this->utils->log( "Cancelling membership level {$id} for user {$id}" );
-			return \pmpro_cancelMembershipLevel( $level_id, $id, 'admin_cancelled' );
+			$this->utils->log( "Cancelling membership level {$level_id} for user {$id}" );
+			return pmpro_cancelMembershipLevel( $level_id, $id, 'admin_cancelled' );
+		}
+
+		/**
+		 * Check if PMPro is active and throw exception if it isn't
+		 *
+		 * @return bool
+		 */
+		private function pmpro_is_active() {
+			return function_exists( 'pmpro_cancelMembershipLevel' );
 		}
 	}
 }
