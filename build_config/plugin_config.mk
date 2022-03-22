@@ -1,6 +1,8 @@
 E20R_PLUGIN_NAME ?= default-plugin-name
 E20R_PLUGIN_BASE_FILE ?= ./class-e20r-members-list.php
 E20R_DEPLOYMENT_SERVER ?= wordpress.org
+COMPOSER_CHECKSUM := '906a84df04cea2aa72f40b5f787e49f22d4c2f19492ac310e8cba5b96ac8b64115ac402c8cd292b8a03482574915d1a8'
+
 LOCAL_NETWORK_IF ?= en0
 
 ifneq ($(LOCAL_NETWORK_IF), "")
