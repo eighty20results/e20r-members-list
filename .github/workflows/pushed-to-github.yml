@@ -13,7 +13,7 @@ jobs:
   pr_tests:
     strategy:
       matrix:
-        php_version: [ '7.3', '7.4', '8.0' ]
+        php_version: [ '7.3', '7.4', '8.0', '8.1' ]
     name: "Basic testing after push-to-repository"
     defaults:
       run:
@@ -77,11 +77,3 @@ jobs:
 
       - name: Download artifacts
         uses: actions/download-artifact@v2
-
-      - name: Save Code Coverage
-        uses: codecov/codecov-action@v2
-        with:
-          token: ${{ secrets.E20R_CODECOV_SECRET }}
-          files: tests/_output/coverage.xml
-          verbose: true
-          fail_ci_if_error: true
