@@ -14,7 +14,7 @@ jobs:
     strategy:
       matrix:
         php_version: [ '7.3', '7.4', '8.0' ]
-    name: "Plugin tests - PHP"
+    name: "Basic testing after push-to-repository"
     defaults:
       run:
         shell: bash
@@ -73,16 +73,16 @@ jobs:
         run: make phpstan-tests
 
       - name: Run Unit Tests with Code Coverage check
-        run: make coverage
+        run: make unit-tests
 
       - name: Download artifacts
         uses: actions/download-artifact@v2
 
-      - name: Codecov
+      - name: Save Code Coverage
         uses: codecov/codecov-action@v2
         with:
           token: ${{ secrets.E20R_CODECOV_SECRET }}
-#          directory: ./tests/_output/coverage
+          directory: ./tests/_output/coverage
           files: ./tests/_output/coverage.xml
           verbose: true
           fail_ci_if_error: true
