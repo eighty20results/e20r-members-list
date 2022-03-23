@@ -11,7 +11,7 @@ jobs:
   pr_tests:
     strategy:
       matrix:
-        php_version: [ '7.3', '7.4', '8.0' ]
+        php_version: [ '7.3', '7.4', '8.0', '8.1' ]
     name: "Plugin tests - PHP"
     defaults:
       run:
@@ -64,20 +64,11 @@ jobs:
         if: steps.composer-cache.outputs.cache-hit != 'true'
         run: make docker-deps
 
-      - name: Run all Standard Tests
-        run: make tests
-
-      - name: Download artifacts
+      - name: Download pre-existing artifacts
         uses: actions/download-artifact@v2
 
-      - name: Codecov
-        uses: codecov/codecov-action@v2
-        with:
-          token: ${{ secrets.E20R_CODECOV_SECRET }}
-          directory: ./tests/_output/coverage
-          files: ./tests/_output/coverage.xml
-          verbose: true
-          fail_ci_if_error: true
+      - name: Run all Standard Tests
+        run: make tests
 
   build_i18n:
     name: Build the I18N translation files
@@ -93,7 +84,5 @@ jobs:
         uses: iamdharmesh/action-wordpress-pot-generator@main
         with:
           destination_path: './languages'
-          slug: e20r-members-list
-          text_domain: 'e20r-members-list'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          slug: ${{ env.E20R_PLUGIN_NAME }}
+          text_domain: ${{ env.E20R_PLUGIN_NAME }}
