@@ -47,7 +47,7 @@ if ( ! class_exists( '\\E20R\\Members_List\\Admin\\Bulk\\Bulk_Operations' ) ) {
 		/**
 		 * Array of WP_User IDs where the cancel operation failed
 		 *
-		 * @var int[] $failed
+		 * @var array[][] $failed
 		 */
 		protected $failed = array();
 
