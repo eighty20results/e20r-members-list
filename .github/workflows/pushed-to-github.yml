@@ -82,7 +82,6 @@ jobs:
         uses: codecov/codecov-action@v2
         with:
           token: ${{ secrets.E20R_CODECOV_SECRET }}
-          directory: tests/_output/
-          files: tests/_output/coverage.xml
+          directory: ./tests/_output/
           verbose: true
-          fail_ci_if_error: true
+          fail_ci_if_error: false
