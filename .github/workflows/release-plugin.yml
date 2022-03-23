@@ -39,7 +39,7 @@ jobs:
       # Extract the branch name for all events except for pull requests
       - name: Extract branch or tag name
         id: branch-name
-        uses: tj-actions/branch-names@v5.1
+        uses: tj-actions/branch-names@v5.2
 
       - name: Setup PHP with Composer V2+
         uses: shivammathur/setup-php@v2
@@ -242,7 +242,7 @@ jobs:
       # Extract the branch name for all events except for pull requests
       - name: Decide whether to run deploy action
         id: branch-name
-        uses: tj-actions/branch-names@v5.1
+        uses: tj-actions/branch-names@v5.2
 
       - name: Show me the branch
         run: |
