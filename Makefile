@@ -502,7 +502,7 @@ coverage: wp-deps
 #
 # Using codeception to execute the WP Unit Tests (aka WP integration tests) for this plugin
 #
-integration-tests: docker-deps start-stack db-import
+integration-tests: integration-start
 	@if [[ -n "$(FOUND_INTEGRATION_TESTS)" ]]; then \
   		echo "Running all integration tests for $(PROJECT)"; \
 		APACHE_RUN_USER=$(APACHE_RUN_USER) APACHE_RUN_GROUP=$(APACHE_RUN_GROUP) COMPOSE_INTERACTIVE_NO_CLI=1 \

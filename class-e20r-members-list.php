@@ -146,6 +146,15 @@ if ( ! class_exists( '\\E20R\\Members_List\\E20R_Members_List' ) ) {
 		}
 
 		/**
+		 * Fetch the Page object
+		 *
+		 * @return Members_List_Page|null
+		 */
+		public function get_page() {
+			return $this->page;
+		}
+
+		/**
 		 * Initialize the Enhanced Members List functionality
 		 *
 		 * @param null|Utilities $utils The E20R Utilities Module class instance
