@@ -2,7 +2,7 @@
 Contributors: eighty20results
 Tags: paid memberships pro, members, memberships, pmpro enhancements, better members list, members list, addon
 Requires at least: 4.9
-Tested up to: 5.9
+Tested up to: 5.9.2
 Requires PHP: 7.1
 Stable tag: 8.6
 License: GPLv2
