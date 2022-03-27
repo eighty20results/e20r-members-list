@@ -3,7 +3,7 @@
 Plugin Name: Better Members List for Paid Memberships Pro
 Plugin URI: https://wordpress.org/plugins/e20r-members-list
 Description: Extensible, sortable & bulk action capable members listing + export to CSV tool for Paid Memberships Pro.
-Version: 8.5
+Version: 8.6
 Author: Thomas Sjolshagen @ Eighty / 20 Results by Wicked Strong Chicks, LLC <thomas@eighty20results.com>
 Author URI: https://eighty20results.com/thomas-sjolshagen/
 Text Domain: e20r-members-list
@@ -38,6 +38,7 @@ use E20R\Metrics\Exceptions\InvalidMixpanelKey;
 use E20R\Metrics\Exceptions\InvalidPluginInfo;
 use E20R\Metrics\Exceptions\MissingDependencies;
 use E20R\Metrics\MixpanelConnector;
+use E20R\Utilities\ActivateUtilitiesPlugin;
 use E20R\Utilities\Cache;
 use E20R\Utilities\Utilities;
 use E20R\Utilities\Message;
@@ -51,7 +52,7 @@ if ( ! defined( 'ABSPATH' ) && ! defined( 'PLUGIN_PHPUNIT' ) ) {
 }
 
 if ( ! defined( 'E20R_MEMBERSLIST_VER' ) ) {
-	define( 'E20R_MEMBERSLIST_VER', '8.5' );
+	define( 'E20R_MEMBERSLIST_VER', '8.6' );
 }
 
 if ( ! class_exists( '\\E20R\\Members_List\\E20R_Members_List' ) ) {
@@ -59,13 +60,6 @@ if ( ! class_exists( '\\E20R\\Members_List\\E20R_Members_List' ) ) {
 	 * Class E20R_Members_List
 	 */
 	class E20R_Members_List {
-
-		/**
-		 * Instance of the Member List controller
-		 *
-		 * @var null|E20R_Members_List
-		 */
-		private static $instance = null;
 
 		/**
 		 * The E20R Utilities Module class instance
@@ -97,7 +91,6 @@ if ( ! class_exists( '\\E20R\\Members_List\\E20R_Members_List' ) ) {
 		 * @param null|MixpanelConnector $mixpanel The MixpanelConnector class instance
 		 */
 		public function __construct( $ml_page = null, $utils = null, $mixpanel = null ) {
-			self::$instance = $this;
 
 			if ( empty( $utils ) ) {
 				$message = new Message();
@@ -138,7 +131,7 @@ if ( ! class_exists( '\\E20R\\Members_List\\E20R_Members_List' ) ) {
 		 * @return mixed
 		 * @throws InvalidSettingsKey Raised when an invalid class property is specified for the get() method
 		 */
-		public function get( $property = 'instance' ) {
+		public function get( $property = 'utils' ) {
 
 			if ( ! property_exists( $this, $property ) ) {
 				throw new InvalidSettingsKey(
@@ -151,20 +144,14 @@ if ( ! class_exists( '\\E20R\\Members_List\\E20R_Members_List' ) ) {
 
 			return $this->{$property};
 		}
+
 		/**
-		 * Get or instantiate and get the current class
+		 * Fetch the Page object
 		 *
-		 * @return E20R_Members_List|null
-		 *
-		 * @test E20R_Members_ListTest::test_get_instance()
+		 * @return Members_List_Page|null
 		 */
-		public static function get_instance() {
-
-			if ( is_null( self::$instance ) ) {
-				self::$instance = new self();
-			}
-
-			return self::$instance;
+		public function get_page() {
+			return $this->page;
 		}
 
 		/**
@@ -180,7 +167,7 @@ if ( ! class_exists( '\\E20R\\Members_List\\E20R_Members_List' ) ) {
 		 */
 		public function load_hooks( $utils = null ) {
 
-			if ( ! method_exists( '\\E20R\\Utilities\\Utilities', 'get_instance' ) ) {
+			if ( ! method_exists( '\E20R\Utilities\Utilities', 'get_instance' ) ) {
 				$msg = esc_attr__( 'The E20R Utilities Module is missing/inactive!', 'e20r-members-list' );
 				throw new MissingUtilitiesModule( $msg );
 			}
@@ -394,11 +381,11 @@ if ( function_exists( 'apply_filters' ) && ! apply_filters( 'e20r_utilities_modu
 
 	$required_plugin = 'Better Members List for Paid Memberships Pro';
 
-	if ( false === \E20R\Utilities\ActivateUtilitiesPlugin::attempt_activation() ) {
+	if ( false === ActivateUtilitiesPlugin::attempt_activation() ) {
 		add_action(
 			'admin_notices',
 			function () use ( $required_plugin ) {
-				\E20R\Utilities\ActivateUtilitiesPlugin::plugin_not_installed( $required_plugin );
+				ActivateUtilitiesPlugin::plugin_not_installed( $required_plugin );
 			}
 		);
 

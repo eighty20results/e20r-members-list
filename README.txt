@@ -2,9 +2,9 @@
 Contributors: eighty20results
 Tags: paid memberships pro, members, memberships, pmpro enhancements, better members list, members list, addon
 Requires at least: 4.9
-Tested up to: 5.9
+Tested up to: 5.9.2
 Requires PHP: 7.1
-Stable tag: 8.5
+Stable tag: 8.6
 License: GPLv2
 License URI: http://www.gnu.org/licenses/gpl
 
@@ -37,8 +37,9 @@ See [ACTIONS.md](https://github.com/eighty20results.com/e20r-members-list/blob/m
 
 
 == Known Issues ==
-No known issues at this time
+PHP 8.0 and later introduces warning messages for certain behaviors that were ignored prior to v8.0. Because of this, and the fact that this plugin relies on functionality from Paid Memberships Pro, the "end date" column may print messages indicating problems with the `trim()` function. Until Paid Memberships Pro updates their plugin to support PHP8.x, these messages will need to be disabled in your web server configuration (suppressed).
+
+Setting the "Members per page" in the "Options" drop-down on the Members List page to a number greater than 50 can result in unexpected errors/warnings. The default value is 20. One symptom is seeing the PHP warning: "Warning: Unknown: Input variables exceeded 2000. To increase the limit change max_input_vars in php.ini. in Unknown on line 0"
 
 == Changelog ==
 See the official [CHANGELOG.md](https://github.com/eighty20results.com/e20r-members-list/blob/main/CHANGELOG.md) file
-

@@ -21,6 +21,8 @@
 
 namespace E20R\Members_List\Admin\Bulk;
 
+use DateTime;
+use E20R\Members_List\Admin\Exceptions\InvalidMemberList;
 use E20R\Members_List\Admin\Exceptions\InvalidProperty;
 use E20R\Members_List\Admin\Exceptions\PMProNotActive;
 use E20R\Utilities\Message;
@@ -40,21 +42,19 @@ if ( ! class_exists( '\\E20R\\Members_List\\Admin\\Bulk\\Bulk_Update' ) ) {
 		/**
 		 * Bulk_Update constructor
 		 *
-		 * @param array          $members Array of member information to update
+		 * @param null|array[]   $members Array of member information to update
 		 * @param null|Utilities $utils Instance of the E20R Utilities Module class
 		 *
-		 * @throws InvalidProperty Raised if the specified class parameter for some reason is missing
+		 * @throws InvalidMemberList Raised if the supplied $members variable isn't a list of integers
 		 */
-		public function __construct( $members, $utils = null ) {
-
+		public function __construct( $members = null, $utils = null ) {
 			if ( empty( $utils ) ) {
 				$message = new Message();
 				$utils   = new Utilities( $message );
 			}
-
-			parent::__construct( $utils );
-			$this->set( 'members_to_update', $members );
-			$this->set( 'operation', 'cancel' );
+			$this->utils = $utils;
+			parent::__construct( $members, $this->utils );
+			$this->set( 'operation', 'update' );
 		}
 
 		/**
@@ -494,15 +494,6 @@ if ( ! class_exists( '\\E20R\\Members_List\\Admin\\Bulk\\Bulk_Update' ) ) {
 		}
 
 		/**
-		 * Return the list of members being updated
-		 *
-		 * @return array[]
-		 */
-		public function get_members() {
-			return $this->members_to_update;
-		}
-
-		/**
 		 * Test the date supplied for MySQL compliance
 		 *
 		 * @param string $date   The date to validate the format of.
@@ -514,7 +505,7 @@ if ( ! class_exists( '\\E20R\\Members_List\\Admin\\Bulk\\Bulk_Update' ) ) {
 		 */
 		private function validate_date_format( $date, $format = 'Y-m-d' ) {
 
-			$check_date = \DateTime::createFromFormat( $format, $date );
+			$check_date = DateTime::createFromFormat( $format, $date );
 
 			return $check_date && $check_date->format( $format ) === $date;
 		}

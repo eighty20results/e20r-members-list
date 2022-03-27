@@ -2,14 +2,14 @@
 # This file is distributed under the same license as the Better Members List for Paid Memberships Pro plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: Better Members List for Paid Memberships Pro 8.5\n"
+"Project-Id-Version: Better Members List for Paid Memberships Pro 8.6\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/e20r-members-list\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2022-02-04T13:27:08+00:00\n"
+"POT-Creation-Date: 2022-03-27T16:56:55+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.6.0\n"
 "X-Domain: e20r-members-list\n"
@@ -34,63 +34,63 @@ msgstr ""
 msgid "https://eighty20results.com/thomas-sjolshagen/"
 msgstr ""
 
-#: class-e20r-members-list.php:145
+#: class-e20r-members-list.php:138
 msgid "The specified E20R_Members_List() class property does not exist!"
 msgstr ""
 
-#: class-e20r-members-list.php:184
+#: class-e20r-members-list.php:171
 msgid "The E20R Utilities Module is missing/inactive!"
 msgstr ""
 
-#: class-e20r-members-list.php:215
+#: class-e20r-members-list.php:202
 msgid "Could not clear all of the cached members list data. Check error logs for more information."
 msgstr ""
 
-#: class-e20r-members-list.php:342
+#: class-e20r-members-list.php:329
 msgid "Donate to support updates, maintenance and tech support for this plugin"
 msgstr ""
 
-#: class-e20r-members-list.php:346
+#: class-e20r-members-list.php:333
 msgid "Donate"
 msgstr ""
 
-#: class-e20r-members-list.php:351
+#: class-e20r-members-list.php:338
 msgid "View the documentation"
 msgstr ""
 
-#: class-e20r-members-list.php:352
+#: class-e20r-members-list.php:339
 msgid "Docs"
 msgstr ""
 
-#: class-e20r-members-list.php:357
+#: class-e20r-members-list.php:344
 msgid "View the Filter documentation"
 msgstr ""
 
-#: class-e20r-members-list.php:358
+#: class-e20r-members-list.php:345
 msgid "Filters"
 msgstr ""
 
-#: class-e20r-members-list.php:363
+#: class-e20r-members-list.php:350
 msgid "View the Actions documentation"
 msgstr ""
 
-#: class-e20r-members-list.php:364
+#: class-e20r-members-list.php:351
 msgid "Actions"
 msgstr ""
 
-#: class-e20r-members-list.php:369
+#: class-e20r-members-list.php:356
 msgid "Visit the support forum"
 msgstr ""
 
-#: class-e20r-members-list.php:370
+#: class-e20r-members-list.php:357
 msgid "Support"
 msgstr ""
 
-#: class-e20r-members-list.php:375
+#: class-e20r-members-list.php:362
 msgid "Report issues with this plugin"
 msgstr ""
 
-#: class-e20r-members-list.php:376
+#: class-e20r-members-list.php:363
 msgid "Report Issues"
 msgstr ""
 
@@ -100,16 +100,20 @@ msgid "Unable to cancel the following membership levels for user (ID: %1$s): %2$
 msgstr ""
 
 #: src/E20R/members-list/admin/bulk/Bulk_Cancel.php:145
-msgid "Cannot find the pmpro_cancelMembershipLevel() function!"
+msgid "The pmpro_cancelMembershipLevel() function is not defined. Is Paid Memberships Pro activated on this site?"
+msgstr ""
+
+#: src/E20R/members-list/admin/bulk/Bulk_Operations.php:106
+msgid "The specified variable is not an array of user IDs"
 msgstr ""
 
 #. translators: %1$s - The parameter supplied, %2$s - The class name where we expect the supplied parameter to exist,
-#: src/E20R/members-list/admin/bulk/Bulk_Operations.php:98
+#: src/E20R/members-list/admin/bulk/Bulk_Operations.php:120
 msgid "Invalid parameter \"%1$s\" supplied for %2$s"
 msgstr ""
 
 #. translators: %1$s - The class name where we expect the supplied parameter to exist.
-#: src/E20R/members-list/admin/bulk/Bulk_Operations.php:123
+#: src/E20R/members-list/admin/bulk/Bulk_Operations.php:145
 msgid "Invalid parameter supplied for %1$s"
 msgstr ""
 
@@ -153,18 +157,20 @@ msgid "Invalid date format for %1$s (record: %2$d/email: %3$s)"
 msgstr ""
 
 #: src/E20R/members-list/admin/bulk/Bulk_Update.php:408
+#: src/E20R/members-list/Members_List.php:2163
+#: src/E20R/members-list/Members_List.php:2177
 msgid "Unknown"
 msgstr ""
 
-#: src/E20R/members-list/admin/export/Export_Members.php:1005
+#: src/E20R/members-list/admin/export/Export_Members.php:1006
 msgid "Error - Undefined HTTP headers. Exiting!"
 msgstr ""
 
-#: src/E20R/members-list/admin/export/Export_Members.php:1014
+#: src/E20R/members-list/admin/export/Export_Members.php:1015
 msgid "Cannot transmit export file. Review web server error logs for notices/warnings/errors. Exiting!"
 msgstr ""
 
-#: src/E20R/members-list/admin/export/Export_Members.php:1026
+#: src/E20R/members-list/admin/export/Export_Members.php:1027
 msgid "Error: No export data found to transmit..."
 msgstr ""
 
@@ -250,195 +256,200 @@ msgstr ""
 msgid "Member list"
 msgstr ""
 
-#: src/E20R/members-list/Members_List.php:300
+#: src/E20R/members-list/Members_List.php:317
 msgid "member"
 msgstr ""
 
-#: src/E20R/members-list/Members_List.php:301
+#: src/E20R/members-list/Members_List.php:318
 msgid "members"
 msgstr ""
 
-#: src/E20R/members-list/Members_List.php:407
+#: src/E20R/members-list/Members_List.php:446
 msgid "Error: Invalid list of tables & joins for member list!"
 msgstr ""
 
-#: src/E20R/members-list/Members_List.php:415
+#: src/E20R/members-list/Members_List.php:454
 msgid "Error: No FROM table specified for member list!"
 msgstr ""
 
 #. translators: %1$s is the per-page value supplied by the e20r_memberslist_per_page filter.
-#: src/E20R/members-list/Members_List.php:568
+#: src/E20R/members-list/Members_List.php:607
 msgid "Error: Invalid 'per_page' value (need an integer): %1$s"
 msgstr ""
 
 #. translators: %1$s - The error message returned by the exception thrown
-#: src/E20R/members-list/Members_List.php:710
+#: src/E20R/members-list/Members_List.php:749
 msgid "Cannot create a valid Database Query. Error message: %1$s"
 msgstr ""
 
 #. translators: %1$s - The error message returned by the exception thrown
-#: src/E20R/members-list/Members_List.php:735
+#: src/E20R/members-list/Members_List.php:774
 msgid "Cannot execute database query. Error message: %1$s"
 msgstr ""
 
-#: src/E20R/members-list/Members_List.php:1009
+#: src/E20R/members-list/Members_List.php:1051
 msgid "Insecure action denied."
 msgstr ""
 
-#. translators: Error message from the execption thrown
-#: src/E20R/members-list/Members_List.php:1048
-msgid "Cannot export data!. Error message: %1$s"
+#. translators: %1$s - Error message from exception
+#: src/E20R/members-list/Members_List.php:1085
+msgid "Bulk Cancel: %1$s"
 msgstr ""
 
-#: src/E20R/members-list/Members_List.php:1102
-#: src/E20R/members-list/Members_List.php:1111
+#: src/E20R/members-list/Members_List.php:1146
+#: src/E20R/members-list/Members_List.php:1155
 msgid "Error cancelling membership(s)"
 msgstr ""
 
 #. translators: %1$s - Error message from thrown exception(s)
-#: src/E20R/members-list/Members_List.php:1163
-#: src/E20R/members-list/Members_List.php:1178
+#: src/E20R/members-list/Members_List.php:1207
+#: src/E20R/members-list/Members_List.php:1222
 msgid "Cannot export member data! Error message: %1$s"
 msgstr ""
 
 #. translators: %1$s query string.
-#: src/E20R/members-list/Members_List.php:1264
+#: src/E20R/members-list/Members_List.php:1320
 msgid "Error processing Members List database query: %1$s"
 msgstr ""
 
 #. translators: %1$s - The class parameter, %2$s - The class name where we expect said parameter to exist.
-#: src/E20R/members-list/Members_List.php:1298
+#: src/E20R/members-list/Members_List.php:1354
 msgid "%1$s is not a member variable in %2$s"
 msgstr ""
 
-#: src/E20R/members-list/Members_List.php:1380
+#: src/E20R/members-list/Members_List.php:1436
 msgid "Error: Invalid database configuration!!!"
 msgstr ""
 
-#: src/E20R/members-list/Members_List.php:1406
+#: src/E20R/members-list/Members_List.php:1462
 msgid "Missing the \"FROM\" statement"
 msgstr ""
 
-#: src/E20R/members-list/Members_List.php:1417
+#: src/E20R/members-list/Members_List.php:1473
 msgid "Missing the minimum expected number of \"JOIN\" statements"
 msgstr ""
 
 #. translators: %1$d the number of JOIN entries in the Meembers_List::table_list definition
-#: src/E20R/members-list/Members_List.php:1435
+#: src/E20R/members-list/Members_List.php:1491
 msgid "Have %1$d JOIN entries, but need at least 3!"
 msgstr ""
 
-#: src/E20R/members-list/Members_List.php:1456
+#: src/E20R/members-list/Members_List.php:1512
 msgid "Does not include the \"JOIN\" to support membership level search, but specified a level"
 msgstr ""
 
-#: src/E20R/members-list/Members_List.php:1468
+#: src/E20R/members-list/Members_List.php:1524
 msgid "Unexpected condition value for the 4th \"JOIN\" element"
 msgstr ""
 
 #. translators: %1$s table name defined by PMPro, %2$s Unexpected table name from user/developer
-#: src/E20R/members-list/Members_List.php:1482
+#: src/E20R/members-list/Members_List.php:1538
 msgid "Unexpected table name value for the 4th \"JOIN\" element. Want: \"%1$s\", got: \"%2$s\""
 msgstr ""
 
-#: src/E20R/members-list/Members_List.php:1645
-#: src/E20R/members-list/Members_List.php:2057
-#: src/E20R/members-list/Members_List.php:2154
+#: src/E20R/members-list/Members_List.php:1701
+#: src/E20R/members-list/Members_List.php:2097
+#: src/E20R/members-list/Members_List.php:2233
 msgid "Cancel"
 msgstr ""
 
-#: src/E20R/members-list/Members_List.php:1646
-#: src/E20R/members-list/Members_List.php:1720
+#: src/E20R/members-list/Members_List.php:1702
+#: src/E20R/members-list/Members_List.php:1776
 msgid "Update"
 msgstr ""
 
-#: src/E20R/members-list/Members_List.php:1647
+#: src/E20R/members-list/Members_List.php:1703
 msgid "Export"
 msgstr ""
 
-#: src/E20R/members-list/Members_List.php:1719
+#: src/E20R/members-list/Members_List.php:1775
 msgid "Update member info"
 msgstr ""
 
-#: src/E20R/members-list/Members_List.php:1818
-#: src/E20R/members-list/Members_List.php:1835
+#: src/E20R/members-list/Members_List.php:1874
+#: src/E20R/members-list/Members_List.php:1891
 msgid "Not found"
 msgstr ""
 
-#: src/E20R/members-list/Members_List.php:1838
+#: src/E20R/members-list/Members_List.php:1894
+#: src/E20R/members-list/Members_List.php:2168
+#: src/E20R/members-list/Members_List.php:2181
 msgid "N/A"
 msgstr ""
 
-#: src/E20R/members-list/Members_List.php:1877
-#: src/E20R/members-list/modules/Multiple_Memberships.php:93
-msgid "No levels found. Paid Memberships Pro is inactive!"
-msgstr ""
-
-#: src/E20R/members-list/Members_List.php:1901
-#: src/E20R/members-list/Members_List.php:2229
-#: src/E20R/members-list/modules/Multiple_Memberships.php:117
+#: src/E20R/members-list/Members_List.php:1940
+#: src/E20R/members-list/Members_List.php:2306
+#: src/E20R/members-list/modules/Multiple_Memberships.php:124
 msgid "Reset"
 msgstr ""
 
-#: src/E20R/members-list/Members_List.php:1970
+#: src/E20R/members-list/Members_List.php:2010
 msgid "Free"
 msgstr ""
 
-#: src/E20R/members-list/Members_List.php:2022
+#: src/E20R/members-list/Members_List.php:2062
 msgid "Invalid"
 msgstr ""
 
-#: src/E20R/members-list/Members_List.php:2086
-msgid "Never"
+#: src/E20R/members-list/Members_List.php:2128
+msgid "No levels found. Paid Memberships Pro is inactive!"
 msgstr ""
 
-#. translators: %1$s HTML %2$s formatted payment amount, %3$s HTML.
-#: src/E20R/members-list/Members_List.php:2103
+#. translators: %1$s - HTML %2$s - next payment date, %3$s - HTML.
+#: src/E20R/members-list/Members_List.php:2184
 msgid "N/A (%1$sNext Payment: %2$s%3$s)"
 msgstr ""
 
-#: src/E20R/members-list/Members_List.php:2159
-msgid "Bulk update membership end/expiration date"
+#: src/E20R/members-list/Members_List.php:2238
+msgid "Update membership end/expiration date"
 msgstr ""
 
-#: src/E20R/members-list/Members_List.php:2234
+#: src/E20R/members-list/Members_List.php:2311
 msgid "Update the member's membership status"
 msgstr ""
 
-#: src/E20R/members-list/Members_List.php:2362
+#: src/E20R/members-list/Members_List.php:2439
 msgid "No members found"
 msgstr ""
 
-#: src/E20R/members-list/Members_List.php:2366
+#: src/E20R/members-list/Members_List.php:2443
 msgid "It's possible the information you're looking for can be found in one of the following categories:"
 msgstr ""
 
 #. translators: %1$s HTML, %2%s HTML.
-#: src/E20R/members-list/Members_List.php:2373
+#: src/E20R/members-list/Members_List.php:2450
 msgid "Repeat search: %1$sActive Members list%2$s"
 msgstr ""
 
 #. translators: %1$s HTML, %2%s HTML.
-#: src/E20R/members-list/Members_List.php:2386
+#: src/E20R/members-list/Members_List.php:2463
 msgid "Repeat search: %1$sAll Members list%2$s"
 msgstr ""
 
 #. translators: %1$s HTML, %2$s HTML.
-#: src/E20R/members-list/Members_List.php:2398
+#: src/E20R/members-list/Members_List.php:2475
 msgid "Repeat search: %1$sCancelled Members list%2$s"
 msgstr ""
 
 #. translators: %1$s HTML, %2$s HTML.
-#: src/E20R/members-list/Members_List.php:2413
+#: src/E20R/members-list/Members_List.php:2490
 msgid "Repeat search: %1$sExpired Members list%2$s"
 msgstr ""
 
 #. translators: %1$s HTML, %2$s HTML.
-#: src/E20R/members-list/Members_List.php:2425
+#: src/E20R/members-list/Members_List.php:2502
 msgid "Repeat search: %1$sOld Members list%2$s"
 msgstr ""
 
 #. translators: %1$s HTML, %2$s HTML.
-#: src/E20R/members-list/Members_List.php:2436
+#: src/E20R/members-list/Members_List.php:2513
 msgid "Repeat search: %1$sAll Users list%2$s"
+msgstr ""
+
+#: src/E20R/members-list/modules/Multiple_Memberships.php:84
+msgid "primary"
+msgstr ""
+
+#: src/E20R/members-list/modules/Multiple_Memberships.php:133
+msgid "Click to edit primary membership level"
 msgstr ""

@@ -22,7 +22,6 @@ services:
       - /Volumes/Development/www/clean.local/wp-content/plugins/e20r-members-list/inc/composer:/var/www/html/wp-content/plugins/e20r-members-list/inc/composer:cached
       - /Volumes/Development/www/clean.local/wp-content/plugins/e20r-members-list/inc/mixpanel:/var/www/html/wp-content/plugins/e20r-members-list/inc/mixpanel:cached
       - /Volumes/Development/www/clean.local/wp-content/plugins/e20r-members-list/inc/autoload.php:/var/www/html/wp-content/plugins/e20r-members-list/inc/autoload.php:cached
-
     ports:
       - target: 80 # Web server
         published: 80
@@ -34,7 +33,7 @@ services:
         mode: host
 
   php:
-    image: wodby/wordpress:$WORDPRESS_TAG
+    image: wodby/wordpress-php:$PHP_TAG
     environment:
       PHP_FPM_CLEAR_ENV: "no"
       DB_NAME: clean
