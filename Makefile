@@ -137,7 +137,7 @@ $(info Number of running docker images:$(STACK_RUNNING))
 prerequisite:
 	@echo "Testing prerequisite variable settings"
 	@mkdir -p tests/_output/
-	@chown 777 tests/_output
+	@chmod 777 tests/_output
 	@if [[ "$(E20R_PLUGIN_NAME)" =~ "default-plugin-name" ]]; then \
 		echo "The E20R_PLUGIN_NAME environment variable must be configured before running this command!"; \
 		exit 1; \
