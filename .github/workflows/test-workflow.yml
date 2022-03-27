@@ -83,15 +83,6 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v2
 
-      - name: Codecov
-        uses: codecov/codecov-action@v2
-        with:
-          token: ${{ secrets.E20R_CODECOV_SECRET }}
-#          directory: ./tests/_output/coverage
-          files: ./tests/_output/coverage.xml
-          verbose: true
-          fail_ci_if_error: true
-
   # To create the plugin .zip archive
   build_plugin:
     name: Build plugin package to the plugin repository (Our License server or WordPress.org)
