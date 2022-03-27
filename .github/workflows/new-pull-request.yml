@@ -80,7 +80,7 @@ jobs:
         with:
           repository: eighty20results/e20r-members-list
 
-      - name: WordPress .pot File Generator for 00-e20r-utilities
+      - name: WordPress .pot File Generator the plugin
         uses: iamdharmesh/action-wordpress-pot-generator@main
         with:
           destination_path: './languages'
