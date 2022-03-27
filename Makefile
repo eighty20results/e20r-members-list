@@ -515,6 +515,7 @@ integration-tests: integration-start
 integration-start: docker-deps start-stack db-import
 
 integration:
+	@echo "Testing if we need to run integration tests"
 	@if [[ -n "$(FOUND_INTEGRATION_TESTS)" ]]; then \
   		echo "Running specific Integration test(s) for $(PROJECT)/$(TEST_TO_RUN)"; \
 		APACHE_RUN_USER=$(APACHE_RUN_USER) APACHE_RUN_GROUP=$(APACHE_RUN_GROUP) COMPOSE_INTERACTIVE_NO_CLI=1 \
@@ -528,6 +529,7 @@ integration:
 # Using codeception to execute the WP Unit Tests (aka WP integration tests) for this plugin
 #
 functional-tests: docker-deps start-stack db-import
+	@echo "Testing if we need to run functional tests"
 	@if [[ -n "$(FOUND_FUNCTIONAL_TESTS)" ]]; then \
   		echo "Running all functional tests for $(PROJECT)"; \
 		APACHE_RUN_USER=$(APACHE_RUN_USER) APACHE_RUN_GROUP=$(APACHE_RUN_GROUP) COMPOSE_INTERACTIVE_NO_CLI=1 \
@@ -542,6 +544,7 @@ functional-tests: docker-deps start-stack db-import
 # Using codeception to execute the Plugin Acceptance tests
 #
 acceptance-tests: docker-deps start-stack db-import
+	@echo "Testing if we need to run acceptance tests"
 	@if [[ -n "$(FOUND_WP_ACCEPTANCE_TESTS)" ]]; then \
   		echo "Running all acceptance tests for $(PROJECT)"; \
 		APACHE_RUN_USER=$(APACHE_RUN_USER) APACHE_RUN_GROUP=$(APACHE_RUN_GROUP) COMPOSE_INTERACTIVE_NO_CLI=1 \
