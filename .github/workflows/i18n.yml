@@ -45,7 +45,7 @@ jobs:
           password: ${{ secrets.CONTAINER_ACCESS_TOKEN }}
 
       - name: Load cached Composer and test related dependencies
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         id: composer-cache
         with:
           key: ${{ runner.os }}-composer-cache-${{ hashFiles('**/composer.lock') }}
