@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 DEV_ENVIRONMENT=$(ipconfig getifaddr en0) ; export DEV_ENVIRONMENT
-PROJECT_NAME='e20r-members-list' ; export PROJECT_NAME
+PROJECT_NAME="${E20R_PLUGIN_NAME:-e20r-members-list}" ; export PROJECT_NAME
 PLUGIN_DIR=../docker-env
 PLUGIN_LIST="paid-memberships-pro 00-e20r-utilities ${PROJECT_NAME}"
 #PLUGIN_LIST="paid-memberships-pro pmpro-email-confirmation"
 CURRENT_DIR=$(pwd)
 if [[ ${DEV_ENVIRONMENT} = "10.0.0.214" || ${DEV_ENVIRONMENT} == "10.0.0.175" ]];
 then
-    echo "At home so using the docker env on docker.local"
+    echo "At home so using the docker env on docker.local for ${PROJECT_NAME}"
     ssh docker.local "cd ./www/docker-images/docker4wordpress/ ; mkdir -p ./mariadb-init" # mkdir -p ./traefik
     cp  "${PLUGIN_DIR}/hosts.home" ~/PhpStormProjects/docker-images/docker4wordpress/hosts.docker
     scp "${PLUGIN_DIR}/docker-compose.yml" docker.local:./www/docker/docker4wordpress/docker-compose.yml
@@ -24,7 +24,7 @@ then
     ssh docker.local "cd ./www/docker-images/docker4wordpress/ ; make wp plugin activate ${PLUGIN_LIST}"
 
 else
-    echo "Not at home (using the local laptop docker env)"
+    echo "Not at home (using the local laptop docker env for ${PROJECT_NAME})"
     mkdir -p /Volumes/Development/www/docker-images/docker4wordpress/mariadb-init
     cp "${PLUGIN_DIR}/hosts.local" ~/PhpStormProjects/docker-images/docker4wordpress/hosts.docker
     cp "${PLUGIN_DIR}/docker-compose.yml" ~/PhpStormProjects/docker-images/docker4wordpress/docker-compose.yml

@@ -13,8 +13,8 @@ jobs:
   pr_tests:
     strategy:
       matrix:
-        php_version: [ '7.3', '7.4', '8.0' ]
-    name: "Plugin tests - PHP"
+        php_version: [ '7.3', '7.4', '8.0', '8.1' ]
+    name: "Basic testing after push-to-repository"
     defaults:
       run:
         shell: bash
@@ -73,4 +73,7 @@ jobs:
         run: make phpstan-tests
 
       - name: Run Unit Tests with Code Coverage check
-        run: make coverage
+        run: make unit-tests
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v2

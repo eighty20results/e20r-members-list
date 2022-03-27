@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+#
+# Successfully run the code standard (WPCS-Extra) and PHPStan tests before the commit is allowed
+#
+# Copyright 2022(c) Thomas Sjolshagen, Eighty/20 Results by Wicked Strong Chicks, LLC
+
+function main() {
+	declare plugin_name;
+	plugin_name=${E20R_PLUGIN_NAME:-e20r-members-list}
+
+	E20R_PLUGIN_NAME=${plugin_name} make code-standard-tests || die "Error: WP Code Standard tests failed!"
+	E20R_PLUGIN_NAME=${plugin_name} make phpstan-tests || die "Error: PHPStan tests failed!"
+}
+
+main "$@"

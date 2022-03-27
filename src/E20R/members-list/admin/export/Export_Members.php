@@ -29,7 +29,7 @@ if ( ! defined( 'ABSPATH' ) && ! defined( 'PLUGIN_PHPUNIT' ) ) {
 	die( 'WordPress not loaded. Naughty, naughty!' );
 }
 
-if ( ! class_exists( '\\E20R\\Members_List\\Admin\\Export\\Export_Members' ) ) {
+if ( ! class_exists( 'E20R\Members_List\Admin\Export\Export_Members' ) ) {
 
 	/**
 	 * Handles exporting member data to CSV file.
@@ -661,6 +661,7 @@ if ( ! class_exists( '\\E20R\\Members_List\\Admin\\Export\\Export_Members' ) ) {
 		 * @return string
 		 */
 		private function enclose( $text ) {
+			$text = empty( $text ) ? '' : $text;
 			return '"' . str_replace( '"', '\\"', $text ) . '"';
 		}
 
