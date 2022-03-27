@@ -1,13 +1,13 @@
 {
   "name": "Better Members List for Paid Memberships Pro",
   "slug": "e20r-members-list",
-  "download_url": "https://wordpress.org/protected-content/e20r-members-list/e20r-members-list-8.5.zip",
-  "version": "8.5",
-  "tested": "5.9",
+  "download_url": "https://wordpress.org/protected-content/e20r-members-list/e20r-members-list-8.6.zip",
+  "version": "8.6",
+  "tested": "5.9.2",
   "requires": "5.0",
   "author": "Thomas Sjolshagen <thomas@eighty20results.com>",
   "author_homepage": "https://eighty20results.com/thomas-sjolshagen",
-  "last_updated": "2022-02-04 13:06:38 CET",
+  "last_updated": "2022-03-27 18:43:39 CET",
   "homepage": "https://wordpress.org/plugins/e20r-members-list/",
   "sections": {
     "description": "Extensible, sortable & bulk action capable members listing + export to CSV tool for Paid Memberships Pro.",

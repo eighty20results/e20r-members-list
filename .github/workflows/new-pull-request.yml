@@ -3,7 +3,7 @@ name: Run Unit Tests and create translations when creating a PR
 # Run Unit Test and POT files when new PR is created
 on:
   pull_request:
-    types: [opened]
+    types: [opened, edited]
     branches:
       - main
 
@@ -11,7 +11,7 @@ jobs:
   pr_tests:
     strategy:
       matrix:
-        php_version: [ '7.3', '7.4', '8.0' ]
+        php_version: [ '7.3', '7.4', '8.0', '8.1' ]
     name: "Plugin tests - PHP"
     defaults:
       run:
@@ -64,6 +64,9 @@ jobs:
         if: steps.composer-cache.outputs.cache-hit != 'true'
         run: make docker-deps
 
+      - name: Download pre-existing artifacts
+        uses: actions/download-artifact@v2
+
       - name: Run all Standard Tests
         run: make tests
 
@@ -81,7 +84,5 @@ jobs:
         uses: iamdharmesh/action-wordpress-pot-generator@main
         with:
           destination_path: './languages'
-          slug: e20r-members-list
-          text_domain: 'e20r-members-list'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          slug: ${{ env.E20R_PLUGIN_NAME }}
+          text_domain: ${{ env.E20R_PLUGIN_NAME }}

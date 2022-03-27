@@ -83,8 +83,10 @@ class E20R_Members_List_IntegrationTest extends WPTestCase {
 
 	/**
 	 * Tests that the get_instance() function returns the expected class
+	 *
+	 * @test
 	 */
-	public function test_get_instance() {
+	public function it_should_return_the_instance() {
 		self::assertInstanceOf( '\\E20R\\Members_List\\E20R_Members_List', new E20R_Members_List( $this->mlp_class, $this->utils ) );
 	}
 
@@ -93,7 +95,7 @@ class E20R_Members_List_IntegrationTest extends WPTestCase {
 	 *
 	 * @test
 	 */
-	public function test_load_hooks() {
+	public function it_should_load_hooks_and_actions() {
 
 		// Load the class and hooks (make sure the hooks we expect are loaded).
 		$class = new E20R_Members_List( $this->mlp_class, $this->utils );
@@ -102,6 +104,15 @@ class E20R_Members_List_IntegrationTest extends WPTestCase {
 		} catch ( MissingUtilitiesModule $e ) {
 			self::assertFalse( true, 'Error: The E20R Utilities Module is missing!' );
 		}
-		// TODO: Figure out how to test that actions have been set, etc.
+
+		self::assertSame( 1, has_action( 'init', array( $class, 'load_text_domain' ) ) );
+		self::assertSame( 10, has_action( 'wp_loaded', array( $class->get_page(), 'load_hooks' ) ) );
+
+		self::assertSame( 99999, has_action( 'pmpro_after_change_membership_level', array( $class, 'attempt_clear_cache' ) ) );
+		self::assertSame( 99999, has_action( 'deleted_user', array( $class, 'attempt_clear_cache' ) ) );
+		self::assertSame( 99999, has_action( 'profile_update', array( $class, 'attempt_clear_cache' ) ) );
+		self::assertSame( 99999, has_action( 'edit_user_profile_update', array( $class, 'attempt_clear_cache' ) ) );
+
+		self::assertSame( 10, has_filter( 'plugin_row_meta', array( $class, 'plugin_row_meta' ) ) );
 	}
 }

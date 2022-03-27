@@ -149,6 +149,7 @@ class Bulk_Operations_UnitTest extends Unit {
 			array( 'members-to-update', null, InvalidProperty::class ), // #7
 			array( 'operation ', null, InvalidProperty::class ), // #8
 			array( 'oper ation', null, InvalidProperty::class ), // #8
+			array( 'members_to_update', null, null ), // #9
 		);
 	}
 
@@ -219,7 +220,7 @@ class Bulk_Operations_UnitTest extends Unit {
 			), // # 0
 			array( 'operation', 'unit-test', 'unit-test', null ), // # 1
 			array( 'members_to_update', false, array(), null ), // #2 -> Tests the default value
-			array( 'failed', false, null, null ), // #3 -> Tests the default value
+			array( 'failed', false, array(), null ), // #3 -> Tests the default value
 			array( 'nothing_useful', false, null, InvalidProperty::class ), // #4
 			array( 'should raise exception', false, null, InvalidProperty::class ), // #4
 		);
@@ -246,7 +247,8 @@ class Bulk_Operations_UnitTest extends Unit {
 	/**
 	 * Unit test for the Bulk_Operations::__construct() (constructor)
 	 *
-	 * @param mixed $arguments The argument to supply to the class constructor
+	 * @param mixed $arg_1 The argument to supply to the class constructor
+	 * @param mixed $arg_2 The 2nd argument to supply to the class constructor
 	 * @param mixed $expected The expected result from the get('utils') method
 	 *
 	 * @return void
@@ -254,11 +256,11 @@ class Bulk_Operations_UnitTest extends Unit {
 	 * @dataProvider fixture_instantiate_bulk_operations
 	 * @test
 	 */
-	public function it_instantiates_bulk_operations( $arguments, $expected ) {
+	public function it_instantiates_bulk_operations( $arg_1, $arg_2, $expected ) {
 
 		$m_bo = $this->construct(
 			Bulk_Operations::class,
-			array( $arguments ),
+			array( $arg_1, $arg_2 ),
 			array( 'execute' => true )
 		);
 
@@ -276,10 +278,10 @@ class Bulk_Operations_UnitTest extends Unit {
 		$message   = new Message();
 		$new_utils = new Utilities( $message );
 		return array(
-			array( null, Utilities::class ),
-			array( $utils, Utilities::class ),
-			array( $message, Message::class ),
-			array( $new_utils, Utilities::class ),
+			array( null, null, Utilities::class ),
+			array( null, $utils, Utilities::class ),
+			array( null, $message, Message::class ),
+			array( null, $new_utils, Utilities::class ),
 		);
 	}
 }

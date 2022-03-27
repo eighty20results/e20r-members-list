@@ -1,9 +1,9 @@
 {
   "redefinable-internals": [
-	"function_exists",
-	"file_exists",
-	"mkdir",
-	"dirname",
-	"json_decode"
+    "function_exists",
+    "file_exists",
+    "mkdir",
+    "dirname",
+    "json_decode"
   ]
 }

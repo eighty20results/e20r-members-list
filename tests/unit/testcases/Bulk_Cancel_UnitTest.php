@@ -22,16 +22,16 @@
 
 namespace E20R\Tests\Unit;
 
-use Brain\Monkey;
-use Brain\Monkey\Functions;
 use E20R\Members_List\Admin\Exceptions\InvalidProperty;
-use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
-use Codeception\Test\Unit;
 use E20R\Members_List\Admin\Exceptions\PMProNotActive;
-use E20R\Tests\Unit\Fixtures;
-
 use E20R\Members_List\Admin\Bulk\Bulk_Cancel;
 use E20R\Utilities\Utilities;
+
+use Brain\Monkey;
+use Brain\Monkey\Functions;
+use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
+use Codeception\Test\Unit;
+
 use Exception;
 
 /**
@@ -105,12 +105,62 @@ class Bulk_Cancel_UnitTest extends Unit {
 	}
 
 	/**
+	 * Unit test to validate that PMProNotActive exception is thrown
+	 *
+	 * @param bool $pmpro_present Whether we will behave as if PMPro is installed and active
+	 * @param bool $cancel_result The result we'll return from the stub'ed pmpro_cancelM
+	 * @param bool $expected_result The result from running the execute() method against the mock data
+	 *
+	 * @return void
+	 * @throws InvalidProperty Thrown if attempting to access an invalid class property
+	 *
+	 * @dataProvider fixture_pmpro_not_active
+	 * @test
+	 */
+	public function it_should_throw_pmpro_not_active_exception( $pmpro_present, $cancel_result, $expected_result ) {
+		Functions\stubs(
+			array(
+				'function_exists'             => function( $name ) use ( $pmpro_present ) {
+					switch ( $name ) {
+						case 'pmpro_setMessage':
+						case 'pmpro_cancelMembershipLevel':
+							$this->m_utils->log( "Is {$name}() available? Returning " . ( $pmpro_present ? 'Yes' : 'No' ) );
+							return $pmpro_present;
+						default:
+							$this->m_utils->log( 'Returning default of TRUE for ' . $name );
+							return true;
+					}
+				},
+				'pmpro_cancelMembershipLevel' => function( $level_id, $user_id, $level_status ) use ( $cancel_result ) {
+					$this->m_utils->log( "Canceling membership level {$level_id} for user {$user_id} and setting status => {$level_status}" );
+					return $cancel_result;
+				},
+			)
+		);
+
+		$bc     = new Bulk_Cancel( null, $this->m_utils );
+		$result = $bc->execute();
+		self::assertSame( $expected_result, $result );
+	}
+
+	/**
+	 * Fixture for the it_should_throw_pmpro_not_active_exception test
+	 *
+	 * @return array
+	 */
+	public function fixture_pmpro_not_active() {
+		return array(
+			array( false, null, false ),
+		);
+	}
+	/**
 	 * Happy Path unit test for the Bulk_Cancel::cancel() method
 	 *
 	 * @param array $members_to_cancel The list of members to "cancel"
 	 * @param bool  $pmpro_present What the 'function_exists()' function is supposed to return
 	 * @param bool  $cancel_returns What the pmpro_cnacelMembershipLevel() function is supposed to return
 	 * @param int   $failed_count The expected count of failed cancellations from the operation
+	 * @param mixed $expected The expected outcome from running the cancel operation
 	 *
 	 * @dataProvider fixture_generates_users_to_bulk_cancel
 	 * @return void
@@ -118,12 +168,27 @@ class Bulk_Cancel_UnitTest extends Unit {
 	 * @throws InvalidProperty Thrown if the get/set operation is invalid
 	 */
 	public function it_performs_the_bulk_cancel_operation( $members_to_cancel, $pmpro_present, $cancel_returns, $failed_count, $expected ) {
+		if ( true === $pmpro_present ) {
+			Functions\stubs(
+				array(
+					'pmpro_setMessage' => function( $msg, $prio ) {
+						$this->m_utils->add_message( $msg, $prio, 'backend' );
+					},
+				)
+			);
+		}
+
 		Functions\stubs(
 			array(
-				'pmpro_setMessage' => function( $msg, $prio ) {
-					$this->m_utils->add_message( $msg, $prio, 'backend' );
+				'function_exists' => function( $name ) use ( $pmpro_present ) {
+					switch ( $name ) {
+						case 'pmpro_setMessage':
+						case 'pmpro_cancelMembershipLevel':
+							return $pmpro_present;
+						default:
+							return true;
+					}
 				},
-				'function_exists'  => $pmpro_present,
 			)
 		);
 
@@ -176,6 +241,7 @@ class Bulk_Cancel_UnitTest extends Unit {
 			// members to process, is pmpro present, pmpro_cancelMembershipLevel returns, failed count, expected result from execute()
 			array( $members, true, true, 0, true ),
 			array( $members, true, false, 30, false ),
+			array( $members, false, false, 0, false ),
 		);
 	}
 
@@ -196,19 +262,32 @@ class Bulk_Cancel_UnitTest extends Unit {
 	 */
 	public function it_tries_to_cancel_the_membership_for_the_specified_wpuser_id( $user_id, $level_id, $function_exists, $pmp_returns, $expected ) {
 
-		if ( false === $function_exists ) {
-			$this->expectException( PMProNotActive::class );
+		if ( true === $function_exists ) {
+			Functions\stubs(
+				array(
+					'pmpro_cancelMembershipLevel' =>
+						function( $level_id, $user_id, $status ) use ( $pmp_returns ) {
+							$this->m_utils->log( "pmpro_cancelMembershipLevel({$level_id}, {$user_id}, {$status})" );
+							return $pmp_returns;
+						},
+				)
+			);
 		}
 
 		Functions\stubs(
 			array(
-				'do_action'                   => null,
-				'function_exists'             => $function_exists,
-				'pmpro_cancelMembershipLevel' =>
-					function( $level_id, $user_id, $status ) use ( $pmp_returns ) {
-						$this->m_utils->log( "pmpro_cancelMembershipLevel({$level_id}, {$user_id}, {$status})" );
-						return $pmp_returns;
-					},
+				'do_action'       => null,
+				'function_exists' => function( $name ) use ( $function_exists ) {
+					if ( 'pmpro_cancelMembershipLevel' === $name ) {
+						$this->m_utils->log( 'function_exists( "pmpro_cancelMembershipLevel" ) -> ' . ( $function_exists ? 'Yes' : 'No' ) );
+						if ( false === $function_exists ) {
+							$this->expectException( PMProNotActive::class );
+						}
+						return $function_exists;
+					}
+
+					return true;
+				},
 			)
 		);
 
@@ -230,6 +309,48 @@ class Bulk_Cancel_UnitTest extends Unit {
 			array( 1234567, 123456, false, null, null ),
 			array( 1234567, 123456, true, null, null ),
 			array( 1, 1, true, true, true ),
+			array( 1, 1, false, false, false ),
+		);
+	}
+
+	/**
+	 * Bulk_Cancel() class instantiation unit test
+	 *
+	 * @param array          $members_to_update The list of member info to use for cancellation operation
+	 * @param Utilities|null $utils_class The E20R Utilities module class (or mocked class)
+	 * @param mixed          $expected_class The expected class returned
+	 * @param int[]          $expected_to_update The expected response
+	 *
+	 * @return void
+	 *
+	 * @test
+	 * @dataProvider fixture_instantiated_values
+	 */
+	public function it_should_instantiate_the_class( $members_to_update, $utils_class, $expected_class, $expected_to_update ) {
+		$bc = new Bulk_Cancel( $members_to_update, $utils_class );
+
+		if ( null !== $utils_class ) {
+			self::assertInstanceOf( $expected_class, $bc->get( 'utils' ) );
+		}
+
+		self::assertIsArray( $bc->get( 'members_to_update' ) );
+		self::assertSameSize( $members_to_update, $expected_to_update );
+		self::assertSameSize( $members_to_update, $bc->get( 'members_to_update' ) );
+		self::assertSame( 'cancel', $bc->get( 'operation' ) );
+	}
+
+	/**
+	 * Fixture for the it_should_instanitate_the_class
+	 *
+	 * @return array[]
+	 */
+	public function fixture_instantiated_values() {
+		$utils   = new Utilities();
+		$members = $this->fixture_generate_user_level_array();
+		return array(
+			array( $members, null, Utilities::class, $members ),
+			array( $members, $utils, Utilities::class, $members ),
+			array( $members, null, Utilities::class, $members ),
 		);
 	}
 }

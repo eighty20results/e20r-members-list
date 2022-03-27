@@ -29,15 +29,35 @@ if ( ! defined( 'ABSPATH' ) && defined( 'PLUGIN_PHPUNIT' ) ) {
 
 use Codeception\TestCase\WPTestCase;
 use E20R\Members_List\Admin\Exceptions\DBQueryError;
+use E20R\Members_List\Admin\Exceptions\InvalidProperty;
 use E20R\Members_List\Admin\Exceptions\InvalidSQL;
+use E20R\Members_List\Admin\Pages\Members_List_Page;
 use E20R\Members_List\Members_List;
 use E20R\Utilities\Message;
 use E20R\Utilities\Utilities;
 
+use Brain\Monkey;
+use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
+use function Brain\faker;
+
+use stdClass;
+use function Brain\fakerReset;
+use function E20R\Tests\Fixtures\fixture_insert_level_data;
+use function E20R\Tests\Fixtures\fixture_insert_member_data;
+use function E20R\Tests\Fixtures\fixture_insert_order_data;
+use function E20R\Tests\Fixtures\fixture_insert_user_records;
+use function E20R\Tests\Fixtures\fixture_insert_usermeta;
+use function E20R\Tests\Fixtures\fixture_clear_test_data;
+use function E20R\Tests\Fixtures\fixture_test_tables_exist;
+
 /**
  * Integration tests for the MembersList class
+ *
+ * @covers \E20R\Members_List\Members_List
  */
 class Members_List_IntegrationTest extends WPTestCase {
+
+	use MockeryPHPUnitIntegration;
 
 	/**
 	 * The utilities class we'll use for these tests
@@ -47,17 +67,91 @@ class Members_List_IntegrationTest extends WPTestCase {
 	private $utils = null;
 
 	/**
+	 * Validates that tables exist or lets us know which one(s) are missing
+	 *
+	 * @var bool|string
+	 */
+	private $tables_exist = true;
+
+	/**
+	 * The list of values representing an empty end-date timestamp
+	 *
+	 * @var array $empty_values
+	 */
+	private $empty_values = array();
+
+	/**
+	 * Add WP-Faker class
+	 *
+	 * @var null|mixed
+	 */
+	private $wp_faker = null;
+
+	/**
 	 * Set up for the test class
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		Monkey\setUp();
 
 		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$GLOBALS['hook_suffix'] = 'pmpro_membership';
 		$message                = new Message();
 		$this->utils            = new Utilities( $message );
+		$this->wp_faker         = faker()->wp();
+		$this->utils->log( 'Loading records as necessary' );
+
+		self::fixtureMockPMProTableNames();
+
+		if ( false === fixture_test_tables_exist() ) {
+			$this->utils->log( 'Error: Required tables are not configured!' );
+			$this->tables_exist = false;
+		}
+		if ( false === fixture_insert_user_records() ) {
+			$this->utils->log( 'Error loading new user records' );
+			$this->tables_exist = 'wp_users';
+		}
+		if ( false === fixture_insert_usermeta() ) {
+			$this->utils->log( 'Error loading new usermeta records' );
+			$this->tables_exist = 'wp_usermeta';
+		}
+		if ( false === fixture_insert_level_data() ) {
+			$this->utils->log( 'Error loading new level records' );
+			$this->tables_exist = 'pmpro_membership_levels';
+		}
+		if ( false === fixture_insert_order_data() ) {
+			$this->utils->log( 'Error loading new order records' );
+			$this->tables_exist = 'pmpro_membership_orders';
+		}
+		if ( false === fixture_insert_member_data() ) {
+			$this->utils->log( 'Error loading new member data records' );
+			$this->tables_exist = 'pmpro_memberships_users';
+		}
+
+		$this->empty_values = array(
+			'',
+			null,
+			0,
+			'0',
+			'0000-00-00 00:00:00',
+			'0000-00-00',
+			'00:00:00',
+		);
 	}
 
+	/**
+	 * Tear-down test settings
+	 *
+	 * @return void
+	 */
+	public function tearDown(): void {
+		fixture_clear_test_data();
+		fakerReset();
+
+		Monkey\tearDown();
+		parent::tearDown();
+
+	}
 	/**
 	 * Test the set_tables_and_joins() function with a filter
 	 *
@@ -290,6 +384,7 @@ class Members_List_IntegrationTest extends WPTestCase {
 	 *
 	 * @dataProvider fixture_member_sql_params_levels
 	 * @test
+	 * @throws InvalidProperty Raise if the property specified is invalid
 	 */
 	public function it_generates_sql_with_multiple_levels( $level, int $per_page, int $page_number, string $sort_order, string $order_by, string $find, bool $is_email, string $expected_sql ) {
 
@@ -303,11 +398,11 @@ class Members_List_IntegrationTest extends WPTestCase {
 		try {
 			$ml_class->generate_member_sql( $per_page, $page_number, false );
 		} catch ( InvalidSQL $e ) {
-			self::assertFalse( true, 'Error generating SQL: ' . $e->getMessage() );
+			$this->fail( 'Error generating SQL: ' . $e->getMessage() );
 		}
 
 		$resulting_sql = $ml_class->get( 'sql_query' );
-		$this->assertDiscardWhitespace( $expected_sql, $resulting_sql );
+		self::assertDiscardWhitespace( $expected_sql, $resulting_sql );
 	}
 
 	/**
@@ -386,7 +481,7 @@ class Members_List_IntegrationTest extends WPTestCase {
 			 GROUP BY ml.id, u.ID
 			 ORDER BY ml.id, u.ID DESC
 ",
-			// FIXME: There's something wrong with the generated SQL during testing - specifically the statusv value when searching for a membership level(?)
+			// FIXME: There's something wrong with the generated SQL during testing - specifically the status value when searching for a membership level(?)
 			4 => "SELECT
 		mu.id AS record_id, u.ID AS ID, u.user_login AS user_login, u.user_email AS user_email, u.user_registered AS user_registered, mu.membership_id AS membership_id, mu.initial_payment AS initial_payment, mu.billing_amount AS billing_amount, mu.cycle_period AS cycle_period, mu.cycle_number AS cycle_number, mu.billing_limit AS billing_limit, mu.code_id AS code_id, mu.status AS status, mu.trial_amount AS trial_amount, mu.trial_limit AS trial_limit, mu.startdate AS startdate, mu.enddate AS enddate, ml.name AS name
 			 FROM {$wpdb->prefix}users AS u
@@ -494,7 +589,7 @@ class Members_List_IntegrationTest extends WPTestCase {
 
 		try {
 			$mc_class->get_members( $per_page, $page_number );
-		} catch ( InvalidSQL $exp ) {
+		} catch ( InvalidSQL | DBQueryError $exp ) {
 			$this->utils->log( "Error: {$exp->getMessage()}" );
 		}
 
@@ -535,11 +630,311 @@ class Members_List_IntegrationTest extends WPTestCase {
 	/**
 	 * The fixture method for test_get_member_record_count
 	 *
-	 * @return \int[][]
+	 * @return int[][]
 	 */
 	public function fixture_record_count_params(): array {
 		return array(
 			array( 1 ),
+		);
+	}
+
+	/**
+	 * Test the returned column value when processing Members_List::column_last()
+	 *
+	 * @param array       $test_item The simulated CSV column data for the import
+	 * @param null|string $next_payment The expected next payment date for recurring billing configurations
+	 * @param string|null $date_format The date format to use for the column
+	 * @param string      $expected_html The expected HTML/enddate information for the 'last' column
+	 *
+	 * @return void
+	 *
+	 * @dataProvider fixture_last_column_item
+	 * @test
+	 */
+	public function it_should_return_the_correct_html_for_the_last_column(
+		$test_item,
+		$next_payment,
+		$date_format,
+		$expected_html
+	) {
+		$existing_date_format = get_option( 'date_format' );
+
+		if ( $existing_date_format !== $date_format ) {
+			if ( false === update_option( 'date_format', $date_format, 'no' ) ) {
+				$this->fail( 'Cannot configure date format to: ' . $date_format );
+			}
+		}
+
+		Monkey\Functions\stubs(
+			array(
+				'pmpro_next_payment' => $next_payment,
+			)
+		);
+
+		$page        = new Members_List_Page( $this->utils );
+		$ml          = new Members_List( $this->utils, $page );
+		$result_html = $ml->column_last( $test_item );
+		$timestamp   = ! $ml->has_empty_date( $test_item['enddate'] ) ?
+			strtotime( $test_item['enddate'], time() ) :
+			null;
+
+		self::assertDiscardWhitespace( $expected_html, $result_html );
+		self::assertStringContainsString(
+			"<input type=\"hidden\" value=\"{$test_item['membership_id']}\" class=\"e20r-members-list-membership-id\" name=\"e20r-members-list-enddate_mid_{$test_item['ID']}\" />",
+			$result_html,
+			"Error: membership_id info problem -> MID: {$test_item['membership_id']} for user {$test_item['ID']}"
+		);
+		self::assertStringContainsString(
+			"<input type=\"hidden\" value=\"{$test_item['ID']}\" class=\"e20r-members-list-user-id\" name=\"e20r-members-list-user_id_{$test_item['ID']}\" />",
+			$result_html,
+			"Error: user_id info problem -> user_id: {$test_item['ID']}"
+		);
+		self::assertStringContainsString(
+			"<input type=\"hidden\" value=\"{$timestamp}\" class=\"e20r-members-list-db-enddate\" name=\"e20r-members-list-db_enddate_{$test_item['ID']}\" />",
+			$result_html,
+			"Error: enddate timestamp problem -> Timestamp: {$timestamp} for user {$test_item['ID']}"
+		);
+
+		if ( ! empty( $existing_date_format ) ) {
+			update_option( 'date_format', $existing_date_format );
+		}
+	}
+
+	/**
+	 * Fixture for the it_should_return_the_correct_html_for_the_last_column() test
+	 *
+	 * @return array[]
+	 */
+	public function fixture_last_column_item() {
+		$item_list          = $this->fixture_generate_item_list();
+		$return_array       = array();
+		$this->empty_values = array(
+			'',
+			null,
+			0,
+			'0',
+			'0000-00-00 00:00:00',
+			'0000-00-00',
+			'00:00:00',
+		);
+
+		// Build the fixture dynamically(ish)
+		foreach ( $item_list as $item ) {
+			// Have custom settings we need to pull
+			$date_format  = $item['date_format'];
+			$next_payment = $item['next_payment'];
+
+			// Clean up the item before treating it as a user record
+			unset( $item['date_format'] );
+			unset( $item['next_payment'] );
+
+			// Add a test record
+			$return_array[] = array( $item, $next_payment, $date_format, $this->fixture_generate_enddate_html( $item, $date_format, $next_payment ) );
+		}
+
+		return $return_array;
+	}
+
+	/**
+	 * Generates a list of records to test against
+	 *
+	 * @return array[]
+	 */
+	private function fixture_generate_item_list() {
+		return array(
+			// Test with membership that has fixed end-date and no recurring billing  (F j, Y as date format)
+			array(
+				'record_id'       => 2,
+				'ID'              => 1,
+				'membership_id'   => 1,
+				'code_id'         => 0,
+				'startdate'       => '2022-02-12 09:36:33',
+				'enddate'         => '2023-02-12 23:59:59',
+				'initial_payment' => 25.00,
+				'billing_amount'  => 0.00,
+				'next_payment'    => null,
+				'cycle_number'    => 0,
+				'cycle_period'    => '',
+				'date_format'     => 'F j, Y',
+			),
+			// Test with a recurring membership setup (F j, Y as date format)
+			array(
+				'record_id'       => 2,
+				'ID'              => 3,
+				'membership_id'   => 2,
+				'code_id'         => 0,
+				'startdate'       => '2022-02-12 09:38:22',
+				'enddate'         => '0000-00-00 00:00:00',
+				'initial_payment' => 15.00,
+				'billing_amount'  => 10.00,
+				'next_payment'    => strtotime( 'March 12, 2022', time() ),
+				'cycle_number'    => 1,
+				'cycle_period'    => 'Month',
+				'date_format'     => 'F j, Y',
+			),
+			// Test with membership that has fixed end-date and no recurring billing  (Y-m-d as date format)
+			array(
+				'record_id'       => 2,
+				'ID'              => 1,
+				'membership_id'   => 1,
+				'code_id'         => 0,
+				'startdate'       => '2022-02-12 09:36:33',
+				'enddate'         => '2023-02-12 23:59:59',
+				'initial_payment' => 25.00,
+				'billing_amount'  => 0.00,
+				'next_payment'    => null,
+				'cycle_number'    => 0,
+				'cycle_period'    => '',
+				'date_format'     => 'Y-m-d',
+			),
+			// Test with a recurring membership setup (Y-m-d as date format)
+			array(
+				'record_id'       => 2,
+				'ID'              => 3,
+				'membership_id'   => 2,
+				'code_id'         => 0,
+				'startdate'       => '2022-02-12 09:38:22',
+				'enddate'         => '0000-00-00 00:00:00',
+				'next_payment'    => strtotime( '2022-03-12', time() ),
+				'initial_payment' => 15.00,
+				'billing_amount'  => 10.00,
+				'cycle_number'    => 1,
+				'cycle_period'    => 'Month',
+				'date_format'     => 'Y-m-d',
+			),
+			// Test with what is an empty (no) enddate value
+			array(
+				'ID'             => 3,
+				'record_id'      => 682,
+				'membership_id'  => 1,
+				'enddate'        => null,
+				'billing_amount' => null,
+				'next_payment'   => null,
+				'cycle_number'   => null,
+				'date_format'    => 'F j, Y',
+			),
+			// Test with what should also be treated as an empty (no) enddate value
+			array( // #5
+				'ID'             => 3,
+				'record_id'      => 682,
+				'membership_id'  => 1,
+				'enddate'        => '',
+				'billing_amount' => null,
+				'next_payment'   => null,
+				'cycle_number'   => null,
+				'date_format'    => 'F j, Y',
+			),
+			// Test with a valid end-date
+			array(
+				'ID'             => 3,
+				'record_id'      => 682,
+				'membership_id'  => 1,
+				'enddate'        => '2020-01-01 23:59:59',
+				'billing_amount' => null,
+				'next_payment'   => null,
+				'cycle_number'   => null,
+				'date_format'    => 'F j, Y',
+			),
+		);
+	}
+
+	/**
+	 * Generate the expected HTML for the fixture_last_column_item() method
+	 * NOTE: We won't be including the 'id=' field for the datepicker field (date field)
+	 * as it's done by the datepicker JS library
+	 *
+	 * @param array       $item The record we're testing with
+	 * @param string      $date_format The date format
+	 * @param string|null $next_payment The expected next payment date
+	 *
+	 * @return string
+	 */
+	private function fixture_generate_enddate_html( $item, $date_format, $next_payment ) {
+		if ( true !== $this->tables_exist ) {
+			$this->fail( "Error: Something wrong with the table(s)... '{$this->tables_exist}'" );
+		}
+
+		$empty_date        = in_array( $item['enddate'], $this->empty_values, true );
+		$enddate_timestamp = $empty_date ? null : strtotime( $item['enddate'], time() );
+		$enddate_label     = $empty_date ? 'N/A' : gmdate( $date_format, $enddate_timestamp );
+
+		if ( $empty_date && ! empty( $item['billing_amount'] ) && ! empty( $item['cycle_number'] ) ) {
+			return $this->fixture_get_recurring(
+				null !== $next_payment ? gmdate( $date_format, $next_payment ) : '',
+				$item,
+				$enddate_timestamp,
+				$enddate_label
+			);
+		} else {
+			return $this->fixture_get_non_recurring(
+				$enddate_label,
+				$item,
+				$enddate_timestamp
+			);
+		}
+	}
+
+	/**
+	 * HTML we expect when the user has a non-recurring membership
+	 *
+	 * @param string $next_payment_date The date used to show when the next payment is scheduled
+	 * @param array  $item The record being processed
+	 * @param int    $enddate_timestamp The epoch value for the enddate
+	 * @param string $enddate_label The label used for the 'enddate'
+	 *
+	 * @return string
+	 */
+	private function fixture_get_recurring( $next_payment_date, $item, $enddate_timestamp, $enddate_label ) {
+		return sprintf(
+			'<a href="#" class="e20r-members-list_enddate e20r-members-list-editable" title="Update membership end/expiration date">N/A (<span class="e20r-members-list-small" style="font-size: 10px; font-style: italic;">Next Payment: %1$s</span>)<span class="dashicons dashicons-edit"></span></a><div class="ml-row-settings clearfix">
+
+				<input type="hidden" value="%2$d" class="e20r-members-list-membership-id" name="e20r-members-list-enddate_mid_%3$d" />
+				<input type="hidden" value="%3$d" class="e20r-members-list-user-id" name="e20r-members-list-user_id_%3$d" />
+				<input type="hidden" value="%6$s" class="e20r-members-list-enddate-label" name="e20r-members-list-enddatelabel_%3$d" />
+				<input type="hidden" value="%4$s" class="e20r-members-list-db-enddate" name="e20r-members-list-db_enddate_%3$d" />
+				<input type="hidden" value="%5$d" class="e20r-members-list-db_record_id" name="e20r-members-list-db_record_id_%3$d" />
+				<input type="hidden" value="enddate" class="e20r-members-list-field-name" name="e20r-members-list-field_name_%3$d" />
+						<input type="date" placeholder="YYYY-MM-DD" pattern="(?:19|20)[0-9]{2}-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1[0-9]|2[0-9])|(?:(?!02)(?:0[1-9]|1[0-2])-(?:30))|(?:(?:0[13578]|1[02])-31))" title="Enter a date in this format YYYY-MM-DD" name="e20r-members-list-new_enddate_%3$d" class="e20r-members-list-input-enddate" value="%4$s" />
+						<br />
+						<a href="#" class="e20r-members-list-cancel e20r-members-list-list-link">Cancel</a>
+					</div>',
+			$next_payment_date,
+			$item['membership_id'],
+			$item['ID'],
+			$enddate_timestamp,
+			$item['record_id'],
+			$enddate_label
+		);
+	}
+
+	/**
+	 * HTML we expect when the user has a non-recurring membership
+	 *
+	 * @param string $enddate_label The end-date label (text)
+	 * @param array  $item The record being processed
+	 * @param int    $enddate_timestamp The epoch value for the enddate
+	 * @return string
+	 */
+	private function fixture_get_non_recurring( $enddate_label, $item, $enddate_timestamp ) {
+		return sprintf(
+			'<a href="#" class="e20r-members-list_enddate e20r-members-list-editable" title="Update membership end/expiration date">%1$s<span class="dashicons dashicons-edit"></span></a><div class="ml-row-settings clearfix">
+
+				<input type="hidden" value="%2$d" class="e20r-members-list-membership-id" name="e20r-members-list-enddate_mid_%3$d" />
+				<input type="hidden" value="%3$d" class="e20r-members-list-user-id" name="e20r-members-list-user_id_%3$d" />
+				<input type="hidden" value="%1$s" class="e20r-members-list-enddate-label" name="e20r-members-list-enddatelabel_%3$d" />
+				<input type="hidden" value="%4$s" class="e20r-members-list-db-enddate" name="e20r-members-list-db_enddate_%3$d" />
+				<input type="hidden" value="%5$d" class="e20r-members-list-db_record_id" name="e20r-members-list-db_record_id_%3$d" />
+				<input type="hidden" value="enddate" class="e20r-members-list-field-name" name="e20r-members-list-field_name_%3$d" />
+						<input type="date" placeholder="YYYY-MM-DD" pattern="(?:19|20)[0-9]{2}-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1[0-9]|2[0-9])|(?:(?!02)(?:0[1-9]|1[0-2])-(?:30))|(?:(?:0[13578]|1[02])-31))" title="Enter a date in this format YYYY-MM-DD" name="e20r-members-list-new_enddate_%3$d" class="e20r-members-list-input-enddate" value="%6$s" />
+						<br />
+						<a href="#" class="e20r-members-list-cancel e20r-members-list-list-link">Cancel</a>
+					</div>',
+			$enddate_label,
+			$item['membership_id'],
+			$item['ID'],
+			$enddate_timestamp,
+			$item['record_id'],
+			$enddate_timestamp ? gmdate( 'Y-m-d', $enddate_timestamp ) : $enddate_timestamp
 		);
 	}
 
@@ -565,7 +960,7 @@ class Members_List_IntegrationTest extends WPTestCase {
 		}
 
 		$actual = $members_list->all_columns();
-		$this->assertEquals( $expected, $actual );
+		self::assertSame( $expected, $actual );
 	}
 
 	/**
@@ -604,5 +999,85 @@ class Members_List_IntegrationTest extends WPTestCase {
 		$GLOBALS['hook_suffix'] = 'pmpro_membership'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$members_list           = new Members_List( $this->utils );
 		return $members_list->all_columns();
+	}
+
+	/**
+	 * Makes sure we generate the correct HTML for a single membership level per user record
+	 *
+	 * @param array $test_item The record data used for the test
+	 *
+	 * @return void
+	 *
+	 * @dataProvider fixture_generate_level_column_data
+	 * @test
+	 */
+	public function it_should_return_single_membership_level_column_html( $test_item ) {
+
+		Monkey\Functions\stubs(
+			array(
+				'pmpro_getAllLevels' => function( $bool1, $bool2 ) {
+					return $this->fixture_fake_pmpro_levels();
+				},
+			)
+		);
+
+	}
+
+	/**
+	 * Generate mocked PMPro Membership Level definitions
+	 *
+	 * @return array
+	 */
+	public function fixture_fake_pmpro_levels() {
+		$level_ids = range( 1, 13, 1 );
+		$levels    = array();
+
+		foreach ( $level_ids as $level_id ) {
+			$level               = new stdClass();
+			$level->id           = $level_id;
+			$level->name         = sprintf( 'Test level #%d', $level_id );
+			$levels[ $level_id ] = $level;
+		}
+
+		return $levels;
+	}
+
+	/**
+	 * Fixture for the it_should_return_single_membership_level_column_html
+	 *
+	 * @return \array[][]
+	 */
+	public function fixture_generate_level_column_data() {
+		return array(
+			array(
+				array(
+					'ID'            => 1,
+					'membership_id' => 1,
+					'name'          => '',
+					'record_id'     => 1,
+				),
+			),
+		);
+	}
+
+	/**
+	 * Verify that the PMPro tables are present in the global WPDB object
+	 *
+	 * @return void
+	 */
+	public static function fixtureMockPMProTableNames() {
+		$table_names = array(
+			'pmpro_memberships_users',
+			'pmpro_membership_orders',
+			'pmpro_membership_levels',
+		);
+
+		global $wpdb;
+
+		foreach ( $table_names as $table_name ) {
+			if ( ! isset( $wpdb->{$table_name} ) ) {
+				$wpdb->{$table_name} = "{$wpdb->prefix}{$table_name}";
+			}
+		}
 	}
 }

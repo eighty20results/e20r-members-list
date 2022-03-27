@@ -1,0 +1,24 @@
+#!/usr/bin/env sh
+#
+# Installs all configured git hooks (using ZSH)
+# Copyright 2022(c) Thomas Sjolshagen, Eighty/20 Results by Wicked Strong Chicks, LLC
+
+main() {
+
+	if [ -f /bin/zsh ]; then
+		echo "Using zsh based hook installer"
+		/bin/zsh -c bin/git_hooks/install-hooks.zsh
+	fi
+	if [ ! -f /bin/zsh ] && [ -f /bin/bash ]; then
+		bash_version=$(bash --version)
+		if echo "${bash_version}" | grep -iq 'version 4.4 '; then
+			echo "Using bash based hook installer"
+			/bin/bash -c bin/git_hooks/install-hooks.bash
+		else
+			echo "Error: Neither zsh nor a valid version of Bash are present on this system!"
+			exit 1
+		fi
+	fi
+}
+
+main "$@"

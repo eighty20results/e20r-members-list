@@ -21,6 +21,7 @@
 
 namespace E20R\Members_List\Admin\Bulk;
 
+use E20R\Members_List\Admin\Exceptions\InvalidMemberList;
 use E20R\Members_List\Admin\Exceptions\InvalidProperty;
 use E20R\Utilities\Message;
 use E20R\Utilities\Utilities;
@@ -46,14 +47,14 @@ if ( ! class_exists( '\\E20R\\Members_List\\Admin\\Bulk\\Bulk_Operations' ) ) {
 		/**
 		 * Array of WP_User IDs where the cancel operation failed
 		 *
-		 * @var null|int[] $failed
+		 * @var array[][] $failed
 		 */
-		protected $failed = null;
+		protected $failed = array();
 
 		/**
 		 * Array of members to update where the memebr date is represented as an array per member
 		 *
-		 * @var array[]|int[]|null
+		 * @var array[]
 		 */
 		protected $members_to_update = array();
 
@@ -67,17 +68,21 @@ if ( ! class_exists( '\\E20R\\Members_List\\Admin\\Bulk\\Bulk_Operations' ) ) {
 		/**
 		 * Bulk_Cancel constructor (singleton)
 		 *
+		 * @param array          $members_to_update The list of members and level IDs to process
 		 * @param Utilities|null $utils Instance of the E20R Utilities Module class
 		 *
 		 * @access public
 		 */
-		public function __construct( $utils = null ) {
+		public function __construct( $members_to_update = null, $utils = null ) {
 
 			if ( empty( $utils ) ) {
 				$message = new Message();
 				$utils   = new Utilities( $message );
 			}
 
+			if ( null !== $members_to_update ) {
+				$this->set( 'members_to_update', $members_to_update );
+			}
 			$this->utils = $utils;
 		}
 
@@ -88,8 +93,25 @@ if ( ! class_exists( '\\E20R\\Members_List\\Admin\\Bulk\\Bulk_Operations' ) ) {
 		 * @param mixed  $value The value to set the class parameter to
 		 *
 		 * @throws InvalidProperty Raised if the user supplies an invalid class parameter
+		 * @throws InvalidMemberList Raised if we're attempting to set the 'members_to_update' property and its value isn't appropriate
 		 */
 		public function set( string $param, $value ) {
+
+			if (
+				'members_to_update' === $param &&
+				null !== $value &&
+				false === $this->valid_member_array( $value )
+			) {
+				throw new InvalidMemberList(
+					esc_attr__(
+						'The specified variable is not an array of user IDs',
+						'e20r-members-list'
+					)
+				);
+			} elseif ( 'members_to_update' === $param && null === $value ) {
+				$value = array();
+			}
+
 			// Make sure we let the caller know there's a problem if the variable doesn't exist.
 			if ( ! property_exists( $this, $param ) ) {
 				throw new InvalidProperty(
@@ -127,6 +149,34 @@ if ( ! class_exists( '\\E20R\\Members_List\\Admin\\Bulk\\Bulk_Operations' ) ) {
 			}
 
 			return $this->{$param};
+		}
+
+		/**
+		 * Make sure the array is a valid user/membership level array
+		 *
+		 * @param mixed $members Variable (array) to test
+		 *
+		 * @return bool
+		 */
+		protected function valid_member_array( $members ) {
+
+			if ( ! is_array( $members ) ) {
+				return false;
+			}
+
+			if ( empty( $members ) ) {
+				return true;
+			}
+
+			return array_reduce(
+				$members,
+				function ( $result, $item ) {
+					return $result &&
+						( isset( $item['user_id'] ) && is_int( $item['user_id'] ) ) &&
+						( isset( $item['level_id'] ) && is_int( $item['level_id'] ) );
+				},
+				true
+			);
 		}
 
 		/**

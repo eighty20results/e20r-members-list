@@ -28,7 +28,7 @@ jobs:
       SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
     strategy:
       matrix:
-        php_version: [ '7.3', '7.4', '8.0' ]
+        php_version: [ '7.3', '7.4', '8.0', '8.1' ]
     runs-on: ubuntu-18.04
     steps:
       - name: Checkout repository
@@ -77,6 +77,9 @@ jobs:
 
       - name: Run all Standard Tests
         run: make tests
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v2
 
   # To create the plugin .zip archive
   build_plugin:

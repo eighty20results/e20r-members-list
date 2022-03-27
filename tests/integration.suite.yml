@@ -2,6 +2,7 @@
 #
 # suite for WordPress integration tests.
 # Load WordPress and integration test classes that rely on it.
+bootstrap: _bootstrap.php
 class_name: IntegrationTester
 modules:
     enabled:
@@ -18,5 +19,5 @@ modules:
             domain: "%TEST_SITE_WP_DOMAIN%"
             adminEmail: "%TEST_SITE_ADMIN_EMAIL%"
             title: "WP Tests"
-            plugins: ["00-e20r-utilities/class-loader.php", "e20r-members-list/class-e20r-members-list.php", "paid-memberships-pro/paid-memberships-pro.php"]
-            activatePlugins: ["00-e20r-utilities/class-loader.php", "e20r-members-list/class-e20r-members-list.php", "paid-memberships-pro/paid-memberships-pro.php"]
+            plugins: ["00-e20r-utilities/class-loader.php", "e20r-members-list/class-e20r-members-list.php"]
+            activatePlugins: ["00-e20r-utilities/class-loader.php", "e20r-members-list/class-e20r-members-list.php"]
