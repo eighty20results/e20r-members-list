@@ -65,7 +65,7 @@ jobs:
         run: make docker-deps
 
       - name: Download pre-existing artifacts
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
 
       - name: Run all Standard Tests
         run: make tests
