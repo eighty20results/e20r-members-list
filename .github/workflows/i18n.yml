@@ -68,7 +68,7 @@ jobs:
         run: make tests
 
       - name: Download artifacts
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
 
       - name: Codecov
         uses: codecov/codecov-action@v2

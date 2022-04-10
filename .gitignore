@@ -69,8 +69,7 @@ fabric.properties
 !/build_readmes/skel/CHANGELOG.md
 !/build_readmes/skel/metadata.json
 !/build_readmes/skel/README.txt
-docker-env/e20r-members-list.sql
-/.circleci/docker/test/db_backup/e20r-members-list.sql
+*.sql
 /composer
 /composer.phar
 /composer.lock
