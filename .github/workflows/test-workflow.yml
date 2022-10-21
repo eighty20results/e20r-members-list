@@ -32,7 +32,7 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3.1.0
         with:
           repository: eighty20results/e20r-members-list
           # FIXME: Remove comment when applying to release-plugin workstream
@@ -41,7 +41,7 @@ jobs:
       # Extract the branch name for all events except for pull requests
       - name: Extract branch or tag name
         id: branch-name
-        uses: tj-actions/branch-names@v5.2
+        uses: tj-actions/branch-names@v6.2
 
       - name: Setup PHP with Composer V2+
         uses: shivammathur/setup-php@v2
@@ -104,7 +104,7 @@ jobs:
       SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3.1.0
         with:
           repository: eighty20results/e20r-members-list
           # FIXME: Remove comment when applying to release-plugin workstream
@@ -131,7 +131,7 @@ jobs:
           coverage: pcov
 
       - name: Login to Docker HUB
-        uses: docker/login-action@v1
+        uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_USER }}
           password: ${{ secrets.CONTAINER_ACCESS_TOKEN }}
@@ -188,7 +188,7 @@ jobs:
       SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3.1.0
         with:
           repository: eighty20results/e20r-members-list
           # FIXME: Remove comment when applying to release-plugin workstream
@@ -251,7 +251,7 @@ jobs:
       # Extract the branch name for all events except for pull requests
       - name: Decide whether to run deploy action
         id: branch-name
-        uses: tj-actions/branch-names@v5.2
+        uses: tj-actions/branch-names@v6.2
 
       - name: Show me the branch
         run: |
