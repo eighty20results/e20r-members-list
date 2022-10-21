@@ -258,13 +258,8 @@ real-clean: prerequisite stop-stack clean clean-inc clean-wp-deps
 #
 php-composer: prerequisite
 	@if [[ ! -z "$(PHP_BIN)" && "Xinactive" != "X$(LOCAL_NETWORK_STATUS)" ]]; then \
-	    echo "Install the PHP Composer component" && \
-	    $(PHP_BIN) -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" && \
-	    $(PHP_BIN) -r "if (hash_file('sha384', 'composer-setup.php') === $(COMPOSER_CHECKSUM)) { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;" && \
-            $(PHP_BIN) composer-setup.php --install-dir=$(BASE_PATH)/ && \
-            $(PHP_BIN) -r "unlink('composer-setup.php');" ; \
+	    bin/install-composer.sh $(BASE_PATH); \
     fi
-
 #
 # Install the Composer packages required by this plugin when it is released
 #
