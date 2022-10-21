@@ -17,6 +17,7 @@ parameters:
         - '#^Constant WP_LANG_DIR not found\.$#'
         - '#^Cannot access property \$pmpro_b.* on WP_User\|false\.#'
         - '#^Parameter \#1 \$page_name of function pmpro_loadTemplate expects null, string given\.#'
+        - '#Cannot access property \$name on object\|false\.#'
         # - '#^Access to an undefined property object::\$cycle_period\.$#'
         # - '#^Constant WP_PLUGIN_DIR not found\.$#'
     scanDirectories:
