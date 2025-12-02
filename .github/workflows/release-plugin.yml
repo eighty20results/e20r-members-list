@@ -32,14 +32,14 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3.1.0
+        uses: actions/checkout@v6.0.0
         with:
           repository: eighty20results/e20r-members-list
 
       # Extract the branch name for all events except for pull requests
       - name: Extract branch or tag name
         id: branch-name
-        uses: tj-actions/branch-names@v6.4
+        uses: tj-actions/branch-names@v9
 
       - name: Setup PHP with Composer V2+
         uses: shivammathur/setup-php@v2
@@ -56,7 +56,7 @@ jobs:
           password: ${{ secrets.CONTAINER_ACCESS_TOKEN }}
 
       - name: Load cached Composer and test related dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: composer-cache
         with:
           key: ${{ runner.os }}-composer-cache-${{ hashFiles('**/composer.lock') }}
@@ -79,7 +79,7 @@ jobs:
         run: make tests
 
       - name: Download artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v6
 
   # To create the plugin .zip archive
   build_plugin:
@@ -102,7 +102,7 @@ jobs:
       SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3.1.0
+        uses: actions/checkout@v6.0.0
         with:
           repository: eighty20results/e20r-members-list
 
@@ -132,7 +132,7 @@ jobs:
           password: ${{ secrets.CONTAINER_ACCESS_TOKEN }}
 
       - name: Load cached Composer and test related dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: composer-cache
         with:
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
@@ -152,7 +152,7 @@ jobs:
         run: make docker-deps
 
       - name: Cache the built plugin package
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: plugin-package-cache
         with:
           key: ${{ runner.os }}-plugin-package-cache-${{ hashFiles('**/build/kits/**.zip') }}
@@ -183,7 +183,7 @@ jobs:
       SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3.1.0
+        uses: actions/checkout@v6.0.0
         with:
           repository: eighty20results/e20r-members-list
 
@@ -215,7 +215,7 @@ jobs:
           coverage: pcov
 
       - name: Load cached Composer and test related dependencies (Production)
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: composer-cache-prod
         with:
           key: ${{ runner.os }}-composer-cache-prod-${{ hashFiles('**/composer.lock') }}
@@ -236,7 +236,7 @@ jobs:
 
       - name: Restore the built plugin package
         id: plugin-package-cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           key: ${{ runner.os }}-plugin-package-cache-${{ hashFiles('**/build/kits/**.zip') }}
           restore-keys: ${{ runner.os }}-plugin-package-cache
@@ -245,7 +245,7 @@ jobs:
       # Extract the branch name for all events except for pull requests
       - name: Decide whether to run deploy action
         id: branch-name
-        uses: tj-actions/branch-names@v6.4
+        uses: tj-actions/branch-names@v9
 
       - name: Show me the branch
         run: |
