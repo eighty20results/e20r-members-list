@@ -39,7 +39,7 @@ jobs:
           coverage: pcov
 
       - name: Login to Docker HUB
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USER }}
           password: ${{ secrets.CONTAINER_ACCESS_TOKEN }}
